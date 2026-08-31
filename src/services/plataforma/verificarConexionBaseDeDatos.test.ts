@@ -8,7 +8,7 @@ vi.mock('@/db/cliente', () => ({
 describe('verificarConexionBaseDeDatos', () => {
   it('recibe (input, contexto) y devuelve si la conexión funciona, sin objetos HTTP', async () => {
     const { verificarConexionBaseDeDatos } = await import('./verificarConexionBaseDeDatos');
-    const contexto: Contexto = { usuarioId: null, permisos: {} };
+    const contexto: Contexto = { usuarioId: null, permisos: {}, esSistema: false };
 
     const resultado = await verificarConexionBaseDeDatos(undefined, contexto);
 
