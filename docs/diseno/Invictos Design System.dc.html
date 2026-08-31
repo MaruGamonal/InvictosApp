@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #F7F9FA; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; padding-bottom: 96px">
+
+  <div style="background: #0E1720; color: #FFFFFF; padding: 64px 40px 56px">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div style="width: 10px; height: 10px; background: #00A8CC"></div>
+        <div style="font: 600 13px/1 Barlow; letter-spacing: 0.14em; text-transform: uppercase; color: #A9B4BC">Design System · v0.1 · MVP</div>
+      </div>
+      <div style="font-family: 'Barlow Condensed', Barlow, sans-serif; font-weight: 700; font-size: 96px; line-height: 0.9; letter-spacing: -0.01em; text-transform: uppercase">Invictos</div>
+      <div style="max-width: 640px; font: 400 20px/1.5 Barlow; color: #CBD3D8; text-wrap: pretty">Torneos de fútbol amateur. La identidad es oscura, el lienzo de trabajo es claro: la energía vive en la tipografía, el contraste y los momentos — nunca en el color de fondo de una tabla.</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px">
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #0E1720; background: #00A8CC; padding: 9px 14px; border-radius: 999px">Mobile-first</div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #CBD3D8; border: 1px solid #2C383F; padding: 8px 14px; border-radius: 999px">Cifras tabulares obligatorias</div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #CBD3D8; border: 1px solid #2C383F; padding: 8px 14px; border-radius: 999px">Un solo color de marca</div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #CBD3D8; border: 1px solid #2C383F; padding: 8px 14px; border-radius: 999px">Tokenizado para tema oscuro</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 1180px; margin: 0 auto; padding: 0 40px; display: flex; flex-direction: column; gap: 56px">
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: -28px">
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-top: 3px solid #00A8CC; border-radius: 8px; padding: 20px 22px">
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Regla 1</div>
+        <div style="font: 400 16px/1.45 Barlow; text-wrap: pretty">Si una decisión visual hace más difícil leer un número, es decorativa — no enérgica.</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-top: 3px solid #00A8CC; border-radius: 8px; padding: 20px 22px">
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Regla 2</div>
+        <div style="font: 400 16px/1.45 Barlow; text-wrap: pretty">Ningún estado se comunica solo con color: todo badge lleva su etiqueta visible del catálogo.</div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-top: 3px solid #00A8CC; border-radius: 8px; padding: 20px 22px">
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Regla 3</div>
+        <div style="font: 400 16px/1.45 Barlow; text-wrap: pretty">El contenido del usuario tiene el color. La interfaz es el marco, no el cuadro.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">01</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Color</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Marca, neutros y semántica. Ningún color se escribe directo en un componente.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div style="background: #0E1720; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 6px; min-height: 168px; justify-content: flex-end">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Neutro oscuro de marca</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; color: #FFFFFF; text-transform: uppercase">ink-900</div>
+          <div style="font: 500 14px/1.4 Barlow; color: #A9B4BC">#0E1720 · azulado frío, no negro puro. Fondo de toda superficie de identidad.</div>
+        </div>
+        <div style="background: #00A8CC; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 6px; min-height: 168px; justify-content: flex-end">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #003B47">Acento de marca — único</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; color: #0E1720; text-transform: uppercase">accent-500</div>
+          <div style="font: 500 14px/1.4 Barlow; color: #00404E">#00A8CC · acción primaria. Aparece poco. Cian: lejos del verde de éxito y del rojo de error.</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Escala de neutros — hace el 90% del trabajo</div>
+        <div style="display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px">
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">000<br /><span style="font-weight: 400; color: #7E8B95">FFFFFF</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">025<br /><span style="font-weight: 400; color: #7E8B95">F7F9FA</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #EFF2F4; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">050<br /><span style="font-weight: 400; color: #7E8B95">EFF2F4</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #E3E8EB; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">100<br /><span style="font-weight: 400; color: #7E8B95">E3E8EB</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #CBD3D8; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">200<br /><span style="font-weight: 400; color: #7E8B95">CBD3D8</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #A9B4BC; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">300<br /><span style="font-weight: 400; color: #7E8B95">A9B4BC</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #7E8B95; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">400<br /><span style="font-weight: 400; color: #7E8B95">7E8B95</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #5C6A74; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">500<br /><span style="font-weight: 400; color: #7E8B95">5C6A74</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #414E57; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">600<br /><span style="font-weight: 400; color: #7E8B95">414E57</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #2C383F; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">700<br /><span style="font-weight: 400; color: #7E8B95">2C383F</span></div></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; background: #142230; border-radius: 4px"></div><div style="font: 600 11px/1.3 Barlow; color: #5C6A74">800<br /><span style="font-weight: 400; color: #7E8B95">142230</span></div></div>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 4px">Paleta semántica — fuente de verdad: catálogo de enumeraciones, sección 6</div>
+        <div style="font: 400 15px/1.5 Barlow; color: #5C6A74; margin-bottom: 20px">Independiente de la marca. Cada nivel trae además una <strong style="font-weight: 600; color: #142230">forma propia de indicador</strong>, para que advertencia y éxito se distingan en un badge de 10 px sin leer el texto.</div>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px">
+          <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+            <div style="background: #E4F3E8; padding: 14px; display: flex; align-items: center; gap: 8px">
+              <div style="width: 10px; height: 10px; border-radius: 999px; background: #1B8A3C"></div>
+              <div style="font: 700 13px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #12662C">Éxito</div>
+            </div>
+            <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Círculo · #1B8A3C</div>
+              <div style="font: 500 13px/1.4 Barlow">Confirmado · Aprobada · En curso · Jugado</div>
+            </div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+            <div style="background: #E7E9FB; padding: 14px; display: flex; align-items: center; gap: 8px">
+              <div style="width: 10px; height: 10px; background: #4038C2"></div>
+              <div style="font: 700 13px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #322BA0">Información</div>
+            </div>
+            <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Cuadrado · #4038C2</div>
+              <div style="font: 500 13px/1.4 Barlow">Cargado · Programado · Inscripciones cerradas</div>
+            </div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+            <div style="background: #FBEBD3; padding: 14px; display: flex; align-items: center; gap: 8px">
+              <div style="width: 10px; height: 10px; background: #A25C00; transform: rotate(45deg)"></div>
+              <div style="font: 700 13px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #7A4600">Advertencia</div>
+            </div>
+            <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Rombo · #A25C00</div>
+              <div style="font: 500 13px/1.4 Barlow">Sin cargar · Pendiente · Ganado por presentación</div>
+            </div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+            <div style="background: #FBE5E2; padding: 14px; display: flex; align-items: center; gap: 8px">
+              <div style="width: 10px; height: 10px; border-radius: 999px; border: 3px solid #C42B1C"></div>
+              <div style="font: 700 13px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #A11F12">Error</div>
+            </div>
+            <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Anillo · #C42B1C</div>
+              <div style="font: 500 13px/1.4 Barlow">En disputa · Rechazada · Cancelado</div>
+            </div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+            <div style="background: #EFF2F4; padding: 14px; display: flex; align-items: center; gap: 8px">
+              <div style="width: 12px; height: 4px; background: #5C6A74"></div>
+              <div style="font: 700 13px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #414E57">Neutro</div>
+            </div>
+            <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Barra · #5C6A74</div>
+              <div style="font: 500 13px/1.4 Barlow">Borrador · Finalizado · Dejó el equipo</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+          <div style="background: #F7F9FA; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px">
+            <div style="display: flex; gap: 6px">
+              <div style="width: 40px; height: 40px; border-radius: 4px; background: #00A8CC"></div>
+              <div style="width: 40px; height: 40px; border-radius: 4px; background: #1B8A3C"></div>
+              <div style="width: 40px; height: 40px; border-radius: 4px; background: #C42B1C"></div>
+            </div>
+            <div style="font: 400 13px/1.45 Barlow; color: #5C6A74">Verificación exigida: <strong style="font-weight: 600; color: #142230">acento vs. éxito vs. error</strong>. Cian, verde y rojo no se confunden ni en un botón chico.</div>
+          </div>
+          <div style="background: #F7F9FA; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #E4F3E8; padding: 3px 7px; border-radius: 3px"><div style="width: 7px; height: 7px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #12662C">Jugado</span></div>
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #FBEBD3; padding: 3px 7px; border-radius: 3px"><div style="width: 7px; height: 7px; background: #A25C00; transform: rotate(45deg)"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #7A4600">Presentación</span></div>
+            </div>
+            <div style="font: 400 13px/1.45 Barlow; color: #5C6A74">Verificación exigida: <strong style="font-weight: 600; color: #142230">advertencia vs. éxito a 10 px</strong>. Verde/círculo contra ámbar/rombo.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">02</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Tipografía</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Barlow Condensed para display, Barlow para todo lo demás. Una superfamilia, dos roles.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Marcador / 72</div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 72px; line-height: 0.9; letter-spacing: -0.01em">3 — 1</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Display / 44</div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px; line-height: 1; text-transform: uppercase">Copa Otoño F5</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Título / 30</div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.1; text-transform: uppercase">Tabla de posiciones</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Subtítulo / 20</div>
+            <div style="font: 600 20px/1.3 Barlow">Fecha 7 · sábado 12 de abril</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Cuerpo / 16</div>
+            <div style="font: 400 16px/1.5 Barlow; max-width: 420px">Cargá el resultado de cada partido y la tabla se actualiza sola. Si el otro equipo no responde, queda firme a las 72 horas.</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Menor / 14</div>
+            <div style="font: 400 14px/1.5 Barlow; color: #5C6A74">Cancha 2 · Complejo San Martín · 20:30</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; width: 130px; flex: none">Etiqueta / 12</div>
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #414E57">Zona norte · F5 · Libre masculino</div>
+          </div>
+          <div style="border-top: 1px solid #E3E8EB; padding-top: 18px; font: 400 14px/1.5 Barlow; color: #5C6A74; text-wrap: pretty">La familia de display <strong style="font-weight: 600; color: #C42B1C">no se usa nunca</strong> en texto corrido ni en etiquetas de formulario.</div>
+        </div>
+
+        <div style="background: #0E1720; border-radius: 8px; padding: 28px; color: #FFFFFF; display: flex; flex-direction: column; gap: 18px">
+          <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Cifras tabulares — criterio de descarte</div>
+          <div style="font: 400 14px/1.5 Barlow; color: #A9B4BC">Las columnas tienen que alinearse fila a fila. Mismo texto, con y sin <code style="font: 500 13px Barlow; color: #22C8E6">tabular-nums</code>:</div>
+          <div style="display: flex; flex-direction: column; gap: 4px; background: #142230; border-radius: 6px; padding: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #C42B1C; margin-bottom: 4px">Mal</div>
+            <div style="font: 500 20px/1.3 Barlow; font-variant-numeric: proportional-nums">11 · 118 · 1041</div>
+            <div style="font: 500 20px/1.3 Barlow; font-variant-numeric: proportional-nums">47 · 903 · 7710</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px; background: #142230; border-radius: 6px; padding: 16px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #4ADE80; margin-bottom: 4px">Bien</div>
+            <div style="font: 500 20px/1.3 Barlow; font-variant-numeric: tabular-nums">11 · 118 · 1041</div>
+            <div style="font: 500 20px/1.3 Barlow; font-variant-numeric: tabular-nums">47 · 903 · 7710</div>
+          </div>
+          <div style="margin-top: auto; border-top: 1px solid #2C383F; padding-top: 16px; font: 400 13px/1.5 Barlow; color: #A9B4BC">Se aplica global al documento, en las dos familias.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">03</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Espaciado y densidad</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Densidad calculada, no densidad por defecto. Cada pantalla declara la suya.</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Escala base 4</div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">04</div><div style="height: 12px; width: 4px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">08</div><div style="height: 12px; width: 8px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">12</div><div style="height: 12px; width: 12px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">16</div><div style="height: 12px; width: 16px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">24</div><div style="height: 12px; width: 24px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">32</div><div style="height: 12px; width: 32px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">48</div><div style="height: 12px; width: 48px; background: #00A8CC"></div></div>
+            <div style="display: flex; align-items: center; gap: 12px"><div style="width: 46px; font: 600 13px/1 Barlow; color: #5C6A74">64</div><div style="height: 12px; width: 64px; background: #00A8CC"></div></div>
+          </div>
+          <div style="margin-top: 20px; border-top: 1px solid #E3E8EB; padding-top: 16px; display: flex; flex-direction: column; gap: 8px">
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Radios y borde</div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div style="width: 44px; height: 32px; border: 1px solid #CBD3D8; border-radius: 4px"></div>
+              <div style="width: 44px; height: 32px; border: 1px solid #CBD3D8; border-radius: 8px"></div>
+              <div style="width: 44px; height: 32px; border: 1px solid #CBD3D8; border-radius: 999px"></div>
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">4 · 8 · pill</div>
+            </div>
+            <div style="font: 400 13px/1.45 Barlow; color: #5C6A74">Borde 1 px #E3E8EB. Una sola sombra, mínima: <code style="font: 500 12px Barlow">0 1px 2px rgba(14,23,32,.06)</code>. Sin adornos que no sumen información.</div>
+          </div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Tres densidades</div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 6px; overflow: hidden">
+            <div style="background: #EFF2F4; padding: 8px 14px; display: flex; justify-content: space-between"><span style="font: 700 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase">Compacta</span><span style="font: 400 12px/1 Barlow; color: #5C6A74">fila 44 px · pad 8/12 · toque 44 px mínimo</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 44px; border-bottom: 1px solid #EFF2F4"><span style="font: 500 15px/1 Barlow">Los Pibes del Fondo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px">21</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; min-height: 44px"><span style="font: 500 15px/1 Barlow">Deportivo Belgrano</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px">19</span></div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 6px; overflow: hidden">
+            <div style="background: #EFF2F4; padding: 8px 14px; display: flex; justify-content: space-between"><span style="font: 700 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase">Estándar</span><span style="font: 400 12px/1 Barlow; color: #5C6A74">fila 56 px · pad 12/16 · el default del producto</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; min-height: 56px"><span style="font: 500 16px/1 Barlow">Copa Otoño F5 · Zona Norte</span><span style="font: 400 14px/1 Barlow; color: #5C6A74">12 / 16 equipos</span></div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 6px; overflow: hidden">
+            <div style="background: #EFF2F4; padding: 8px 14px; display: flex; justify-content: space-between"><span style="font: 700 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase">Amplia</span><span style="font: 400 12px/1 Barlow; color: #5C6A74">pad 24/32 · identidad, momentos, vacíos</span></div>
+            <div style="padding: 28px 32px; display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1; text-transform: uppercase">Fecha cerrada</span><span style="font: 400 15px/1.4 Barlow; color: #5C6A74">Se actualizó la tabla de posiciones.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">04</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Componentes</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Los que aparecen en más de una pantalla: son sistema, no diseño de pantalla.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Escudo / avatar — con placeholder digno</div>
+          <div style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 64px; height: 64px; border-radius: 999px; background: #142230; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: 0.02em">PF</div>
+              <div style="font: 400 11px/1 Barlow; color: #7E8B95">64</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 40px; height: 40px; border-radius: 999px; background: #2C383F; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">DB</div>
+              <div style="font: 400 11px/1 Barlow; color: #7E8B95">40</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 28px; height: 28px; border-radius: 999px; background: #414E57; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px">SM</div>
+              <div style="font: 400 11px/1 Barlow; color: #7E8B95">28</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 64px; height: 64px; border-radius: 999px; border: 1px solid #E3E8EB; overflow: hidden">
+                <image-slot id="ds-escudo-1" shape="circle" placeholder=""></image-slot>
+              </div>
+              <div style="font: 400 11px/1 Barlow; color: #7E8B95">escudo real</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 64px; height: 64px; border-radius: 999px; border: 1px solid #2C383F; overflow: hidden; background: #0E1720">
+                <image-slot id="ds-avatar-1" shape="circle" placeholder=""></image-slot>
+              </div>
+              <div style="font: 400 11px/1 Barlow; color: #7E8B95">sobre oscuro</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Iniciales sobre neutro oscuro: la mayoría de los equipos amateur no tiene escudo, y el vacío no puede verse como un error. Nunca un ícono genérico gris.</div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Marcador — el elemento con más energía</div>
+          <div style="background: #0E1720; border-radius: 8px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; width: 96px">
+              <div style="width: 48px; height: 48px; border-radius: 999px; background: #2C383F; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">PF</div>
+              <div style="font: 600 13px/1.25 Barlow; color: #FFFFFF; text-align: center">Los Pibes del Fondo</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 76px; line-height: 0.85; color: #FFFFFF; letter-spacing: -0.01em">3<span style="color: #414E57; padding: 0 10px">·</span>1</div>
+              <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(27,138,60,0.18); padding: 5px 10px; border-radius: 4px"><div style="width: 8px; height: 8px; border-radius: 999px; background: #4ADE80"></div><span style="font: 700 11px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #86EFAC">Confirmado</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; width: 96px">
+              <div style="width: 48px; height: 48px; border-radius: 999px; background: #2C383F; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">DB</div>
+              <div style="font: 600 13px/1.25 Barlow; color: #FFFFFF; text-align: center">Deportivo Belgrano</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; font: 400 13px/1.45 Barlow; color: #5C6A74">Vive en superficie oscura y no compite con nada de su tarjeta. En el detalle del partido es el primer elemento de la pantalla.</div>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Fila de partido — cuatro variantes</div>
+          <div style="font: 400 13px/1 Barlow; color: #5C6A74">Densidad compacta · fixture, inicio, perfil de equipo</div>
+        </div>
+        <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 60px; border-bottom: 1px solid #EFF2F4">
+            <div style="width: 66px; flex: none; display: flex; flex-direction: column; gap: 2px"><span style="font: 600 13px/1.2 Barlow">Sáb 12/4</span><span style="font: 400 12px/1.2 Barlow; color: #5C6A74">20:30</span></div>
+            <div style="width: 1px; align-self: stretch; background: #EFF2F4"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">PF</div><span style="font: 500 15px/1 Barlow">Los Pibes del Fondo</span></div>
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">SM</div><span style="font: 500 15px/1 Barlow">San Martín FC</span></div>
+            </div>
+            <div style="width: 130px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 12px">
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #E7E9FB; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; background: #4038C2"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #322BA0">Programado</span></div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #CBD3D8">–</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 60px; border-bottom: 1px solid #EFF2F4">
+            <div style="width: 66px; flex: none; display: flex; flex-direction: column; gap: 2px"><span style="font: 600 13px/1.2 Barlow">Sáb 5/4</span><span style="font: 400 12px/1.2 Barlow; color: #5C6A74">21:00</span></div>
+            <div style="width: 1px; align-self: stretch; background: #EFF2F4"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">DB</div><span style="font: 700 15px/1 Barlow">Deportivo Belgrano</span></div>
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">AT</div><span style="font: 500 15px/1 Barlow; color: #5C6A74">Atlético Talleres</span></div>
+            </div>
+            <div style="width: 130px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 12px">
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #E4F3E8; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #12662C">Confirmado</span></div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1">2<span style="color: #A9B4BC; padding: 0 3px">·</span>0</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 60px; border-bottom: 1px solid #EFF2F4; background: #FEFAF3">
+            <div style="width: 66px; flex: none; display: flex; flex-direction: column; gap: 2px"><span style="font: 600 13px/1.2 Barlow">Sáb 5/4</span><span style="font: 400 12px/1.2 Barlow; color: #5C6A74">22:00</span></div>
+            <div style="width: 1px; align-self: stretch; background: #F2E4CB"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">LG</div><span style="font: 700 15px/1 Barlow">La Gloria</span></div>
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">RC</div><span style="font: 500 15px/1 Barlow; color: #5C6A74">Racing del Barrio</span></div>
+            </div>
+            <div style="width: 130px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 12px">
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #FBEBD3; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; background: #A25C00; transform: rotate(45deg)"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #7A4600">Presentación</span></div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; color: #7A4600">3<span style="color: #D9BC8A; padding: 0 3px">·</span>0</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 60px">
+            <div style="width: 66px; flex: none; display: flex; flex-direction: column; gap: 2px"><span style="font: 600 13px/1.2 Barlow">Dom 20/4</span><span style="font: 400 12px/1.2 Barlow; color: #5C6A74; text-decoration: line-through">Sáb 12/4</span></div>
+            <div style="width: 1px; align-self: stretch; background: #EFF2F4"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">SM</div><span style="font: 500 15px/1 Barlow">San Martín FC</span></div>
+              <div style="display: flex; align-items: center; gap: 8px"><div style="width: 24px; height: 24px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">LG</div><span style="font: 500 15px/1 Barlow">La Gloria</span></div>
+            </div>
+            <div style="width: 130px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 12px">
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: #EFF2F4; border: 1px dashed #A9B4BC; padding: 3px 8px; border-radius: 3px"><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #414E57">Se movió</span></div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #CBD3D8">–</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font: 400 13px/1.4 Barlow; color: #5C6A74">
+          <div><strong style="font-weight: 600; color: #142230">Por jugarse.</strong> Sin marcador: guion, no cero.</div>
+          <div><strong style="font-weight: 600; color: #142230">Jugado.</strong> Ganador en negrita; perdedor atenuado.</div>
+          <div><strong style="font-weight: 600; color: #142230">No disputado.</strong> Fondo ámbar tenue: la única fila que se tiñe, porque no se jugó.</div>
+          <div><strong style="font-weight: 600; color: #142230">Reprogramado.</strong> Fecha nueva arriba, la original tachada.</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px">
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Tabla de posiciones</div>
+            <div style="display: inline-flex; align-items: center; gap: 5px; background: #FBEBD3; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; background: #A25C00; transform: rotate(45deg)"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #7A4600">Provisoria · 1 resultado en disputa</span></div>
+          </div>
+          <div style="border: 1px solid #E3E8EB; border-radius: 6px; overflow: hidden">
+            <div style="display: grid; grid-template-columns: 28px 1fr repeat(7, 30px) 40px 44px; align-items: center; gap: 4px; background: #142230; color: #FFFFFF; padding: 8px 12px; font: 700 11px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase">
+              <div>#</div><div>Equipo</div><div style="text-align: right">PJ</div><div style="text-align: right">G</div><div style="text-align: right">E</div><div style="text-align: right">P</div><div style="text-align: right">GF</div><div style="text-align: right">GC</div><div style="text-align: right">DIF</div><div style="text-align: right; color: #A25C00; background: #FBEBD3; padding: 3px 4px; border-radius: 2px">Quita</div><div style="text-align: right; color: #00A8CC">Pts</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 28px 1fr repeat(7, 30px) 40px 44px; align-items: center; gap: 4px; padding: 8px 12px; min-height: 44px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid #00A8CC; font: 500 14px/1 Barlow">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">1</div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0"><div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px">DB</div><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Deportivo Belgrano</span></div>
+              <div style="text-align: right">7</div><div style="text-align: right">6</div><div style="text-align: right">1</div><div style="text-align: right">0</div><div style="text-align: right">19</div><div style="text-align: right">6</div><div style="text-align: right; font-weight: 600">+13</div><div style="text-align: right; color: #A9B4BC">—</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">19</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 28px 1fr repeat(7, 30px) 40px 44px; align-items: center; gap: 4px; padding: 8px 12px; min-height: 44px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid #00A8CC; font: 500 14px/1 Barlow">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">2</div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0"><div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px">PF</div><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Los Pibes del Fondo</span></div>
+              <div style="text-align: right">7</div><div style="text-align: right">5</div><div style="text-align: right">1</div><div style="text-align: right">1</div><div style="text-align: right">17</div><div style="text-align: right">8</div><div style="text-align: right; font-weight: 600">+9</div><div style="text-align: right; color: #A9B4BC">—</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">16</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 28px 1fr repeat(7, 30px) 40px 44px; align-items: center; gap: 4px; padding: 8px 12px; min-height: 44px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid transparent; font: 500 14px/1 Barlow">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">3</div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0"><div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px">SM</div><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">San Martín FC</span></div>
+              <div style="text-align: right">7</div><div style="text-align: right">4</div><div style="text-align: right">0</div><div style="text-align: right">3</div><div style="text-align: right">14</div><div style="text-align: right">11</div><div style="text-align: right; font-weight: 600">+3</div><div style="text-align: right; color: #A11F12; font-weight: 600">−3</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">9</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 28px 1fr repeat(7, 30px) 40px 44px; align-items: center; gap: 4px; padding: 8px 12px; min-height: 44px; border-left: 3px solid transparent; font: 500 14px/1 Barlow">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">4</div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0"><div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px">LG</div><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">La Gloria</span></div>
+              <div style="text-align: right">6</div><div style="text-align: right">2</div><div style="text-align: right">2</div><div style="text-align: right">2</div><div style="text-align: right">9</div><div style="text-align: right">10</div><div style="text-align: right; font-weight: 600">−1</div><div style="text-align: right; color: #A9B4BC">—</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">8</div>
+            </div>
+          </div>
+          <div style="margin-top: 14px; display: flex; gap: 20px; font: 400 13px/1.45 Barlow; color: #5C6A74">
+            <div style="display: flex; align-items: center; gap: 8px"><div style="width: 3px; height: 22px; background: #00A8CC"></div>Clasifica</div>
+            <div>La <strong style="font-weight: 600; color: #142230">quita de puntos va en columna separada</strong>, nunca sumada a Pts: es lo que mantiene la tabla explicable.</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 14px">Tarjeta de torneo</div>
+            <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(14,23,32,0.06)">
+              <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+                  <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ estadoBg }}; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; border-radius: {{ estadoRadio }}; background: {{ estadoDot }}; transform: {{ estadoRot }}"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ estadoFg }}">{{ estadoLabel }}</span></div>
+                </div>
+                <div style="font: 600 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #5C6A74">F5 · Libre masculino · Zona Norte</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid #EFF2F4; padding-top: 12px">
+                  <div style="display: flex; flex-direction: column; gap: 2px">
+                    <span style="font: 400 12px/1 Barlow; color: #7E8B95">Arranca</span>
+                    <span style="font: 600 15px/1 Barlow">12 de abril</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end">
+                    <span style="font: 400 12px/1 Barlow; color: #7E8B95">Cupo</span>
+                    <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; line-height: 1">12<span style="color: #A9B4BC"> / 16</span></span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; border-top: 1px solid #EFF2F4; padding-top: 12px">
+                  <div style="width: 26px; height: 26px; border-radius: 4px; background: #142230; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">CS</div>
+                  <span style="font: 500 14px/1 Barlow">Complejo San Martín</span>
+                  <div style="display: inline-flex; align-items: center; gap: 4px; background: #E4F3E8; padding: 3px 7px; border-radius: 3px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #12662C">Verificada</span></div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 12px; font: 400 13px/1.45 Barlow; color: #5C6A74">Tiene que entenderse si sirve o no <strong style="font-weight: 600; color: #142230">sin abrirla</strong>: zona, cupo y estado son los tres datos que deciden.</div>
+          </div>
+
+          <sc-if value="{{ pubOn }}" hint-placeholder-val="{{ true }}">
+            <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+              <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 14px">Contenedor de publicidad</div>
+              <div style="background: #EFF2F4; border-top: 1px solid #CBD3D8; border-bottom: 1px solid #CBD3D8; margin: 0 -24px; padding: 10px 24px">
+                <div style="font: 600 10px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Publicidad</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 4px; height: 92px; display: flex; align-items: center; justify-content: center; font: 400 13px/1 Barlow; color: #A9B4BC">Contenido de red · 320 × 100</div>
+              </div>
+              <div style="margin-top: 14px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Sangra a los bordes y rompe la grilla de tarjetas: sin texto explicativo, se lee como contenido ajeno. Solo en ficha, fixture y descubrimiento — <strong style="font-weight: 600; color: #142230">nunca</strong> en flujos de tarea.</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Botones</div>
+          <div style="display: flex; flex-direction: column; gap: 20px">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+              <div style="background: #00A8CC; color: #0E1720; font: 700 15px/1 Barlow; letter-spacing: 0.02em; padding: 15px 22px; border-radius: 6px; min-height: 48px; display: flex; align-items: center; cursor: pointer" style-hover="background: #009BBB">Cargar resultado</div>
+              <div style="border: 1.5px solid #142230; color: #142230; font: 600 15px/1 Barlow; padding: 14px 20px; border-radius: 6px; min-height: 48px; display: flex; align-items: center; cursor: pointer" style-hover="background: #EFF2F4">Ver fixture</div>
+              <div style="color: #007D99; font: 600 15px/1 Barlow; padding: 14px 8px; min-height: 48px; display: flex; align-items: center; cursor: pointer" style-hover="text-decoration: underline">Omitir goleadores</div>
+              <div style="border: 1.5px solid #C42B1C; color: #A11F12; font: 600 15px/1 Barlow; padding: 14px 20px; border-radius: 6px; min-height: 48px; display: flex; align-items: center; cursor: pointer" style-hover="background: #FBE5E2">Cancelar torneo</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+              <div style="background: #CBD3D8; color: #7E8B95; font: 700 15px/1 Barlow; padding: 15px 22px; border-radius: 6px; min-height: 48px; display: flex; align-items: center">Publicar</div>
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; max-width: 220px">Deshabilitado solo cuando falta un dato; nunca para insinuar permisos que no existen.</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <div style="background: #142230; color: #FFFFFF; font: 600 13px/1 Barlow; padding: 10px 14px; border-radius: 999px; cursor: pointer">Zona Norte</div>
+              <div style="border: 1px solid #CBD3D8; color: #414E57; font: 500 13px/1 Barlow; padding: 9px 14px; border-radius: 999px; cursor: pointer" style-hover="border-color: #142230">F5</div>
+              <div style="border: 1px solid #CBD3D8; color: #414E57; font: 500 13px/1 Barlow; padding: 9px 14px; border-radius: 999px; cursor: pointer" style-hover="border-color: #142230">Inscripciones abiertas</div>
+              <div style="border: 1px solid #CBD3D8; color: #414E57; font: 500 13px/1 Barlow; padding: 9px 14px; border-radius: 999px; cursor: pointer" style-hover="border-color: #142230">Libre masculino</div>
+            </div>
+            <div style="font: 400 13px/1.45 Barlow; color: #5C6A74">Altura mínima 48 px en todo control táctil. El acento aparece <strong style="font-weight: 600; color: #142230">una vez por pantalla</strong>: en la acción primaria.</div>
+          </div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Campos y formulario</div>
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre del torneo</label>
+              <div style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; display: flex; align-items: center">Copa Otoño F5</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Zona</label>
+              <div style="border: 2px solid #00A8CC; border-radius: 6px; padding: 13px; font: 400 16px/1 Barlow; min-height: 50px; display: flex; align-items: center; justify-content: space-between">Zona Norte <span style="color: #7E8B95; font-size: 13px">▾</span></div>
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Es el filtro primario del descubrimiento: nadie viaja dos horas para un torneo amateur.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #A11F12">Cupo de equipos</label>
+              <div style="border: 1.5px solid #C42B1C; background: #FEF7F6; border-radius: 6px; padding: 13px; font: 400 16px/1 Barlow; min-height: 50px; display: flex; align-items: center">4</div>
+              <div style="display: flex; align-items: center; gap: 6px; font: 500 13px/1.4 Barlow; color: #A11F12"><div style="width: 8px; height: 8px; flex: none; border-radius: 999px; border: 2.5px solid #C42B1C"></div>Con menos de 6 equipos no se puede generar un fixture de liga.</div>
+            </div>
+            <div style="display: flex; gap: 12px">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Puntos por victoria</label>
+                <div style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; display: flex; align-items: center">3</div>
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Por empate</label>
+                <div style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; display: flex; align-items: center">1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Estados vacíos — nunca sin salida</div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="border: 1px dashed #CBD3D8; border-radius: 8px; padding: 28px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Todavía no hay torneos en Zona Norte</div>
+              <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Podés ampliar la búsqueda a las zonas de al lado, o avisarte cuando se publique uno que coincida.</div>
+              <div style="display: flex; gap: 8px; margin-top: 4px">
+                <div style="background: #00A8CC; color: #0E1720; font: 700 14px/1 Barlow; padding: 14px 18px; border-radius: 6px; cursor: pointer">Ampliar a zonas cercanas</div>
+                <div style="border: 1.5px solid #142230; font: 600 14px/1 Barlow; padding: 13px 18px; border-radius: 6px; cursor: pointer">Avisarme</div>
+              </div>
+            </div>
+            <div style="border: 1px dashed #CBD3D8; border-radius: 8px; padding: 20px; display: flex; align-items: center; gap: 16px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #5C6A74; flex: none; width: 130px">Sin score todavía</div>
+              <div style="font: 400 14px/1.45 Barlow; color: #5C6A74">Le faltan partidos confirmados para tener un score comparable. <strong style="font-weight: 600; color: #142230">Nunca un cero:</strong> un cero se lee como "es malísimo".</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+          <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 16px">Navegación — barra inferior + acción de carga</div>
+          <div style="background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px 0 0; display: flex; flex-direction: column; align-items: center">
+            <div style="width: 320px; background: #FFFFFF; border: 1px solid #E3E8EB; border-bottom: none; border-radius: 8px 8px 0 0; padding-top: 20px; position: relative">
+              <div style="position: absolute; top: -22px; right: 20px; width: 60px; height: 60px; border-radius: 999px; background: #00A8CC; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(0,168,204,0.4)">
+                <div style="position: relative; width: 22px; height: 22px">
+                  <div style="position: absolute; top: 9px; left: 0; width: 22px; height: 4px; background: #0E1720; border-radius: 2px"></div>
+                  <div style="position: absolute; left: 9px; top: 0; width: 4px; height: 22px; background: #0E1720; border-radius: 2px"></div>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #E3E8EB; padding: 8px 4px 12px">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" /></svg>
+                  <span style="font: 700 11px/1 Barlow; letter-spacing: 0.04em; color: #00A8CC">Inicio</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+                  <span style="font: 500 11px/1 Barlow; color: #5C6A74">Buscar</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z" /><path d="M8 5.5H5v1.5a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3" /><path d="M12 13v3M9 20h6" /></svg>
+                  <span style="font: 500 11px/1 Barlow; color: #5C6A74">Torneos</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+                  <span style="font: 500 11px/1 Barlow; color: #5C6A74">Perfil</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 14px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Cuatro destinos siempre visibles y un botón de carga permanente para el organizador. <strong style="font-weight: 600; color: #142230">Nada esencial detrás de un gesto oculto</strong>: conviven un pibe de 18 y un coordinador de 55.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">05</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Cargar resultados</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">El sistema puesto a prueba en la pantalla más repetida del producto. Interactiva: cargá y mirá la tabla.</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 390px 1fr; gap: 24px; align-items: start">
+        <div style="background: #0E1720; border-radius: 28px; padding: 10px; box-shadow: 0 8px 32px rgba(14,23,32,0.18)">
+          <div style="background: #FFFFFF; border-radius: 20px; overflow: hidden">
+            <div style="background: #0E1720; color: #FFFFFF; padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 12px">
+              <div style="display: flex; align-items: center; justify-content: space-between; font: 600 12px/1 Barlow; color: #7E8B95"><span>20:41</span><span>Cancha 2 · San Martín</span></div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <div style="font: 400 22px/1 Barlow; color: #A9B4BC">‹</div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC; margin-bottom: 4px">Copa Otoño F5 · Zona Norte</div>
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase">Fecha 7 · Cargar</div>
+                </div>
+              </div>
+              <div style="font: 400 13px/1.4 Barlow; color: #A9B4BC">{{ resumenFecha }}</div>
+            </div>
+
+            <div style="background: #FFFFFF">
+              <sc-for list="{{ partidos }}" as="p" hint-placeholder-count="3">
+                <div style="border-bottom: 1px solid #EFF2F4; padding: {{ filaPad }}; display: flex; flex-direction: column; gap: 8px">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                    <span style="font: 600 12px/1 Barlow; color: #5C6A74">{{ p.hora }} · {{ p.cancha }}</span>
+                    <div style="display: inline-flex; align-items: center; gap: 5px; background: {{ p.badgeBg }}; padding: 3px 7px; border-radius: 3px"><div style="width: 7px; height: 7px; border-radius: {{ p.badgeRadio }}; background: {{ p.badgeDot }}; transform: {{ p.badgeRot }}"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ p.badgeFg }}">{{ p.badgeLabel }}</span></div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                      <div style="display: flex; align-items: center; gap: 8px"><div style="width: 26px; height: 26px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">{{ p.iniL }}</div><span style="font: 500 15px/1.1 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ p.local }}</span></div>
+                      <div style="display: flex; align-items: center; gap: 8px"><div style="width: 26px; height: 26px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">{{ p.iniV }}</div><span style="font: 500 15px/1.1 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ p.visita }}</span></div>
+                    </div>
+                    <div style="flex: none; display: flex; flex-direction: column; gap: 6px">
+                      <div style="display: flex; align-items: center; gap: 6px">
+                        <div onClick="{{ p.bajaL }}" style="width: 44px; height: 44px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 20px/1 Barlow; color: #414E57; cursor: pointer; user-select: none" style-hover="background: #EFF2F4">−</div>
+                        <div style="width: 40px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; color: {{ p.golesColor }}">{{ p.gl }}</div>
+                        <div onClick="{{ p.subeL }}" style="width: 44px; height: 44px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 20px/1 Barlow; color: #414E57; cursor: pointer; user-select: none" style-hover="background: #EFF2F4">+</div>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 6px">
+                        <div onClick="{{ p.bajaV }}" style="width: 44px; height: 44px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 20px/1 Barlow; color: #414E57; cursor: pointer; user-select: none" style-hover="background: #EFF2F4">−</div>
+                        <div style="width: 40px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; color: {{ p.golesColor }}">{{ p.gv }}</div>
+                        <div onClick="{{ p.subeV }}" style="width: 44px; height: 44px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 20px/1 Barlow; color: #414E57; cursor: pointer; user-select: none" style-hover="background: #EFF2F4">+</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px">
+                    <span onClick="{{ p.noDisputado }}" style="font: 600 13px/1 Barlow; color: #7A4600; cursor: pointer; padding: 8px 0" style-hover="text-decoration: underline">{{ p.textoNoDisputado }}</span>
+                    <sc-if value="{{ golesOn }}" hint-placeholder-val="{{ true }}">
+                      <span style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer; padding: 8px 0" style-hover="text-decoration: underline">Goleadores</span>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+
+              <div style="padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 12px">
+                <div onClick="{{ cerrarFecha }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer" style-hover="background: #009BBB">{{ textoBotonCerrar }}</div>
+                <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-align: center">Cada resultado queda firme a las 72 horas si el otro equipo no lo objeta.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px">
+              <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">La tabla se actualiza sola — y hay que verla actualizarse</div>
+              <div style="font: 400 13px/1 Barlow; color: {{ colorAvisoTabla }}">{{ avisoTabla }}</div>
+            </div>
+            <div style="border: 1px solid #E3E8EB; border-radius: 6px; overflow: hidden">
+              <div style="display: grid; grid-template-columns: 26px 1fr repeat(4, 34px) 46px; align-items: center; gap: 4px; background: #142230; color: #FFFFFF; padding: 8px 12px; font: 700 11px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase">
+                <div>#</div><div>Equipo</div><div style="text-align: right">PJ</div><div style="text-align: right">GF</div><div style="text-align: right">GC</div><div style="text-align: right">DIF</div><div style="text-align: right; color: #00A8CC">Pts</div>
+              </div>
+              <sc-for list="{{ tabla }}" as="t" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 26px 1fr repeat(4, 34px) 46px; align-items: center; gap: 4px; padding: 8px 12px; min-height: 44px; border-bottom: 1px solid #EFF2F4; background: {{ t.fondo }}; font: 500 14px/1 Barlow; transition: background 400ms ease">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">{{ t.pos }}</div>
+                  <div style="display: flex; align-items: center; gap: 8px; min-width: 0"><div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px">{{ t.ini }}</div><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ t.nombre }}</span><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #007D99">{{ t.marca }}</span></div>
+                  <div style="text-align: right">{{ t.pj }}</div><div style="text-align: right">{{ t.gf }}</div><div style="text-align: right">{{ t.gc }}</div><div style="text-align: right; font-weight: 600">{{ t.dif }}</div>
+                  <div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">{{ t.pts }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px">
+            <div style="background: #0E1720; border-radius: 8px; padding: 20px; color: #FFFFFF">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">En la propia fila</div>
+              <div style="font: 400 14px/1.45 Barlow; color: #A9B4BC; text-wrap: pretty">Sin entrar y salir de un detalle por partido. Con seis partidos, ese recorrido se hace seis veces por fecha.</div>
+            </div>
+            <div style="background: #0E1720; border-radius: 8px; padding: 20px; color: #FFFFFF">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Goleadores, omitible</div>
+              <div style="font: 400 14px/1.45 Barlow; color: #A9B4BC; text-wrap: pretty">Un paso al costado, nunca un formulario que haya que atravesar. Si estorba, se deja de cargar el resultado también.</div>
+            </div>
+            <div style="background: #0E1720; border-radius: 8px; padding: 20px; color: #FFFFFF">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Un solo torneo a la vista</div>
+              <div style="font: 400 14px/1.45 Barlow; color: #A9B4BC; text-wrap: pretty">El nombre del torneo va fijo en la cabecera: cargar en el torneo equivocado es un error que nadie detecta.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">06</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Momentos con energía</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Reservado para lo que de verdad es un evento — un partido en vivo, un resultado, un marcador. No es licencia para decorar todo lo demás.</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 24px">
+        <div style="font: 400 15px/1.5 Barlow; color: #5C6A74; text-wrap: pretty">El sistema es deliberadamente plano en el 90% del producto — tablas, formularios, listas. Pero un partido en vivo o un resultado recién cargado es el pico emocional del producto. Estos tres patrones son el único lugar donde la interfaz sube la voz — <strong style="font-weight: 700; color: #142230">corte diagonal como firma gráfica, marcador gigante, punto en vivo pulsante</strong> — y solo en pantallas de partido, nunca en listas ni formularios.</div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Corte diagonal — divisor de sección "evento"</div>
+        <div style="border-radius: 10px; overflow: hidden">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 22px 24px 34px; position: relative">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(27,138,60,0.18); padding: 4px 9px; border-radius: 999px; margin-bottom: 10px">
+              <div style="width: 7px; height: 7px; border-radius: 999px; background: #4ADE80; animation: pulso 1.4s ease-in-out infinite"></div>
+              <span style="font: 700 10px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #86EFAC">En vivo · 2° tiempo</span>
+            </div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.1; text-transform: uppercase">Los Pibes del Fondo <span style="color: #7E8B95">vs</span> San Martín FC</div>
+          </div>
+          <div style="height: 20px; background: #0E1720; clip-path: polygon(0 0, 100% 0, 100% 0, 0 100%)"></div>
+          <div style="background: #F7F9FA; padding: 18px 24px; font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: -20px">El corte va siempre del panel oscuro hacia el lienzo claro — es la costura entre "esto es un evento" y "esto es una tabla".</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Marcador — el número más grande del sistema</div>
+        <div style="background: #0E1720; border-radius: 10px; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+          <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC">Copa Otoño F5 · Fecha 7</div>
+          <div style="display: flex; align-items: center; gap: 22px">
+            <div style="color: #FFFFFF; font: 700 15px/1.2 Barlow; text-align: right; max-width: 100px">Los Pibes del Fondo</div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 64px; line-height: 1; color: #FFFFFF">2<span style="color: #5C6A74; font-size: 40px"> – </span>0</div>
+            <div style="color: #FFFFFF; font: 700 15px/1.2 Barlow; max-width: 100px">San Martín FC</div>
+          </div>
+          <div style="font: 400 12px/1 Barlow; color: #7E8B95">Confirmado · cuenta para la tabla</div>
+        </div>
+        <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: 10px; text-wrap: pretty">64px condensado, siempre sobre ink-900 — nunca sobre el lienzo claro. Es el único número del sistema que se permite ese tamaño.</div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Punto en vivo — la única animación del sistema</div>
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(27,138,60,0.12); border: 1px solid #BEE8C6; padding: 5px 10px; border-radius: 999px">
+          <div style="width: 7px; height: 7px; border-radius: 999px; background: #1B8A3C; animation: pulso 1.4s ease-in-out infinite"></div>
+          <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #12662C">En vivo</span>
+        </div>
+        <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: 10px; text-wrap: pretty">Un pulso sutil, solo para "en vivo". Todos los demás estados del catálogo (sección 6 de enumeraciones) se quedan quietos — el movimiento es la excepción que marca la excepción.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: baseline; gap: 16px; border-bottom: 2px solid #142230; padding-bottom: 10px">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: #00A8CC">07</div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase">Fixture y tabla</div>
+        <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Las dos vistas de consulta más repetidas de un torneo. Solo lectura — se calculan, no se editan a mano.</div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Fila de fixture — resultado siempre al centro</div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="background: #F7F9FA; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #CBD3D8">
+            <div style="width: 40px; flex: none; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #7E8B95">Fecha 6</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; text-align: right; color: #142230">San Martín FC</div>
+            <div style="flex: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; min-width: 44px; text-align: center">0 – 2</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; color: #142230">Deportivo Belgrano</div>
+          </div>
+          <div style="background: #E8F7FB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #00A8CC">
+            <div style="width: 40px; flex: none; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #007D99">Fecha 7</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; text-align: right; color: #0E1720">Los Pibes del Fondo</div>
+            <div style="flex: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; min-width: 44px; text-align: center; color: #0E1720">—</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; color: #0E1720">San Martín FC</div>
+            <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(0,168,204,0.15); padding: 3px 7px; border-radius: 999px; flex: none"><div style="width: 5px; height: 5px; border-radius: 999px; background: #00A8CC"></div><span style="font: 700 9px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #007D99">Próx.</span></div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid #E3E8EB">
+            <div style="width: 40px; flex: none; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #A9B4BC">Fecha 8</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; text-align: right; color: #5C6A74">Deportivo Belgrano</div>
+            <div style="flex: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; min-width: 44px; text-align: center; color: #5C6A74">—</div>
+            <div style="flex: 1; font: 600 13px/1.3 Barlow; color: #5C6A74">Los Pibes del Fondo</div>
+          </div>
+        </div>
+        <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: 10px; text-wrap: pretty">Local y visita siempre a los costados, resultado fijo al centro — nunca todo pegado a la izquierda. El borde izquierdo marca el estado: gris jugado, cian próximo, neutro pendiente.</div>
+      </div>
+
+      <div>
+        <div style="font: 600 12px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Tabla de posiciones — calculada, borde de clasificación</div>
+        <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+          <div style="display: grid; grid-template-columns: 20px 1fr repeat(6, 20px) 30px 34px; align-items: center; gap: 2px; background: #142230; color: #FFFFFF; padding: 8px 8px; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase">
+            <div>#</div><div>Equipo</div><div style="text-align: right">PJ</div><div style="text-align: right">G</div><div style="text-align: right">E</div><div style="text-align: right">P</div><div style="text-align: right">GF</div><div style="text-align: right">GC</div><div style="text-align: right; background: #FBEBD3; color: #7A4600; border-radius: 2px; padding: 1px 2px">Q</div><div style="text-align: right; color: #00A8CC">Pts</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 20px 1fr repeat(6, 20px) 30px 34px; align-items: center; gap: 2px; padding: 8px 8px; min-height: 42px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid #00A8CC; font: 500 12px/1 Barlow">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px">1</div><div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Deportivo Belgrano</div><div style="text-align: right">7</div><div style="text-align: right">6</div><div style="text-align: right">1</div><div style="text-align: right">0</div><div style="text-align: right">19</div><div style="text-align: right">6</div><div style="text-align: right; color: #A9B4BC">—</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">19</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 20px 1fr repeat(6, 20px) 30px 34px; align-items: center; gap: 2px; padding: 8px 8px; min-height: 42px; border-left: 3px solid transparent; font: 500 12px/1 Barlow">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px">3</div><div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">San Martín FC</div><div style="text-align: right">7</div><div style="text-align: right">4</div><div style="text-align: right">0</div><div style="text-align: right">3</div><div style="text-align: right">14</div><div style="text-align: right">11</div><div style="text-align: right; color: #A11F12">−3</div><div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">9</div>
+          </div>
+        </div>
+        <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: 10px; text-wrap: pretty">Borde izquierdo cian marca "clasifica" — nunca color de fondo en la fila entera. La quita de puntos vive en su propia columna, jamás mezclada con lo ganado en cancha.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>@keyframes pulso { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }</style>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;densidad&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Compacta&quot;, &quot;Estándar&quot;], &quot;default&quot;: &quot;Compacta&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Demo · Cargar resultados&quot; },
+  &quot;pasoGoleadores&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Demo · Cargar resultados&quot; },
+  &quot;estadoTorneo&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Inscripciones abiertas&quot;, &quot;Inscripciones cerradas&quot;, &quot;En curso&quot;, &quot;Suspendido&quot;, &quot;Finalizado&quot;, &quot;Cancelado&quot;], &quot;default&quot;: &quot;Inscripciones abiertas&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Componentes&quot; },
+  &quot;mostrarPublicidad&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Componentes&quot; }
+}">
+class Component extends DCLogic {
+  state = {
+    partidos: [
+      { id: 1, local: "Los Pibes del Fondo", visita: "San Martín FC", iniL: "PF", iniV: "SM", hora: "20:30", cancha: "Cancha 1", gl: 0, gv: 0, cargado: false, walkover: false },
+      { id: 2, local: "La Gloria", visita: "Racing del Barrio", iniL: "LG", iniV: "RC", hora: "21:15", cancha: "Cancha 1", gl: 0, gv: 0, cargado: false, walkover: false },
+      { id: 3, local: "Deportivo Belgrano", visita: "Atlético Talleres", iniL: "DB", iniV: "AT", hora: "22:00", cancha: "Cancha 2", gl: 0, gv: 0, cargado: false, walkover: false }
+    ],
+    cerrada: false
+  };
+
+  base = [
+    { ini: "DB", nombre: "Deportivo Belgrano", pj: 6, gf: 17, gc: 6, pts: 16 },
+    { ini: "PF", nombre: "Los Pibes del Fondo", pj: 6, gf: 15, gc: 8, pts: 13 },
+    { ini: "SM", nombre: "San Martín FC", pj: 6, gf: 12, gc: 11, pts: 9 },
+    { ini: "LG", nombre: "La Gloria", pj: 6, gf: 9, gc: 10, pts: 8 },
+    { ini: "RC", nombre: "Racing del Barrio", pj: 6, gf: 7, gc: 14, pts: 5 },
+    { ini: "AT", nombre: "Atlético Talleres", pj: 6, gf: 6, gc: 17, pts: 4 }
+  ];
+
+  mut(id, fn) {
+    this.setState(s => ({ partidos: s.partidos.map(p => (p.id === id ? fn(Object.assign({}, p)) : p)), cerrada: false }));
+  }
+
+  sumar(id, lado, delta) {
+    this.mut(id, p => {
+      if (p.walkover) return p;
+      const k = lado === "L" ? "gl" : "gv";
+      p[k] = Math.max(0, Math.min(20, p[k] + delta));
+      p.cargado = true;
+      return p;
+    });
+  }
+
+  toggleWalkover(id) {
+    this.mut(id, p => {
+      p.walkover = !p.walkover;
+      if (p.walkover) { p.gl = 3; p.gv = 0; p.cargado = true; }
+      else { p.gl = 0; p.gv = 0; p.cargado = false; }
+      return p;
+    });
+  }
+
+  badge(p) {
+    if (p.walkover) return { badgeLabel: "Ganado por presentación", badgeBg: "#FBEBD3", badgeFg: "#7A4600", badgeDot: "#A25C00", badgeRadio: "0", badgeRot: "rotate(45deg)" };
+    if (p.cargado) return { badgeLabel: "Cargado", badgeBg: "#E7E9FB", badgeFg: "#322BA0", badgeDot: "#4038C2", badgeRadio: "0", badgeRot: "none" };
+    return { badgeLabel: "Sin cargar", badgeBg: "#FBEBD3", badgeFg: "#7A4600", badgeDot: "#A25C00", badgeRadio: "0", badgeRot: "rotate(45deg)" };
+  }
+
+  estadoTarjeta() {
+    const e = this.props.estadoTorneo || "Inscripciones abiertas";
+    const mapa = {
+      "Inscripciones abiertas": { estadoBg: "#E4F3E8", estadoFg: "#12662C", estadoDot: "#1B8A3C", estadoRadio: "999px", estadoRot: "none" },
+      "Inscripciones cerradas": { estadoBg: "#E7E9FB", estadoFg: "#322BA0", estadoDot: "#4038C2", estadoRadio: "0", estadoRot: "none" },
+      "En curso": { estadoBg: "#E4F3E8", estadoFg: "#12662C", estadoDot: "#1B8A3C", estadoRadio: "999px", estadoRot: "none" },
+      "Suspendido": { estadoBg: "#FBEBD3", estadoFg: "#7A4600", estadoDot: "#A25C00", estadoRadio: "0", estadoRot: "rotate(45deg)" },
+      "Finalizado": { estadoBg: "#EFF2F4", estadoFg: "#414E57", estadoDot: "#5C6A74", estadoRadio: "0", estadoRot: "none" },
+      "Cancelado": { estadoBg: "#FBE5E2", estadoFg: "#A11F12", estadoDot: "#C42B1C", estadoRadio: "999px", estadoRot: "none" }
+    };
+    return Object.assign({ estadoLabel: e }, mapa[e] || mapa["Inscripciones abiertas"]);
+  }
+
+  tablaCalculada() {
+    const filas = this.base.map(e => Object.assign({}, e, { nuevo: false }));
+    const find = n => filas.find(f => f.nombre === n);
+    this.state.partidos.forEach(p => {
+      if (!p.cargado) return;
+      const L = find(p.local), V = find(p.visita);
+      if (!L || !V) return;
+      [L, V].forEach(t => { t.pj += 1; t.nuevo = true; });
+      L.gf += p.gl; L.gc += p.gv; V.gf += p.gv; V.gc += p.gl;
+      if (p.gl > p.gv) L.pts += 3;
+      else if (p.gl < p.gv) V.pts += 3;
+      else { L.pts += 1; V.pts += 1; }
+    });
+    filas.sort((a, b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc) || b.gf - a.gf);
+    return filas.map((f, i) => ({
+      pos: i + 1,
+      ini: f.ini,
+      nombre: f.nombre,
+      pj: f.pj,
+      gf: f.gf,
+      gc: f.gc,
+      dif: (f.gf - f.gc > 0 ? "+" : f.gf - f.gc < 0 ? "−" : "") + Math.abs(f.gf - f.gc),
+      pts: f.pts,
+      marca: f.nuevo ? "actualizado" : "",
+      fondo: f.nuevo ? "#E8F7FB" : "#FFFFFF"
+    }));
+  }
+
+  renderVals() {
+    const compacta = (this.props.densidad || "Compacta") === "Compacta";
+    const golesOn = this.props.pasoGoleadores !== false;
+    const cargados = this.state.partidos.filter(p => p.cargado).length;
+    const total = this.state.partidos.length;
+
+    return Object.assign({
+      golesOn,
+      pubOn: this.props.mostrarPublicidad !== false,
+      filaPad: compacta ? "10px 14px" : "16px 18px",
+      resumenFecha: this.state.cerrada
+        ? "Fecha cerrada. La tabla ya refleja los resultados."
+        : cargados + " de " + total + " partidos con resultado. Cargá con el pulgar, sin salir de la lista.",
+      textoBotonCerrar: this.state.cerrada ? "Fecha cerrada ✓" : "Guardar y cerrar la fecha",
+      avisoTabla: cargados === 0 ? "Todavía sin cambios" : cargados + (cargados === 1 ? " partido nuevo" : " partidos nuevos") + " en la tabla",
+      colorAvisoTabla: cargados === 0 ? "#7E8B95" : "#007D99",
+      cerrarFecha: () => this.setState({ cerrada: true }),
+      tabla: this.tablaCalculada(),
+      partidos: this.state.partidos.map(p => Object.assign({
+        hora: p.hora,
+        cancha: p.cancha,
+        local: p.local,
+        visita: p.visita,
+        iniL: p.iniL,
+        iniV: p.iniV,
+        gl: p.walkover ? p.gl : p.gl,
+        gv: p.gv,
+        golesColor: p.walkover ? "#7A4600" : p.cargado ? "#142230" : "#A9B4BC",
+        textoNoDisputado: p.walkover ? "Deshacer: sí se jugó" : "No se disputó",
+        subeL: () => this.sumar(p.id, "L", 1),
+        bajaL: () => this.sumar(p.id, "L", -1),
+        subeV: () => this.sumar(p.id, "V", 1),
+        bajaV: () => this.sumar(p.id, "V", -1),
+        noDisputado: () => this.toggleWalkover(p.id)
+      }, this.badge(p)))
+    }, this.estadoTarjeta());
+  }
+}
+
+</script>
+</body>
+</html>

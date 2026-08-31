@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invictos — Perfil de jugador (UC-02 a UC-05)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Perfil de jugador · UC-02 a UC-05 · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sMiPerfil }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Mi perfil (UC-02)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div onClick="{{ irInicioSimulado }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+            <div style="font: 600 13px/1 Barlow; color: #414E57">Mi perfil</div>
+            <div onClick="{{ irPerfilPublicoPropio }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer; padding: 4px">Ver como lo ven</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 22px">
+            <div style="display: flex; align-items: center; gap: 16px">
+              <div style="width: 76px; height: 76px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; overflow: hidden">
+                <image-slot id="miperfil-avatar" shape="circle" placeholder="Foto"></image-slot>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer">Cambiar foto</div>
+                
+                <div style="font: 400 13px/1.5 Barlow; color: #5C6A74; max-width: 230px">Recomendación: Tomar la foto de frente y con buena luz. Con la camiseta del equipo, suma.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre visible</label>
+              <input value="{{ nombreVisible }}" onInput="{{ onNombreVisible }}" type="text" placeholder="Cómo te van a ver los demás" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Ciudad</label>
+              <div onClick="{{ irSelectorCiudad }}" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; width: 100%; background: #FFFFFF; color: #142230; display: flex; align-items: center; justify-content: space-between; cursor: pointer">
+                <span>{{ zona }}</span>
+                <span style="color: #A9B4BC">›</span>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Define tu vista por defecto en Descubrimiento. Se puede cambiar cuando quieras.</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Posición <span style="font-weight: 400; color: #7E8B95">(opcional)</span></label>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <sc-for list="{{ posiciones }}" as="pos" hint-placeholder-count="5">
+                  <div onClick="{{ pos.elegir }}" style="font: 600 13px/1 Barlow; padding: 10px 14px; border-radius: 999px; cursor: pointer; background: {{ pos.bg }}; color: {{ pos.fg }}; border: 1px solid {{ pos.borde }}">{{ pos.nombre }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div onClick="{{ irVisibilidad }}" style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-top: 4px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ colorVisibilidadIcono }}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="{{ iconoVisibilidad }}"></path></svg>
+              <div style="flex: 1">
+                <div style="font: 700 15px/1.2 Barlow">Visibilidad del perfil</div>
+                <div style="font: 400 13px/1.3 Barlow; color: #5C6A74">{{ resumenVisibilidad }}</div>
+              </div>
+              <div style="font: 400 20px/1 Barlow; color: #A9B4BC">›</div>
+            </div>
+
+            
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sVisibilidad }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Visibilidad del perfil (UC-04)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none">
+            <div onClick="{{ irMiPerfil }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 22px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Visibilidad</div>
+              <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Elegí cuánto de tu perfil ve el resto. Se aplica al instante en todos lados donde aparece.</div>
+            </div>
+
+            <div onClick="{{ elegirPublico }}" style="border: 1.5px solid {{ bordePublico }}; border-radius: 12px; padding: 18px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px">
+              <div style="width: 22px; height: 22px; flex: none; border-radius: 999px; border: 2px solid {{ bordePublico }}; display: flex; align-items: center; justify-content: center; margin-top: 2px">
+                <sc-if value="{{ esPublico }}" hint-placeholder-val="{{ true }}"><div style="width: 11px; height: 11px; border-radius: 999px; background: #00A8CC"></div></sc-if>
+              </div>
+              <div>
+                <div style="font: 700 17px/1.2 Barlow">Público</div>
+                <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 3px">Cualquiera ve tu nombre, tus equipos, tus torneos y tus estadísticas. Es lo que hace que un capitán te encuentre.</div>
+              </div>
+            </div>
+
+            <div onClick="{{ elegirRestringido }}" style="border: 1.5px solid {{ bordeRestringido }}; border-radius: 12px; padding: 18px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px">
+              <div style="width: 22px; height: 22px; flex: none; border-radius: 999px; border: 2px solid {{ bordeRestringido }}; display: flex; align-items: center; justify-content: center; margin-top: 2px">
+                <sc-if value="{{ esRestringido }}" hint-placeholder-val="{{ false }}"><div style="width: 11px; height: 11px; border-radius: 999px; background: #00A8CC"></div></sc-if>
+              </div>
+              <div>
+                <div style="font: 700 17px/1.2 Barlow">Restringido</div>
+                <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 3px">El resto solo ve tu nombre. Nada de equipos, torneos ni estadísticas.</div>
+              </div>
+            </div>
+
+            <div style="background: #E7E9FB; border-radius: 10px; padding: 16px; display: flex; gap: 12px">
+              <div style="width: 8px; height: 8px; flex: none; margin-top: 6px; background: #4038C2"></div>
+              <div style="font: 400 13px/1.45 Barlow; color: #322BA0; text-wrap: pretty">Restringir el perfil no te saca de las estadísticas del torneo que ya jugaste: ese resultado es público porque la competencia lo es. Lo que se oculta es tu perfil, no el hecho de haber jugado.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPerfilPublico }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Perfil público de jugador (UC-03)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto">
+            <div style="padding: 18px 18px 0; display: flex; align-items: center; justify-content: space-between">
+              <div onClick="{{ irVolverDesdePerfilPublico }}" style="font: 400 24px/1 Barlow; color: #A9B4BC; cursor: pointer; width: 24px">‹</div>
+            </div>
+            <div style="background: #0E1720; color: #FFFFFF; padding: 8px 24px 28px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+              <div style="width: 84px; height: 84px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; overflow: hidden">
+                <image-slot id="perfilpub-avatar" shape="circle" placeholder="Foto"></image-slot>
+              </div>
+              <div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">{{ nombreVisible }}</div>
+                <sc-if value="{{ esPublico }}" hint-placeholder-val="{{ true }}">
+                  <div style="font: 500 14px/1.3 Barlow; color: #A9B4BC; margin-top: 4px">{{ posicionEtiqueta }} · {{ zona }}</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <sc-if value="{{ esPublico }}" hint-placeholder-val="{{ true }}">
+              <div style="padding: 20px 20px 28px; display: flex; flex-direction: column; gap: 20px">
+                <div>
+                  <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Equipos</div>
+                  <sc-for list="{{ equiposHistorial }}" as="eq" hint-placeholder-count="2">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFF2F4">
+                      <div style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; overflow: hidden">
+                        <image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot>
+                      </div>
+                      <div style="flex: 1">
+                        <div style="font: 700 15px/1.2 Barlow">{{ eq.nombre }}</div>
+                        <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.periodo }} · {{ eq.rol }}</div>
+                      </div>
+                      <sc-if value="{{ eq.activo }}" hint-placeholder-val="{{ true }}">
+                        <div style="display: inline-flex; align-items: center; gap: 5px; background: #E4F3E8; padding: 4px 8px; border-radius: 999px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #12662C">Actual</span></div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="display: flex; gap: 10px">
+                  <div style="flex: 1; background: #F7F9FA; border-radius: 8px; padding: 12px 14px">
+                    <div style="font: 600 10px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 6px">Próximo partido</div>
+                    <div style="font: 700 13px/1.25 Barlow">{{ proximoPartidoJugador.rival }}</div>
+                    <div style="font: 400 11px/1.3 Barlow; color: #5C6A74; margin-top: 2px">{{ proximoPartidoJugador.fecha }}</div>
+                  </div>
+                  <div style="flex: 1; background: #F7F9FA; border-radius: 8px; padding: 12px 14px">
+                    <div style="font: 600 10px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 6px">Último resultado</div>
+                    <div style="font: 700 13px/1.25 Barlow">{{ ultimoResultadoJugador.marcador }} <span style="color: #5C6A74; font-weight: 500">vs {{ ultimoResultadoJugador.rival }}</span></div>
+                    <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; background: {{ ultimoResultadoJugador.bg }}; padding: 2px 6px; border-radius: 999px"><span style="font: 700 9px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: {{ ultimoResultadoJugador.fg }}">{{ ultimoResultadoJugador.label }}</span></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Estadísticas</div>
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px">
+                    <div style="background: #F7F9FA; border-radius: 8px; padding: 14px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1">{{ stats.partidos }}</div><div style="font: 400 11px/1.3 Barlow; color: #7E8B95; margin-top: 2px">Partidos</div></div>
+                    <div style="background: #F7F9FA; border-radius: 8px; padding: 14px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1">{{ stats.goles }}</div><div style="font: 400 11px/1.3 Barlow; color: #7E8B95; margin-top: 2px">Goles</div></div>
+                    <div style="background: #F7F9FA; border-radius: 8px; padding: 14px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1">{{ stats.torneos }}</div><div style="font: 400 11px/1.3 Barlow; color: #7E8B95; margin-top: 2px">Torneos</div></div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ !esPublico }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 32px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#A9B4BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+                <div style="font: 600 15px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Este jugador eligió mostrar menos. Solo su nombre es visible.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sReclamar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Reclamar perfil (UC-05 · post-MVP)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div onClick="{{ irInicioSimulado }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #A25C00; background: #FBEBD3; padding: 4px 8px; border-radius: 3px">Post-MVP</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 20px">
+
+            <sc-if value="{{ reclamoEsBuscar }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">¿Ya jugaste con este nombre?</div>
+                <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Si un capitán te cargó al plantel antes de que tuvieras cuenta, tu historial ya existe. Podés reclamarlo.</div>
+              </div>
+              <div onClick="{{ encontrarPerfil }}" style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 14px">
+                <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">JR</div>
+                <div style="flex: 1">
+                  <div style="font: 700 16px/1.2 Barlow">Julián Rodríguez</div>
+                  <div style="font: 400 13px/1.3 Barlow; color: #5C6A74">Cargado por Los Pibes del Fondo · sin cuenta asociada</div>
+                </div>
+                <div style="font: 400 20px/1 Barlow; color: #A9B4BC">›</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ reclamoEsPendiente }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 20px">
+                <div style="width: 52px; height: 52px; border-radius: 999px; background: #FBEBD3; display: flex; align-items: center; justify-content: center">
+                  <div style="width: 12px; height: 12px; background: #A25C00; transform: rotate(45deg)"></div>
+                </div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; text-transform: uppercase">Reclamo enviado</div>
+                <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Tiene que confirmarlo el capitán de Los Pibes del Fondo, que fue quien creó este perfil. Mientras tanto, tu historial sigue intacto.</div>
+                <div onClick="{{ confirmarComoCapitan }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 4px">Simular: el capitán confirma</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ reclamoEsConfirmado }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 20px">
+                <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"></path></svg>
+                </div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; text-transform: uppercase">Historial recuperado</div>
+                <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Los partidos y estadísticas que Julián Rodríguez acumuló ya son parte de tu perfil.</div>
+                <div onClick="{{ irInicioSimulado }}" style="background: #00A8CC; color: #0E1720; font: 700 15px/1 Barlow; padding: 15px 22px; border-radius: 6px; cursor: pointer; margin-top: 6px">Ver mi perfil</div>
+              </div>
+            </sc-if>
+
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-wrap: pretty; margin-top: auto">Fuera del alcance de esta primera entrega de diseño (`08`, 13) — incluida acá para completar UC-05.</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="4">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "miPerfil",
+    nombreVisible: "Julián Rodríguez",
+    zona: "San Isidro",
+    posicion: "Mediocampista",
+    visibilidad: "publico",
+    reclamoEstado: "buscar"
+  };
+
+  posicionesLista = ["Arquero", "Defensor", "Mediocampista", "Delantero", "Sin especificar"];
+
+  equiposHistorial = [
+    { nombre: "Los Pibes del Fondo", periodo: "2024 — presente", rol: "Mediocampista", activo: true, slotId: "hist-pf" },
+    { nombre: "Racing del Barrio", periodo: "2022 — 2023", rol: "Mediocampista", activo: false, slotId: "hist-rc" }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+    const esPublico = s.visibilidad === "publico";
+
+    const etiquetas = {
+      miPerfil: "Mi perfil (UC-02)", visibilidad: "Visibilidad (UC-04)",
+      perfilPublico: "Perfil público (UC-03)", reclamar: "Reclamar perfil (UC-05, post-MVP)"
+    };
+    const mapa = [
+      ["Mi perfil", "miPerfil"], ["Visibilidad", "visibilidad"], ["Perfil público", "perfilPublico"], ["Reclamar", "reclamar"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent",
+      fg: sc === id ? "#0E1720" : "#CBD3D8",
+      borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      miPerfil: "Ningún campo es obligatorio salvo el nombre visible — UC-02: un perfil incompleto nunca bloquea.",
+      visibilidad: "Binaria a propósito (D-14b): público o restringido, sin niveles intermedios que multipliquen superficie de fuga.",
+      perfilPublico: "Restringido muestra solo el nombre — nunca un error. El historial de torneos jugados sigue siendo público aparte.",
+      reclamar: "UC-05 es post-MVP (`08`, 13); lo incluyo para cerrar el set 2-5. El reclamo lo confirma quien creó el perfil, no la plataforma."
+    };
+
+    const posiciones = this.posicionesLista.map(p => ({
+      nombre: p, elegir: () => this.setState({ posicion: p }),
+      bg: s.posicion === p ? "#142230" : "transparent",
+      fg: s.posicion === p ? "#FFFFFF" : "#414E57",
+      borde: s.posicion === p ? "#142230" : "#CBD3D8"
+    }));
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sMiPerfil: sc === "miPerfil", sVisibilidad: sc === "visibilidad", sPerfilPublico: sc === "perfilPublico", sReclamar: sc === "reclamar",
+      irMiPerfil: () => this.go("miPerfil"), irVisibilidad: () => this.go("visibilidad"),
+      irPerfilPublicoPropio: () => this.go("perfilPublico"), irInicioSimulado: () => this.go("miPerfil"),
+      irVolverDesdePerfilPublico: () => this.go("miPerfil"),
+
+      nombreVisible: s.nombreVisible, onNombreVisible: e => this.setState({ nombreVisible: e.target.value }),
+      zona: s.zona, irSelectorCiudad: () => {},
+      posiciones, posicionEtiqueta: s.posicion,
+
+      esPublico, esRestringido: !esPublico,
+      bordePublico: esPublico ? "#00A8CC" : "#CBD3D8",
+      bordeRestringido: !esPublico ? "#00A8CC" : "#CBD3D8",
+      elegirPublico: () => this.setState({ visibilidad: "publico" }),
+      elegirRestringido: () => this.setState({ visibilidad: "restringido" }),
+      resumenVisibilidad: esPublico ? "Público — cualquiera te encuentra" : "Restringido — solo tu nombre es visible",
+      colorVisibilidadIcono: esPublico ? "#12662C" : "#A11F12",
+      iconoVisibilidad: esPublico ? "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" : "M5 11h14v9H5zM8 11V8a4 4 0 0 1 8 0v3",
+
+      equiposHistorial: this.equiposHistorial,
+      stats: { partidos: 34, goles: 11, torneos: 5 },
+      proximoPartidoJugador: { rival: "vs San Martín FC", fecha: "Dom 20/4 · 19:00 · Copa Otoño F5" },
+      ultimoResultadoJugador: { marcador: "2 – 0", rival: "La Gloria", label: "Ganado", bg: "#E4F3E8", fg: "#12662C" },
+
+      reclamoEstado: s.reclamoEstado,
+      reclamoEsBuscar: s.reclamoEstado === "buscar",
+      reclamoEsPendiente: s.reclamoEstado === "pendiente",
+      reclamoEsConfirmado: s.reclamoEstado === "confirmado",
+      encontrarPerfil: () => this.setState({ reclamoEstado: "pendiente" }),
+      confirmarComoCapitan: () => this.setState({ reclamoEstado: "confirmado" })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

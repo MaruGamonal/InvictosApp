@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invictos — Entrada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Entrada · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sBienvenida }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Bienvenida" style="display: flex; flex-direction: column; height: 100%; background: #0E1720; color: #FFFFFF; position: relative; overflow: hidden">
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 46%; z-index: 0; overflow: hidden">
+            <image-slot id="hero-bienvenida" shape="rect" fit="cover" src="uploads/ChatGPT Image Aug 27, 2026, 05_23_53 PM.png" placeholder="Foto de fútbol amateur: cancha, luces, jugadores"></image-slot>
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,23,32,0.05) 0%, rgba(14,23,32,0.1) 55%, #0E1720 100%); pointer-events: none"></div>
+          </div>
+
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 90px; z-index: 3; background: linear-gradient(180deg, #0F0C08, rgba(14,23,32,0) 100%); pointer-events: none"></div>
+          <div style="position: relative; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 24px 26px 0">
+            <div style="width: 10px; height: 10px; background: #00A8CC"></div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.02em; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.55)">Invictos</div>
+          </div>
+          <div style="position: relative; z-index: 4; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px 26px 28px; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 52px; line-height: 0.92; letter-spacing: -0.01em; text-transform: uppercase; text-shadow: 0 4px 24px rgba(0,0,0,0.5)">Tu equipo,<br>tu pasión,<br>tu app.</div>
+            <div style="font: 400 16px/1.5 Barlow; color: #CBD3D8; max-width: 300px; text-wrap: pretty">Armá el fixture, cargá resultados y seguí la tabla. Descubrí torneos cerca tuyo sin necesidad de cuenta.</div>
+          </div>
+          <div style="position: relative; z-index: 4; padding: 8px 26px 36px; display: flex; flex-direction: column; gap: 12px">
+            <div onClick="{{ irIngreso }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer" style-hover="background: #009BBB">Ingresar</div>
+            <div onClick="{{ irRegistro }}" style="border: 1.5px solid #414E57; color: #FFFFFF; font: 600 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer" style-hover="background: #142230">Crear cuenta</div>
+            <div onClick="{{ irDescubrir }}" style="font: 600 14px/1 Barlow; color: #A9B4BC; text-align: center; padding: 12px; cursor: pointer" style-hover="color: #FFFFFF">Descubrir torneos sin cuenta</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sIngreso }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Ingreso" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 24px 0; flex: none">
+            <div onClick="{{ irBienvenida }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 24px 26px 32px; display: flex; flex-direction: column; gap: 22px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase; margin-bottom: 8px">Ingresar</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Con el correo o el usuario de tu cuenta.</div>
+            </div>
+
+            <sc-if value="{{ hayError }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; align-items: flex-start; gap: 10px; background: #FEF7F6; border: 1px solid #F2CFCA; border-radius: 8px; padding: 14px">
+                <div style="width: 9px; height: 9px; flex: none; margin-top: 4px; border-radius: 999px; border: 2.5px solid #C42B1C"></div>
+                <div style="font: 500 14px/1.4 Barlow; color: #A11F12">{{ textoError }}</div>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Correo o usuario</label>
+                <input value="{{ identificador }}" onInput="{{ onIdentificador }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid {{ bordeId }}; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="display: flex; align-items: baseline; justify-content: space-between">
+                  <label style="font: 600 13px/1 Barlow; color: #414E57">Contraseña</label>
+                  <span onClick="{{ irOlvide }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer" style-hover="text-decoration: underline">¿La olvidaste?</span>
+                </div>
+                <input value="{{ credencial }}" onInput="{{ onCredencial }}" type="password" placeholder="••••••••" style="border: 1px solid {{ bordeCred }}; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+              </div>
+            </div>
+
+            <div onClick="{{ intentarIngresar }}" style="background: {{ botonBg }}; color: {{ botonFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 4px">Ingresar</div>
+
+            <div style="text-align: center; font: 400 14px/1.4 Barlow; color: #5C6A74">¿No tenés cuenta? <span onClick="{{ irRegistro }}" style="color: #007D99; font-weight: 600; cursor: pointer" style-hover="text-decoration: underline">Creala en un momento</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sOlvide }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Olvidé mi contraseña" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 24px 0; flex: none">
+            <div onClick="{{ irIngreso }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 24px 26px 32px; display: flex; flex-direction: column; gap: 22px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase; margin-bottom: 8px">Recuperar acceso</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Escribí el correo de tu cuenta y te mandamos un link para elegir una contraseña nueva.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Correo</label>
+              <input value="{{ correoRecuperar }}" onInput="{{ onCorreoRecuperar }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+            </div>
+            <div onClick="{{ enviarRecuperacion }}" style="background: {{ botonRecuperarBg }}; color: {{ botonRecuperarFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Enviar link</div>
+            <div style="font: 400 13px/1.4 Barlow; color: #7E8B95; text-wrap: pretty">Sin SMS ni código para tipear: el link llega solo por correo.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sCorreoEnviado }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Correo de recuperación enviado" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto; padding: 40px 28px; display: flex; flex-direction: column; gap: 20px; align-items: flex-start">
+            <div style="width: 52px; height: 52px; border-radius: 999px; background: #E7E9FB; display: flex; align-items: center; justify-content: center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4038C2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+            </div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1.05; text-transform: uppercase">Te mandamos un link</div>
+            <div style="font: 400 16px/1.5 Barlow; color: #5C6A74; text-wrap: pretty">Revisá <strong style="font-weight: 600; color: #142230">{{ correoRecuperar }}</strong>. El link para elegir una contraseña nueva vence en 30 minutos.</div>
+            <div onClick="{{ enviarRecuperacion }}" style="font: 600 14px/1 Barlow; color: #007D99; cursor: pointer; padding: 4px 0" style-hover="text-decoration: underline">No me llegó, reenviar</div>
+            <div style="flex: 1"></div>
+            <div onClick="{{ irIngreso }}" style="width: 100%; border: 1.5px solid #142230; font: 600 15px/1 Barlow; padding: 16px; border-radius: 8px; text-align: center; cursor: pointer">Volver a ingresar</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sRegistro }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Registro" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 24px 0; flex: none">
+            <div onClick="{{ irBienvenida }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 24px 26px 32px; display: flex; flex-direction: column; gap: 22px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase; margin-bottom: 8px">Crear cuenta</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Solo lo justo para empezar.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre visible</label>
+                <input value="{{ nombreVisible }}" onInput="{{ onNombreVisible }}" type="text" placeholder="Cómo te van a ver los demás" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Correo</label>
+                <input value="{{ correoRegistro }}" onInput="{{ onCorreoRegistro }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Contraseña</label>
+                <input value="{{ passRegistro }}" onInput="{{ onPassRegistro }}" type="password" placeholder="••••••••" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230">
+              </div>
+            </div>
+            <div onClick="{{ crearCuenta }}" style="background: {{ botonRegistroBg }}; color: {{ botonRegistroFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Crear cuenta</div>
+            <div style="font: 400 13px/1.45 Barlow; color: #7E8B95; text-wrap: pretty">No preguntamos qué tipo de usuario sos: eso lo define lo que hagas después.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sVerificar }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Confirmar el correo" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto; padding: 40px 28px; display: flex; flex-direction: column; gap: 20px; align-items: flex-start">
+            <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+            </div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1.05; text-transform: uppercase">Ya casi. Confirmá tu correo</div>
+            <div style="font: 400 16px/1.5 Barlow; color: #5C6A74; text-wrap: pretty">Te mandamos un link a <strong style="font-weight: 600; color: #142230">{{ correoRegistro }}</strong>. Sin eso podés usar la cuenta, pero tus torneos no van a listarse en el descubrimiento.</div>
+            <div onClick="{{ reenviarVerificacion }}" style="font: 600 14px/1 Barlow; color: #007D99; cursor: pointer; padding: 4px 0" style-hover="text-decoration: underline">{{ textoReenviar }}</div>
+            <div style="flex: 1"></div>
+            <div onClick="{{ irInicioSimulado }}" style="width: 100%; background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Seguir usando la cuenta</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sInicioSimulado }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Sesión iniciada (destino)" style="display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; padding: 32px; gap: 16px; text-align: center">
+          <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"></path></svg>
+          </div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.1; text-transform: uppercase">Sesión iniciada</div>
+          <div style="font: 400 15px/1.5 Barlow; color: #5C6A74; max-width: 260px; text-wrap: pretty">De acá seguiría a Inicio — próxima pantalla del recorrido.</div>
+          <div onClick="{{ irBienvenida }}" style="font: 600 14px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 8px" style-hover="text-decoration: underline">Volver al comienzo</div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="7">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "bienvenida",
+    identificador: "",
+    credencial: "",
+    intentoFallido: false,
+    correoRecuperar: "",
+    correoEnviado: false,
+    nombreVisible: "",
+    correoRegistro: "",
+    passRegistro: "",
+    reenviosVerificacion: 0
+  };
+
+  go = id => this.setState({ screen: id });
+
+  intentarIngresar() {
+    const s = this.state;
+    if (!s.identificador.trim() || !s.credencial.trim()) {
+      this.setState({ intentoFallido: true });
+      return;
+    }
+    // Credencial de prueba correcta: cualquier valor de 4+ caracteres que NO sea "1234" simula error real
+    if (s.credencial === "1234") {
+      this.setState({ intentoFallido: true });
+      return;
+    }
+    this.go("inicioSimulado");
+  }
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      bienvenida: "Bienvenida", ingreso: "Ingreso", olvide: "Olvidé mi contraseña",
+      correoEnviado: "Link enviado", registro: "Registro", verificar: "Confirmar el correo",
+      inicioSimulado: "Destino tras ingresar"
+    };
+
+    const mapa = [
+      ["Bienvenida", "bienvenida"], ["Ingreso", "ingreso"], ["Olvidé mi contraseña", "olvide"],
+      ["Link enviado", "correoEnviado"], ["Registro", "registro"], ["Confirmar correo", "verificar"], ["Destino", "inicioSimulado"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent",
+      fg: sc === id ? "#0E1720" : "#CBD3D8",
+      borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const idVacio = s.intentoFallido && !s.identificador.trim();
+    const credVacia = s.intentoFallido && !s.credencial.trim();
+    const credMala = s.intentoFallido && s.identificador.trim() && s.credencial === "1234";
+
+    return {
+      mapa,
+      etiquetaPantalla: etiquetas[sc] || sc,
+      sBienvenida: sc === "bienvenida", sIngreso: sc === "ingreso", sOlvide: sc === "olvide",
+      sCorreoEnviado: sc === "correoEnviado", sRegistro: sc === "registro", sVerificar: sc === "verificar",
+      sInicioSimulado: sc === "inicioSimulado",
+
+      irBienvenida: () => this.go("bienvenida"),
+      irIngreso: () => this.setState({ screen: "ingreso", intentoFallido: false }),
+      irOlvide: () => this.go("olvide"),
+      irRegistro: () => this.go("registro"),
+      irDescubrir: () => this.go("inicioSimulado"),
+      irInicioSimulado: () => this.go("inicioSimulado"),
+
+      identificador: s.identificador,
+      credencial: s.credencial,
+      onIdentificador: e => this.setState({ identificador: e.target.value }),
+      onCredencial: e => this.setState({ credencial: e.target.value }),
+      bordeId: idVacio ? "#C42B1C" : "#CBD3D8",
+      bordeCred: (credVacia || credMala) ? "#C42B1C" : "#CBD3D8",
+      hayError: idVacio || credVacia || credMala,
+      textoError: credMala
+        ? "Ese correo o esa contraseña no coinciden. Probá de nuevo o recuperala."
+        : "Completá los dos campos para ingresar. Tip: usá \"1234\" como contraseña para ver el error de credenciales inválidas.",
+      botonBg: "#00A8CC", botonFg: "#0E1720",
+      intentarIngresar: () => this.intentarIngresar(),
+
+      correoRecuperar: s.correoRecuperar,
+      onCorreoRecuperar: e => this.setState({ correoRecuperar: e.target.value }),
+      botonRecuperarBg: s.correoRecuperar.trim() ? "#00A8CC" : "#CBD3D8",
+      botonRecuperarFg: s.correoRecuperar.trim() ? "#0E1720" : "#7E8B95",
+      enviarRecuperacion: () => { if (s.correoRecuperar.trim()) this.go("correoEnviado"); },
+
+      nombreVisible: s.nombreVisible,
+      onNombreVisible: e => this.setState({ nombreVisible: e.target.value }),
+      correoRegistro: s.correoRegistro,
+      onCorreoRegistro: e => this.setState({ correoRegistro: e.target.value }),
+      passRegistro: s.passRegistro,
+      onPassRegistro: e => this.setState({ passRegistro: e.target.value }),
+      botonRegistroBg: (s.nombreVisible.trim() && s.correoRegistro.trim() && s.passRegistro.trim()) ? "#00A8CC" : "#CBD3D8",
+      botonRegistroFg: (s.nombreVisible.trim() && s.correoRegistro.trim() && s.passRegistro.trim()) ? "#0E1720" : "#7E8B95",
+      crearCuenta: () => { if (s.nombreVisible.trim() && s.correoRegistro.trim() && s.passRegistro.trim()) this.go("verificar"); },
+
+      textoReenviar: s.reenviosVerificacion === 0 ? "No me llegó, reenviar" : "Reenviado ✓",
+      reenviarVerificacion: () => this.setState(st => ({ reenviosVerificacion: st.reenviosVerificacion + 1 }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Flujo: Crear torneo → publicar → fixture → resultados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Flujo 3 · Crear torneo → publicar → fixture → resultados · Paso {{ pasoNum }}/{{ totalPasos }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ p === 0 }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="1. Crear torneo" style="display: flex; flex-direction: column; height: 100%; padding: 22px 22px 24px; gap: 14px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Crear torneo</div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Nombre</label><input value="{{ nombreTorneo }}" onInput="{{ onNombreTorneo }}" type="text" placeholder="Copa Otoño F5" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="display: flex; gap: 10px">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Ciudad</label><div onClick="{{ irSelectorCiudadFlujo }}" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 600 14px/1 Barlow; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; cursor: pointer"><span>{{ ciudadTorneo }}</span><span style="color: #A9B4BC">›</span></div></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Cupo máx.</label><input value="{{ cupoTorneo }}" onInput="{{ onCupoTorneo }}" type="text" placeholder="16" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 600 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Dirección</label><input value="{{ direccionTorneo }}" onInput="{{ onDireccionTorneo }}" type="text" placeholder="Av. Libertador 4200" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="display: flex; gap: 10px">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Costo inscripción <span style="font-weight: 400; color: #7E8B95">(opcional)</span></label><input value="{{ costoInscripcionFlujo }}" onInput="{{ onCostoInscripcionFlujo }}" type="text" placeholder="$0" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Costo planilla <span style="font-weight: 400; color: #7E8B95">(opcional)</span></label><input value="{{ costoPlanillaFlujo }}" onInput="{{ onCostoPlanillaFlujo }}" type="text" placeholder="$0" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          </div>
+          <div onClick="{{ sig }}" style="background: {{ crearTorneoBtnBg }}; color: {{ crearTorneoBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar a formato</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 1 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="2. Formato" style="display: flex; flex-direction: column; height: 100%; padding: 22px 22px 24px; gap: 14px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Formato</div>
+          <sc-for list="{{ formatos }}" as="f" hint-placeholder-count="3">
+            <div onClick="{{ f.elegir }}" style="border: 1.5px solid {{ f.borde }}; border-radius: 10px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px">
+              <div style="width: 18px; height: 18px; flex: none; border-radius: 999px; border: 2px solid {{ f.borde }}; display: flex; align-items: center; justify-content: center"><sc-if value="{{ f.activo }}" hint-placeholder-val="{{ false }}"><div style="width: 9px; height: 9px; border-radius: 999px; background: #00A8CC"></div></sc-if></div>
+              <div style="font: 600 14px/1.2 Barlow">{{ f.nombre }}</div>
+            </div>
+          </sc-for>
+          <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar a reglamento</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 2 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="3. Reglamento" style="display: flex; flex-direction: column; height: 100%; padding: 22px 22px 24px; gap: 14px">
+          <div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Reglamento <span style="font-weight: 400; color: #7E8B95; font-size: 15px; text-transform: none">(opcional)</span></div>
+            <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Es el texto contra el que se resuelve cualquier disputa. Cada cambio queda versionado.</div>
+          </div>
+          <textarea value="{{ textoReglamentoFlujo }}" onInput="{{ onTextoReglamentoFlujo }}" placeholder="Escribí el reglamento, o subí un archivo abajo" style="border: 1px solid #CBD3D8; border-radius: 8px; padding: 14px; font: 400 15px/1.5 Barlow; min-height: 130px; outline: none; width: 100%; resize: none; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px"></textarea>
+          <div style="border: 1px dashed #CBD3D8; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 10px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0-12 4 4m-4-4-4 4M5 21h14" /></svg>
+            <div style="font: 600 13px/1 Barlow; color: #007D99">Adjuntar archivo (PDF)</div>
+          </div>
+          <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar a publicar</div>
+          <div onClick="{{ sig }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; text-align: center">Omitir — es opcional</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 3 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="4. Publicar" style="display: flex; flex-direction: column; height: 100%; padding: 22px 22px 24px; gap: 16px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Listo para publicar</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74">{{ nombreTorneo || 'Copa Otoño F5' }} · San Isidro</div>
+          <div style="background: #E4F3E8; border-radius: 10px; padding: 14px 16px; font: 400 13px/1.4 Barlow; color: #12662C">Tu organización está verificada: aparece en el descubrimiento apenas publiques.</div>
+          <div onClick="{{ sig }}" style="background: {{ publicarBtnBg }}; color: {{ publicarBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">{{ textoPublicar }}</div>
+          <div style="display: flex; align-items: center; gap: 8px; background: #E8F7FB; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0" /></svg><span style="font: 600 12px/1.3 Barlow; color: #007D99">Notificación a quienes siguen San Isidro: nuevo torneo publicado</span></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 4 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="5. Cerrar inscripciones y generar fixture" style="display: flex; flex-direction: column; height: 100%; padding: 20px 20px 24px; gap: 14px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.05; text-transform: uppercase">Ciclo de vida</div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EFF2F4"><div style="width: 20px; height: 20px; border-radius: 999px; background: #1B8A3C; display: flex; align-items: center; justify-content: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></div><div style="flex: 1; font: 600 14px/1 Barlow">Inscripciones cerradas</div></div>
+          <div onClick="{{ generarFixture }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer"><div style="width: 20px; height: 20px; border-radius: 999px; background: {{ fixtureDotBg }}; display: flex; align-items: center; justify-content: center"><sc-if value="{{ fixtureListo }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if></div><div style="flex: 1; font: 600 14px/1 Barlow">Fixture generado</div><div style="font: 700 12px/1 Barlow; color: #007D99">{{ textoGenerarFixture }}</div></div>
+          <div style="display: flex; align-items: center; gap: 8px; background: #F7F9FA; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0" /></svg><span style="font: 500 12px/1.3 Barlow; color: #5C6A74">Notificación a los equipos inscriptos: fixture publicado</span></div>
+          <div onClick="{{ sig }}" style="background: {{ fixtureBtnBg }}; color: {{ fixtureBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 5 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="6. Cargar resultado" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 14px 18px 22px; flex: none; display: flex; flex-direction: column; gap: 14px">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC">Copa Otoño F5 · Fecha 1</div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
+              <div style="font: 700 13px/1.2 Barlow; text-align: right; width: 84px; flex: none">Los Pibes del Fondo</div>
+              <div style="display: flex; align-items: center; gap: 4px; flex: none">
+                <div onClick="{{ bajaLocal }}" style="width: 30px; height: 30px; border: 1px solid #2C383F; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 16px/1 Barlow; cursor: pointer; color: #FFF; flex: none">−</div>
+                <div style="width: 72px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 36px; white-space: nowrap; flex: none">{{ golesLocal }}<span style="color: #5C6A74; font-size: 24px"> – </span>{{ golesVisita }}</div>
+                <div onClick="{{ subeVisita }}" style="width: 30px; height: 30px; border: 1px solid #2C383F; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 16px/1 Barlow; cursor: pointer; color: #FFF; flex: none">+</div>
+              </div>
+              <div style="font: 700 13px/1.2 Barlow; width: 84px; flex: none">San Martín FC</div>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 30px"><div onClick="{{ subeLocal }}" style="font: 700 11px/1 Barlow; color: #00A8CC; cursor: pointer">+ local</div><div onClick="{{ bajaVisita }}" style="font: 700 11px/1 Barlow; color: #00A8CC; cursor: pointer">+ visita</div></div>
+          </div>
+          <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+            <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Guardar resultado</div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #E4F3E8; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12662C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg><span style="font: 600 12px/1.3 Barlow; color: #12662C">Cargado por vos como organizador: queda confirmado al instante, sin ventana de disputa.</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 6 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="7. Fin del flujo" style="display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 30px">
+          <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">Resultado guardado</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Como lo cargaste vos, el organizador, cuenta para la tabla al instante — no pasa por la ventana de 72hs que sí aplica cuando lo carga un capitán.</div>
+          <div onClick="{{ reiniciar }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 8px">Reiniciar flujo</div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="6">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { p: 0, nombreTorneo: "", ciudadTorneo: "San Isidro", cupoTorneo: "16", direccionTorneo: "", costoInscripcionFlujo: "", costoPlanillaFlujo: "", textoReglamentoFlujo: "", formato: "Liga", publicado: false, fixtureListo: false, golesLocal: 0, golesVisita: 0 };
+  pasos = ["Crear torneo", "Formato", "Reglamento", "Publicar", "Ciclo de vida", "Resultado", "Fin"];
+
+  renderVals() {
+    const s = this.state;
+    const mapa = this.pasos.map((nombre, i) => ({
+      nombre, ir: () => this.setState({ p: i }),
+      bg: s.p === i ? "#00A8CC" : "transparent", fg: s.p === i ? "#0E1720" : "#CBD3D8", borde: s.p === i ? "#00A8CC" : "#2C383F"
+    }));
+    const formatos = ["Liga", "Eliminación directa", "Grupos + eliminatoria"].map(f => ({
+      nombre: f, activo: s.formato === f, borde: s.formato === f ? "#00A8CC" : "#CBD3D8", elegir: () => this.setState({ formato: f })
+    }));
+    return {
+      p: s.p, pasoNum: s.p + 1, totalPasos: this.pasos.length, mapa,
+      sig: () => this.setState(st => {
+        if (st.p === 3 && !st.publicado) return { publicado: true };
+        return { p: Math.min(this.pasos.length - 1, st.p + 1) };
+      }),
+      reiniciar: () => this.setState({ p: 0, nombreTorneo: "", ciudadTorneo: "San Isidro", cupoTorneo: "16", direccionTorneo: "", costoInscripcionFlujo: "", costoPlanillaFlujo: "", formato: "Liga", publicado: false, fixtureListo: false, golesLocal: 0, golesVisita: 0 }),
+      nombreTorneo: s.nombreTorneo, onNombreTorneo: e => this.setState({ nombreTorneo: e.target.value }),
+      ciudadTorneo: s.ciudadTorneo, irSelectorCiudadFlujo: () => {},
+      cupoTorneo: s.cupoTorneo, onCupoTorneo: e => this.setState({ cupoTorneo: e.target.value }),
+      direccionTorneo: s.direccionTorneo, onDireccionTorneo: e => this.setState({ direccionTorneo: e.target.value }),
+      costoInscripcionFlujo: s.costoInscripcionFlujo, onCostoInscripcionFlujo: e => this.setState({ costoInscripcionFlujo: e.target.value }),
+      costoPlanillaFlujo: s.costoPlanillaFlujo, onCostoPlanillaFlujo: e => this.setState({ costoPlanillaFlujo: e.target.value }),
+      crearTorneoBtnBg: (s.nombreTorneo && s.ciudadTorneo && s.cupoTorneo && s.direccionTorneo) ? "#00A8CC" : "#CBD3D8",
+      crearTorneoBtnFg: (s.nombreTorneo && s.ciudadTorneo && s.cupoTorneo && s.direccionTorneo) ? "#0E1720" : "#7E8B95",
+      formatos, publicado: s.publicado,
+      publicarBtnBg: s.publicado ? "#EFF2F4" : "#00A8CC", publicarBtnFg: s.publicado ? "#414E57" : "#0E1720",
+      textoPublicar: s.publicado ? "Publicado ✓ — continuar" : "Publicar",
+      fixtureListo: s.fixtureListo, generarFixture: () => this.setState({ fixtureListo: true }),
+      fixtureDotBg: s.fixtureListo ? "#1B8A3C" : "#CBD3D8", textoGenerarFixture: s.fixtureListo ? "" : "Generar",
+      fixtureBtnBg: s.fixtureListo ? "#00A8CC" : "#CBD3D8", fixtureBtnFg: s.fixtureListo ? "#0E1720" : "#7E8B95",
+      textoReglamentoFlujo: s.textoReglamentoFlujo, onTextoReglamentoFlujo: e => this.setState({ textoReglamentoFlujo: e.target.value }),
+      golesLocal: s.golesLocal, golesVisita: s.golesVisita,
+      subeLocal: () => this.setState(st => ({ golesLocal: st.golesLocal + 1 })),
+      bajaLocal: () => this.setState(st => ({ golesLocal: Math.max(0, st.golesLocal - 1) })),
+      subeVisita: () => this.setState(st => ({ golesVisita: st.golesVisita + 1 })),
+      bajaVisita: () => this.setState(st => ({ golesVisita: Math.max(0, st.golesVisita - 1) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

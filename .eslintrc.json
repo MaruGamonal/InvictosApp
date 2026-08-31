@@ -1,0 +1,53 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals", "plugin:boundaries/recommended"],
+  "plugins": ["boundaries"],
+  "settings": {
+    "boundaries/include": ["src/**/*.ts", "src/**/*.tsx"],
+    "boundaries/elements": [
+      { "type": "app", "pattern": "src/app/**" },
+      { "type": "services", "pattern": "src/services/**" },
+      { "type": "db", "pattern": "src/db/**" },
+      { "type": "lib", "pattern": "src/lib/**" }
+    ]
+  },
+  "rules": {
+    "boundaries/dependencies": [
+      "error",
+      {
+        "default": "disallow",
+        "policies": [
+          {
+            "from": { "element": { "type": "app" } },
+            "allow": [
+              { "to": { "element": { "type": "app" } } },
+              { "to": { "element": { "type": "services" } } },
+              { "to": { "element": { "type": "db" } } },
+              { "to": { "element": { "type": "lib" } } }
+            ]
+          },
+          {
+            "from": { "element": { "type": "services" } },
+            "allow": [
+              { "to": { "element": { "type": "services" } } },
+              { "to": { "element": { "type": "db" } } },
+              { "to": { "element": { "type": "lib" } } }
+            ]
+          },
+          {
+            "from": { "element": { "type": "db" } },
+            "allow": [
+              { "to": { "element": { "type": "db" } } },
+              { "to": { "element": { "type": "lib" } } }
+            ]
+          },
+          {
+            "from": { "element": { "type": "lib" } },
+            "allow": [{ "to": { "element": { "type": "lib" } } }]
+          }
+        ]
+      }
+    ],
+    "boundaries/no-unknown-dependencies": "error"
+  }
+}

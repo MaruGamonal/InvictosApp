@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Flujo: Visitante descubre → sigue → se registra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Flujo 4 · Visitante descubre → sigue → se registra · Paso {{ pasoNum }}/{{ totalPasos }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #F7F9FA; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ p === 0 }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="1. Descubrimiento sin cuenta" style="display: flex; flex-direction: column; height: 100%; padding: 20px 20px 24px; gap: 14px">
+          <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #A25C00; background: #FBEBD3; padding: 4px 8px; border-radius: 3px; align-self: flex-start">Sin cuenta</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Descubrimiento · San Isidro</div>
+          <div onClick="{{ sig }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 8px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #5C6A74">F5 · Masculino · San Isidro</div>
+          </div>
+          <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">Llegaste por un link, sin sesión. Toda esta ficha se ve igual sin cuenta.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 1 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="2. Ficha del torneo → Seguir" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto">
+            <div style="background: #0E1720; color: #FFFFFF; padding: 22px 20px; display: flex; flex-direction: column; gap: 12px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+              <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #A9B4BC">F5 · Masculino · San Isidro</div>
+              <div style="display: flex; align-items: center; gap: 8px; padding-top: 4px">
+                <div style="width: 26px; height: 26px; flex: none; border-radius: 4px; background: #2C383F; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">CS</div>
+                <span style="font: 500 14px/1 Barlow">Complejo San Martín</span>
+              </div>
+              <div onClick="{{ tocarSeguir }}" style="border: 1.5px solid #00A8CC; background: transparent; color: #FFFFFF; font: 700 13px/1 Barlow; padding: 10px 18px; border-radius: 999px; cursor: pointer; align-self: flex-start; margin-top: 4px">Seguir</div>
+            </div>
+            <div style="padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Descripción</div>
+                <div style="font: 400 14px/1.5 Barlow; color: #414E57; text-wrap: pretty">Torneo de fútbol 5 masculino, libre, a cancha de Complejo San Martín. Formato liga, ida y vuelta.</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Inscripciones</div>
+                <div style="display: flex; align-items: center; justify-content: space-between"><span style="font: 500 15px/1 Barlow">Cupo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">12<span style="color: #A9B4BC"> / 16</span></span></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 10px"><span style="font: 500 15px/1 Barlow">Costo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">$18.000</span></div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Equipos inscriptos</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+                  <sc-for list="{{ equiposInscriptosVisitante }}" as="eq" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EFF2F4"><div style="width: 26px; height: 26px; flex: none; border-radius: 999px; background: #414E57"></div><span style="font: 600 13px/1.2 Barlow">{{ eq }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Llegaste por un link, sin sesión. Toda esta ficha se ve igual sin cuenta — el registro se pide recién al tocar "Seguir".</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 2 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="3. Muro de registro mínimo" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 16px; background: #FFFFFF">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Para seguir este torneo</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74">Necesitás una cuenta. Es lo mínimo — nombre, celular y correo.</div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Nombre</label><input value="{{ nombre }}" onInput="{{ onNombre }}" type="text" placeholder="Tu nombre" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Celular</label><input value="{{ contacto }}" onInput="{{ onContacto }}" type="text" placeholder="11 5555-5555" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Correo</label><input value="{{ correo }}" onInput="{{ onCorreo }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Con el correo validamos la cuenta.</div>
+          <div onClick="{{ sig }}" style="background: {{ registroBtnBg }}; color: {{ registroBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Crear cuenta y seguir</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 3 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="4. Cuenta creada · ya siguiendo" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 22px 20px; flex: none; display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+            <div style="border: 1.5px solid #00A8CC; background: #00A8CC; color: #0E1720; font: 700 13px/1 Barlow; padding: 10px 18px; border-radius: 999px; align-self: flex-start">Siguiendo ✓</div>
+          </div>
+          <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; justify-content: center">
+            <div style="width: 48px; height: 48px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1; text-transform: uppercase">Cuenta creada, ya seguís el torneo</div>
+            <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">De visitante a cuenta sin perder de vista lo que vino a ver.</div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #E8F7FB; border-radius: 8px; padding: 10px 12px; margin-top: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0" /></svg><span style="font: 600 12px/1.3 Barlow; color: #007D99">Notificación (push): recibirás avisos de este torneo</span></div>
+            <div onClick="{{ reiniciar }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 8px">Reiniciar flujo</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="4">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { p: 0, nombre: "", contacto: "", correo: "" };
+  pasos = ["Descubrimiento", "Ficha · Seguir", "Registro", "Fin"];
+
+  renderVals() {
+    const s = this.state;
+    const mapa = this.pasos.map((nombre, i) => ({
+      nombre, ir: () => this.setState({ p: i }),
+      bg: s.p === i ? "#00A8CC" : "transparent", fg: s.p === i ? "#0E1720" : "#CBD3D8", borde: s.p === i ? "#00A8CC" : "#2C383F"
+    }));
+    return {
+      p: s.p, pasoNum: s.p + 1, totalPasos: this.pasos.length, mapa,
+      sig: () => this.setState(st => ({ p: Math.min(this.pasos.length - 1, st.p + 1) })),
+      tocarSeguir: () => this.setState({ p: 2 }),
+      reiniciar: () => this.setState({ p: 0, nombre: "", contacto: "" }),
+      nombre: s.nombre, onNombre: e => this.setState({ nombre: e.target.value }),
+      contacto: s.contacto, onContacto: e => this.setState({ contacto: e.target.value }),
+      correo: s.correo, onCorreo: e => this.setState({ correo: e.target.value }),
+      registroBtnBg: (s.nombre && s.contacto && s.correo) ? "#00A8CC" : "#CBD3D8", registroBtnFg: (s.nombre && s.contacto && s.correo) ? "#0E1720" : "#7E8B95",
+      equiposInscriptosVisitante: ["Los Pibes del Fondo", "San Martín FC", "Racing del Barrio"]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

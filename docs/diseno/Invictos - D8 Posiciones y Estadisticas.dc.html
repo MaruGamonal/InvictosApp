@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D8 Posiciones y Estadísticas (UC-35 a 38)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D8 · Posiciones y Estadísticas · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #F7F9FA; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sTabla }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Tabla de posiciones (UC-35)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 16px; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+            <sc-if value="{{ hayDisputaAbierta }}" hint-placeholder-val="{{ true }}">
+              <div style="display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; background: #FBEBD3; padding: 4px 8px; border-radius: 3px"><div style="width: 7px; height: 7px; background: #A25C00; transform: rotate(45deg)"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #7A4600">Provisoria · 1 en disputa</span></div>
+            </sc-if>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 14px 16px 24px">
+            <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+              <div style="display: grid; grid-template-columns: 20px 1fr repeat(6, 20px) 30px 34px; align-items: center; gap: 2px; background: #142230; color: #FFFFFF; padding: 8px 8px; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase">
+                <div>#</div><div>Equipo</div><div style="text-align: right">PJ</div><div style="text-align: right">G</div><div style="text-align: right">E</div><div style="text-align: right">P</div><div style="text-align: right">GF</div><div style="text-align: right">GC</div><div style="text-align: right; background: #FBEBD3; color: #7A4600; border-radius: 2px; padding: 1px 2px">Q</div><div style="text-align: right; color: #00A8CC">Pts</div>
+              </div>
+              <sc-for list="{{ tabla }}" as="t" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 20px 1fr repeat(6, 20px) 30px 34px; align-items: center; gap: 2px; padding: 8px 8px; min-height: 42px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid {{ t.claseBorde }}; font: 500 12px/1 Barlow">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px">{{ t.pos }}</div>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; min-width: 0">{{ t.nombre }}</div>
+                  <div style="text-align: right">{{ t.pj }}</div><div style="text-align: right">{{ t.g }}</div><div style="text-align: right">{{ t.e }}</div><div style="text-align: right">{{ t.p }}</div>
+                  <div style="text-align: right">{{ t.gf }}</div><div style="text-align: right">{{ t.gc }}</div>
+                  <div style="text-align: right; color: {{ t.quitaColor }}">{{ t.quita }}</div>
+                  <div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">{{ t.pts }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; font: 400 12px/1.4 Barlow; color: #5C6A74"><div style="width: 3px; height: 18px; background: #00A8CC"></div>Clasifica</div>
+            <div style="margin-top: 8px; font: 400 12px/1.4 Barlow; color: #5C6A74">Se calcula solo, sin edición manual. La quita va en columna separada — nunca se mezcla con lo ganado en la cancha.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sEstadisticas }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Estadísticas del torneo (UC-36)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 16px; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Estadísticas</div>
+            <div style="font: 400 13px/1.3 Barlow; color: #A9B4BC; margin-top: 4px">Copa Otoño F5</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 18px">
+
+            <sc-if value="{{ hayEventosCargados }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Goleadores</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+                  <sc-for list="{{ goleadores }}" as="g" hint-placeholder-count="5">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EFF2F4">
+                      <div style="width: 22px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; color: #7E8B95">{{ g.pos }}</div>
+                      <div style="flex: 1"><div style="font: 700 14px/1.2 Barlow">{{ g.nombre }}</div><div style="font: 400 11px/1.3 Barlow; color: #5C6A74">{{ g.equipo }}</div></div>
+                      <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">{{ g.goles }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Más goleador (equipo)</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between"><span style="font: 700 15px/1 Barlow">Deportivo Belgrano</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px">19 GF</span></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ !hayEventosCargados }}" hint-placeholder-val="{{ false }}">
+              <div style="border: 1px dashed #CBD3D8; border-radius: 10px; padding: 24px; text-align: center">
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.1; text-transform: uppercase; margin-bottom: 8px">Sin goleadores todavía</div>
+                <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Nadie cargó quién hizo los goles. La tabla de posiciones sí está al día — esto es aparte y opcional.</div>
+              </div>
+            </sc-if>
+            <div onClick="{{ toggleEventosCargados }}" style="font: 600 12px/1 Barlow; color: #007D99; cursor: pointer; text-align: center">{{ textoToggleEventos }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sHistorialEquipo }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Historial del equipo (UC-37)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 16px; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Los Pibes del Fondo</div>
+            <div style="font: 400 13px/1.3 Barlow; color: #A9B4BC; margin-top: 4px">Historial completo · más allá de este torneo</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px">
+              <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">28</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">PJ</div></div>
+              <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">17</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">Ganados</div></div>
+              <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">63</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">GF</div></div>
+              <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">41</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">GC</div></div>
+            </div>
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Torneo por torneo</div>
+              <sc-for list="{{ historialTorneosEquipo }}" as="ht" hint-placeholder-count="3">
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between">
+                  <div><div style="font: 700 15px/1.2 Barlow">{{ ht.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ ht.periodo }} · {{ ht.record }}</div></div>
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; color: {{ ht.color }}">{{ ht.posicion }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-wrap: pretty">Ganar 8 de 10 en un torneo chico no es lo mismo que 5 de 10 en uno competitivo — por eso se lee torneo por torneo, no solo en un acumulado plano.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sHistorialJugador }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Historial del jugador (UC-38)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 16px; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Bruno Sosa</div>
+            <div style="font: 400 13px/1.3 Barlow; color: #A9B4BC; margin-top: 4px">Carrera dentro de Invictos</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 16px">
+
+            <sc-if value="{{ jugadorTieneEventos }}" hint-placeholder-val="{{ true }}">
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+                <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">34</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">Partidos</div></div>
+                <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">11</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">Goles</div></div>
+                <div style="background: #FFFFFF; border-radius: 8px; padding: 12px; text-align: center"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">5</div><div style="font: 400 10px/1.3 Barlow; color: #7E8B95">Torneos</div></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ !jugadorTieneEventos }}" hint-placeholder-val="{{ false }}">
+              <div style="border: 1px dashed #CBD3D8; border-radius: 10px; padding: 20px; text-align: center; font: 400 14px/1.4 Barlow; color: #5C6A74">Jugó, pero ninguno de sus torneos tuvo eventos cargados — se muestra su participación, sin números.</div>
+            </sc-if>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Equipos</div>
+              <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px"><span style="font: 700 15px/1.2 Barlow">Los Pibes del Fondo</span><span style="font: 400 12px/1 Barlow; color: #5C6A74">2024 — presente</span></div>
+              <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between"><span style="font: 700 15px/1.2 Barlow">Racing del Barrio</span><span style="font: 400 12px/1 Barlow; color: #5C6A74">2022 — 2023</span></div>
+            </div>
+            <div onClick="{{ toggleJugadorEventos }}" style="font: 600 12px/1 Barlow; color: #007D99; cursor: pointer; text-align: center">{{ textoToggleJugadorEventos }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="4">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { screen: "tabla", eventosCargados: true, jugadorEventos: true };
+
+  tablaBase = [
+    { pos: 1, nombre: "Deportivo Belgrano", pj: 7, g: 6, e: 1, p: 0, gf: 19, gc: 6, quita: "—", pts: 19, claseBorde: "#00A8CC" },
+    { pos: 2, nombre: "Los Pibes del Fondo", pj: 7, g: 5, e: 1, p: 1, gf: 17, gc: 8, quita: "—", pts: 16, claseBorde: "#00A8CC" },
+    { pos: 3, nombre: "San Martín FC", pj: 7, g: 4, e: 0, p: 3, gf: 14, gc: 11, quita: "−3", pts: 9, claseBorde: "transparent" },
+    { pos: 4, nombre: "La Gloria", pj: 6, g: 2, e: 2, p: 2, gf: 9, gc: 10, quita: "—", pts: 8, claseBorde: "transparent" }
+  ];
+
+  goleadoresBase = [
+    { pos: 1, nombre: "Bruno Sosa", equipo: "Los Pibes del Fondo", goles: 11 },
+    { pos: 2, nombre: "Damián Ortiz", equipo: "San Martín FC", goles: 9 },
+    { pos: 3, nombre: "Nicolás Rey", equipo: "Los Pibes del Fondo", goles: 7 }
+  ];
+
+  historialEquipoBase = [
+    { nombre: "Copa Otoño F5", periodo: "2026", record: "5G 1E 1P", posicion: "2°", color: "#414E57" },
+    { nombre: "Copa Verano F5", periodo: "2025", record: "8G 1E 1P", posicion: "1°", color: "#12662C" },
+    { nombre: "Liga Invierno F7", periodo: "2024", record: "4G 2E 4P", posicion: "6°", color: "#5C6A74" }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      tabla: "Tabla de posiciones (UC-35)", estadisticas: "Estadísticas del torneo (UC-36)",
+      historialEquipo: "Historial del equipo (UC-37)", historialJugador: "Historial del jugador (UC-38)"
+    };
+    const mapa = [
+      ["Tabla", "tabla"], ["Estadísticas", "estadisticas"], ["Historial equipo", "historialEquipo"], ["Historial jugador", "historialJugador"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent", fg: sc === id ? "#0E1720" : "#CBD3D8", borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      tabla: "UC-35 (D-35b): calculada, no editable a mano. La quita de puntos va en columna separada, nunca sumada a lo ganado en cancha.",
+      estadisticas: "UC-36: la tabla de goleadores es el contenido más consultado después de la tabla de posiciones. Sin eventos, se explica — no una tabla vacía.",
+      historialEquipo: "UC-37: conecta torneos entre sí. Se lee torneo por torneo — ganar en uno chico no es lo mismo que en uno competitivo.",
+      historialJugador: "UC-38 (D-10b/D-55): no existe score de jugador ni de DT — solo de equipo. El DT tendrá historial propio en la segunda etapa."
+    };
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sTabla: sc === "tabla", sEstadisticas: sc === "estadisticas", sHistorialEquipo: sc === "historialEquipo", sHistorialJugador: sc === "historialJugador",
+
+      hayDisputaAbierta: true,
+      tabla: this.tablaBase.map(t => Object.assign({}, t, { quitaColor: t.quita === "—" ? "#A9B4BC" : "#A11F12" })),
+
+      hayEventosCargados: s.eventosCargados,
+      goleadores: this.goleadoresBase,
+      textoToggleEventos: s.eventosCargados ? "Ver cómo se ve sin goleadores cargados" : "Ver con goleadores cargados",
+      toggleEventosCargados: () => this.setState(st => ({ eventosCargados: !st.eventosCargados })),
+
+      historialTorneosEquipo: this.historialEquipoBase,
+
+      jugadorTieneEventos: s.jugadorEventos,
+      textoToggleJugadorEventos: s.jugadorEventos ? "Ver sin estadísticas cargadas" : "Ver con estadísticas cargadas",
+      toggleJugadorEventos: () => this.setState(st => ({ jugadorEventos: !st.jugadorEventos }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D4 Torneos (UC-16 a 21, 51-52)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D4 · Torneos · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sCrear }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Crear torneo (UC-16)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPanel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Crear torneo</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Arranca en borrador. Nadie más lo ve hasta que lo publiques.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre</label>
+              <input value="{{ nombreTorneo }}" onInput="{{ onNombreTorneo }}" type="text" placeholder="Ej: Copa Otoño F5" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+            </div>
+            <div style="display: flex; gap: 12px">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 8px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Modalidad</label>
+                <div style="display: flex; gap: 6px">
+                  <sc-for list="{{ modalidades }}" as="mo" hint-placeholder-count="3">
+                    <div onClick="{{ mo.elegir }}" style="flex: 1; text-align: center; font: 600 13px/1 Barlow; padding: 11px 0; border-radius: 6px; cursor: pointer; background: {{ mo.bg }}; color: {{ mo.fg }}; border: 1px solid {{ mo.borde }}">{{ mo.nombre }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Categoría</label>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <sc-for list="{{ categoriasTorneo }}" as="ct" hint-placeholder-count="3">
+                  <div onClick="{{ ct.elegir }}" style="font: 600 13px/1 Barlow; padding: 10px 14px; border-radius: 999px; cursor: pointer; background: {{ ct.bg }}; color: {{ ct.fg }}; border: 1px solid {{ ct.borde }}">{{ ct.nombre }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Ciudad</label>
+              <div onClick="{{ irSelectorCiudadTorneo }}" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; width: 100%; background: #FFFFFF; color: {{ ciudadTorneo ? '#142230' : '#A9B4BC' }}; display: flex; align-items: center; justify-content: space-between; cursor: pointer">
+                <span>{{ ciudadTorneo || 'Buscá tu ciudad' }}</span>
+                <span style="color: #A9B4BC">›</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Dirección</label>
+              <input value="{{ direccionTorneo }}" onInput="{{ onDireccionTorneo }}" type="text" placeholder="Ej: Av. Libertador 4200" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">La ciudad es para que te encuentren; la dirección, para que lleguen.</div>
+            </div>
+            <div style="display: flex; gap: 12px">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Fecha estimada</label>
+                <input value="{{ fechaTorneo }}" onInput="{{ onFechaTorneo }}" type="text" placeholder="12 de abril" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Cupo de equipos</label>
+                <input value="{{ cupoTorneo }}" onInput="{{ onCupoTorneo }}" type="text" placeholder="16" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Costos <span style="font-weight: 400; color: #7E8B95">(opcional)</span></label>
+              <div style="display: flex; gap: 10px">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                  <span style="font: 400 12px/1 Barlow; color: #5C6A74">Inscripción</span>
+                  <input value="{{ costoInscripcionTorneo }}" onInput="{{ onCostoInscripcionTorneo }}" type="text" placeholder="$0" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                  <span style="font: 400 12px/1 Barlow; color: #5C6A74">Planilla / fecha</span>
+                  <input value="{{ costoPlanillaTorneo }}" onInput="{{ onCostoPlanillaTorneo }}" type="text" placeholder="$0" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+                </div>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Se muestran en la ficha pública. Sin cargar, el torneo aparece como sin costo.</div>
+            </div>
+            <div onClick="{{ irFormato }}" style="background: {{ crearTorneoBg }}; color: {{ crearTorneoFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Continuar a formato</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sFormato }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Definir formato (UC-17)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCrear }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Formato de competencia</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Define el fixture y la tabla. No se puede cambiar una vez que haya partidos jugados.</div>
+            </div>
+            <sc-for list="{{ formatos }}" as="f" hint-placeholder-count="3">
+              <div onClick="{{ f.elegir }}" style="border: 1.5px solid {{ f.borde }}; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px">
+                <div style="width: 20px; height: 20px; flex: none; border-radius: 999px; border: 2px solid {{ f.borde }}; display: flex; align-items: center; justify-content: center; margin-top: 2px">
+                  <sc-if value="{{ f.activo }}" hint-placeholder-val="{{ false }}"><div style="width: 10px; height: 10px; border-radius: 999px; background: #00A8CC"></div></sc-if>
+                </div>
+                <div><div style="font: 700 16px/1.2 Barlow">{{ f.nombre }}</div><div style="font: 400 13px/1.35 Barlow; color: #5C6A74; margin-top: 3px">{{ f.detalle }}</div></div>
+              </div>
+            </sc-for>
+            <div style="display: flex; gap: 12px">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Puntos por victoria</label>
+                <input value="{{ ptsVictoria }}" onInput="{{ onPtsVictoria }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Por empate</label>
+                <input value="{{ ptsEmpate }}" onInput="{{ onPtsEmpate }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+            </div>
+            <div onClick="{{ irReglamento }}" style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+              <div style="font: 700 15px/1.2 Barlow; flex: 1">Reglamento <span style="font-weight: 400; color: #7E8B95">(opcional)</span></div>
+              <div style="font: 400 20px/1 Barlow; color: #A9B4BC">›</div>
+            </div>
+            <div onClick="{{ irPublicar }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Continuar a publicar</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sReglamento }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Reglamento del torneo (UC-51)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irFormato }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Reglamento</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Opcional. Es el texto contra el que se resuelve cualquier disputa (UC-32) — por eso cada cambio queda versionado.</div>
+            </div>
+            <textarea value="{{ textoReglamento }}" onInput="{{ onTextoReglamento }}" placeholder="Escribí el reglamento, o subí un archivo abajo" style="border: 1px solid #CBD3D8; border-radius: 8px; padding: 14px; font: 400 15px/1.5 Barlow; min-height: 140px; outline: none; width: 100%; resize: none; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px"></textarea>
+            <div style="border: 1px dashed #CBD3D8; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0-12 4 4m-4-4-4 4M5 21h14" /></svg>
+              <div style="font: 600 13px/1 Barlow; color: #007D99">Adjuntar archivo (PDF)</div>
+            </div>
+            <sc-if value="{{ hayVersionAnterior }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #F7F9FA; border-radius: 8px; padding: 12px 14px; font: 400 12px/1.4 Barlow; color: #5C6A74">Versión vigente: v2, publicada hace 3 días. La v1 sigue guardada — se puede consultar qué regía antes de cada cambio.</div>
+            </sc-if>
+            <div onClick="{{ guardarReglamento }}" style="background: {{ guardarReglamentoBg }}; color: {{ guardarReglamentoFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoGuardarReglamento }}</div>
+            <sc-if value="{{ torneoTieneInscriptos }}" hint-placeholder-val="{{ false }}">
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Ya hay equipos inscriptos: si guardás un cambio, se les notifica. No se les vuelve a pedir que acepten.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPublicar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Publicar torneo (UC-18)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irFormato }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Listo para publicar</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">{{ nombreTorneo }} · {{ ciudadTorneo }} · {{ fechaTorneo }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg><span style="font: 500 14px/1 Barlow">Nombre, modalidad y formato</span></div>
+              <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg><span style="font: 500 14px/1 Barlow">Zona, fecha estimada y cupo</span></div>
+            </div>
+
+            <sc-if value="{{ orgVerificadaBasica }}" hint-placeholder-val="{{ true }}">
+              <div style="background: #E4F3E8; border-radius: 10px; padding: 16px; display: flex; gap: 12px">
+                <div style="width: 8px; height: 8px; flex: none; margin-top: 6px; border-radius: 999px; background: #1B8A3C"></div>
+                <div style="font: 400 13px/1.45 Barlow; color: #12662C; text-wrap: pretty">Tu organización está verificada: el torneo va a aparecer en el descubrimiento apenas lo publiques.</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ !orgVerificadaBasica }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FBEBD3; border-radius: 10px; padding: 16px; display: flex; gap: 12px">
+                <div style="width: 9px; height: 9px; flex: none; margin-top: 5px; background: #A25C00; transform: rotate(45deg)"></div>
+                <div style="font: 400 13px/1.45 Barlow; color: #7A4600; text-wrap: pretty">Tu organización todavía no tiene verificación básica: el torneo se publica igual, pero queda <strong style="font-weight: 700">no listado</strong> — accesible por link, no por búsqueda. <span style="text-decoration: underline; cursor: pointer" onClick="{{ irVerificarOrg }}">Verificar ahora</span> confirmando tu correo.</div>
+              </div>
+            </sc-if>
+
+            <div onClick="{{ publicarTorneo }}" style="background: {{ publicarBg }}; color: {{ publicarFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoPublicar }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sModificar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Modificar torneo publicado (UC-19)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPanel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Modificar torneo</div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Fecha de inicio</label>
+              <input value="{{ fechaTorneo }}" onInput="{{ onFechaTorneo }}" type="text" style="border: 2px solid #00A8CC; border-radius: 6px; padding: 13px; font: 500 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" />
+              <div style="display: flex; align-items: center; gap: 6px; font: 500 12px/1.4 Barlow; color: #322BA0"><div style="width: 7px; height: 7px; flex: none; background: #4038C2"></div>Este cambio notifica a inscriptos y seguidores.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Descripción</label>
+              <textarea value="{{ descripcionTorneo }}" onInput="{{ onDescripcionTorneo }}" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 13px; font: 400 15px/1.4 Barlow; min-height: 80px; outline: none; width: 100%; resize: none; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 12px"></textarea>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Este cambio no notifica: no es de los cinco relevantes (fecha, sede, formato, cupo, reglamento).</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Cupo de equipos</label>
+              <input value="{{ cupoTorneo }}" onInput="{{ onCupoTorneo }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 500 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              <div style="font: 400 12px/1.4 Barlow; color: #A11F12">No puede bajar de {{ equiposAprobados }}: ya son los equipos aprobados hoy.</div>
+            </div>
+            <div onClick="{{ guardarModificacion }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoGuardarModificacion }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPanel }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Estado y avance del torneo (UC-20)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 20px 20px; flex: none; display: flex; flex-direction: column; gap: 10px">
+            <div onClick="{{ irCrear }}" style="font: 400 24px/1 Barlow; color: #A9B4BC; cursor: pointer; width: 24px; margin-bottom: 4px">‹</div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+              <div style="display: inline-flex; align-items: center; gap: 5px; background: {{ estadoTorneoBg }}; padding: 4px 8px; border-radius: {{ estadoTorneoRadio }}"><div style="width: 7px; height: 7px; border-radius: {{ estadoTorneoDotRadio }}; background: {{ estadoTorneoDot }}"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ estadoTorneoFg }}">{{ estadoTorneoLabel }}</span></div>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 18px 20px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Ciclo de vida</div>
+              <sc-for list="{{ pasosCicloVida }}" as="pv" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFF2F4">
+                  <div style="width: 22px; height: 22px; flex: none; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: {{ pv.circBg }}">
+                    <sc-if value="{{ pv.hecho }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if>
+                  </div>
+                  <div style="flex: 1; font: 600 15px/1.2 Barlow; color: {{ pv.color }}">{{ pv.nombre }}</div>
+                  <sc-if value="{{ pv.accionable }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ pv.accion }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; padding: 6px 0">{{ pv.textoAccion }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 14px 16px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">No se puede iniciar sin fixture, y el fixture no se genera sin inscripciones cerradas. Finalizar es siempre manual.</div>
+            <div onClick="{{ irModificar }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer">Modificar información del torneo</div>
+            <div onClick="{{ irColaboradores }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer">Asignar colaboradores</div>
+            <div onClick="{{ irCancelar }}" style="font: 600 13px/1 Barlow; color: #A11F12; cursor: pointer">Cancelar o suspender el torneo</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sColaboradores }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Asignar colaboradores (UC-52)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPanel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Colaboradores de esta fecha</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Solo pueden cargar resultados, programar partidos y registrar no disputados en este torneo — nada más.</div>
+            </div>
+            <sc-for list="{{ colaboradores }}" as="cl" hint-placeholder-count="2">
+              <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+                <div style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; overflow: hidden">
+                  <image-slot id="{{ cl.slotId }}" shape="circle" placeholder=""></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 15px/1.2 Barlow">{{ cl.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ cl.detalle }}</div>
+                </div>
+                <div onClick="{{ cl.quitar }}" style="font: 600 20px/1 Barlow; color: #A9B4BC; cursor: pointer; padding: 4px">×</div>
+              </div>
+            </sc-for>
+            <div onClick="{{ irAsignarColaborador }}" style="border: 1px dashed #CBD3D8; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px">
+              <div style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #E8F7FB; display: flex; align-items: center; justify-content: center; font: 700 20px/1 Barlow; color: #007D99">+</div>
+              <div style="font: 700 15px/1.2 Barlow; color: #007D99">Asignar colaborador</div>
+            </div>
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 14px 16px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">El vínculo es con este torneo, no con la organización. Sacarlo de acá no lo saca de otros torneos donde también colabore.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sCancelar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Cancelar o suspender (UC-21)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPanel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Interrumpir el torneo</div>
+            <div style="display: flex; gap: 10px">
+              <div onClick="{{ elegirSuspender }}" style="flex: 1; border: 1.5px solid {{ bordeSuspender }}; border-radius: 10px; padding: 16px; cursor: pointer; text-align: center"><div style="font: 700 15px/1.2 Barlow">Suspender</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74; margin-top: 4px">Se puede retomar</div></div>
+              <div onClick="{{ elegirCancelar }}" style="flex: 1; border: 1.5px solid {{ bordeCancelar }}; border-radius: 10px; padding: 16px; cursor: pointer; text-align: center"><div style="font: 700 15px/1.2 Barlow; color: #A11F12">Cancelar</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74; margin-top: 4px">Definitivo</div></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Motivo</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                <sc-for list="{{ motivosCancelacion }}" as="mc" hint-placeholder-count="4">
+                  <div onClick="{{ mc.elegir }}" style="font: 600 13px/1 Barlow; padding: 9px 13px; border-radius: 999px; cursor: pointer; background: {{ mc.bg }}; color: {{ mc.fg }}; border: 1px solid {{ mc.borde }}">{{ mc.nombre }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background: #E7E9FB; border-radius: 10px; padding: 14px 16px; font: 400 13px/1.4 Barlow; color: #322BA0; text-wrap: pretty">Los partidos ya jugados cuentan para el score de los equipos, aunque el torneo no termine — nadie es responsable de la cancelación.</div>
+            <div onClick="{{ confirmarCancelacion }}" style="background: {{ confirmarCancelBg }}; color: #FFFFFF; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarCancel }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="9">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "panel",
+    nombreTorneo: "Copa Otoño F5", modalidad: "F5", categoriaTorneo: "Masculino", ciudadTorneo: "San Isidro", direccionTorneo: "",
+    fechaTorneo: "12 de abril", cupoTorneo: "16", descripcionTorneo: "",
+    costoInscripcionTorneo: "", costoPlanillaTorneo: "",
+    formato: "Liga", ptsVictoria: "3", ptsEmpate: "1",
+    textoReglamento: "", reglamentoGuardado: false,
+    orgVerificada: true, torneoPublicado: false,
+    inscripcionesCerradas: true, fixtureGenerado: true, torneoIniciado: true, torneoFinalizado: false,
+    tipoInterrupcion: "suspender", motivoCancelacion: "", cancelConfirmado: false
+  };
+
+  colaboradoresBase = [
+    { nombre: "Marco Ibarra", detalle: "Asignado hace 2 fechas", slotId: "col-mi" }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      crear: "Crear torneo (UC-16)", formato: "Definir formato (UC-17)", reglamento: "Reglamento (UC-51)",
+      publicar: "Publicar torneo (UC-18)", modificar: "Modificar torneo (UC-19)", panel: "Estado y avance (UC-20)",
+      colaboradores: "Asignar colaboradores (UC-52)", cancelar: "Cancelar o suspender (UC-21)"
+    };
+    const mapa = [
+      ["Panel", "panel"], ["Crear", "crear"], ["Formato", "formato"], ["Reglamento", "reglamento"],
+      ["Publicar", "publicar"], ["Modificar", "modificar"], ["Colaboradores", "colaboradores"], ["Cancelar", "cancelar"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent",
+      fg: sc === id ? "#0E1720" : "#CBD3D8",
+      borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      crear: "UC-16: el torneo nace en borrador, invisible para todos salvo la organización, hasta que se publica. Ciudad (catálogo) + dirección (texto libre) son dos campos con dos usos: la ciudad para encontrarlo, la dirección para llegar. Costos son opcionales.",
+      formato: "UC-17: liga, eliminación directa, o grupos + eliminatoria. No se cambia una vez que hay partidos jugados.",
+      reglamento: "UC-51: opcional, no forma parte de los datos mínimos. Cada guardado crea una versión — las anteriores se conservan.",
+      publicar: "UC-18 (D-51): sin verificación básica, publica igual pero queda no listado — accesible por link, no por búsqueda.",
+      modificar: "UC-19: solo 5 cambios notifican (fecha, sede, formato, cupo, reglamento). El cupo no puede bajar de los equipos ya aprobados.",
+      panel: "UC-20: el estado habilita o bloquea todo lo demás — inscripciones, resultados, aparecer como activo. Finalizar es siempre manual.",
+      colaboradores: "UC-52 (D-32/D-64): permisos fijos, vínculo por torneo — no por organización. No pueden inscribir ni reconfigurar.",
+      cancelar: "UC-21 (D-66/D-24b): motivo de lista cerrada + 'Otro'. Lo jugado cuenta para el score aunque el torneo no termine."
+    };
+
+    const modalidades = ["F5", "F7", "F11"].map(m => ({
+      nombre: m, elegir: () => this.setState({ modalidad: m }),
+      bg: s.modalidad === m ? "#142230" : "transparent", fg: s.modalidad === m ? "#FFFFFF" : "#414E57", borde: s.modalidad === m ? "#142230" : "#CBD3D8"
+    }));
+    const categoriasTorneo = ["Masculino", "Femenino", "Mixto"].map(c => ({
+      nombre: c, elegir: () => this.setState({ categoriaTorneo: c }),
+      bg: s.categoriaTorneo === c ? "#142230" : "transparent", fg: s.categoriaTorneo === c ? "#FFFFFF" : "#414E57", borde: s.categoriaTorneo === c ? "#142230" : "#CBD3D8"
+    }));
+    const formatosBase = [
+      { id: "Liga", nombre: "Liga (todos contra todos)", detalle: "Cada equipo juega contra todos. La tabla acumula puntos." },
+      { id: "Eliminacion", nombre: "Eliminación directa", detalle: "Quien pierde queda afuera. Ideal para torneos cortos." },
+      { id: "Grupos", nombre: "Grupos + eliminatoria", detalle: "Fase de grupos y luego cruces entre los que clasifican." }
+    ];
+    const formatos = formatosBase.map(f => ({ nombre: f.nombre, detalle: f.detalle, activo: s.formato === f.id, borde: s.formato === f.id ? "#00A8CC" : "#CBD3D8", elegir: () => this.setState({ formato: f.id }) }));
+
+    const motivosBase = ["Falta de equipos", "Clima", "Problemas con la sede", "Otro"];
+    const motivosCancelacion = motivosBase.map(m => ({
+      nombre: m, elegir: () => this.setState({ motivoCancelacion: m }),
+      bg: s.motivoCancelacion === m ? "#142230" : "transparent", fg: s.motivoCancelacion === m ? "#FFFFFF" : "#414E57", borde: s.motivoCancelacion === m ? "#142230" : "#CBD3D8"
+    }));
+
+    const pasosCicloVidaBase = [
+      { nombre: "Inscripciones cerradas", hecho: s.inscripcionesCerradas, accionable: !s.inscripcionesCerradas, textoAccion: "Cerrar ahora", accion: () => this.setState({ inscripcionesCerradas: true }) },
+      { nombre: "Fixture generado", hecho: s.fixtureGenerado, accionable: s.inscripcionesCerradas && !s.fixtureGenerado, textoAccion: "Generar", accion: () => this.setState({ fixtureGenerado: true }) },
+      { nombre: "Torneo iniciado", hecho: s.torneoIniciado, accionable: s.fixtureGenerado && !s.torneoIniciado, textoAccion: "Iniciar", accion: () => this.setState({ torneoIniciado: true }) },
+      { nombre: "Torneo finalizado", hecho: s.torneoFinalizado, accionable: s.torneoIniciado && !s.torneoFinalizado, textoAccion: "Finalizar", accion: () => this.setState({ torneoFinalizado: true }) }
+    ];
+    const pasosCicloVida = pasosCicloVidaBase.map(p => ({
+      nombre: p.nombre, hecho: p.hecho, accionable: p.accionable, textoAccion: p.textoAccion, accion: p.accion,
+      circBg: p.hecho ? "#1B8A3C" : "#CBD3D8", color: p.hecho ? "#142230" : "#7E8B95"
+    }));
+
+    const colaboradores = this.colaboradoresBase.map(c => Object.assign({ quitar: () => {} }, c));
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sCrear: sc === "crear", sFormato: sc === "formato", sReglamento: sc === "reglamento", sPublicar: sc === "publicar",
+      sModificar: sc === "modificar", sPanel: sc === "panel", sColaboradores: sc === "colaboradores", sCancelar: sc === "cancelar",
+
+      irCrear: () => this.go("crear"), irFormato: () => this.go("formato"), irReglamento: () => this.go("reglamento"),
+      irPublicar: () => this.go("publicar"), irModificar: () => this.go("modificar"), irPanel: () => this.go("panel"),
+      irColaboradores: () => this.go("colaboradores"), irCancelar: () => this.go("cancelar"),
+      irAsignarColaborador: () => {}, irVerificarOrg: () => {},
+
+      nombreTorneo: s.nombreTorneo, onNombreTorneo: e => this.setState({ nombreTorneo: e.target.value }),
+      modalidades, categoriasTorneo,
+      ciudadTorneo: s.ciudadTorneo, irSelectorCiudadTorneo: () => {},
+      direccionTorneo: s.direccionTorneo, onDireccionTorneo: e => this.setState({ direccionTorneo: e.target.value }),
+      fechaTorneo: s.fechaTorneo, onFechaTorneo: e => this.setState({ fechaTorneo: e.target.value }),
+      cupoTorneo: s.cupoTorneo, onCupoTorneo: e => this.setState({ cupoTorneo: e.target.value }),
+      costoInscripcionTorneo: s.costoInscripcionTorneo, onCostoInscripcionTorneo: e => this.setState({ costoInscripcionTorneo: e.target.value }),
+      costoPlanillaTorneo: s.costoPlanillaTorneo, onCostoPlanillaTorneo: e => this.setState({ costoPlanillaTorneo: e.target.value }),
+      crearTorneoBg: s.nombreTorneo.trim() ? "#00A8CC" : "#CBD3D8",
+      crearTorneoFg: s.nombreTorneo.trim() ? "#0E1720" : "#7E8B95",
+
+      formatos, ptsVictoria: s.ptsVictoria, onPtsVictoria: e => this.setState({ ptsVictoria: e.target.value }),
+      ptsEmpate: s.ptsEmpate, onPtsEmpate: e => this.setState({ ptsEmpate: e.target.value }),
+
+      textoReglamento: s.textoReglamento, onTextoReglamento: e => this.setState({ textoReglamento: e.target.value }),
+      hayVersionAnterior: s.reglamentoGuardado, torneoTieneInscriptos: true,
+      guardarReglamentoBg: "#00A8CC", guardarReglamentoFg: "#0E1720",
+      textoGuardarReglamento: s.reglamentoGuardado ? "Guardar nueva versión" : "Guardar reglamento",
+      guardarReglamento: () => this.setState({ reglamentoGuardado: true }),
+
+      orgVerificadaBasica: s.orgVerificada,
+      publicarBg: "#00A8CC", publicarFg: "#0E1720",
+      textoPublicar: s.torneoPublicado ? "Publicado ✓" : (s.orgVerificada ? "Publicar" : "Publicar como no listado"),
+      publicarTorneo: () => this.setState({ torneoPublicado: true }),
+
+      descripcionTorneo: s.descripcionTorneo, onDescripcionTorneo: e => this.setState({ descripcionTorneo: e.target.value }),
+      equiposAprobados: 12,
+      textoGuardarModificacion: "Guardar cambios",
+      guardarModificacion: () => this.go("panel"),
+
+      estadoTorneoLabel: s.torneoFinalizado ? "Finalizado" : s.torneoIniciado ? "En curso" : "Publicado",
+      estadoTorneoBg: s.torneoFinalizado ? "#EFF2F4" : "#E4F3E8",
+      estadoTorneoFg: s.torneoFinalizado ? "#414E57" : "#12662C",
+      estadoTorneoDot: s.torneoFinalizado ? "#5C6A74" : "#1B8A3C",
+      estadoTorneoRadio: "999px", estadoTorneoDotRadio: "999px",
+      pasosCicloVida,
+
+      colaboradores,
+
+      bordeSuspender: s.tipoInterrupcion === "suspender" ? "#00A8CC" : "#CBD3D8",
+      bordeCancelar: s.tipoInterrupcion === "cancelar" ? "#C42B1C" : "#CBD3D8",
+      elegirSuspender: () => this.setState({ tipoInterrupcion: "suspender" }),
+      elegirCancelar: () => this.setState({ tipoInterrupcion: "cancelar" }),
+      motivosCancelacion,
+      confirmarCancelBg: s.tipoInterrupcion === "cancelar" ? "#C42B1C" : "#A25C00",
+      textoConfirmarCancel: s.cancelConfirmado ? "Hecho ✓" : (s.tipoInterrupcion === "cancelar" ? "Cancelar torneo" : "Suspender torneo"),
+      confirmarCancelacion: () => { if (s.motivoCancelacion) this.setState({ cancelConfirmado: true }); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

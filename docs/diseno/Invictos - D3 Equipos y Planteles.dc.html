@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D3 Equipos y Planteles (UC-10 a 15, 53)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D3 · Equipos y Planteles · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sCrear }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Crear equipo (UC-10)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPerfilEquipo }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Crear equipo</div>
+              <div style="font: 400 15px/1.4 Barlow; color: #5C6A74">Podés inscribirlo con el plantel vacío y sumar gente después.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px">
+              <div style="width: 60px; height: 60px; flex: none; border-radius: 999px; border: 1px dashed #CBD3D8; overflow: hidden"><image-slot id="crearequipo-escudo" shape="circle" placeholder=""></image-slot></div>
+              <div style="font: 600 13px/1 Barlow; color: #007D99">Subir escudo</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre</label>
+              <input value="{{ nombreEquipo }}" onInput="{{ onNombreEquipo }}" type="text" placeholder="Ej: Los Pibes del Fondo" style="border: 1px solid {{ bordeNombre }}; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              <sc-if value="{{ mostrarAvisoNombre }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: flex-start; gap: 8px; background: #E7E9FB; border-radius: 6px; padding: 10px 12px"><div style="width: 6px; height: 6px; flex: none; margin-top: 5px; background: #4038C2"></div><div style="font: 400 13px/1.4 Barlow; color: #322BA0">Ya existe un equipo con ese nombre en Zona Norte. Podés seguir igual — no es un error, solo un aviso.</div></div>
+              </sc-if>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Categoría de género <span style="font-weight: 400; color: #A11F12">· obligatoria</span></label>
+              <div style="display: flex; gap: 8px">
+                <sc-for list="{{ categorias }}" as="c" hint-placeholder-count="3">
+                  <div onClick="{{ c.elegir }}" style="flex: 1; text-align: center; font: 600 14px/1 Barlow; padding: 12px 0; border-radius: 6px; cursor: pointer; background: {{ c.bg }}; color: {{ c.fg }}; border: 1px solid {{ c.borde }}">{{ c.nombre }}</div>
+                </sc-for>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Sin esto no se puede calcular tu ranking ni avisar una inscripción cruzada.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Ciudad</label>
+              <div onClick="{{ irSelectorCiudadEquipo }}" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; width: 100%; background: #FFFFFF; color: {{ ciudadEquipo ? '#142230' : '#A9B4BC' }}; display: flex; align-items: center; justify-content: space-between; cursor: pointer">
+                <span>{{ ciudadEquipo || 'Buscá tu ciudad' }}</span>
+                <span style="color: #A9B4BC">›</span>
+              </div>
+            </div>
+            <div onClick="{{ crearEquipo }}" style="background: {{ crearEquipoBg }}; color: {{ crearEquipoFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Crear equipo</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPlantel }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Plantel (UC-11, UC-13)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div onClick="{{ irPerfilEquipo }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+            <div style="font: 600 13px/1 Barlow">Los Pibes del Fondo</div>
+            <div onClick="{{ irSolicitudes }}" style="position: relative; cursor: pointer; padding: 4px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#414E57" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+              <sc-if value="{{ haySolicitudesPendientes }}" hint-placeholder-val="{{ true }}"><div style="position: absolute; top: 1px; right: 1px; width: 8px; height: 8px; border-radius: 999px; background: #A25C00; border: 2px solid #FFFFFF"></div></sc-if>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 14px 20px 32px; display: flex; flex-direction: column; gap: 10px">
+            <sc-for list="{{ plantel }}" as="p" hint-placeholder-count="5">
+              <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+                <div style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; overflow: hidden">
+                  <image-slot id="{{ p.slotId }}" shape="circle" placeholder=""></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 15px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ p.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ p.detalle }}</div>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ p.rolBg }}; padding: 4px 8px; border-radius: {{ p.rolRadio }}">
+                  <div style="width: 6px; height: 6px; border-radius: {{ p.rolDotRadio }}; background: {{ p.rolDot }}; transform: {{ p.rolRot }}"></div>
+                  <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ p.rolFg }}">{{ p.rol }}</span>
+                </div>
+                <sc-if value="{{ p.puedeQuitar }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ p.quitar }}" style="font: 600 20px/1 Barlow; color: #A9B4BC; cursor: pointer; padding: 4px">×</div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div onClick="{{ irInvitar }}" style="border: 1px dashed #CBD3D8; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-top: 4px">
+              <div style="width: 38px; height: 38px; flex: none; border-radius: 999px; background: #E8F7FB; display: flex; align-items: center; justify-content: center; font: 700 20px/1 Barlow; color: #007D99">+</div>
+              <div style="font: 700 15px/1.2 Barlow; color: #007D99">Invitar integrante</div>
+            </div>
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 14px 16px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">El Capitán no puede irse sin designar reemplazo. Cualquier otro se da de baja al instante — nadie tiene que confirmarlo.</div>
+            <div onClick="{{ irArchivar }}" style="font: 600 13px/1 Barlow; color: #A11F12; cursor: pointer; text-align: center; margin-top: 6px">Archivar este equipo</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sInvitar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Invitar integrante (UC-11)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPlantel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Invitar integrante</div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre o correo</label>
+              <input value="{{ invitadoNombre }}" onInput="{{ onInvitadoNombre }}" type="text" placeholder="Buscá en la plataforma, o cargalo directo" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Si no tiene cuenta, queda como perfil sin cuenta asociada — lo puede reclamar después (UC-05).</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Rol</label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <sc-for list="{{ rolesInvitar }}" as="r" hint-placeholder-count="3">
+                  <div onClick="{{ r.elegir }}" style="font: 600 13px/1 Barlow; padding: 10px 14px; border-radius: 999px; cursor: pointer; background: {{ r.bg }}; color: {{ r.fg }}; border: 1px solid {{ r.borde }}">{{ r.nombre }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div onClick="{{ enviarInvitacionPlantel }}" style="background: {{ invitarPlantelBg }}; color: {{ invitarPlantelFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoInvitarPlantel }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Invitar dos veces a la misma persona no duplica: reenvía el acceso. Las invitaciones no vencen.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sResponder }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Responder invitación (UC-12)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto; padding: 40px 26px; display: flex; flex-direction: column; gap: 18px">
+            <div style="width: 52px; height: 52px; border-radius: 999px; background: #E7E9FB; display: flex; align-items: center; justify-content: center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4038C2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z" /><path d="M8 5.5H5v1.5a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3" /><path d="M12 13v3M9 20h6" /></svg>
+            </div>
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.1; text-transform: uppercase">{{ tituloInvitacionRecibida }}</div>
+              <div style="font: 400 15px/1.5 Barlow; color: #5C6A74; margin-top: 6px; text-wrap: pretty">{{ detalleInvitacionRecibida }}</div>
+            </div>
+            <sc-if value="{{ respuestaEsPendiente }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; gap: 10px">
+                <div onClick="{{ aceptarInvitacionPlantel }}" style="flex: 1; background: #00A8CC; color: #0E1720; font: 700 15px/1 Barlow; padding: 16px; border-radius: 8px; text-align: center; cursor: pointer">Aceptar</div>
+                <div onClick="{{ rechazarInvitacionPlantel }}" style="flex: 1; border: 1.5px solid #142230; font: 600 15px/1 Barlow; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer">Rechazar</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ respuestaEsAceptada }}" hint-placeholder-val="{{ false }}">
+              <div style="display: inline-flex; align-items: center; gap: 8px; background: #E4F3E8; padding: 10px 14px; border-radius: 8px; align-self: flex-start"><div style="width: 8px; height: 8px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 13px/1 Barlow; color: #12662C">Ya sos parte del plantel — aparece en tu perfil.</span></div>
+            </sc-if>
+            <sc-if value="{{ respuestaEsRechazada }}" hint-placeholder-val="{{ false }}">
+              <div style="display: inline-flex; align-items: center; gap: 8px; background: #EFF2F4; padding: 10px 14px; border-radius: 8px; align-self: flex-start"><span style="font: 700 13px/1 Barlow; color: #414E57">Rechazada. No queda rastro público de esto.</span></div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sSolicitudes }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Solicitudes de ingreso (UC-53)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPlantel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Solicitudes de ingreso</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Piden sumarse ellos. Distinto de las invitaciones que mandaste vos, y no aparecen en el plantel hasta que las resolvés.</div>
+            </div>
+            <sc-for list="{{ solicitudes }}" as="s" hint-placeholder-count="2">
+              <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <div style="width: 40px; height: 40px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; overflow: hidden">
+                    <image-slot id="{{ s.slotId }}" shape="circle" placeholder=""></image-slot>
+                  </div>
+                  <div style="flex: 1">
+                    <div style="font: 700 15px/1.2 Barlow">{{ s.nombre }}</div>
+                    <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ s.detalle }} · pide ser Jugador</div>
+                  </div>
+                </div>
+                <sc-if value="{{ s.pendiente }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; gap: 8px">
+                    <div onClick="{{ s.aceptar }}" style="flex: 1; background: #00A8CC; color: #0E1720; font: 700 14px/1 Barlow; padding: 13px; border-radius: 6px; text-align: center; cursor: pointer">Aceptar</div>
+                    <div onClick="{{ s.rechazar }}" style="flex: 1; border: 1.5px solid #142230; font: 600 14px/1 Barlow; padding: 12px; border-radius: 6px; text-align: center; cursor: pointer">Rechazar</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ s.resuelta }}" hint-placeholder-val="{{ false }}">
+                  <div style="font: 700 12px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: {{ s.resueltaColor }}">{{ s.resueltaTexto }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 14px 16px; font: 400 13px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Tras un rechazo, la persona puede volver a solicitar: la fila vuelve a "solicitado" y ves que hubo un rechazo previo.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPerfilEquipo }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Perfil público del equipo (UC-14)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto">
+            <div style="padding: 18px 18px 0"><div onClick="{{ irVolverInicio }}" style="font: 400 24px/1 Barlow; color: #A9B4BC; cursor: pointer; width: 24px">‹</div></div>
+            <div style="background: #0E1720; color: #FFFFFF; padding: 8px 24px 26px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+              <div style="width: 76px; height: 76px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; overflow: hidden">
+                <image-slot id="perfilequipo-escudo" shape="circle" placeholder=""></image-slot>
+              </div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Los Pibes del Fondo</div>
+              <div style="display: inline-flex; align-items: center; gap: 4px; background: #EFF2F4; color: #142230; padding: 3px 8px; border-radius: 999px; font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase">Masculino · San Isidro</div>
+              <div style="display: flex; gap: 10px; margin-top: 6px">
+                <div onClick="{{ toggleSeguir }}" style="border: 1.5px solid {{ seguirBorde }}; background: {{ seguirBg }}; color: {{ seguirFg }}; font: 700 13px/1 Barlow; padding: 10px 18px; border-radius: 999px; cursor: pointer">{{ textoSeguir }}</div>
+                <div onClick="{{ irSolicitarSumarse }}" style="background: #00A8CC; color: #0E1720; font: 700 13px/1 Barlow; padding: 10px 18px; border-radius: 999px; cursor: pointer">Pedir sumarme</div>
+                <div onClick="{{ compartirEquipo }}" style="width: 38px; height: 38px; flex: none; border: 1.5px solid #414E57; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="M8.2 10.7 15.8 6.3M8.2 13.3l7.6 4.4" /></svg>
+                </div>
+              </div>
+              <div style="font: 400 11px/1.3 Barlow; color: #7E8B95; max-width: 260px">Seguir es al toque. Sumarte al plantel necesita que el capitán lo confirme.</div>
+            </div>
+
+            <div style="padding: 20px 20px 28px; display: flex; flex-direction: column; gap: 20px">
+              <div style="display: flex; gap: 10px">
+                <div style="flex: 1; background: #F7F9FA; border-radius: 10px; padding: 14px">
+                  <div style="font: 600 10px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 6px">Próximo partido</div>
+                  <div style="font: 700 14px/1.25 Barlow">{{ proximoPartido.rival }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74; margin-top: 2px">{{ proximoPartido.fecha }} · {{ proximoPartido.torneo }}</div>
+                </div>
+                <div style="flex: 1; background: #F7F9FA; border-radius: 10px; padding: 14px">
+                  <div style="font: 600 10px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 6px">Último resultado</div>
+                  <div style="font: 700 14px/1.25 Barlow">{{ ultimoResultado.marcador }} <span style="color: #5C6A74; font-weight: 500">vs {{ ultimoResultado.rival }}</span></div>
+                  <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; background: {{ ultimoResultado.bg }}; padding: 2px 7px; border-radius: 999px"><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: {{ ultimoResultado.fg }}">{{ ultimoResultado.label }}</span></div>
+                </div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Score</div>
+                <div style="background: #F7F9FA; border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1">{{ scoreEquipo }}</div>
+                  <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; max-width: 200px; text-align: right">Sobre {{ scorePartidos }} partidos confirmados en los últimos 12 meses.</div>
+                </div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Torneos en juego</div>
+                <sc-for list="{{ torneosActivosEquipo }}" as="ta" hint-placeholder-count="1">
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EFF2F4">
+                    <div style="flex: 1"><div style="font: 700 14px/1.2 Barlow">{{ ta.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ ta.categoria }}</div></div>
+                    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px">{{ ta.posicion }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Plantel actual</div>
+                <sc-for list="{{ plantelResumen }}" as="pr" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #EFF2F4">
+                    <div style="width: 30px; height: 30px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">{{ pr.ini }}</div>
+                    <div style="flex: 1; font: 500 14px/1 Barlow">{{ pr.nombre }}</div>
+                    <div style="font: 400 12px/1 Barlow; color: #7E8B95">{{ pr.rol }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Torneos jugados</div>
+                <sc-for list="{{ torneosJugadosEquipo }}" as="tj" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EFF2F4">
+                    <div style="flex: 1"><div style="font: 700 14px/1.2 Barlow">{{ tj.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ tj.periodo }}</div></div>
+                    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; color: {{ tj.color }}">{{ tj.resultado }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sSolicitarSumarse }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Solicitar sumarse (UC-53)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPerfilEquipo }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+
+            <sc-if value="{{ solicitudEsFormulario }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Pedir sumarme</div>
+                <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Vas a pedir entrar como Jugador. El capitán o un delegado tiene que aceptarte — no aparecés en el plantel hasta entonces.</div>
+              </div>
+              <div onClick="{{ enviarSolicitudSumarse }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Enviar solicitud</div>
+            </sc-if>
+
+            <sc-if value="{{ solicitudEsPendiente }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 24px">
+                <div style="width: 52px; height: 52px; border-radius: 999px; background: #FBEBD3; display: flex; align-items: center; justify-content: center"><div style="width: 12px; height: 12px; background: #A25C00; transform: rotate(45deg)"></div></div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">Solicitud enviada</div>
+                <div style="font: 400 15px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Le avisamos al capitán y a los delegados de Los Pibes del Fondo. Todavía no aparecés en el plantel.</div>
+                <div onClick="{{ retirarSolicitud }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer">Retirar mi solicitud</div>
+                <div onClick="{{ simularAceptacionSolicitud }}" style="font: 600 13px/1 Barlow; color: #A9B4BC; cursor: pointer">Simular: el capitán te acepta</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ solicitudEsAceptada }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 24px">
+                <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">Ya sos parte del plantel</div>
+                <div style="font: 400 15px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Además, pasaste a seguir a Los Pibes del Fondo automáticamente.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sArchivar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Archivar equipo (UC-15)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irPlantel }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 20px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; margin-bottom: 8px">Archivar equipo</div>
+              <div style="font: 400 15px/1.45 Barlow; color: #5C6A74; text-wrap: pretty">Deja de poder inscribirse en torneos nuevos y de aparecer en búsquedas. Su historial, su perfil y sus estadísticas siguen existiendo tal cual.</div>
+            </div>
+
+            <sc-if value="{{ archivarBloqueado }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; align-items: flex-start; gap: 10px; background: #FEF7F6; border: 1px solid #F2CFCA; border-radius: 8px; padding: 14px">
+                <div style="width: 9px; height: 9px; flex: none; margin-top: 4px; border-radius: 999px; border: 2.5px solid #C42B1C"></div>
+                <div style="font: 500 14px/1.4 Barlow; color: #A11F12">No se puede: el equipo está jugando Copa Otoño F5, un torneo en curso. Primero hay que resolverlo como una baja de ese torneo.</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ !archivarBloqueado }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ confirmarArchivar }}" style="border: 1.5px solid #C42B1C; color: #A11F12; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer">Archivar de todas formas</div>
+            </sc-if>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Nunca se borra un equipo — es baja lógica. Ningún partido ni tabla que lo referencie queda apuntando al vacío.</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="8">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "perfilEquipo",
+    nombreEquipo: "", ciudadEquipo: "San Isidro", categoriaEquipo: "Masculino",
+    invitadoNombre: "", rolInvitar: "Jugador", invitacionPlantelEnviada: false,
+    respuestaInvitacion: "pendiente",
+    siguiendo: false,
+    solicitudEstado: "formulario"
+  };
+
+  plantelBase = [
+    { nombre: "Vos", detalle: "Desde la creación", rol: "Capitán", slotId: "pl-vos", puedeQuitar: false },
+    { nombre: "Bruno Sosa", detalle: "Delegado desde marzo", rol: "Delegado", slotId: "pl-bs", puedeQuitar: true },
+    { nombre: "Ariel Ocampo", detalle: "Cuerpo técnico", rol: "DT", slotId: "pl-ao", puedeQuitar: true },
+    { nombre: "Nicolás Rey", detalle: "Jugador", rol: "Jugador", slotId: "pl-nr", puedeQuitar: true },
+    { nombre: "Leo Ferrari", detalle: "Invitado hace 5 días, sin responder", rol: "Invitado", slotId: "pl-lf", puedeQuitar: true }
+  ];
+
+  solicitudesBase = [
+    { nombre: "Julián Rodríguez", detalle: "Sin equipo actual", slotId: "sol-jr", estado: "pendiente" },
+    { nombre: "Damián Ortiz", detalle: "Jugó en Racing del Barrio", slotId: "sol-do", estado: "aceptada" }
+  ];
+
+  torneosActivosEquipoBase = [
+    { nombre: "Copa Otoño F5", categoria: "F5 · Masculino", posicion: "2°" }
+  ];
+  torneosJugadosEquipoBase = [
+    { nombre: "Copa Verano F5", periodo: "2025", resultado: "1°", color: "#12662C" },
+    { nombre: "Liga Invierno F7", periodo: "2024", resultado: "6°", color: "#5C6A74" }
+  ];
+
+  plantelResumenBase = [
+    { ini: "VO", nombre: "Vos", rol: "Capitán" },
+    { ini: "BS", nombre: "Bruno Sosa", rol: "Delegado" },
+    { ini: "NR", nombre: "Nicolás Rey", rol: "Jugador" }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  badgeRolPlantel(rol) {
+    const m = {
+      "Capitán": { rolBg: "#EFF2F4", rolFg: "#414E57", rolDot: "#5C6A74", rolRadio: "999px", rolDotRadio: "999px", rolRot: "none" },
+      "Delegado": { rolBg: "#E7E9FB", rolFg: "#322BA0", rolDot: "#4038C2", rolRadio: "999px", rolDotRadio: "999px", rolRot: "none" },
+      "DT": { rolBg: "#E7E9FB", rolFg: "#322BA0", rolDot: "#4038C2", rolRadio: "999px", rolDotRadio: "999px", rolRot: "none" },
+      "Jugador": { rolBg: "#EFF2F4", rolFg: "#414E57", rolDot: "#5C6A74", rolRadio: "999px", rolDotRadio: "999px", rolRot: "none" },
+      "Invitado": { rolBg: "#FBEBD3", rolFg: "#7A4600", rolDot: "#A25C00", rolRadio: "0", rolDotRadio: "0", rolRot: "rotate(45deg)" }
+    };
+    return m[rol] || m["Jugador"];
+  }
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      crear: "Crear equipo (UC-10)", plantel: "Plantel (UC-11, UC-13)", invitar: "Invitar integrante (UC-11)",
+      responder: "Responder invitación (UC-12)", solicitudes: "Solicitudes de ingreso (UC-53)",
+      perfilEquipo: "Perfil público del equipo (UC-14)", solicitarSumarse: "Solicitar sumarse (UC-53)",
+      archivar: "Archivar equipo (UC-15)"
+    };
+    const mapa = [
+      ["Perfil equipo", "perfilEquipo"], ["Crear", "crear"], ["Plantel", "plantel"], ["Invitar", "invitar"],
+      ["Responder inv.", "responder"], ["Solicitudes", "solicitudes"], ["Pedir sumarme", "solicitarSumarse"], ["Archivar", "archivar"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent",
+      fg: sc === id ? "#0E1720" : "#CBD3D8",
+      borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      crear: "UC-10: la categoría de género es obligatoria (D-81) — sin ella no se puede calcular el ranking ni avisar una inscripción cruzada.",
+      plantel: "UC-11/UC-13: el rol vive en el vínculo, no en la persona. El Capitán no puede irse sin designar reemplazo antes.",
+      invitar: "UC-11: si esa persona ya había solicitado sumarse, invitarla equivale a aceptar su solicitud — las dos partes ya dijeron que sí.",
+      responder: "UC-12: aplica igual a una invitación como DT. Rechazar no deja rastro público.",
+      solicitudes: "UC-53: la resuelven el Capitán o un Delegado. El estado 'rechazado' nunca se muestra públicamente.",
+      perfilEquipo: "UC-14: seguir (UC-43) y pedir sumarse (UC-53) están una junto a la otra pero pesan distinto — no pueden parecer la misma acción.",
+      solicitarSumarse: "UC-53 (D-85): sumarse siempre pide el rol de Jugador — los otros roles los asigna el capitán después, no se solicitan.",
+      archivar: "UC-15 (D-68): bloqueado si el equipo juega un torneo en curso. Nunca se borra — es baja lógica."
+    };
+
+    const categorias = ["Masculino", "Femenino", "Mixto"].map(c => ({
+      nombre: c, elegir: () => this.setState({ categoriaEquipo: c }),
+      bg: s.categoriaEquipo === c ? "#142230" : "transparent",
+      fg: s.categoriaEquipo === c ? "#FFFFFF" : "#414E57",
+      borde: s.categoriaEquipo === c ? "#142230" : "#CBD3D8"
+    }));
+
+    const rolesInvitar = ["Jugador", "DT", "Delegado"].map(r => ({
+      nombre: r, elegir: () => this.setState({ rolInvitar: r }),
+      bg: s.rolInvitar === r ? "#142230" : "transparent",
+      fg: s.rolInvitar === r ? "#FFFFFF" : "#414E57",
+      borde: s.rolInvitar === r ? "#142230" : "#CBD3D8"
+    }));
+
+    const plantel = this.plantelBase.map(p => Object.assign({ quitar: () => {} }, p, this.badgeRolPlantel(p.rol)));
+
+    const solicitudes = this.solicitudesBase.map(sol => Object.assign({
+      pendiente: sol.estado === "pendiente",
+      resuelta: sol.estado !== "pendiente",
+      resueltaTexto: sol.estado === "aceptada" ? "Aceptada — ya está en el plantel" : "Rechazada",
+      resueltaColor: sol.estado === "aceptada" ? "#12662C" : "#414E57",
+      aceptar: () => {}, rechazar: () => {}
+    }, sol));
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sCrear: sc === "crear", sPlantel: sc === "plantel", sInvitar: sc === "invitar", sResponder: sc === "responder",
+      sSolicitudes: sc === "solicitudes", sPerfilEquipo: sc === "perfilEquipo", sSolicitarSumarse: sc === "solicitarSumarse",
+      sArchivar: sc === "archivar",
+
+      irPerfilEquipo: () => this.go("perfilEquipo"), irPlantel: () => this.go("plantel"), irInvitar: () => this.go("invitar"),
+      irSolicitudes: () => this.go("solicitudes"), irSolicitarSumarse: () => this.setState({ screen: "solicitarSumarse", solicitudEstado: "formulario" }),
+      irVolverInicio: () => this.go("perfilEquipo"), irArchivar: () => this.setState({ screen: "archivar" }),
+
+      nombreEquipo: s.nombreEquipo, onNombreEquipo: e => this.setState({ nombreEquipo: e.target.value }),
+      bordeNombre: "#CBD3D8", mostrarAvisoNombre: s.nombreEquipo.trim().toLowerCase() === "los pibes del fondo",
+      categorias, ciudadEquipo: s.ciudadEquipo, irSelectorCiudadEquipo: () => {},
+      crearEquipoBg: s.nombreEquipo.trim() ? "#00A8CC" : "#CBD3D8",
+      crearEquipoFg: s.nombreEquipo.trim() ? "#0E1720" : "#7E8B95",
+      crearEquipo: () => { if (s.nombreEquipo.trim()) this.go("plantel"); },
+
+      plantel, haySolicitudesPendientes: this.solicitudesBase.some(x => x.estado === "pendiente"),
+
+      invitadoNombre: s.invitadoNombre, onInvitadoNombre: e => this.setState({ invitadoNombre: e.target.value }),
+      rolesInvitar,
+      invitarPlantelBg: s.invitadoNombre.trim() ? "#00A8CC" : "#CBD3D8",
+      invitarPlantelFg: s.invitadoNombre.trim() ? "#0E1720" : "#7E8B95",
+      textoInvitarPlantel: s.invitacionPlantelEnviada ? "Invitación enviada ✓" : "Enviar invitación",
+      enviarInvitacionPlantel: () => { if (s.invitadoNombre.trim()) this.setState({ invitacionPlantelEnviada: true }); },
+
+      tituloInvitacionRecibida: "Los Pibes del Fondo te invita",
+      detalleInvitacionRecibida: "Como Jugador. Podés aceptar o rechazar — rechazar no queda a la vista de nadie.",
+      respuestaEsPendiente: s.respuestaInvitacion === "pendiente",
+      respuestaEsAceptada: s.respuestaInvitacion === "aceptada",
+      respuestaEsRechazada: s.respuestaInvitacion === "rechazada",
+      aceptarInvitacionPlantel: () => this.setState({ respuestaInvitacion: "aceptada" }),
+      rechazarInvitacionPlantel: () => this.setState({ respuestaInvitacion: "rechazada" }),
+
+      solicitudes,
+
+      seguirBorde: s.siguiendo ? "#00A8CC" : "#CBD3D8",
+      seguirBg: s.siguiendo ? "#E8F7FB" : "transparent",
+      seguirFg: s.siguiendo ? "#007D99" : "#414E57",
+      textoSeguir: s.siguiendo ? "Siguiendo ✓" : "Seguir",
+      toggleSeguir: () => this.setState(st => ({ siguiendo: !st.siguiendo })),
+      compartirEquipo: () => {},
+      scoreEquipo: 78, scorePartidos: 14,
+      proximoPartido: { rival: "vs San Martín FC", fecha: "Dom 20/4 · 19:00", torneo: "Copa Otoño F5" },
+      ultimoResultado: { marcador: "2 – 0", rival: "La Gloria", label: "Ganado", bg: "#E4F3E8", fg: "#12662C" },
+      torneosActivosEquipo: this.torneosActivosEquipoBase,
+      torneosJugadosEquipo: this.torneosJugadosEquipoBase,
+      plantelResumen: this.plantelResumenBase,
+
+      solicitudEsFormulario: s.solicitudEstado === "formulario",
+      solicitudEsPendiente: s.solicitudEstado === "pendiente",
+      solicitudEsAceptada: s.solicitudEstado === "aceptada",
+      enviarSolicitudSumarse: () => this.setState({ solicitudEstado: "pendiente" }),
+      retirarSolicitud: () => this.setState({ solicitudEstado: "formulario" }),
+      simularAceptacionSolicitud: () => this.setState(st => ({ solicitudEstado: "aceptada", siguiendo: true })),
+
+      archivarBloqueado: true,
+      confirmarArchivar: () => {}
+    };
+  }
+}
+
+</script>
+</body>
+</html>

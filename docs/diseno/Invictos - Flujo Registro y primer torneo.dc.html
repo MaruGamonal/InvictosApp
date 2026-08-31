@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invictos — Flujo: Registro → perfil → primer torneo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Flujo 1 · Registro → perfil → primer torneo · Paso {{ pasoNum }}/{{ totalPasos }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ p === 0 }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="1. Bienvenida" style="display: flex; flex-direction: column; height: 100%; background: #0E1720; color: #FFFFFF; position: relative; overflow: hidden">
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 46%; z-index: 0; overflow: hidden">
+            <image-slot id="hero-bienvenida" shape="rect" fit="cover" src="uploads/ChatGPT Image Aug 27, 2026, 05_23_53 PM.png" placeholder="Foto de fútbol amateur: cancha, luces, jugadores"></image-slot>
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,23,32,0.05) 0%, rgba(14,23,32,0.1) 55%, #0E1720 100%); pointer-events: none"></div>
+          </div>
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 90px; z-index: 3; background: linear-gradient(180deg, #0F0C08, rgba(14,23,32,0) 100%); pointer-events: none"></div>
+          <div style="position: relative; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 24px 26px 0">
+            <div style="width: 10px; height: 10px; background: #00A8CC"></div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.02em; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.55)">Invictos</div>
+          </div>
+          <div style="position: relative; z-index: 4; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px 26px 28px; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 52px; line-height: 0.92; letter-spacing: -0.01em; text-transform: uppercase; text-shadow: 0 4px 24px rgba(0,0,0,0.5)">Tu equipo, tu pasión, tu app</div>
+            <div style="font: 400 16px/1.5 Barlow; color: #CBD3D8; max-width: 300px; text-wrap: pretty">Armá el fixture, cargá resultados y seguí la tabla.</div>
+          </div>
+          <div style="position: relative; z-index: 4; padding: 8px 26px 36px; display: flex; flex-direction: column; gap: 12px">
+            <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Crear cuenta</div>
+            <div style="border: 1.5px solid #414E57; color: #FFFFFF; font: 600 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center">Ingresar</div>
+            <div style="font: 600 14px/1 Barlow; color: #A9B4BC; text-align: center; padding: 12px">Descubrir torneos sin cuenta</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 1 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="2. Registro mínimo" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 18px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Creá tu cuenta</div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Nombre</label><input value="{{ nombre }}" onInput="{{ onNombre }}" type="text" placeholder="Julián Rodríguez" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230"></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Correo</label><input value="{{ correo }}" onInput="{{ onCorreo }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230"></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Contraseña</label><input value="{{ contrasena }}" onInput="{{ onContrasena }}" type="password" placeholder="Mínimo 8 caracteres" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230"></div>
+          <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">La validación de tu correo solo te la pedimos si más adelante querés sumarte a un equipo o publicar un torneo.</div>
+          <div onClick="{{ sig }}" style="background: {{ registroBtnBg }}; color: {{ registroBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 2 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="3. Cuenta creada" style="display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; text-align: center; gap: 16px; padding: 30px; background: #0E1720; color: #FFFFFF">
+          <div style="width: 60px; height: 60px; border-radius: 999px; background: rgba(0,168,204,0.15); display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"></path></svg></div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.1; text-transform: uppercase">Cuenta creada</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #A9B4BC; text-wrap: pretty">Ya podés seguir equipos y torneos. Si más adelante querés sumarte a un plantel o publicar un torneo, te vamos a pedir validar el correo.</div>
+          <div style="display: flex; gap: 6px; margin-top: 4px">
+            <div style="width: 26px; height: 4px; border-radius: 999px; background: #00A8CC"></div>
+            <div style="width: 26px; height: 4px; border-radius: 999px; background: #2C383F"></div>
+            <div style="width: 26px; height: 4px; border-radius: 999px; background: #2C383F"></div>
+          </div>
+          <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 15px 24px; border-radius: 8px; cursor: pointer; margin-top: 8px">Empezar</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 3 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="4. Ciudad (primer uso de Descubrimiento)" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 18px">
+          <div style="font: 700 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #00A8CC">Último paso</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">¿Desde dónde jugás?</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74">Es lo que vas a ver por defecto — lo cambiás cuando quieras.</div>
+          <div style="background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E8B95" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input value="{{ ciudad }}" onInput="{{ onCiudad }}" type="text" placeholder="Buscá tu ciudad" style="border: none; outline: none; background: transparent; flex: 1; font: 400 15px/1 Barlow"></div>
+          <div onClick="{{ elegirCiudad }}" style="border-bottom: 1px solid #EFF2F4; padding: 11px 0; display: flex; align-items: center; gap: 10px; cursor: pointer">
+            <div style="width: 20px; height: 20px; flex: none; border-radius: 4px; border: 1.5px solid {{ ciudadCheckBorde }}; background: {{ ciudadCheckBg }}; display: flex; align-items: center; justify-content: center"><sc-if value="{{ ciudadElegida }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"></path></svg></sc-if></div>
+            <div style="flex: 1; font: 600 14px/1 Barlow">San Isidro <span style="color: #7E8B95; font-weight: 400">· Buenos Aires (AMBA)</span></div>
+          </div>
+          <sc-if value="{{ ciudadElegida }}" hint-placeholder-val="{{ false }}">
+            
+          </sc-if>
+          <div onClick="{{ sig }}" style="background: {{ ciudadBtnBg }}; color: {{ ciudadBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Ir a mi Home</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 4 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="5. Home (torneos + equipos de tu ciudad)" style="display: flex; flex-direction: column; height: 100%; position: relative">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 22px; flex: none">
+            <div style="display: flex; align-items: center; justify-content: space-between; font: 600 12px/1 Barlow; color: #7E8B95; margin-bottom: 16px">
+              <span>San Isidro</span>
+              <div style="position: relative; padding: 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD3D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px">
+              <div style="width: 42px; height: 42px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden"><image-slot id="home-avatar-flujo" shape="circle" placeholder="Foto"></image-slot></div>
+              <div>
+                <div style="font: 400 13px/1.2 Barlow; color: #A9B4BC">Hola, {{ nombre }}</div>
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">Inicio</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 16px 90px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 78px">
+
+            <div style="background: #0E1720; border-radius: 12px; padding: 24px 22px; color: #FFFFFF; display: flex; flex-direction: column; gap: 6px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; text-transform: uppercase">Bienvenida a Invictos</div>
+              <div style="font: 400 14px/1.5 Barlow; color: #A9B4BC; text-wrap: pretty">Todavía no seguís equipos ni torneos — acá abajo tenés los de tu ciudad.</div>
+            </div>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Torneos en San Isidro</div>
+
+              <sc-if value="{{ hayTorneosCiudad }}" hint-placeholder-val="{{ true }}">
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px">
+                  <div onClick="{{ irFichaDesdeDescubrimiento }}" style="flex: 1; min-width: 0; cursor: pointer; display: flex; align-items: center; gap: 12px">
+                    <div style="width: 44px; height: 44px; flex: none; border-radius: 8px; background: #142230; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; overflow: hidden"><image-slot id="home-torneo-copa" shape="rounded" placeholder="Logo"></image-slot></div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Copa Otoño F5</div>
+                      <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">F5 · Masculino</div>
+                      <div style="display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; background: #E4F3E8; padding: 3px 8px; border-radius: 3px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #12662C">Inscripciones abiertas</span></div>
+                    </div>
+                  </div>
+                  <div onClick="{{ seguirDesdeDescubrimiento }}" style="flex: none; border: 1.5px solid {{ seguirBorde }}; background: {{ seguirBg }}; color: {{ seguirFgSobreClaro }}; font: 700 12px/1 Barlow; padding: 9px 16px; border-radius: 999px; cursor: pointer; text-align: center">{{ textoSeguir }}</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ !hayTorneosCiudad }}" hint-placeholder-val="{{ false }}">
+                <div style="border: 1px dashed #CBD3D8; border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+                  <div style="font: 700 14px/1.3 Barlow">Todavía no hay torneos en San Isidro</div>
+                  <div style="font: 400 13px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Es normal en ciudades que recién están empezando en Invictos.</div>
+                  <div onClick="{{ irCrearTorneoFlujo }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 4px">¿Querés crear uno? Crear torneo</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Equipos en San Isidro</div>
+              <div style="display: flex; gap: 6px; margin-bottom: 10px">
+                <sc-for list="{{ chipsCategoriaEquipo }}" as="ch" hint-placeholder-count="4">
+                  <div onClick="{{ ch.elegir }}" style="font: 600 12px/1 Barlow; padding: 7px 12px; border-radius: 999px; cursor: pointer; background: {{ ch.bg }}; color: {{ ch.fg }}; border: 1px solid {{ ch.borde }}">{{ ch.nombre }}</div>
+                </sc-for>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <sc-for list="{{ equiposCiudadFlujo }}" as="eq" hint-placeholder-count="4">
+                  <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px">
+                    <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden"><image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot></div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ eq.nombre }}</div>
+                      <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.categoria }} · {{ eq.seguidores }} seguidores</div>
+                      <div style="font: 600 12px/1.3 Barlow; color: #007D99; margin-top: 2px">{{ eq.torneoActivo }}</div>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex: none">
+                      <div onClick="{{ eq.toggle }}" style="border: 1.5px solid {{ eq.borde }}; background: {{ eq.bg }}; color: {{ eq.fg }}; font: 700 11px/1 Barlow; padding: 7px 12px; border-radius: 999px; cursor: pointer">{{ eq.texto }}</div>
+                      <div onClick="{{ eq.sumarse }}" style="background: #00A8CC; color: #0E1720; font: 700 11px/1 Barlow; padding: 7px 12px; border-radius: 999px; cursor: pointer">{{ eq.textoSumarse }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div onClick="{{ irCrearEquipoFlujo }}" style="border: 1.5px dashed #CBD3D8; color: #007D99; font: 700 13px/1 Barlow; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: 10px">¿No está tu equipo? Crear equipo</div>
+            </div>
+
+          </div>
+
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 78px; background: #FFFFFF; border-top: 1px solid #E3E8EB; z-index: 5">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 4px 14px">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path></svg><span style="font: 700 11px/1 Barlow; letter-spacing: 0.04em; color: #00A8CC">Inicio</span></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><span style="font: 500 11px/1 Barlow; color: #5C6A74">Buscar</span></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"></path><path d="M8 5.5H5v1.5a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3"></path><path d="M12 13v3M9 20h6"></path></svg><span style="font: 500 11px/1 Barlow; color: #5C6A74">Torneos</span></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg><span style="font: 500 11px/1 Barlow; color: #5C6A74">Perfil</span></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 5 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="6. Ficha del torneo → Seguir" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto">
+            <div style="padding: 16px 20px 0"><div onClick="{{ irDescubrimientoDesdeFicha }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+            <div style="background: #0E1720; color: #FFFFFF; padding: 16px 20px 22px; display: flex; flex-direction: column; gap: 12px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+              <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #A9B4BC">F5 · Masculino · San Isidro</div>
+              <div style="display: flex; align-items: center; gap: 8px; padding-top: 4px">
+                <div style="width: 26px; height: 26px; flex: none; border-radius: 4px; background: #2C383F; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">CS</div>
+                <span style="font: 500 14px/1 Barlow">Complejo San Martín</span>
+              </div>
+              <div onClick="{{ seguir }}" style="border: 1.5px solid {{ seguirBorde }}; background: {{ seguirBg }}; color: {{ seguirFg }}; font: 700 13px/1 Barlow; padding: 10px 18px; border-radius: 999px; cursor: pointer; align-self: flex-start; margin-top: 4px">{{ textoSeguir }}</div>
+            </div>
+            <div style="padding: 14px 20px 0">
+              <div style="display: flex; align-items: center; gap: 8px; background: #E8F7FB; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0"></path></svg><span style="font: 600 12px/1.3 Barlow; color: #007D99">Notificación (push + in-app): resultados, próxima fecha y reprogramaciones de este torneo</span></div>
+            </div>
+            <div style="padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Descripción</div>
+                <div style="font: 400 14px/1.5 Barlow; color: #414E57; text-wrap: pretty">Torneo de fútbol 5 masculino, libre, a cancha de Complejo San Martín. Formato liga, ida y vuelta.</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Inscripciones</div>
+                <div style="display: flex; align-items: center; justify-content: space-between"><span style="font: 500 15px/1 Barlow">Cupo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">12<span style="color: #A9B4BC"> / 16</span></span></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 10px"><span style="font: 500 15px/1 Barlow">Costo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">$18.000</span></div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Equipos inscriptos</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+                  <sc-for list="{{ equiposInscriptosFlujo }}" as="eq" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EFF2F4"><div style="width: 26px; height: 26px; flex: none; border-radius: 999px; background: #414E57"></div><span style="font: 600 13px/1.2 Barlow">{{ eq }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Todo esto se ve sin cuenta. Recién te pedimos registrarte cuando tocás "Seguir".</div>
+              <div onClick="{{ sig }}" style="background: {{ seguirBtnBg }}; color: {{ seguirBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer">Listo</div>
+              <div onClick="{{ sig }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; text-align: center">Omitir</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="6">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { p: 0, nombre: "", correo: "", contrasena: "", codigoValidacion: "", ciudad: "", siguiendo: false, equiposSeguidos: {}, equiposSumados: {}, filtroCategoriaEquipo: "Todas" };
+  equiposCiudadBase = [
+    { nombre: "Racing del Barrio", categoria: "Masculino", seguidores: 58, torneoActivo: "Juega Copa Otoño F5" },
+    { nombre: "San Martín FC", categoria: "Masculino", seguidores: 96, torneoActivo: "Juega Copa Otoño F5" },
+    { nombre: "La Gloria", categoria: "Mixto", seguidores: 41, torneoActivo: "Sin torneo activo" },
+    { nombre: "Deportivo Belgrano", categoria: "Masculino", seguidores: 143, torneoActivo: "Juega Copa Otoño F5" }
+  ];
+  pasos = ["Bienvenida", "Registro", "Cuenta creada", "Ciudad", "Home", "Ficha · Seguir"];
+
+  renderVals() {
+    const s = this.state;
+    const mapa = this.pasos.map((nombre, i) => ({
+      nombre, ir: () => this.setState({ p: i }),
+      bg: s.p === i ? "#00A8CC" : "transparent", fg: s.p === i ? "#0E1720" : "#CBD3D8", borde: s.p === i ? "#00A8CC" : "#2C383F"
+    }));
+    return {
+      p: s.p, pasoNum: s.p + 1, totalPasos: this.pasos.length, mapa,
+      sig: () => this.setState(st => ({ p: Math.min(this.pasos.length - 1, st.p + 1) })),
+      reiniciar: () => this.setState({ p: 0, nombre: "", contacto: "", ciudad: "", siguiendo: false }),
+      nombre: s.nombre, onNombre: e => this.setState({ nombre: e.target.value }),
+      correo: s.correo, onCorreo: e => this.setState({ correo: e.target.value }),
+      contrasena: s.contrasena, onContrasena: e => this.setState({ contrasena: e.target.value }),
+      registroBtnBg: (s.nombre && s.correo && s.contrasena) ? "#00A8CC" : "#CBD3D8", registroBtnFg: (s.nombre && s.correo && s.contrasena) ? "#0E1720" : "#7E8B95",
+      ciudad: s.ciudad, onCiudad: e => this.setState({ ciudad: e.target.value }),
+      elegirCiudad: () => this.setState({ ciudad: "San Isidro" }),
+      ciudadElegida: !!s.ciudad,
+      ciudadCheckBorde: s.ciudad ? "#00A8CC" : "#CBD3D8", ciudadCheckBg: s.ciudad ? "#00A8CC" : "transparent",
+      ciudadBtnBg: s.ciudad ? "#00A8CC" : "#CBD3D8", ciudadBtnFg: s.ciudad ? "#0E1720" : "#7E8B95",
+      siguiendo: s.siguiendo, seguir: () => this.setState(st => ({ siguiendo: !st.siguiendo })),
+      irFichaDesdeDescubrimiento: () => this.setState({ p: 5 }),
+      irDescubrimientoDesdeFicha: () => this.setState({ p: 4 }),
+      hayTorneosCiudad: true,
+      chipsCategoriaEquipo: ["Todas", "Masculino", "Femenino", "Mixto"].map(c => ({
+        nombre: c, elegir: () => this.setState({ filtroCategoriaEquipo: c }),
+        bg: s.filtroCategoriaEquipo === c ? "#142230" : "transparent", fg: s.filtroCategoriaEquipo === c ? "#FFFFFF" : "#414E57", borde: s.filtroCategoriaEquipo === c ? "#142230" : "#CBD3D8"
+      })),
+      irCrearTorneoFlujo: () => {},
+      seguirDesdeDescubrimiento: () => this.setState(st => ({ siguiendo: !st.siguiendo })),
+      seguirBorde: s.siguiendo ? "#00A8CC" : "#414E57", seguirBg: s.siguiendo ? "#00A8CC" : "transparent", seguirFg: s.siguiendo ? "#0E1720" : "#FFFFFF",
+      seguirFgSobreClaro: s.siguiendo ? "#0E1720" : "#142230",
+      textoSeguir: s.siguiendo ? "Siguiendo ✓" : "Seguir",
+      seguirBtnBg: s.siguiendo ? "#00A8CC" : "#CBD3D8", seguirBtnFg: s.siguiendo ? "#0E1720" : "#7E8B95",
+      equiposInscriptosFlujo: ["Los Pibes del Fondo", "San Martín FC", "Racing del Barrio"],
+      irCrearEquipoFlujo: () => {},
+      equiposCiudadFlujo: this.equiposCiudadBase.filter(e => s.filtroCategoriaEquipo === "Todas" || e.categoria === s.filtroCategoriaEquipo).map(e => {
+        const nombre = e.nombre;
+        const sig2 = !!s.equiposSeguidos[nombre];
+        const sumado = !!s.equiposSumados[nombre];
+        return {
+          nombre, categoria: e.categoria, seguidores: e.seguidores, torneoActivo: e.torneoActivo,
+          slotId: "home-eq-" + nombre.replace(/\s+/g, "-").toLowerCase(),
+          ini: nombre.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase(),
+          borde: sig2 ? "#00A8CC" : "#CBD3D8", bg: sig2 ? "#00A8CC" : "transparent", fg: sig2 ? "#0E1720" : "#414E57",
+          texto: sig2 ? "Siguiendo ✓" : "Seguir",
+          toggle: () => this.setState(st => ({ equiposSeguidos: Object.assign({}, st.equiposSeguidos, { [nombre]: !st.equiposSeguidos[nombre] }) })),
+          textoSumarse: sumado ? "Pedido enviado ✓" : "Pedir sumarme",
+          sumarse: () => this.setState(st => ({ equiposSumados: Object.assign({}, st.equiposSumados, { [nombre]: !st.equiposSumados[nombre] }) }))
+        };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

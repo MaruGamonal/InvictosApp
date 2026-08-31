@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Flujo: Crear equipo → invitar → inscribirse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Flujo 2 · Crear equipo → invitar → inscribirse · Paso {{ pasoNum }}/{{ totalPasos }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ p === 0 }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="1. Crear equipo" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 16px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Crear equipo</div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Nombre</label><input value="{{ nombreEquipo }}" onInput="{{ onNombreEquipo }}" type="text" placeholder="Los Pibes del Fondo" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+          <div style="display: flex; gap: 10px">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Categoría</label><div style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 600 14px/1 Barlow; background: #F7F9FA">Masculino</div></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Ciudad</label><div style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 600 14px/1 Barlow; background: #F7F9FA">San Isidro</div></div>
+          </div>
+          <div onClick="{{ sig }}" style="background: {{ crearEquipoBtnBg }}; color: {{ crearEquipoBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Crear equipo</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 1 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="2. Equipo creado · sos Capitán" style="display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 30px">
+          <div style="width: 64px; height: 64px; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px">{{ inicialesEquipo }}</div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">{{ nombreEquipo || 'Tu equipo' }}</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74">Sos Capitán. Ahora sumá a tu primer jugador.</div>
+          <div onClick="{{ sig }}" style="background: #00A8CC; color: #0E1720; font: 700 15px/1 Barlow; padding: 15px 22px; border-radius: 8px; cursor: pointer">Invitar jugador</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 2 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="3. Invitar jugador" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 16px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Invitar jugador</div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label style="font: 600 13px/1 Barlow">Buscar por nombre</label><input value="{{ busquedaInvitado }}" onInput="{{ onBusquedaInvitado }}" type="text" placeholder="Bruno Sosa" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" /></div>
+
+          <sc-if value="{{ hayCoincidencias }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <sc-for list="{{ coincidenciasInvitado }}" as="c" hint-placeholder-count="2">
+                <div onClick="{{ c.elegir }}" style="border: 1.5px solid {{ c.borde }}; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px">
+                  <div style="width: 32px; height: 32px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font: 700 12px/1 Barlow">{{ c.ini }}</div>
+                  <div style="flex: 1"><div style="font: 700 14px/1.2 Barlow">{{ c.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ c.detalle }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ mostrarInvitarPorCorreo }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="font: 400 13px/1.4 Barlow; color: #5C6A74">{{ textoSinCoincidencias }}</div>
+              <label style="font: 600 13px/1 Barlow">Invitar por correo</label>
+              <input value="{{ correoInvitado }}" onInput="{{ onCorreoInvitado }}" type="text" placeholder="vos@ejemplo.com" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230; color-scheme: light" style-focus="border: 2px solid #00A8CC; padding: 13px; background: #FFFFFF; color: #142230" />
+            </div>
+          </sc-if>
+
+          <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Rol: Jugador. Otros roles se asignan después, dentro del plantel.</div>
+          <div onClick="{{ sig }}" style="background: {{ invitarBtnBg }}; color: {{ invitarBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Enviar invitación</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 3 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="4. Invitación enviada → aceptada" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 16px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Plantel</div>
+          <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #EFF2F4; padding: 10px 0"><div style="width: 30px; height: 30px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font: 700 11px/1 Barlow">TÚ</div><div style="flex: 1; font: 500 14px/1 Barlow">Tú</div><div style="font: 400 12px/1 Barlow; color: #7E8B95">Capitán</div></div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0"><div style="width: 30px; height: 30px; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font: 700 11px/1 Barlow">{{ inicialesInvitado }}</div><div style="flex: 1; font: 500 14px/1 Barlow">{{ nombreInvitadoMostrado }}</div><div style="font: 700 11px/1 Barlow; color: {{ colorEstadoInvitacion }}">{{ textoEstadoInvitacion }}</div></div>
+          <div style="display: flex; align-items: center; gap: 8px; background: #E8F7FB; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0" /></svg><span style="font: 600 12px/1.3 Barlow; color: #007D99">Notificación a {{ nombreInvitadoMostrado }}: "Te invitaron a un equipo — Los Pibes del Fondo"</span></div>
+          <div onClick="{{ aceptarInvitacion }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer">{{ textoAceptarInvitacion }}</div>
+          <div onClick="{{ sig }}" style="background: {{ aceptadoBtnBg }}; color: {{ aceptadoBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Continuar</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 4 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="5. Encontrar un torneo" style="display: flex; flex-direction: column; height: 100%; padding: 20px 20px 24px; gap: 14px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Descubrimiento · San Isidro</div>
+          <div onClick="{{ sig }}" style="background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 8px; padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 8px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+            <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #5C6A74">F5 · Masculino · San Isidro</div>
+            <div style="display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; background: #E4F3E8; padding: 3px 8px; border-radius: 999px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #12662C">Inscripciones abiertas</span></div>
+          </div>
+          <div style="font: 400 13px/1.4 Barlow; color: #7E8B95">Tocá el torneo para inscribir a tu equipo.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 5 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="6. Solicitar inscripción" style="display: flex; flex-direction: column; height: 100%; padding: 24px 22px; gap: 16px">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Inscribir {{ nombreEquipoMostrado }}</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74">Copa Otoño F5 · F5 · Masculino</div>
+          <div style="background: #F7F9FA; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 130px; overflow-y: auto">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #7E8B95">Reglamento · v2</div>
+            <div style="font: 400 13px/1.5 Barlow; color: #414E57; text-wrap: pretty">Torneo de fútbol 5, formato liga ida y vuelta. Planteles de hasta 15 jugadores habilitados por fecha. Walkover por incomparecencia: 3–0. Tarjeta roja: 1 fecha de suspensión mínima.</div>
+          </div>
+          <div onClick="{{ toggleReglamento }}" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer">
+            <div style="width: 20px; height: 20px; flex: none; border-radius: 4px; border: 1.5px solid {{ reglamentoBorde }}; background: {{ reglamentoBg }}; display: flex; align-items: center; justify-content: center"><sc-if value="{{ reglamentoOk }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if></div>
+            <div style="font: 400 14px/1.4 Barlow">Leí y acepto el reglamento del torneo.</div>
+          </div>
+          <div onClick="{{ sig }}" style="background: {{ reglamentoBtnBg }}; color: {{ reglamentoBtnFg }}; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer; margin-top: auto">Confirmar inscripción</div>
+          <div style="display: flex; align-items: center; gap: 8px; background: #F7F9FA; border-radius: 8px; padding: 10px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 4-1.5 5.5-2 6.5h16c-.5-1-2-2.5-2-6.5ZM10 19a2 2 0 0 0 4 0" /></svg><span style="font: 500 12px/1.3 Barlow; color: #5C6A74">Notificación al organizador: nueva solicitud de inscripción pendiente</span></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ p === 6 }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="7. Fin del flujo" style="display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 30px">
+          <div style="width: 52px; height: 52px; border-radius: 999px; background: #E4F3E8; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B8A3C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></div>
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">Solicitud enviada</div>
+          <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">El organizador la va a aprobar o rechazar — el cupo no te asegura el lugar.</div>
+          <div onClick="{{ reiniciar }}" style="font: 700 13px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 8px">Reiniciar flujo</div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="7">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { p: 0, nombreEquipo: "", busquedaInvitado: "", invitadoElegido: "", correoInvitado: "", aceptado: false, reglamentoOk: false };
+  jugadoresCatalogo = [
+    { nombre: "Bruno Sosa", detalle: "Zona Norte · sin equipo" },
+    { nombre: "Bruno Sosa Fernández", detalle: "Zona Sur · juega en Racing" }
+  ];
+  pasos = ["Crear equipo", "Equipo creado", "Invitar", "Aceptar inv.", "Buscar torneo", "Inscribir", "Fin"];
+
+  iniciales(nombre) {
+    if (!nombre) return "??";
+    return nombre.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const q = s.busquedaInvitado.trim().toLowerCase();
+    const coincidencias = q ? this.jugadoresCatalogo.filter(j => j.nombre.toLowerCase().indexOf(q) >= 0) : [];
+    const invitadoFinal = s.invitadoElegido || s.correoInvitado;
+    const mapa = this.pasos.map((nombre, i) => ({
+      nombre, ir: () => this.setState({ p: i }),
+      bg: s.p === i ? "#00A8CC" : "transparent", fg: s.p === i ? "#0E1720" : "#CBD3D8", borde: s.p === i ? "#00A8CC" : "#2C383F"
+    }));
+    return {
+      p: s.p, pasoNum: s.p + 1, totalPasos: this.pasos.length, mapa,
+      sig: () => this.setState(st => ({ p: Math.min(this.pasos.length - 1, st.p + 1) })),
+      reiniciar: () => this.setState({ p: 0, nombreEquipo: "", invitado: "", aceptado: false, reglamentoOk: false }),
+      nombreEquipo: s.nombreEquipo, onNombreEquipo: e => this.setState({ nombreEquipo: e.target.value }),
+      crearEquipoBtnBg: s.nombreEquipo ? "#00A8CC" : "#CBD3D8", crearEquipoBtnFg: s.nombreEquipo ? "#0E1720" : "#7E8B95",
+      nombreEquipoMostrado: s.nombreEquipo ? s.nombreEquipo : "tu equipo",
+      inicialesEquipo: this.iniciales(s.nombreEquipo || "Tu Equipo"),
+      busquedaInvitado: s.busquedaInvitado, onBusquedaInvitado: e => this.setState({ busquedaInvitado: e.target.value, invitadoElegido: "" }),
+      coincidenciasInvitado: coincidencias.map(j => ({
+        nombre: j.nombre, detalle: j.detalle, ini: this.iniciales(j.nombre),
+        borde: s.invitadoElegido === j.nombre ? "#00A8CC" : "#CBD3D8",
+        elegir: () => this.setState({ invitadoElegido: j.nombre })
+      })),
+      hayCoincidencias: coincidencias.length > 0,
+      mostrarInvitarPorCorreo: s.busquedaInvitado.trim().length > 0 && coincidencias.length === 0,
+      textoSinCoincidencias: "No encontramos a nadie con ese nombre.",
+      correoInvitado: s.correoInvitado, onCorreoInvitado: e => this.setState({ correoInvitado: e.target.value }),
+      invitarBtnBg: invitadoFinal ? "#00A8CC" : "#CBD3D8", invitarBtnFg: invitadoFinal ? "#0E1720" : "#7E8B95",
+      nombreInvitadoMostrado: invitadoFinal || "Bruno Sosa",
+      inicialesInvitado: this.iniciales(invitadoFinal || "Bruno Sosa"),
+      colorEstadoInvitacion: s.aceptado ? "#12662C" : "#A25C00",
+      textoEstadoInvitacion: s.aceptado ? "Jugador" : "Invitación pendiente",
+      aceptado: s.aceptado, aceptarInvitacion: () => this.setState({ aceptado: true }),
+      textoAceptarInvitacion: s.aceptado ? "Aceptada ✓" : "Simular: acepta la invitación",
+      aceptadoBtnBg: s.aceptado ? "#00A8CC" : "#CBD3D8", aceptadoBtnFg: s.aceptado ? "#0E1720" : "#7E8B95",
+      reglamentoOk: s.reglamentoOk, toggleReglamento: () => this.setState(st => ({ reglamentoOk: !st.reglamentoOk })),
+      reglamentoBorde: s.reglamentoOk ? "#00A8CC" : "#CBD3D8", reglamentoBg: s.reglamentoOk ? "#00A8CC" : "transparent",
+      reglamentoBtnBg: s.reglamentoOk ? "#00A8CC" : "#CBD3D8", reglamentoBtnFg: s.reglamentoOk ? "#0E1720" : "#7E8B95"
+    };
+  }
+}
+
+</script>
+</body>
+</html>

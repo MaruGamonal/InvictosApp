@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D11 Notificaciones (UC-46, 47)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D11 · Notificaciones · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sCentro }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Recibir notificaciones (UC-46)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 12px; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; text-transform: uppercase">Notificaciones</div>
+            <div onClick="{{ irPreferencias }}" style="cursor: pointer; padding: 4px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #A25C00; margin-bottom: 8px">Accionables · push + email</div>
+              <sc-for list="{{ notifsAccionables }}" as="n" hint-placeholder-count="2">
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-left: 3px solid #A25C00; border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px">
+                  <div style="font: 700 14px/1.25 Barlow">{{ n.titulo }}</div>
+                  <div style="font: 400 13px/1.35 Barlow; color: #5C6A74">{{ n.detalle }}</div>
+                  <div style="display: flex; align-items: center; justify-content: space-between"><span style="font: 400 11px/1 Barlow; color: #A9B4BC">{{ n.cuando }}</span><span onClick="{{ n.accion }}" style="font: 700 12px/1 Barlow; color: #007D99; cursor: pointer">{{ n.textoAccion }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #5C6A74; margin-bottom: 8px">Informativas · solo push</div>
+              <sc-for list="{{ notifsInformativas }}" as="ni" hint-placeholder-count="3">
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 10px">
+                  <div style="width: 7px; height: 7px; flex: none; margin-top: 5px; border-radius: 999px; background: #5C6A74"></div>
+                  <div style="flex: 1"><div style="font: 600 13px/1.3 Barlow">{{ ni.titulo }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ ni.detalle }}</div></div>
+                  <div style="font: 400 11px/1 Barlow; color: #A9B4BC; flex: none">{{ ni.cuando }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 14px 16px; font: 400 12px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">La reprogramación de un partido es la de mayor valor: es el mensaje que hoy se pierde en un grupo de mensajería.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPreferencias }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Preferencias de notificación (UC-47)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCentro }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 20px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Preferencias</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Dos canales: dentro de la app y correo. WhatsApp llega en la segunda etapa, solo para reprogramaciones.</div>
+            </div>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Accionables</div>
+              <sc-for list="{{ prefsAccionables }}" as="pa" hint-placeholder-count="3">
+                <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+                  <div style="flex: 1"><div style="font: 700 14px/1.2 Barlow">{{ pa.titulo }}</div><div style="font: 400 12px/1.3 Barlow; color: #A11F12">No se puede apagar del todo — solo elegir el canal.</div></div>
+                  <div style="display: flex; gap: 6px; flex: none">
+                    <div onClick="{{ pa.togglePush }}" style="width: 30px; height: 30px; border-radius: 6px; background: {{ pa.pushBg }}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ pa.pushIcono }}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z" /></svg></div>
+                    <div style="width: 30px; height: 30px; border-radius: 6px; background: #EFF2F4; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Informativas</div>
+              <sc-for list="{{ prefsInformativas }}" as="pi" hint-placeholder-count="3">
+                <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+                  <div style="font: 700 14px/1.2 Barlow; flex: 1">{{ pi.titulo }}</div>
+                  <div onClick="{{ pi.toggle }}" style="width: 42px; height: 24px; border-radius: 999px; background: {{ pi.bg }}; position: relative; cursor: pointer; flex: none"><div style="position: absolute; top: 2px; left: {{ pi.pos }}; width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; transition: left 150ms ease"></div></div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background: #E7E9FB; border-radius: 8px; padding: 12px 14px; font: 400 12px/1.4 Barlow; color: #322BA0; text-wrap: pretty">Si apagás algo, el hecho no se pierde: sigue en tu actividad. Solo deja de interrumpirte.</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="2">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "centro",
+    prefsPush: { invitacion: true, inscripcion: true, reprogramacion: true },
+    prefsInfo: { resultados: true, inicioTorneo: true, finTorneo: false }
+  };
+
+  notifsAccionablesBase = [
+    { titulo: "Te invitaron a un equipo", detalle: "Racing del Barrio te invita como Jugador.", cuando: "hace 1 hora", textoAccion: "Responder" },
+    { titulo: "Se movió tu partido", detalle: "Fecha 8 pasó de sábado a domingo 19:00.", cuando: "hace 5 horas", textoAccion: "Ver partido" }
+  ];
+
+  notifsInformativasBase = [
+    { titulo: "Resultado cargado", detalle: "Deportivo Belgrano 3 · 1 La Gloria", cuando: "hace 2 horas" },
+    { titulo: "Empezó Copa Otoño F5", detalle: "12 equipos confirmados, primera fecha programada", cuando: "hace 3 días" },
+    { titulo: "Terminó Liga Invierno F7", detalle: "San Martín FC salió campeón", cuando: "hace 1 semana" }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = { centro: "Recibir notificaciones (UC-46)", preferencias: "Preferencias (UC-47)" };
+    const mapa = [["Centro de notificaciones", "centro"], ["Preferencias", "preferencias"]].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent", fg: sc === id ? "#0E1720" : "#CBD3D8", borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      centro: "UC-46 (D-53/D-67): dos categorías con umbrales distintos. Accionables por push + email; informativas solo dentro del producto.",
+      preferencias: "UC-47 (D-53): las accionables no se apagan del todo, solo cambian de canal — apagarlas del todo rompe el flujo para otra persona."
+    };
+
+    const prefsAccionables = [
+      { key: "invitacion", titulo: "Invitaciones a un plantel" },
+      { key: "inscripcion", titulo: "Estado de una inscripción" },
+      { key: "reprogramacion", titulo: "Cambios de horario o cancha" }
+    ].map(p => ({
+      titulo: p.titulo,
+      pushBg: s.prefsPush[p.key] ? "#00A8CC" : "#EFF2F4",
+      pushIcono: s.prefsPush[p.key] ? "#0E1720" : "#5C6A74",
+      togglePush: () => this.setState(st => ({ prefsPush: Object.assign({}, st.prefsPush, { [p.key]: !st.prefsPush[p.key] }) }))
+    }));
+
+    const prefsInformativas = [
+      { key: "resultados", titulo: "Resultados de lo que sigo" },
+      { key: "inicioTorneo", titulo: "Inicio de un torneo" },
+      { key: "finTorneo", titulo: "Final de un torneo" }
+    ].map(p => ({
+      titulo: p.titulo,
+      bg: s.prefsInfo[p.key] ? "#00A8CC" : "#CBD3D8",
+      pos: s.prefsInfo[p.key] ? "20px" : "2px",
+      toggle: () => this.setState(st => ({ prefsInfo: Object.assign({}, st.prefsInfo, { [p.key]: !st.prefsInfo[p.key] }) }))
+    }));
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sCentro: sc === "centro", sPreferencias: sc === "preferencias",
+      irCentro: () => this.go("centro"), irPreferencias: () => this.go("preferencias"),
+
+      notifsAccionables: this.notifsAccionablesBase.map(n => Object.assign({ accion: () => {} }, n)),
+      notifsInformativas: this.notifsInformativasBase,
+
+      prefsAccionables, prefsInformativas
+    };
+  }
+}
+
+</script>
+</body>
+</html>

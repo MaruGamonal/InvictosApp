@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D6 Inscripciones (UC-24 a 28)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D6 · Inscripciones · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sSolicitar }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Solicitar inscripción (UC-24)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irListaOrg }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Inscribir mi equipo</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px">Copa Otoño F5 · F5 · Masculino · Zona Norte</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Con qué equipo</label>
+              <sc-for list="{{ misEquiposParaInscribir }}" as="eq" hint-placeholder-count="2">
+                <div onClick="{{ eq.elegir }}" style="border: 1.5px solid {{ eq.borde }}; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px">
+                  <div style="width: 20px; height: 20px; flex: none; border-radius: 999px; border: 2px solid {{ eq.borde }}; display: flex; align-items: center; justify-content: center">
+                    <sc-if value="{{ eq.activo }}" hint-placeholder-val="{{ false }}"><div style="width: 10px; height: 10px; border-radius: 999px; background: #00A8CC"></div></sc-if>
+                  </div>
+                  <div style="flex: 1"><div style="font: 700 15px/1.2 Barlow">{{ eq.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.categoria }}</div></div>
+                  <sc-if value="{{ eq.categoriaCruzada }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 9px; height: 9px; flex: none; background: #A25C00; transform: rotate(45deg)"></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ mostrarAvisoCategoria }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FBEBD3; border-radius: 10px; padding: 14px 16px; display: flex; gap: 10px">
+                <div style="width: 9px; height: 9px; flex: none; margin-top: 5px; background: #A25C00; transform: rotate(45deg)"></div>
+                <div style="font: 400 13px/1.4 Barlow; color: #7A4600; text-wrap: pretty">Tu equipo es Femenino y este torneo es Masculino. Podés inscribirte igual — el organizador va a ver el mismo aviso al resolverlo.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ torneoTieneReglamentoInscripcion }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ toggleReglamentoAceptado }}" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer">
+                <div style="width: 20px; height: 20px; flex: none; border-radius: 4px; border: 1.5px solid {{ reglamentoAceptado ? '#00A8CC' : '#CBD3D8' }}; background: {{ reglamentoAceptado ? '#00A8CC' : 'transparent' }}; display: flex; align-items: center; justify-content: center; margin-top: 1px">
+                  <sc-if value="{{ reglamentoAceptado }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0E1720" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if>
+                </div>
+                <div style="font: 400 14px/1.4 Barlow; color: #414E57">Leí y acepto el <span style="color: #007D99; text-decoration: underline">reglamento del torneo</span> (v2).</div>
+              </div>
+            </sc-if>
+
+            <div onClick="{{ confirmarInscripcion }}" style="background: {{ confirmarInscripcionBg }}; color: {{ confirmarInscripcionFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarInscripcion }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Sin costo hoy. Si el cupo ya se completó, tu equipo entra en lista de espera.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sResolver }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Resolver solicitudes (UC-25)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irListaOrg }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 14px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Inscripciones pendientes</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px">Copa Otoño F5 · 12 / 16 cupos ocupados</div>
+            </div>
+            <sc-for list="{{ inscripcionesPendientes }}" as="ip" hint-placeholder-count="3">
+              <div style="border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <div style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px">{{ ip.ini }}</div>
+                  <div style="flex: 1"><div style="font: 700 15px/1.2 Barlow">{{ ip.nombre }}</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">Score {{ ip.score }} · {{ ip.categoria }}</div></div>
+                </div>
+                <sc-if value="{{ ip.categoriaCruzada }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: 8px; background: #FBEBD3; border-radius: 6px; padding: 8px 10px"><div style="width: 8px; height: 8px; flex: none; margin-top: 3px; background: #A25C00; transform: rotate(45deg)"></div><span style="font: 500 12px/1.35 Barlow; color: #7A4600">Categoría del equipo distinta a la del torneo.</span></div>
+                </sc-if>
+                <sc-if value="{{ ip.pendiente }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; gap: 8px">
+                    <div onClick="{{ ip.aprobar }}" style="flex: 1; background: #00A8CC; color: #0E1720; font: 700 14px/1 Barlow; padding: 13px; border-radius: 6px; text-align: center; cursor: pointer">Aprobar</div>
+                    <div onClick="{{ ip.rechazar }}" style="flex: 1; border: 1.5px solid #142230; font: 600 14px/1 Barlow; padding: 12px; border-radius: 6px; text-align: center; cursor: pointer">Rechazar</div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ ip.resuelta }}" hint-placeholder-val="{{ false }}">
+                  <div style="font: 700 12px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: {{ ip.resueltaColor }}">{{ ip.resueltaTexto }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div onClick="{{ toggleAutoAprobacion }}" style="display: flex; align-items: center; justify-content: space-between; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; margin-top: 4px; cursor: pointer">
+              <div><div style="font: 700 14px/1.2 Barlow">Aprobación automática</div><div style="font: 400 12px/1.3 Barlow; color: #5C6A74">Para torneos abiertos, sin revisar equipo por equipo</div></div>
+              <div style="width: 42px; height: 24px; border-radius: 999px; background: {{ autoAprobacionBg }}; position: relative"><div style="position: absolute; top: 2px; left: {{ autoAprobacionPos }}; width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; transition: left 150ms ease"></div></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sInscribirManual }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Inscribir equipo manualmente (UC-26)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irResolver }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Sumar equipo</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Buscá un equipo existente, o cargalo con sus datos mínimos si todavía no está en la plataforma.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Nombre del equipo</label>
+              <input value="{{ nombreEquipoManual }}" onInput="{{ onNombreEquipoManual }}" type="text" placeholder="Buscá, o escribí el nombre" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+            </div>
+            <div onClick="{{ sumarEquipoManual }}" style="background: {{ sumarEquipoBg }}; color: {{ sumarEquipoFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoSumarEquipo }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Queda inscripto y aprobado en un solo paso. Si más adelante alguien reclama ser su capitán real, se resuelve igual que un perfil sin cuenta (UC-05).</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sPlantelHabilitado }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Confirmar plantel habilitado (UC-27)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irListaOrg }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 14px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Lista de buena fe</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px">Quién está habilitado para Copa Otoño F5 — distinto del plantel permanente.</div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; font: 600 12px/1 Barlow; color: #5C6A74"><span>{{ seleccionadosCount }} habilitados</span><span>{{ maxLista }}</span></div>
+            <sc-for list="{{ plantelParaHabilitar }}" as="ph" hint-placeholder-count="6">
+              <div onClick="{{ ph.toggle }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFF2F4; cursor: pointer">
+                <div style="width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1.5px solid {{ ph.seleccionado ? '#00A8CC' : '#CBD3D8' }}; background: {{ ph.seleccionado ? '#00A8CC' : 'transparent' }}; display: flex; align-items: center; justify-content: center">
+                  <sc-if value="{{ ph.seleccionado }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0E1720" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if>
+                </div>
+                <div style="width: 30px; height: 30px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">{{ ph.ini }}</div>
+                <div style="flex: 1"><div style="font: 500 15px/1.1 Barlow">{{ ph.nombre }}</div><div style="font: 400 11px/1.2 Barlow; color: #7E8B95">{{ ph.rolEquipo }}</div></div>
+                <sc-if value="{{ ph.yaEnOtroEquipo }}" hint-placeholder-val="{{ false }}">
+                  <div style="font: 600 11px/1 Barlow; color: #A11F12">Ya habilitado en otro equipo</div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div onClick="{{ confirmarListaHabilitada }}" style="background: {{ confirmarListaBg }}; color: {{ confirmarListaFg }}; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarLista }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">El DT no ocupa cupo de jugadores. La lista sigue abierta durante todo el torneo salvo que el organizador la cierre.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sBaja }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Dar de baja del torneo (UC-28)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irListaOrg }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Dar de baja del torneo</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px">San Martín FC · Copa Otoño F5</div>
+            </div>
+            <div style="background: #E7E9FB; border-radius: 10px; padding: 14px 16px; font: 400 13px/1.4 Barlow; color: #322BA0; text-wrap: pretty">El torneo está en curso: los partidos ya jugados se mantienen, y los pendientes se dan por ganados a sus rivales.</div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Motivo</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                <sc-for list="{{ motivosBaja }}" as="mb" hint-placeholder-count="4">
+                  <div onClick="{{ mb.elegir }}" style="font: 600 13px/1 Barlow; padding: 9px 13px; border-radius: 999px; cursor: pointer; background: {{ mb.bg }}; color: {{ mb.fg }}; border: 1px solid {{ mb.borde }}">{{ mb.nombre }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div onClick="{{ confirmarBaja }}" style="border: 1.5px solid #C42B1C; color: #A11F12; font: 700 16px/1 Barlow; padding: 17px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarBaja }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Además del score deportivo, esto queda registrado en un indicador de confiabilidad separado: torneos terminados vs. abandonados.</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="5">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "solicitar", equipoElegido: "Los Pibes del Fondo", reglamentoAceptado: false, inscripcionEnviada: false,
+    autoAprobacion: false, nombreEquipoManual: "", equipoManualSumado: false,
+    seleccionados: { "Bruno Sosa": true, "Iván Peralta": true, "Nicolás Rey": true, "Franco Díaz": true, "Matías Ledesma": true, "Ariel Ocampo": true },
+    listaConfirmada: false, motivoBaja: "", bajaConfirmada: false
+  };
+
+  equiposParaInscribirBase = [
+    { nombre: "Los Pibes del Fondo", categoria: "Masculino · Libre", categoriaCruzada: false },
+    { nombre: "Racing del Barrio", categoria: "Masculino · Libre", categoriaCruzada: false }
+  ];
+
+  inscripcionesPendientesBase = [
+    { nombre: "Atlético Talleres", ini: "AT", score: 62, categoria: "Masculino", categoriaCruzada: false, estado: "pendiente" },
+    { nombre: "Deportivo Belgrano Femenino", ini: "DB", score: 71, categoria: "Femenino", categoriaCruzada: true, estado: "pendiente" },
+    { nombre: "La Gloria", ini: "LG", score: 55, categoria: "Masculino", categoriaCruzada: false, estado: "aprobada" }
+  ];
+
+  plantelParaHabilitarBase = [
+    { nombre: "Bruno Sosa", ini: "BS", rolEquipo: "Capitán · Jugador", yaEnOtroEquipo: false },
+    { nombre: "Iván Peralta", ini: "IP", rolEquipo: "Jugador", yaEnOtroEquipo: false },
+    { nombre: "Nicolás Rey", ini: "NR", rolEquipo: "Jugador", yaEnOtroEquipo: false },
+    { nombre: "Franco Díaz", ini: "FD", rolEquipo: "Jugador", yaEnOtroEquipo: false },
+    { nombre: "Matías Ledesma", ini: "ML", rolEquipo: "Jugador", yaEnOtroEquipo: false },
+    { nombre: "Leo Ferrari", ini: "LF", rolEquipo: "Jugador", yaEnOtroEquipo: true },
+    { nombre: "Ariel Ocampo", ini: "AO", rolEquipo: "DT", yaEnOtroEquipo: false }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      solicitar: "Solicitar inscripción (UC-24)", resolver: "Resolver solicitudes (UC-25)",
+      inscribirManual: "Inscribir manualmente (UC-26)", plantelHabilitado: "Plantel habilitado (UC-27)", baja: "Dar de baja (UC-28)"
+    };
+    const mapa = [
+      ["Solicitar", "solicitar"], ["Resolver", "resolver"], ["Inscribir manual", "inscribirManual"],
+      ["Plantel habilitado", "plantelHabilitado"], ["Dar de baja", "baja"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent", fg: sc === id ? "#0E1720" : "#CBD3D8", borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      solicitar: "UC-24 (D-54/D-82): el reglamento se acepta de un clic, queda registrada la versión. Categoría cruzada avisa, no bloquea.",
+      resolver: "UC-25: el organizador siempre decide, aunque haya cupo. El score es información para esa decisión, no un filtro automático.",
+      inscribirManual: "UC-26: indispensable desde el MVP — la mayoría llega con equipos ya conocidos. Queda inscripto y aprobado en un solo paso.",
+      plantelHabilitado: "UC-27 (D-24/D-59): plantel permanente y plantel habilitado son cosas distintas. El DT no ocupa cupo de jugadores.",
+      baja: "UC-28 (D-08b/D-66): default configurable — jugados se mantienen, pendientes se dan por ganados al rival. Motivo de lista cerrada + Otro."
+    };
+
+    const equiposParaInscribir = this.equiposParaInscribirBase.map(eq => ({
+      nombre: eq.nombre, categoria: eq.categoria, categoriaCruzada: eq.categoria.indexOf("Femenino") >= 0,
+      activo: s.equipoElegido === eq.nombre, borde: s.equipoElegido === eq.nombre ? "#00A8CC" : "#CBD3D8",
+      elegir: () => this.setState({ equipoElegido: eq.nombre })
+    }));
+
+    const inscripcionesPendientes = this.inscripcionesPendientesBase.map(ip => ({
+      nombre: ip.nombre, ini: ip.ini, score: ip.score, categoria: ip.categoria, categoriaCruzada: ip.categoriaCruzada,
+      pendiente: ip.estado === "pendiente", resuelta: ip.estado !== "pendiente",
+      resueltaTexto: ip.estado === "aprobada" ? "Aprobada" : "Rechazada",
+      resueltaColor: ip.estado === "aprobada" ? "#12662C" : "#414E57",
+      aprobar: () => {}, rechazar: () => {}
+    }));
+
+    const seleccionadosCount = Object.values(s.seleccionados).filter(Boolean).length;
+    const plantelParaHabilitar = this.plantelParaHabilitarBase.map(p => ({
+      nombre: p.nombre, ini: p.ini, rolEquipo: p.rolEquipo, yaEnOtroEquipo: p.yaEnOtroEquipo,
+      seleccionado: !!s.seleccionados[p.nombre],
+      toggle: () => this.setState(st => ({ seleccionados: Object.assign({}, st.seleccionados, { [p.nombre]: !st.seleccionados[p.nombre] }) }))
+    }));
+
+    const motivosBaja = ["Falta de jugadores", "Superposición de fechas", "Problemas económicos", "Otro"].map(m => ({
+      nombre: m, elegir: () => this.setState({ motivoBaja: m }),
+      bg: s.motivoBaja === m ? "#142230" : "transparent", fg: s.motivoBaja === m ? "#FFFFFF" : "#414E57", borde: s.motivoBaja === m ? "#142230" : "#CBD3D8"
+    }));
+
+    const puedeConfirmarInscripcion = s.reglamentoAceptado;
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sSolicitar: sc === "solicitar", sResolver: sc === "resolver", sInscribirManual: sc === "inscribirManual",
+      sPlantelHabilitado: sc === "plantelHabilitado", sBaja: sc === "baja",
+      irListaOrg: () => this.go("resolver"), irResolver: () => this.go("resolver"),
+
+      misEquiposParaInscribir: equiposParaInscribir,
+      mostrarAvisoCategoria: equiposParaInscribir.some(e => e.activo && e.categoriaCruzada),
+      torneoTieneReglamentoInscripcion: true,
+      reglamentoAceptado: s.reglamentoAceptado, toggleReglamentoAceptado: () => this.setState(st => ({ reglamentoAceptado: !st.reglamentoAceptado })),
+      confirmarInscripcionBg: puedeConfirmarInscripcion ? "#00A8CC" : "#CBD3D8",
+      confirmarInscripcionFg: puedeConfirmarInscripcion ? "#0E1720" : "#7E8B95",
+      textoConfirmarInscripcion: s.inscripcionEnviada ? "Solicitud enviada ✓" : "Confirmar inscripción",
+      confirmarInscripcion: () => { if (puedeConfirmarInscripcion) this.setState({ inscripcionEnviada: true }); },
+
+      inscripcionesPendientes,
+      autoAprobacion: s.autoAprobacion, toggleAutoAprobacion: () => this.setState(st => ({ autoAprobacion: !st.autoAprobacion })),
+      autoAprobacionBg: s.autoAprobacion ? "#00A8CC" : "#CBD3D8", autoAprobacionPos: s.autoAprobacion ? "20px" : "2px",
+
+      nombreEquipoManual: s.nombreEquipoManual, onNombreEquipoManual: e => this.setState({ nombreEquipoManual: e.target.value }),
+      sumarEquipoBg: s.nombreEquipoManual.trim() ? "#00A8CC" : "#CBD3D8",
+      sumarEquipoFg: s.nombreEquipoManual.trim() ? "#0E1720" : "#7E8B95",
+      textoSumarEquipo: s.equipoManualSumado ? "Sumado ✓" : "Sumar al torneo",
+      sumarEquipoManual: () => { if (s.nombreEquipoManual.trim()) this.setState({ equipoManualSumado: true }); },
+
+      seleccionadosCount, maxLista: "máx. 15",
+      plantelParaHabilitar,
+      confirmarListaBg: "#00A8CC", confirmarListaFg: "#0E1720",
+      textoConfirmarLista: s.listaConfirmada ? "Lista confirmada ✓" : "Confirmar lista",
+      confirmarListaHabilitada: () => this.setState({ listaConfirmada: true }),
+
+      motivosBaja,
+      textoConfirmarBaja: s.bajaConfirmada ? "Baja confirmada ✓" : "Confirmar baja del torneo",
+      confirmarBaja: () => { if (s.motivoBaja) this.setState({ bajaConfirmada: true }); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

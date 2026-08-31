@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — D7 Partidos y Resultados (UC-29 a 34)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D7 · Partidos y Resultados · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sFixture }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Generar fixture (UC-29)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCargar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 14px">
+            <div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase">Propuesta de fixture</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; margin-top: 4px; text-wrap: pretty">Editable a mano: cambiá cualquier cruce antes de confirmar. El sorteo no conoce tus restricciones reales.</div>
+            </div>
+            <sc-for list="{{ cruces }}" as="c" hint-placeholder-count="4">
+              <div style="border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+                <div style="flex: 1; font: 700 15px/1.3 Barlow">{{ c.local }} <span style="color: #A9B4BC; font-weight: 400">vs</span> {{ c.visita }}</div>
+                <div onClick="{{ c.swap }}" style="width: 34px; height: 34px; flex: none; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3 21 7l-4 4M21 7H3M7 21l-4-4 4-4M3 17h18" /></svg>
+                </div>
+              </div>
+            </sc-for>
+            <div style="background: #F7F9FA; border-radius: 8px; padding: 12px 14px; font: 400 13px/1.4 Barlow; color: #5C6A74">Fecha libre: Racing del Barrio (impar en la zona esta fecha).</div>
+            <div onClick="{{ confirmarFixture }}" style="background: {{ confirmarFixtureBg }}; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarFixture }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sProgramar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Programar / reprogramar (UC-30)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCargar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Los Pibes del Fondo vs San Martín FC</div>
+            <sc-if value="{{ mostrarFechaOriginal }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #EFF2F4; border-radius: 8px; padding: 10px 14px; font: 500 13px/1.4 Barlow; color: #5C6A74">Fecha original: <span style="text-decoration: line-through">Sáb 12/4 · 20:30</span></div>
+            </sc-if>
+            <div style="display: flex; gap: 10px">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Día</label>
+                <input value="{{ diaPartido }}" onInput="{{ onDiaPartido }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">Hora</label>
+                <input value="{{ horaPartido }}" onInput="{{ onHoraPartido }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">Cancha</label>
+              <input value="{{ canchaPartido }}" onInput="{{ onCanchaPartido }}" type="text" style="border: 1px solid #CBD3D8; border-radius: 6px; padding: 14px; font: 400 16px/1 Barlow; min-height: 50px; outline: none; width: 100%; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px" />
+            </div>
+            <div onClick="{{ guardarProgramacion }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoGuardarProgramacion }}</div>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Reprogramar notifica a los dos equipos y a quienes siguen el torneo, y conserva la fecha original.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sCargar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Cargar resultado (UC-31)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 14px 18px 26px; flex: none; display: flex; flex-direction: column; gap: 14px; position: relative">
+            <div onClick="{{ irFixture }}" style="font: 400 24px/1 Barlow; color: #A9B4BC; cursor: pointer; width: 22px">‹</div>
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC">Copa Otoño F5 · Fecha 7</div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 18px; padding: 4px 0">
+              <div style="font: 700 13px/1.2 Barlow; text-align: right; max-width: 82px">Los Pibes del Fondo</div>
+              <div style="display: flex; align-items: center; gap: 4px">
+                <div onClick="{{ bajaLocal }}" style="width: 34px; height: 34px; border: 1px solid #2C383F; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 18px/1 Barlow; cursor: pointer; color: #FFFFFF">−</div>
+                <div style="width: 84px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 52px; line-height: 1">{{ golesLocal }}<span style="color: #5C6A74; font-size: 32px"> – </span>{{ golesVisita }}</div>
+                <div onClick="{{ subeVisita }}" style="width: 34px; height: 34px; border: 1px solid #2C383F; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 18px/1 Barlow; cursor: pointer; color: #FFFFFF">+</div>
+              </div>
+              <div style="font: 700 13px/1.2 Barlow; max-width: 82px">San Martín FC</div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 34px">
+              <div onClick="{{ subeLocal }}" style="font: 700 11px/1 Barlow; color: #00A8CC; cursor: pointer">+ local</div>
+              <div onClick="{{ bajaVisita }}" style="font: 700 11px/1 Barlow; color: #00A8CC; cursor: pointer">+ visita</div>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+            <div onClick="{{ irEventos }}" style="font: 600 13px/1 Barlow; color: #007D99; cursor: pointer; text-align: center">Cargar goleadores y tarjetas (opcional)</div>
+            <div onClick="{{ guardarResultado }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoGuardarResultado }}</div>
+            <sc-if value="{{ resultadoGuardado }}" hint-placeholder-val="{{ false }}">
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-align: center">Notificamos a los dos equipos y a quienes siguen el torneo. Vos, como organizador, ya lo confirmaste al cargarlo.</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sConfirmar }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Confirmar o disputar (UC-32)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCargar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="background: #0E1720; border-radius: 12px; padding: 20px; color: #FFFFFF">
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC; margin-bottom: 10px">Fecha 6 · San Martín FC vs Deportivo Belgrano</div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 48px; line-height: 1; text-align: center">0 <span style="color: #7E8B95">·</span> 2</div>
+              <div style="text-align: center; font: 400 13px/1.4 Barlow; color: #A9B4BC; margin-top: 10px">Cargado hace 18 horas</div>
+            </div>
+
+            <sc-if value="{{ confirmacionEsPendiente }}" hint-placeholder-val="{{ true }}">
+              <div style="background: #E7E9FB; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 10px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4038C2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+                <span style="font: 500 13px/1.35 Barlow; color: #322BA0">Quedan {{ horasRestantes }} para que se dé por confirmado solo, si nadie lo objeta.</span>
+              </div>
+              <div style="display: flex; gap: 10px">
+                <div onClick="{{ confirmarResultado }}" style="flex: 1; background: #00A8CC; color: #0E1720; font: 700 15px/1 Barlow; padding: 16px; border-radius: 8px; text-align: center; cursor: pointer">Confirmar</div>
+                <div onClick="{{ irDisputar }}" style="flex: 1; border: 1.5px solid #142230; font: 600 15px/1 Barlow; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer">Disputar</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ confirmacionEsDisputando }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <label style="font: 600 13px/1 Barlow; color: #414E57">¿Qué pasó?</label>
+                <textarea value="{{ motivoDisputa }}" onInput="{{ onMotivoDisputa }}" placeholder="Contá qué no coincide con lo que pasó en la cancha" style="border: 1px solid #CBD3D8; border-radius: 8px; padding: 14px; font: 400 15px/1.5 Barlow; min-height: 100px; outline: none; width: 100%; resize: none; background: #FFFFFF; color: #142230" style-focus="border: 2px solid #00A8CC; padding: 13px"></textarea>
+              </div>
+              <div onClick="{{ enviarDisputa }}" style="background: {{ enviarDisputaBg }}; color: #FFFFFF; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Enviar al organizador</div>
+            </sc-if>
+
+            <sc-if value="{{ confirmacionEsConfirmada }}" hint-placeholder-val="{{ false }}">
+              <div style="display: inline-flex; align-items: center; gap: 8px; background: #E4F3E8; padding: 12px 16px; border-radius: 8px"><div style="width: 8px; height: 8px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 13px/1 Barlow; color: #12662C">Confirmado. Ya cuenta para la tabla y el score.</span></div>
+            </sc-if>
+
+            <sc-if value="{{ confirmacionEsEnDisputa }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; align-items: flex-start; gap: 10px; background: #FEF7F6; border: 1px solid #F2CFCA; border-radius: 8px; padding: 14px">
+                <div style="width: 9px; height: 9px; flex: none; margin-top: 4px; border-radius: 999px; border: 2.5px solid #C42B1C"></div>
+                <div style="font: 500 14px/1.4 Barlow; color: #A11F12">En disputa. El plazo de 72 horas está congelado y no cuenta para el score hasta que el organizador resuelva — pero ya se ve en la tabla, marcado como provisorio.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sNoDisputado }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Registrar no disputado (UC-33)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none"><div onClick="{{ irCargar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px 22px 32px; display: flex; flex-direction: column; gap: 18px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">La Gloria vs Racing del Barrio</div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label style="font: 600 13px/1 Barlow; color: #414E57">¿Qué pasó?</label>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <sc-for list="{{ resolucionesNoDisputado }}" as="rn" hint-placeholder-count="3">
+                  <div onClick="{{ rn.elegir }}" style="border: 1.5px solid {{ rn.borde }}; border-radius: 10px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px">
+                    <div style="width: 18px; height: 18px; flex: none; border-radius: 999px; border: 2px solid {{ rn.borde }}; display: flex; align-items: center; justify-content: center"><sc-if value="{{ rn.activo }}" hint-placeholder-val="{{ false }}"><div style="width: 9px; height: 9px; border-radius: 999px; background: #00A8CC"></div></sc-if></div>
+                    <div style="font: 600 14px/1.2 Barlow">{{ rn.nombre }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <sc-if value="{{ mostrarGanadorPresentacion }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 8px">
+                <div onClick="{{ elegirGanadorLocal }}" style="flex: 1; border: 1.5px solid {{ bordeGanadorLocal }}; border-radius: 8px; padding: 12px; text-align: center; font: 600 14px/1.2 Barlow; cursor: pointer">La Gloria</div>
+                <div onClick="{{ elegirGanadorVisita }}" style="flex: 1; border: 1.5px solid {{ bordeGanadorVisita }}; border-radius: 8px; padding: 12px; text-align: center; font: 600 14px/1.2 Barlow; cursor: pointer">Racing del Barrio</div>
+              </div>
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95">Se computa 3 – 0 (configurable). Cuenta para la diferencia de gol, no para estadísticas individuales ni como partido jugado en el score.</div>
+            </sc-if>
+            <div onClick="{{ confirmarNoDisputado }}" style="background: {{ confirmarNoDispBg }}; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">{{ textoConfirmarNoDisp }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sEventos }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Cargar eventos del partido (UC-34)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 20px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div onClick="{{ irCargar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #A25C00; background: #FBEBD3; padding: 4px 8px; border-radius: 3px">Fase 2 · opcional</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 16px">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.05; text-transform: uppercase">Goleadores y tarjetas</div>
+            <sc-for list="{{ plantelesEventos }}" as="pe" hint-placeholder-count="2">
+              <div style="border: 1px solid #E3E8EB; border-radius: 10px; overflow: hidden">
+                <div style="background: #F7F9FA; padding: 10px 14px; font: 700 13px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase">{{ pe.equipo }}</div>
+                <sc-for list="{{ pe.jugadores }}" as="j" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid #EFF2F4">
+                    <div style="flex: 1; font: 500 14px/1.2 Barlow">{{ j.nombre }} <span style="color: #7E8B95; font-weight: 400">· {{ j.rol }}</span></div>
+                    <div onClick="{{ j.bajaGol }}" style="width: 32px; height: 32px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 16px/1 Barlow; cursor: pointer">−</div>
+                    <div style="width: 20px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px">{{ j.goles }}</div>
+                    <div onClick="{{ j.subeGol }}" style="width: 32px; height: 32px; border: 1px solid #CBD3D8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font: 600 16px/1 Barlow; cursor: pointer">+</div>
+                    <div onClick="{{ j.toggleAmarilla }}" style="width: 22px; height: 30px; border-radius: 3px; background: {{ j.amarillaBg }}; border: 1px solid #CBD3D8; cursor: pointer"></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-wrap: pretty">Solo integrantes habilitados en este torneo (UC-27). Los goles solo van a jugadores; las tarjetas también al cuerpo técnico.</div>
+            <div onClick="{{ irCargar }}" style="background: #00A8CC; color: #0E1720; font: 700 16px/1 Barlow; padding: 18px; border-radius: 8px; text-align: center; cursor: pointer">Listo</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="6">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: "cargar", fixtureConfirmado: false,
+    diaPartido: "Dom 20/4", horaPartido: "19:00", canchaPartido: "Cancha 2", programacionGuardada: false,
+    golesLocal: 0, golesVisita: 0, resultadoGuardado: false,
+    confirmacionEstado: "pendiente", motivoDisputa: "",
+    resolucionNoDisp: "presentacion", ganadorPresentacion: "local", noDispConfirmado: false,
+    eventos: {}
+  };
+
+  crucesBase = [
+    { local: "Los Pibes del Fondo", visita: "San Martín FC" },
+    { local: "Deportivo Belgrano", visita: "La Gloria" }
+  ];
+
+  plantelesEventosBase = [
+    { equipo: "Los Pibes del Fondo", jugadores: [{ nombre: "Bruno Sosa", rol: "Jugador" }, { nombre: "Nicolás Rey", rol: "Jugador" }, { nombre: "Ariel Ocampo", rol: "DT" }] },
+    { equipo: "San Martín FC", jugadores: [{ nombre: "Damián Ortiz", rol: "Jugador" }, { nombre: "Kevin Salas", rol: "Jugador" }] }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = {
+      fixture: "Generar fixture (UC-29)", programar: "Programar / reprogramar (UC-30)", cargar: "Cargar resultado (UC-31)",
+      confirmar: "Confirmar o disputar (UC-32)", noDisputado: "No disputado (UC-33)", eventos: "Eventos del partido (UC-34, fase 2)"
+    };
+    const mapa = [
+      ["Fixture", "fixture"], ["Programar", "programar"], ["Cargar resultado", "cargar"],
+      ["Confirmar/disputar", "confirmar"], ["No disputado", "noDisputado"], ["Eventos", "eventos"]
+    ].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent", fg: sc === id ? "#0E1720" : "#CBD3D8", borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      fixture: "UC-29 (D-31b): el fixture es siempre una propuesta editable — ningún sorteo conoce las restricciones reales del organizador.",
+      programar: "UC-30 (D-30): se conserva la fecha original junto a la nueva. Reprogramar es lo normal en amateur, no la excepción.",
+      cargar: "UC-31 (D-07b/D-63): capitanes cargan, organizador confirma. Sin publicidad — es el flujo del que vive el producto.",
+      confirmar: "UC-32 (D-60): 72 horas desde la carga, congeladas si hay disputa abierta. En disputa no alimenta el score, pero sí la tabla (provisoria).",
+      noDisputado: "UC-33 (D-33b): walkover default 3-0, configurable. No cuenta como partido jugado en el score ni en estadísticas individuales.",
+      eventos: "UC-34 (D-26, fase 2): siempre opcional. Solo integrantes habilitados (UC-27); goles solo a jugadores, tarjetas también al cuerpo técnico."
+    };
+
+    const cruces = this.crucesBase.map((c, i) => ({
+      local: c.local, visita: c.visita,
+      swap: () => this.setState(st => {
+        const arr = [...this.crucesBase];
+        return {};
+      })
+    }));
+
+    const resolucionesNoDisp = [
+      ["presentacion", "Ganado por presentación"], ["reprogramar", "Reprogramar"], ["anular", "Anular el partido"]
+    ].map(([id, nombre]) => ({
+      nombre, activo: s.resolucionNoDisp === id, borde: s.resolucionNoDisp === id ? "#00A8CC" : "#CBD3D8",
+      elegir: () => this.setState({ resolucionNoDisp: id })
+    }));
+
+    const plantelesEventos = this.plantelesEventosBase.map(pe => ({
+      equipo: pe.equipo,
+      jugadores: pe.jugadores.map(j => {
+        const key = pe.equipo + j.nombre;
+        const ev = s.eventos[key] || { goles: 0, amarilla: false };
+        return {
+          nombre: j.nombre, rol: j.rol, goles: ev.goles, amarillaBg: ev.amarilla ? "#FBEBD3" : "#F7F9FA",
+          subeGol: () => this.setEvento(key, e => ({ goles: e.goles + 1 })),
+          bajaGol: () => this.setEvento(key, e => ({ goles: Math.max(0, e.goles - 1) })),
+          toggleAmarilla: () => this.setEvento(key, e => ({ amarilla: !e.amarilla }))
+        };
+      })
+    }));
+
+    return {
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sFixture: sc === "fixture", sProgramar: sc === "programar", sCargar: sc === "cargar",
+      sConfirmar: sc === "confirmar", sNoDisputado: sc === "noDisputado", sEventos: sc === "eventos",
+      irFixture: () => this.go("fixture"), irCargar: () => this.go("cargar"), irEventos: () => this.go("eventos"), irDisputar: () => this.setState({ confirmacionEstado: "disputando" }),
+
+      cruces,
+      confirmarFixtureBg: "#00A8CC",
+      textoConfirmarFixture: s.fixtureConfirmado ? "Fixture confirmado ✓" : "Confirmar fixture",
+      confirmarFixture: () => this.setState({ fixtureConfirmado: true }),
+
+      mostrarFechaOriginal: s.programacionGuardada,
+      diaPartido: s.diaPartido, onDiaPartido: e => this.setState({ diaPartido: e.target.value }),
+      horaPartido: s.horaPartido, onHoraPartido: e => this.setState({ horaPartido: e.target.value }),
+      canchaPartido: s.canchaPartido, onCanchaPartido: e => this.setState({ canchaPartido: e.target.value }),
+      textoGuardarProgramacion: s.programacionGuardada ? "Reprogramación guardada ✓" : "Programar partido",
+      guardarProgramacion: () => this.setState({ programacionGuardada: true }),
+
+      golesLocal: s.golesLocal, golesVisita: s.golesVisita,
+      subeLocal: () => this.setState(st => ({ golesLocal: Math.min(20, st.golesLocal + 1) })),
+      bajaLocal: () => this.setState(st => ({ golesLocal: Math.max(0, st.golesLocal - 1) })),
+      subeVisita: () => this.setState(st => ({ golesVisita: Math.min(20, st.golesVisita + 1) })),
+      bajaVisita: () => this.setState(st => ({ golesVisita: Math.max(0, st.golesVisita - 1) })),
+      resultadoGuardado: s.resultadoGuardado,
+      textoGuardarResultado: s.resultadoGuardado ? "Guardado ✓" : "Guardar resultado",
+      guardarResultado: () => this.setState({ resultadoGuardado: true }),
+
+      confirmacionEsPendiente: s.confirmacionEstado === "pendiente",
+      confirmacionEsDisputando: s.confirmacionEstado === "disputando",
+      confirmacionEsConfirmada: s.confirmacionEstado === "confirmada",
+      confirmacionEsEnDisputa: s.confirmacionEstado === "en_disputa",
+      horasRestantes: "54 horas",
+      confirmarResultado: () => this.setState({ confirmacionEstado: "confirmada" }),
+      motivoDisputa: s.motivoDisputa, onMotivoDisputa: e => this.setState({ motivoDisputa: e.target.value }),
+      enviarDisputaBg: s.motivoDisputa.trim() ? "#C42B1C" : "#CBD3D8",
+      enviarDisputa: () => { if (s.motivoDisputa.trim()) this.setState({ confirmacionEstado: "en_disputa" }); },
+
+      resolucionesNoDisputado: resolucionesNoDisp,
+      mostrarGanadorPresentacion: s.resolucionNoDisp === "presentacion",
+      bordeGanadorLocal: s.ganadorPresentacion === "local" ? "#00A8CC" : "#CBD3D8",
+      bordeGanadorVisita: s.ganadorPresentacion === "visita" ? "#00A8CC" : "#CBD3D8",
+      elegirGanadorLocal: () => this.setState({ ganadorPresentacion: "local" }),
+      elegirGanadorVisita: () => this.setState({ ganadorPresentacion: "visita" }),
+      confirmarNoDispBg: "#00A8CC",
+      textoConfirmarNoDisp: s.noDispConfirmado ? "Registrado ✓" : "Confirmar",
+      confirmarNoDisputado: () => this.setState({ noDispConfirmado: true }),
+
+      plantelesEventos
+    };
+  }
+
+  setEvento(key, fn) {
+    this.setState(st => {
+      const cur = st.eventos[key] || { goles: 0, amarilla: false };
+      return { eventos: Object.assign({}, st.eventos, { [key]: Object.assign({}, cur, fn(cur)) }) };
+    });
+  }
+}
+
+</script>
+</body>
+</html>

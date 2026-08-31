@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invictos — D5 Descubrimiento (UC-22, UC-23)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">D5 · Descubrimiento · {{ etiquetaPantalla }}</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #F7F9FA; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <sc-if value="{{ sBuscar }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Descubrimiento (UC-22)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="background: #0E1720; color: #FFFFFF; padding: 16px 18px 14px; flex: none; display: flex; flex-direction: column; gap: 10px">
+            <div onClick="{{ irSelectorCiudad }}" style="background: rgba(255,255,255,0.08); border-radius: 8px; padding: 11px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+              <span style="font: 700 14px/1.2 Barlow; flex: 1">{{ etiquetaCiudades }}</span>
+              <span style="font: 700 12px/1 Barlow; color: #00A8CC">Explorar</span>
+            </div>
+            <div onClick="{{ toggleFiltros }}" style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7E8B95" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+              <span style="font: 500 12px/1 Barlow; color: #A9B4BC">{{ resumenFiltros }}</span>
+              <span style="font: 700 11px/1 Barlow; color: #007D99">{{ textoToggleFiltros }}</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ filtrosAbiertos }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #FFFFFF; border-bottom: 1px solid #E3E8EB; padding: 16px 18px; flex: none; display: flex; flex-direction: column; gap: 14px">
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Modalidad</div>
+                <div style="display: flex; gap: 6px">
+                  <sc-for list="{{ modalidadesFiltro }}" as="mo" hint-placeholder-count="3">
+                    <div onClick="{{ mo.elegir }}" style="flex: 1; text-align: center; font: 600 13px/1 Barlow; padding: 9px 0; border-radius: 6px; cursor: pointer; background: {{ mo.bg }}; color: {{ mo.fg }}; border: 1px solid {{ mo.borde }}">{{ mo.nombre }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Categoría</div>
+                <div style="display: flex; gap: 6px">
+                  <sc-for list="{{ categoriasFiltro }}" as="ca" hint-placeholder-count="3">
+                    <div onClick="{{ ca.elegir }}" style="flex: 1; text-align: center; font: 600 13px/1 Barlow; padding: 9px 0; border-radius: 6px; cursor: pointer; background: {{ ca.bg }}; color: {{ ca.fg }}; border: 1px solid {{ ca.borde }}">{{ ca.nombre }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Estado de inscripción</div>
+                <div style="display: flex; gap: 6px">
+                  <sc-for list="{{ estadosFiltro }}" as="e" hint-placeholder-count="2">
+                    <div onClick="{{ e.elegir }}" style="flex: 1; text-align: center; font: 600 13px/1 Barlow; padding: 9px 0; border-radius: 6px; cursor: pointer; background: {{ e.bg }}; color: {{ e.fg }}; border: 1px solid {{ e.borde }}">{{ e.nombre }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div onClick="{{ toggleFiltros }}" style="background: #00A8CC; color: #0E1720; font: 700 14px/1 Barlow; padding: 13px; border-radius: 6px; text-align: center; cursor: pointer">Ver resultados</div>
+            </div>
+          </sc-if>
+
+          <div style="flex: 1; overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+            <sc-if value="{{ hayResultados }}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{ gruposCiudad }}" as="gc" hint-placeholder-count="1">
+                <div style="display: flex; flex-direction: column; gap: 12px">
+                  <sc-if value="{{ mostrarEncabezadoCiudad }}" hint-placeholder-val="{{ false }}">
+                    <div style="font: 700 12px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: #5C6A74; padding-top: 4px">{{ gc.ciudad }}</div>
+                  </sc-if>
+                  <sc-for list="{{ gc.torneos }}" as="t" hint-placeholder-count="3">
+                    <div onClick="{{ t.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0">
+                      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+                        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.05; text-transform: uppercase">{{ t.nombre }}</div>
+                        <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ t.estadoBg }}; padding: 3px 8px; border-radius: 999px"><div style="width: 6px; height: 6px; border-radius: 999px; background: {{ t.estadoDot }}"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: {{ t.estadoFg }}">{{ t.estadoLabel }}</span></div>
+                      </div>
+                      <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #5C6A74">{{ t.modalidad }} · {{ t.categoria }} · {{ t.zona }}</div>
+                      <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 10px; font: 500 13px/1 Barlow; color: #414E57"><span>{{ t.fecha }}</span><span>{{ t.inscriptos }} / {{ t.cupo }} equipos</span></div>
+                      <sc-if value="{{ t.verificada }}" hint-placeholder-val="{{ false }}"><div style="display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; background: #E4F3E8; padding: 3px 7px; border-radius: 3px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #12662C">Organizador verificado</span></div></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+
+              <div style="background: #EFF2F4; border-top: 1px solid #CBD3D8; border-bottom: 1px solid #CBD3D8; margin: 0 -16px; padding: 10px 16px; flex-shrink: 0">
+                <div style="font: 600 10px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Publicidad</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 4px; height: 88px; display: flex; align-items: center; justify-content: center; font: 400 13px/1 Barlow; color: #A9B4BC">Contenido de red</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ !hayResultados }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 4px">
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1; text-transform: uppercase">Todavía no hay torneos en {{ etiquetaCiudades }}</div>
+                <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">Es normal: la mayoría de las ciudades recién está empezando en Invictos.</div>
+                <div onClick="{{ verProvincia }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 6px">
+                  <div style="flex: 1; font: 700 15px/1.2 Barlow">Ver los de {{ provinciaEtiqueta }}</div>
+                  <div style="font: 600 12px/1 Barlow; color: #7E8B95">{{ torneosProvincia }}</div>
+                </div>
+                <div onClick="{{ avisarmeCiudad }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+                  <div style="flex: 1; font: 700 15px/1.2 Barlow">{{ textoAvisarme }}</div>
+                </div>
+                <div onClick="{{ publicarDesdeVacio }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+                  <div style="flex: 1; font: 700 15px/1.2 Barlow">Publicar un torneo acá</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sSelectorCiudad }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Selector de ciudad — compartido" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 16px 18px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+            <div onClick="{{ irBuscar }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+            <div style="font: 700 15px/1 Barlow">Elegí tu ciudad</div>
+            <div onClick="{{ confirmarSelectorCiudad }}" style="font: 700 13px/1 Barlow; color: #00A8CC; cursor: pointer">Listo</div>
+          </div>
+          <div style="padding: 12px 18px 0; flex: none">
+            <div style="background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E8B95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <span style="font: 400 15px/1 Barlow; color: #A9B4BC">Buscá tu ciudad</span>
+            </div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 14px 18px 24px; margin-top: 4px">
+            <div style="font: 700 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Buenos Aires (AMBA)</div>
+            <sc-for list="{{ ciudadesSelector }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.toggle }}" style="display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #EFF2F4; cursor: pointer">
+                <div style="width: 20px; height: 20px; flex: none; border-radius: 4px; border: 1.5px solid {{ c.checkBorde }}; background: {{ c.checkBg }}; display: flex; align-items: center; justify-content: center">
+                  <sc-if value="{{ c.seleccionada }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if>
+                </div>
+                <div style="flex: 1; font: 600 14px/1.2 Barlow">{{ c.nombre }}</div>
+              </div>
+            </sc-for>
+            <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; margin-top: 12px; text-wrap: pretty">Hasta 3 ciudades a la vez — pensado para AMBA, donde se juega en más de un municipio. Mismo componente que usan Crear torneo, Crear equipo y Mi perfil.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sFicha }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Ficha pública del torneo (UC-23)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="flex: 1; overflow-y: auto">
+            <div style="padding: 18px 18px 0; display: flex; align-items: center; justify-content: space-between">
+              <div onClick="{{ irBuscar }}" style="font: 400 24px/1 Barlow; color: #A9B4BC; cursor: pointer; width: 24px">‹</div>
+            </div>
+            <div style="background: #0E1720; color: #FFFFFF; padding: 8px 20px 22px; display: flex; flex-direction: column; gap: 12px">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+                <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1.05; text-transform: uppercase">Copa Otoño F5</div>
+                <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ fichaEstadoBg }}; padding: 4px 8px; border-radius: 999px; margin-top: 6px"><div style="width: 7px; height: 7px; border-radius: 999px; background: {{ fichaEstadoDot }}"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ fichaEstadoFg }}">{{ fichaEstadoLabel }}</span></div>
+              </div>
+              <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #A9B4BC">F5 · Masculino · Zona Norte</div>
+              <div style="display: flex; align-items: center; gap: 8px; padding-top: 4px">
+                <div style="width: 26px; height: 26px; flex: none; border-radius: 4px; background: #2C383F; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px">CS</div>
+                <span style="font: 500 14px/1 Barlow">Complejo San Martín</span>
+                <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(27,138,60,0.18); padding: 3px 7px; border-radius: 3px"><div style="width: 6px; height: 6px; border-radius: 999px; background: #4ADE80"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #86EFAC">Verificado</span></div>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 4px">
+                <div onClick="{{ toggleSeguirFicha }}" style="border: 1.5px solid {{ seguirFichaBorde }}; background: {{ seguirFichaBg }}; color: {{ seguirFichaFg }}; font: 700 13px/1 Barlow; padding: 10px 16px; border-radius: 999px; cursor: pointer">{{ textoSeguirFicha }}</div>
+                <sc-if value="{{ fichaAceptaInscripciones }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ irInscribir }}" style="background: #00A8CC; color: #0E1720; font: 700 13px/1 Barlow; padding: 10px 16px; border-radius: 999px; cursor: pointer">Inscribir mi equipo</div>
+                </sc-if>
+                <div onClick="{{ compartirTorneo }}" style="width: 38px; height: 38px; flex: none; border: 1.5px solid #414E57; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="M8.2 10.7 15.8 6.3M8.2 13.3l7.6 4.4" /></svg>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto">
+              <sc-for list="{{ estadosDemo }}" as="ed" hint-placeholder-count="3">
+                <div onClick="{{ ed.elegir }}" style="font: 600 11px/1 Barlow; padding: 6px 10px; border-radius: 999px; cursor: pointer; background: {{ ed.bg }}; color: {{ ed.fg }}; border: 1px solid {{ ed.borde }}; white-space: nowrap; flex: none">{{ ed.nombre }}</div>
+              </sc-for>
+            </div>
+
+            <div style="padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 18px">
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Descripción</div>
+                <div style="font: 400 14px/1.5 Barlow; color: #414E57; text-wrap: pretty">Torneo de fútbol 5 masculino, libre, a cancha de Complejo San Martín. Formato liga, ida y vuelta.</div>
+              </div>
+              <sc-if value="{{ fichaEsEnCurso }}" hint-placeholder-val="{{ false }}">
+                <div style="border-radius: 10px; padding: 18px 18px 22px; background: linear-gradient(165deg, #0E1720 0%, #142230 65%, #1B2A38 100%)">
+                  <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(27,138,60,0.18); padding: 4px 9px; border-radius: 999px; margin-bottom: 10px">
+                    <div style="width: 6px; height: 6px; border-radius: 999px; background: #4ADE80"></div>
+                    <span style="font: 700 10px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #86EFAC">Próxima fecha</span>
+                  </div>
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.1; text-transform: uppercase; color: #FFFFFF">Fecha 8 · Sáb 19/4</div>
+                  <div style="font: 400 13px/1.3 Barlow; color: #A9B4BC; margin-top: 4px">Deportivo Belgrano lidera con 19 puntos.</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ fichaEsFinalizada }}" hint-placeholder-val="{{ false }}">
+                <div style="border-radius: 10px; padding: 22px 18px; background: linear-gradient(165deg, #0E1720 0%, #142230 65%, #1B2A38 100%); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px">
+                  <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC">Campeón</div>
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; text-transform: uppercase; color: #FFFFFF">Deportivo Belgrano</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ fichaEsAbierta }}" hint-placeholder-val="{{ true }}">
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+                  <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Inscripciones</div>
+                  <div style="display: flex; align-items: center; justify-content: space-between"><span style="font: 500 15px/1 Barlow">Cupo</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">12<span style="color: #A9B4BC"> / 16</span></span></div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 12px"><span style="font: 500 15px/1 Barlow">Costo de inscripción</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">{{ costoInscripcion }}</span></div>
+                  <sc-if value="{{ tieneCostoPlanilla }}" hint-placeholder-val="{{ true }}">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 12px"><span style="font: 500 15px/1 Barlow">Costo de planilla<br></span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1">{{ costoPlanilla }}</span></div>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px"><span style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Equipos inscriptos</span><span style="font: 600 12px/1 Barlow; color: #7E8B95">{{ equiposInscriptos.length }}</span></div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden">
+                  <sc-for list="{{ equiposInscriptosVisibles }}" as="eq" hint-placeholder-count="4">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #EFF2F4">
+                      <div style="width: 30px; height: 30px; flex: none; border-radius: 999px; background: #414E57; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; overflow: hidden">
+                        <image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot>
+                      </div>
+                      <span style="font: 600 14px/1.2 Barlow; flex: 1">{{ eq.nombre }}</span>
+                      <sc-if value="{{ eq.verificado }}" hint-placeholder-val="{{ false }}"><div style="width: 6px; height: 6px; border-radius: 999px; background: #1B8A3C"></div></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ hayMasEquipos }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ toggleEquiposTodos }}" style="text-align: center; font: 600 12px/1 Barlow; color: #007D99; cursor: pointer; margin-top: 8px">{{ textoVerEquipos }}</div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ mostrarFixturePublico }}" hint-placeholder-val="{{ true }}">
+                <div onClick="{{ irTablaTorneo }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+                  <div style="font: 700 15px/1.2 Barlow; flex: 1">Tabla de posiciones</div>
+                  <div style="font: 400 20px/1 Barlow; color: #A9B4BC">›</div>
+                </div>
+                <div onClick="{{ irFixtureTorneo }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer">
+                  <div style="font: 700 15px/1.2 Barlow; flex: 1">Fixture <span style="font-weight: 400; color: #7E8B95">· {{ fixturePublico.length }} partidos</span></div>
+                  <div style="font: 400 20px/1 Barlow; color: #A9B4BC">›</div>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 10px">Reglamento</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 10px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+                  <span style="font: 500 14px/1 Barlow; flex: 1">Versión vigente · v2</span>
+                  <span style="font: 400 20px/1 Barlow; color: #A9B4BC">›</span>
+                </div>
+              </div>
+
+              <div style="background: #EFF2F4; border-top: 1px solid #CBD3D8; border-bottom: 1px solid #CBD3D8; margin: 0 -16px; padding: 10px 16px">
+                <div style="font: 600 10px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Publicidad</div>
+                <div style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 4px; height: 88px; display: flex; align-items: center; justify-content: center; font: 400 13px/1 Barlow; color: #A9B4BC">Contenido de red</div>
+              </div>
+
+              <div style="font: 400 12px/1.4 Barlow; color: #7E8B95; text-wrap: pretty">Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar "Seguir" o "Inscribir mi equipo".</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sTablaTorneo }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Tabla de posiciones (UC-35)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 18px 0; flex: none"><div onClick="{{ irFicha }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="padding: 10px 18px 0; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Tabla de posiciones</div>
+            <div style="font: 400 13px/1.3 Barlow; color: #5C6A74; margin-top: 2px">Copa Otoño F5</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 14px 16px 24px">
+            <div style="border: 1px solid #E3E8EB; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+              <div style="display: grid; grid-template-columns: 20px 1fr repeat(3, 22px) 34px; align-items: center; gap: 2px; background: #142230; color: #FFFFFF; padding: 8px 8px; font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase">
+                <div>#</div><div>Equipo</div><div style="text-align: right">PJ</div><div style="text-align: right">DG</div><div style="text-align: right"></div><div style="text-align: right; color: #00A8CC">Pts</div>
+              </div>
+              <sc-for list="{{ tablaTorneo }}" as="t" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 20px 1fr repeat(3, 22px) 34px; align-items: center; gap: 2px; padding: 8px 8px; min-height: 42px; border-bottom: 1px solid #EFF2F4; border-left: 3px solid {{ t.borde }}; font: 500 12px/1 Barlow">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px">{{ t.pos }}</div>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; min-width: 0">{{ t.nombre }}</div>
+                  <div style="text-align: right">{{ t.pj }}</div><div style="text-align: right">{{ t.dg }}</div><div></div>
+                  <div style="text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px">{{ t.pts }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; font: 400 12px/1.4 Barlow; color: #5C6A74"><div style="width: 3px; height: 18px; background: #00A8CC"></div>Clasifica</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sFixtureTorneo }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Fixture del torneo (UC-23)" style="display: flex; flex-direction: column; height: 100%">
+          <div style="padding: 18px 18px 0; flex: none"><div onClick="{{ irFicha }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div></div>
+          <div style="padding: 10px 18px 0; flex: none">
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">Fixture</div>
+            <div style="font: 400 13px/1.3 Barlow; color: #5C6A74; margin-top: 2px">Copa Otoño F5 · {{ fixturePublico.length }} partidos</div>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 18px">
+            <sc-for list="{{ fixtureAgrupado }}" as="fecha" hint-placeholder-count="3">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1.5px solid #E3E8EB; margin-bottom: 10px">
+                  <span style="font: 700 11px/1 Barlow; letter-spacing: 0.08em; text-transform: uppercase; color: {{ fecha.color }}">{{ fecha.nombre }}</span>
+                  <sc-if value="{{ fecha.esProxima }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(0,168,204,0.15); padding: 2px 7px; border-radius: 999px"><div style="width: 5px; height: 5px; border-radius: 999px; background: #00A8CC"></div><span style="font: 700 9px/1 Barlow; letter-spacing: 0.04em; color: #007D99">Próxima</span></div>
+                  </sc-if>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{ fecha.partidos }}" as="fp" hint-placeholder-count="2">
+                    <div style="background: {{ fp.cardBg }}; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 8px; border-left: 3px solid {{ fp.borde }}; box-shadow: 0 1px 2px rgba(14,23,32,0.06)">
+                      <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0">
+                        <span style="font: 600 13px/1.3 Barlow; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: {{ fp.textoColor }}">{{ fp.local }}</span>
+                        <div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #414E57; overflow: hidden"><image-slot id="{{ fp.slotLocal }}" shape="circle" placeholder=""></image-slot></div>
+                      </div>
+                      <div style="flex: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; color: {{ fp.textoColor }}; min-width: 44px; text-align: center">{{ fp.resultado }}</div>
+                      <div style="flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0">
+                        <div style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #414E57; overflow: hidden"><image-slot id="{{ fp.slotVisita }}" shape="circle" placeholder=""></image-slot></div>
+                        <span style="font: 600 13px/1.3 Barlow; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: {{ fp.textoColor }}">{{ fp.visita }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; display: flex; flex-wrap: wrap; gap: 6px">
+    <sc-for list="{{ mapa }}" as="m" hint-placeholder-count="2">
+      <div onClick="{{ m.ir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ m.bg }}; color: {{ m.fg }}; border: 1px solid {{ m.borde }}">{{ m.nombre }}</div>
+    </sc-for>
+  </div>
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { screen: "buscar", filtrosAbiertos: false,
+    ciudadesSeleccionadas: ["San Isidro"], modalidadFiltro: "Todas", categoriaFiltro: "Todas", estadoFiltro: "Abiertas",
+    siguiendoFicha: false, fichaEstado: "abierta",
+    equiposTodosVisible: false, fixtureTodosVisible: false
+  };
+
+  equiposInscriptosBase = [
+    { nombre: "Los Pibes del Fondo", verificado: false, slotId: "insc-pf" },
+    { nombre: "San Martín FC", verificado: true, slotId: "insc-sm" },
+    { nombre: "Racing del Barrio", verificado: false, slotId: "insc-rc" },
+    { nombre: "Deportivo Belgrano", verificado: true, slotId: "insc-db" },
+    { nombre: "La Gloria", verificado: false, slotId: "insc-lg" }
+  ];
+
+  fixturePublicoBase = [
+    { fecha: "Fecha 6", local: "San Martín FC", visita: "Deportivo Belgrano", resultado: "0 – 2", estado: "jugado", slotLocal: "fx-sm-1", slotVisita: "fx-db-1" },
+    { fecha: "Fecha 6", local: "Los Pibes del Fondo", visita: "La Gloria", resultado: "3 – 1", estado: "jugado", slotLocal: "fx-pf-1", slotVisita: "fx-lg-1" },
+    { fecha: "Fecha 7", local: "Los Pibes del Fondo", visita: "San Martín FC", resultado: "—", estado: "proximo", slotLocal: "fx-pf-2", slotVisita: "fx-sm-2" },
+    { fecha: "Fecha 7", local: "La Gloria", visita: "Deportivo Belgrano", resultado: "—", estado: "proximo", slotLocal: "fx-lg-2", slotVisita: "fx-db-2" },
+    { fecha: "Fecha 8", local: "Deportivo Belgrano", visita: "Los Pibes del Fondo", resultado: "—", estado: "pendiente", slotLocal: "fx-db-3", slotVisita: "fx-pf-3" },
+    { fecha: "Fecha 8", local: "San Martín FC", visita: "La Gloria", resultado: "—", estado: "pendiente", slotLocal: "fx-sm-3", slotVisita: "fx-lg-3" }
+  ];
+
+  tablaTorneoBase = [
+    { pos: 1, nombre: "Deportivo Belgrano", pj: 7, dg: "+13", pts: 19, borde: "#00A8CC" },
+    { pos: 2, nombre: "Los Pibes del Fondo", pj: 7, dg: "+9", pts: 16, borde: "#00A8CC" },
+    { pos: 3, nombre: "San Martín FC", pj: 7, dg: "+3", pts: 9, borde: "transparent" },
+    { pos: 4, nombre: "La Gloria", pj: 6, dg: "-1", pts: 8, borde: "transparent" }
+  ];
+
+  ciudadesCatalogoBase = ["CABA", "San Isidro", "Vicente López", "San Fernando"];
+
+  torneosBase = [
+    { nombre: "Copa Otoño F5", ciudad: "San Isidro", modalidad: "F5", categoria: "Masculino", zona: "San Isidro", estado: "Inscripciones abiertas", fecha: "12 de abril", inscriptos: 12, cupo: 16, verificada: true },
+    { nombre: "Liga Femenina Otoño", ciudad: "San Isidro", modalidad: "F7", categoria: "Femenino", zona: "San Isidro", estado: "Inscripciones abiertas", fecha: "20 de abril", inscriptos: 6, cupo: 10, verificada: true },
+    { nombre: "Torneo Relámpago Mixto", ciudad: "Vicente López", modalidad: "F5", categoria: "Mixto", zona: "Vicente López", estado: "En curso", fecha: "ya empezó", inscriptos: 10, cupo: 10, verificada: false }
+  ];
+
+  go = id => this.setState({ screen: id });
+
+  badgeEstado(estado) {
+    if (estado === "Inscripciones abiertas" || estado === "En curso") return { estadoBg: "#E4F3E8", estadoFg: "#12662C", estadoDot: "#1B8A3C" };
+    return { estadoBg: "#EFF2F4", estadoFg: "#414E57", estadoDot: "#5C6A74" };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const sc = s.screen;
+
+    const etiquetas = { buscar: "Descubrimiento (UC-22)", ficha: "Ficha pública (UC-23)", fixtureTorneo: "Fixture del torneo (UC-23)", tablaTorneo: "Tabla de posiciones (UC-35)", selectorCiudad: "Selector de ciudad — compartido" };
+    const mapa = [["Descubrimiento", "buscar"], ["Ficha del torneo", "ficha"], ["Fixture", "fixtureTorneo"], ["Tabla", "tablaTorneo"], ["Selector ciudad", "selectorCiudad"]].map(([nombre, id]) => ({
+      nombre, ir: () => this.go(id),
+      bg: sc === id ? "#00A8CC" : "transparent", fg: sc === id ? "#0E1720" : "#CBD3D8", borde: sc === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      buscar: "UC-22 (nota de ubicación): la ciudad es contexto por defecto, no un filtro — abre resuelta, sin muro de configuración. Hasta 3 ciudades a la vez (AMBA). Modalidad/categoría/estado quedan plegados y secundarios.",
+      ficha: "UC-23 (D-04b/D-63): accesible sin cuenta siempre. El contenido cambia según el estado — abierta destaca cupo, en curso la próxima fecha, finalizada el campeón."
+    };
+
+    const modalidadesFiltro = ["Todas", "F5", "F7", "F11"].map(m => ({
+      nombre: m, elegir: () => this.setState({ modalidadFiltro: m }),
+      bg: s.modalidadFiltro === m ? "#142230" : "transparent", fg: s.modalidadFiltro === m ? "#FFFFFF" : "#414E57", borde: s.modalidadFiltro === m ? "#142230" : "#CBD3D8"
+    }));
+    const categoriasFiltro = ["Todas", "Masculino", "Femenino", "Mixto"].map(c => ({
+      nombre: c, elegir: () => this.setState({ categoriaFiltro: c }),
+      bg: s.categoriaFiltro === c ? "#142230" : "transparent", fg: s.categoriaFiltro === c ? "#FFFFFF" : "#414E57", borde: s.categoriaFiltro === c ? "#142230" : "#CBD3D8"
+    }));
+    const estadosFiltro = ["Abiertas", "Próximas"].map(e => ({
+      nombre: e, elegir: () => this.setState({ estadoFiltro: e }),
+      bg: s.estadoFiltro === e ? "#142230" : "transparent", fg: s.estadoFiltro === e ? "#FFFFFF" : "#414E57", borde: s.estadoFiltro === e ? "#142230" : "#CBD3D8"
+    }));
+
+    const torneosFiltrados = this.torneosBase.filter(t => s.ciudadesSeleccionadas.indexOf(t.ciudad) >= 0);
+    const gruposCiudad = s.ciudadesSeleccionadas.map(ciudad => ({
+      ciudad,
+      torneos: torneosFiltrados.filter(t => t.ciudad === ciudad).map(t => Object.assign({ ir: () => this.go("ficha"), estadoLabel: t.estado }, t, this.badgeEstado(t.estado)))
+    })).filter(g => g.torneos.length);
+
+    const ciudadesSelector = this.ciudadesCatalogoBase.map(nombre => {
+      const seleccionada = s.ciudadesSeleccionadas.indexOf(nombre) >= 0;
+      return {
+        nombre, seleccionada, checkBorde: seleccionada ? "#00A8CC" : "#CBD3D8", checkBg: seleccionada ? "#00A8CC" : "transparent",
+        toggle: () => this.setState(st => {
+          const has = st.ciudadesSeleccionadas.indexOf(nombre) >= 0;
+          if (has) return { ciudadesSeleccionadas: st.ciudadesSeleccionadas.filter(n => n !== nombre) };
+          if (st.ciudadesSeleccionadas.length >= 3) return {};
+          return { ciudadesSeleccionadas: [...st.ciudadesSeleccionadas, nombre] };
+        })
+      };
+    });
+
+    const estadosDemo = [["abierta", "Inscripciones abiertas"], ["en_curso", "En curso"], ["finalizada", "Finalizada"]].map(([id, nombre]) => ({
+      nombre, elegir: () => this.setState({ fichaEstado: id }),
+      bg: s.fichaEstado === id ? "#00A8CC" : "#FFFFFF", fg: s.fichaEstado === id ? "#0E1720" : "#414E57", borde: s.fichaEstado === id ? "#00A8CC" : "#CBD3D8"
+    }));
+
+    const fichaBadges = {
+      abierta: { fichaEstadoLabel: "Inscripciones abiertas", fichaEstadoBg: "#E4F3E8", fichaEstadoFg: "#12662C", fichaEstadoDot: "#1B8A3C" },
+      en_curso: { fichaEstadoLabel: "En curso", fichaEstadoBg: "#E4F3E8", fichaEstadoFg: "#12662C", fichaEstadoDot: "#1B8A3C" },
+      finalizada: { fichaEstadoLabel: "Finalizado", fichaEstadoBg: "#EFF2F4", fichaEstadoFg: "#414E57", fichaEstadoDot: "#5C6A74" }
+    };
+
+    return Object.assign({
+      mapa, notaEstado: notas[sc], etiquetaPantalla: etiquetas[sc],
+      sBuscar: sc === "buscar", sFicha: sc === "ficha", sFixtureTorneo: sc === "fixtureTorneo", sTablaTorneo: sc === "tablaTorneo", sSelectorCiudad: sc === "selectorCiudad",
+      irBuscar: () => this.go("buscar"), irInscribir: () => {}, irFixtureTorneo: () => this.go("fixtureTorneo"), irTablaTorneo: () => this.go("tablaTorneo"), irFicha: () => this.go("ficha"),
+      irSelectorCiudad: () => this.go("selectorCiudad"), confirmarSelectorCiudad: () => this.go("buscar"), ciudadesSelector,
+
+      etiquetaCiudades: s.ciudadesSeleccionadas.length > 1 ? s.ciudadesSeleccionadas.join(" + ") : s.ciudadesSeleccionadas[0],
+      hayResultados: gruposCiudad.length > 0, gruposCiudad,
+      mostrarEncabezadoCiudad: s.ciudadesSeleccionadas.length > 1,
+      provinciaEtiqueta: "Buenos Aires", torneosProvincia: "3 torneos",
+      textoAvisarme: "Avisarme cuando se publique uno acá", avisarmeCiudad: () => {},
+      verProvincia: () => {}, publicarDesdeVacio: () => {},
+
+      filtrosAbiertos: s.filtrosAbiertos, toggleFiltros: () => this.setState(st => ({ filtrosAbiertos: !st.filtrosAbiertos })),
+      textoToggleFiltros: s.filtrosAbiertos ? "Ocultar" : "Filtros",
+      resumenFiltros: s.modalidadFiltro + (s.categoriaFiltro !== "Todas" ? " · " + s.categoriaFiltro : "") + " · " + s.estadoFiltro,
+      modalidadesFiltro, categoriasFiltro, estadosFiltro,
+
+      estadosDemo,
+      fichaEsAbierta: s.fichaEstado === "abierta", fichaEsEnCurso: s.fichaEstado === "en_curso", fichaEsFinalizada: s.fichaEstado === "finalizada",
+      fichaAceptaInscripciones: s.fichaEstado === "abierta",
+      costoInscripcion: "$18.000", tieneCostoPlanilla: true, costoPlanilla: "$3.000 por fecha", equiposInscriptos: this.equiposInscriptosBase,
+      equiposInscriptosVisibles: s.equiposTodosVisible ? this.equiposInscriptosBase : this.equiposInscriptosBase.slice(0, 4),
+      hayMasEquipos: this.equiposInscriptosBase.length > 4,
+      textoVerEquipos: s.equiposTodosVisible ? "Ver menos" : "Ver los " + this.equiposInscriptosBase.length,
+      toggleEquiposTodos: () => this.setState(st => ({ equiposTodosVisible: !st.equiposTodosVisible })),
+      mostrarFixturePublico: s.fichaEstado !== "abierta",
+      fixturePublico: this.fixturePublicoBase.map(fp => {
+        if (fp.estado === "jugado") return Object.assign({}, fp, { cardBg: "#F7F9FA", borde: "#CBD3D8", fechaColor: "#7E8B95", textoColor: "#142230", vsColor: "#A9B4BC", esProximo: false });
+        if (fp.estado === "proximo") return Object.assign({}, fp, { cardBg: "#E8F7FB", borde: "#00A8CC", fechaColor: "#007D99", textoColor: "#0E1720", vsColor: "#5C6A74", esProximo: true });
+        return Object.assign({}, fp, { cardBg: "#FFFFFF", borde: "#E3E8EB", fechaColor: "#A9B4BC", textoColor: "#5C6A74", vsColor: "#CBD3D8", esProximo: false });
+      }),
+      fixturePublicoVisible: (s.fixtureTodosVisible ? this.fixturePublicoBase : this.fixturePublicoBase.slice(0, 4)).map(fp => {
+        if (fp.estado === "jugado") return Object.assign({}, fp, { cardBg: "#F7F9FA", borde: "#CBD3D8", fechaColor: "#7E8B95", textoColor: "#142230", vsColor: "#A9B4BC", esProximo: false });
+        if (fp.estado === "proximo") return Object.assign({}, fp, { cardBg: "#E8F7FB", borde: "#00A8CC", fechaColor: "#007D99", textoColor: "#0E1720", vsColor: "#5C6A74", esProximo: true });
+        return Object.assign({}, fp, { cardBg: "#FFFFFF", borde: "#E3E8EB", fechaColor: "#A9B4BC", textoColor: "#5C6A74", vsColor: "#CBD3D8", esProximo: false });
+      }),
+      hayMasFixture: this.fixturePublicoBase.length > 4,
+      textoVerFixture: s.fixtureTodosVisible ? "Ver menos" : "Ver todo el fixture",
+      toggleFixtureTodos: () => this.setState(st => ({ fixtureTodosVisible: !st.fixtureTodosVisible })),
+      tablaTorneo: this.tablaTorneoBase,
+      fixtureAgrupado: (() => {
+        const grupos = {};
+        this.fixturePublicoBase.forEach(fp => { (grupos[fp.fecha] = grupos[fp.fecha] || []).push(fp); });
+        return Object.keys(grupos).map(nombre => {
+          const partidos = grupos[nombre].map(fp => {
+            if (fp.estado === "jugado") return Object.assign({}, fp, { cardBg: "#F7F9FA", borde: "#CBD3D8", textoColor: "#142230" });
+            if (fp.estado === "proximo") return Object.assign({}, fp, { cardBg: "#E8F7FB", borde: "#00A8CC", textoColor: "#0E1720" });
+            return Object.assign({}, fp, { cardBg: "#FFFFFF", borde: "#E3E8EB", textoColor: "#5C6A74" });
+          });
+          const esProxima = partidos.some(p => p.estado === "proximo");
+          return { nombre, partidos, esProxima, color: esProxima ? "#007D99" : "#7E8B95" };
+        });
+      })(),
+      seguirFichaBorde: s.siguiendoFicha ? "#00A8CC" : "#414E57",
+      seguirFichaBg: s.siguiendoFicha ? "#00A8CC" : "transparent",
+      seguirFichaFg: s.siguiendoFicha ? "#0E1720" : "#FFFFFF",
+      textoSeguirFicha: s.siguiendoFicha ? "Siguiendo ✓" : "Seguir",
+      toggleSeguirFicha: () => this.setState(st => ({ siguiendoFicha: !st.siguiendoFicha })),
+      compartirTorneo: () => {}
+    }, fichaBadges[s.fichaEstado]);
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Inicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #007D99; text-decoration: none; }
+  a:hover { color: #00A8CC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; font-variant-numeric: tabular-nums; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 900px; display: flex; align-items: baseline; gap: 12px">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Inicio · {{ etiquetaActor }}</div>
+    <div style="margin-left: auto; display: flex; gap: 6px">
+      <sc-for list="{{ perfiles }}" as="p" hint-placeholder-count="3">
+        <div onClick="{{ p.elegir }}" style="font: 600 11px/1 Barlow; padding: 7px 10px; border-radius: 999px; cursor: pointer; background: {{ p.bg }}; color: {{ p.fg }}; border: 1px solid {{ p.borde }}">{{ p.nombre }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #F7F9FA; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <div data-screen-label="Inicio — usuario registrado" style="display: flex; flex-direction: column; height: 100%">
+        <div style="background: #0E1720; color: #FFFFFF; padding: 18px 18px 22px; flex: none">
+          <div style="display: flex; align-items: center; justify-content: space-between; font: 600 12px/1 Barlow; color: #7E8B95; margin-bottom: 16px">
+            <span>{{ zonaActual }}</span>
+            <div onClick="{{ irNotifs }}" style="position: relative; cursor: pointer; padding: 4px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CBD3D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z" /><path d="M10 19a2 2 0 0 0 4 0" /></svg>
+              <sc-if value="{{ hayPendientes }}" hint-placeholder-val="{{ true }}">
+                <div style="position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; border-radius: 999px; background: #A25C00; border: 2px solid #0E1720"></div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="width: 42px; height: 42px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden">
+              <image-slot id="inicio-avatar-usuario" shape="circle" placeholder="Foto"></image-slot>
+            </div>
+            <div>
+              <div style="font: 400 13px/1.2 Barlow; color: #A9B4BC">Hola, {{ nombreUsuario }}</div>
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1; text-transform: uppercase">{{ tituloContexto }}</div>
+            </div>
+          </div>
+
+          <sc-if value="{{ mostrarSwitchModo }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; background: #142230; border-radius: 8px; padding: 3px; margin-top: 14px">
+              <div onClick="{{ irModoJugador }}" style="flex: 1; text-align: center; padding: 9px 0; border-radius: 6px; cursor: pointer; background: {{ bgModoJugador }}; font: 700 13px/1 Barlow; color: {{ fgModoJugador }}">Jugador</div>
+              <div onClick="{{ irModoOrganizador }}" style="flex: 1; text-align: center; padding: 9px 0; border-radius: 6px; cursor: pointer; background: {{ bgModoOrganizador }}; font: 700 13px/1 Barlow; color: {{ fgModoOrganizador }}">Organizador</div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 16px 16px 90px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 78px">
+
+          <sc-if value="{{ hayProximoPartido }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">Tu próximo partido</div>
+              <div style="background: #0E1720; border-radius: 12px; padding: 20px; color: #FFFFFF; cursor: pointer">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px">
+                  <span style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #00A8CC">{{ torneoNombre }} · {{ fechaNumero }}</span>
+                  <span style="display: inline-flex; align-items: center; gap: 4px; background: #EFF2F4; padding: 2px 6px; border-radius: 3px; font: 700 9px/1 Barlow; letter-spacing: 0.04em; text-transform: uppercase; color: #414E57">{{ categoriaGeneroEquipo }}</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 92px">
+                    <div style="width: 44px; height: 44px; border-radius: 999px; background: #2C383F; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px">{{ iniEquipo }}</div>
+                    <div style="font: 600 12px/1.2 Barlow; text-align: center">{{ miEquipo }}</div>
+                  </div>
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; color: #7E8B95">VS</div>
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 92px">
+                    <div style="width: 44px; height: 44px; border-radius: 999px; background: #414E57; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px">{{ iniRival }}</div>
+                    <div style="font: 600 12px/1.2 Barlow; text-align: center">{{ rival }}</div>
+                  </div>
+                </div>
+                <div style="border-top: 1px solid #2C383F; margin-top: 18px; padding-top: 14px; display: flex; justify-content: space-between; font: 500 14px/1 Barlow; color: #CBD3D8"><span>{{ diaHora }}</span><span>{{ cancha }}</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ mostrarPasoSiguiente }}" hint-placeholder-val="{{ false }}">
+            <div style="border: 1px dashed #CBD3D8; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase">{{ pasoSiguienteTitulo }}</div>
+              <div style="font: 400 14px/1.4 Barlow; color: #5C6A74; text-wrap: pretty">{{ pasoSiguienteDetalle }}</div>
+              <div onClick="{{ pasoSiguienteAccion }}" style="background: #00A8CC; color: #0E1720; font: 700 14px/1 Barlow; padding: 13px 18px; border-radius: 6px; cursor: pointer; margin-top: 4px">{{ pasoSiguienteBoton }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ esRecienLlegado }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #0E1720; border-radius: 12px; padding: 24px 22px; color: #FFFFFF; display: flex; flex-direction: column; gap: 6px">
+              <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1.1; text-transform: uppercase">Bienvenida a Invictos</div>
+              <div style="font: 400 14px/1.5 Barlow; color: #A9B4BC; text-wrap: pretty">Elegí por dónde arrancar. Podés hacer las dos cosas cuando quieras.</div>
+            </div>
+
+            <div onClick="{{ irDescubrir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 18px; cursor: pointer; display: flex; align-items: center; gap: 14px">
+              <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #E8F7FB; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+              </div>
+              <div style="flex: 1">
+                <div style="font: 700 16px/1.2 Barlow">Descubrir un torneo</div>
+                <div style="font: 400 13px/1.35 Barlow; color: #5C6A74">Buscá por zona y modalidad, sin necesidad de tener equipo todavía.</div>
+              </div>
+              <div style="font: 400 22px/1 Barlow; color: #A9B4BC">›</div>
+            </div>
+
+            <div onClick="{{ irCrearEquipo }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 18px; cursor: pointer; display: flex; align-items: center; gap: 14px">
+              <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #E8F7FB; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#007D99" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z" /><path d="M8 5.5H5v1.5a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3" /><path d="M12 13v3M9 20h6" /></svg>
+              </div>
+              <div style="flex: 1">
+                <div style="font: 700 16px/1.2 Barlow">Crear o sumarme a un equipo</div>
+                <div style="font: 400 13px/1.35 Barlow; color: #5C6A74">Armá tu plantel, o esperá la invitación de un capitán.</div>
+              </div>
+              <div style="font: 400 22px/1 Barlow; color: #A9B4BC">›</div>
+            </div>
+
+            <div onClick="{{ irCrearTorneo }}" style="border: 1px dashed #CBD3D8; border-radius: 10px; padding: 16px 18px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+              <div style="font: 600 14px/1.3 Barlow">¿Vas a organizar un torneo?</div>
+              <div style="font: 600 13px/1 Barlow; color: #007D99">Empezar ›</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hayPendientes }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ irNotifs }}" style="background: #FBEBD3; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer">
+              <div style="width: 9px; height: 9px; flex: none; background: #A25C00; transform: rotate(45deg)"></div>
+              <div style="flex: 1; font: 600 14px/1.3 Barlow; color: #7A4600">{{ textoPendientes }}</div>
+              <div style="font: 400 20px/1 Barlow; color: #A25C00">›</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ mostrarBloqueOrganizador }}" hint-placeholder-val="{{ false }}">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-top: 4px">Mis torneos</div>
+            <sc-for list="{{ torneosAdministrados }}" as="ta" hint-placeholder-count="2">
+              <div onClick="{{ ta.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; width: 100%">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+                  <div style="display: flex; align-items: center; gap: 10px; min-width: 0">
+                    <div style="width: 38px; height: 38px; flex: none; border-radius: 8px; background: #142230; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; overflow: hidden">
+                      <image-slot id="{{ ta.slotId }}" shape="rounded" placeholder="Logo"></image-slot>
+                    </div>
+                    <div style="font: 700 17px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ ta.nombre }}</div>
+                  </div>
+                  <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ ta.estadoBg }}; padding: 4px 8px; border-radius: 3px">
+                    <div style="width: 7px; height: 7px; border-radius: {{ ta.estadoRadio }}; background: {{ ta.estadoDot }}; transform: {{ ta.estadoRot }}"></div>
+                    <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ ta.estadoFg }}">{{ ta.estadoLabel }}</span>
+                  </div>
+                </div>
+                <div style="font: 600 12px/1 Barlow; letter-spacing: 0.06em; text-transform: uppercase; color: #5C6A74">{{ ta.categoria }}</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EFF2F4; padding-top: 10px">
+                  <div style="display: flex; flex-direction: column; gap: 2px">
+                    <span style="font: 400 12px/1 Barlow; color: #7E8B95">Arranca</span>
+                    <span style="font: 600 14px/1 Barlow">{{ ta.fecha }}</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end">
+                    <span style="font: 400 12px/1 Barlow; color: #7E8B95">Inscriptos</span>
+                    <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; line-height: 1">{{ ta.inscriptos }}<span style="color: #A9B4BC"> / {{ ta.cupo }}</span></span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-top: 6px">Equipos que sigo</div>
+            <sc-for list="{{ equiposSeguidos }}" as="eq" hint-placeholder-count="2">
+              <div onClick="{{ eq.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%">
+                <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden">
+                  <image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ eq.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.categoria }}</div>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: #EFF2F4; padding: 4px 9px; border-radius: 999px">
+                  <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #414E57">Siguiendo</span>
+                </div>
+              </div>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ mostrarMisEquiposMisTorneos }}" hint-placeholder-val="{{ true }}">
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-top: 4px">Mis equipos</div>
+            <sc-for list="{{ equipos }}" as="eq" hint-placeholder-count="2">
+              <div onClick="{{ eq.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%">
+                <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden">
+                  <image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ eq.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.categoria }}</div>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: {{ eq.bg }}; padding: 4px 9px; border-radius: 3px">
+                  <div style="width: 6px; height: 6px; border-radius: {{ eq.radio }}; background: {{ eq.dot }}; transform: {{ eq.rot }}"></div>
+                  <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: {{ eq.fg }}">{{ eq.rol }}</span>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-top: 6px">Mis torneos</div>
+            <sc-for list="{{ torneosSeguidos }}" as="tr" hint-placeholder-count="2">
+              <div onClick="{{ tr.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%">
+                <div style="width: 44px; height: 44px; flex: none; border-radius: 8px; background: #142230; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; overflow: hidden">
+                  <image-slot id="{{ tr.slotId }}" shape="rounded" placeholder="Logo"></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ tr.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ tr.fecha }} · {{ tr.categoria }}</div>
+                  <div style="font: 600 12px/1.3 Barlow; color: #007D99; margin-top: 2px">Jugás con {{ tr.miEquipoEnTorneo }}</div>
+                </div>
+                <div style="flex: none; text-align: right">
+                  <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; line-height: 1; color: #00A8CC">{{ tr.posicion }}</div>
+                  <div style="font: 400 10px/1.2 Barlow; color: #7E8B95">en la tabla</div>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="font: 600 11px/1 Barlow; letter-spacing: 0.12em; text-transform: uppercase; color: #7E8B95; margin-top: 6px">Equipos que sigo</div>
+            <sc-for list="{{ equiposSeguidosJugador }}" as="eq" hint-placeholder-count="1">
+              <div onClick="{{ eq.ir }}" style="background: #FFFFFF; border: 1px solid #E3E8EB; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%">
+                <div style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #2C383F; color: #FFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; overflow: hidden">
+                  <image-slot id="{{ eq.slotId }}" shape="circle" placeholder="Escudo"></image-slot>
+                </div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font: 700 16px/1.2 Barlow; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ eq.nombre }}</div>
+                  <div style="font: 400 12px/1.3 Barlow; color: #5C6A74">{{ eq.categoria }}</div>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 5px; flex: none; background: #EFF2F4; padding: 4px 9px; border-radius: 999px">
+                  <span style="font: 700 10px/1 Barlow; letter-spacing: 0.05em; text-transform: uppercase; color: #414E57">Siguiendo</span>
+                </div>
+              </div>
+            </sc-for>
+          </sc-if>
+
+        </div>
+
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 78px; background: #FFFFFF; border-top: 1px solid #E3E8EB; z-index: 5">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px 4px 14px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00A8CC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" /></svg>
+              <span style="font: 700 11px/1 Barlow; letter-spacing: 0.04em; color: #00A8CC">Inicio</span>
+            </div>
+            <div onClick="{{ irBuscar }}" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center; cursor: pointer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+              <span style="font: 500 11px/1 Barlow; color: #5C6A74">Buscar</span>
+            </div>
+            <div onClick="{{ irTorneos }}" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center; cursor: pointer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z" /><path d="M8 5.5H5v1.5a3 3 0 0 0 3 3M16 5.5h3V7a3 3 0 0 1-3 3" /><path d="M12 13v3M9 20h6" /></svg>
+              <span style="font: 500 11px/1 Barlow; color: #5C6A74">Torneos</span>
+            </div>
+            <div onClick="{{ irPerfil }}" style="display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 52px; justify-content: center; cursor: pointer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6A74" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+              <span style="font: 500 11px/1 Barlow; color: #5C6A74">Perfil</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.5 Barlow; color: #7E8B95; text-wrap: pretty">{{ notaEstado }}</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { actor: "ambos", modo: "jugador" };
+
+  escenarios = {
+    ambos: {
+      etiqueta: "jugador y organizador — ambos roles",
+      esJugador: true, esOrganizador: true,
+      nombreUsuario: "Marce",
+      tituloContexto: "Los Pibes del Fondo",
+      categoriaGeneroEquipo: "Masculino",
+      torneoNombre: "Copa Otoño F5",
+      fechaNumero: "Fecha 7",
+      miEquipo: "Los Pibes del Fondo",
+      iniEquipo: "PF",
+      rival: "San Martín FC",
+      iniRival: "SM",
+      diaHora: "Sáb 12/4 · 20:30",
+      cancha: "Cancha 1",
+      hayPendientes: true,
+      textoPendientes: "1 cosa para resolver: confirmar un resultado",
+      resumenEquipos: "2 equipos · uno como capitán",
+      resumenTorneos: "1 torneo en curso",
+      resumenPerfil: "Jugador · 4 goles en el torneo"
+    },
+    conPartido: {
+      etiqueta: "con próximo partido (solo jugador)",
+      esJugador: true, esOrganizador: false,
+      nombreUsuario: "Marce",
+      tituloContexto: "Los Pibes del Fondo",
+      categoriaGeneroEquipo: "Masculino",
+      torneoNombre: "Copa Otoño F5",
+      fechaNumero: "Fecha 7",
+      miEquipo: "Los Pibes del Fondo",
+      iniEquipo: "PF",
+      rival: "San Martín FC",
+      iniRival: "SM",
+      diaHora: "Sáb 12/4 · 20:30",
+      cancha: "Cancha 1",
+      hayPendientes: true,
+      textoPendientes: "1 cosa para resolver: confirmar un resultado",
+      resumenEquipos: "2 equipos · uno como capitán",
+      resumenTorneos: "1 torneo en curso",
+      resumenPerfil: "Jugador · 4 goles en el torneo"
+    },
+    sinPartido: {
+      etiqueta: "sin próximo partido — solo jugador",
+      esJugador: true, esOrganizador: false,
+      nombreUsuario: "Marce",
+      tituloContexto: "Los Pibes del Fondo",
+      categoriaGeneroEquipo: "Masculino",
+      pasoSiguienteTitulo: "Sin partido esta semana",
+      pasoSiguienteDetalle: "El torneo entra en la fecha libre. Mientras tanto, descubrí otro torneo para tu equipo.",
+      pasoSiguienteBoton: "Descubrir torneos",
+      hayPendientes: false,
+      resumenEquipos: "2 equipos · uno como capitán",
+      resumenTorneos: "1 torneo en curso",
+      resumenPerfil: "Jugador · 4 goles en el torneo"
+    },
+    organizador: {
+      etiqueta: "solo organizador (sin equipo propio)",
+      esJugador: false, esOrganizador: true,
+      nombreUsuario: "Coordinador",
+      tituloContexto: "Complejo San Martín",
+      categoriaGeneroEquipo: "",
+      pasoSiguienteTitulo: "3 resultados sin cargar",
+      pasoSiguienteDetalle: "Fecha 7 de Copa Otoño F5 está esperando. Es lo más repetido del producto — no debería acumularse.",
+      pasoSiguienteBoton: "Cargar resultados",
+      hayPendientes: true,
+      textoPendientes: "2 inscripciones pendientes de resolver",
+      resumenEquipos: "—",
+      resumenTorneos: "2 torneos · 1 en curso",
+      resumenPerfil: "Organización verificada"
+    },
+    nuevo: {
+      etiqueta: "recién registrado (sin equipo, sin torneo)",
+      esJugador: false, esOrganizador: false,
+      nombreUsuario: "Vale",
+      tituloContexto: "Bienvenida",
+      categoriaGeneroEquipo: "",
+      pasoSiguienteTitulo: "Todavía no seguís nada",
+      pasoSiguienteDetalle: "Descubrí un torneo cerca tuyo o sumate al plantel de un equipo con la invitación que te llegue.",
+      pasoSiguienteBoton: "Descubrir torneos",
+      hayPendientes: false,
+      resumenEquipos: "Sin equipos todavía",
+      resumenTorneos: "Sin torneos todavía",
+      resumenPerfil: "Completá tu perfil deportivo"
+    }
+  };
+
+  renderVals() {
+    const actorBase = this.escenarios[this.state.actor];
+    const a = (actorBase.esJugador && actorBase.esOrganizador && this.state.modo === "organizador") ? "organizador" : this.state.actor;
+    const e = this.escenarios[a];
+    const perfiles = [
+      ["Ambos roles", "ambos"], ["Solo jugador", "conPartido"], ["Sin partido", "sinPartido"], ["Solo organizador", "organizador"], ["Recién llegado", "nuevo"]
+    ].map(([nombre, id]) => ({
+      nombre, elegir: () => this.setState({ actor: id }),
+      bg: a === id ? "#00A8CC" : "transparent",
+      fg: a === id ? "#0E1720" : "#CBD3D8",
+      borde: a === id ? "#00A8CC" : "#2C383F"
+    }));
+
+    const notas = {
+      ambos: "Con los dos roles, el switch cambia el contexto entero: próximo partido propio o gestión de torneos.",
+      conPartido: "El primer bloque es siempre el próximo partido propio: es la pregunta que trae a la app.",
+      sinPartido: "Sin partido próximo, ese espacio lo ocupa el paso siguiente que corresponda — nunca queda vacío.",
+      organizador: "Un organizador sin partido propio ve su paso siguiente de gestión en el mismo lugar.",
+      nuevo: "Recién registrado: cero seguimientos. La invitación a descubrir ocupa el lugar del partido."
+    };
+
+    const equiposBase = [
+      { nombre: "Los Pibes del Fondo", categoria: "Masculino · Libre", rol: "Capitán", slotId: "eq-pf" },
+      { nombre: "Deportivo Belgrano", categoria: "Masculino · Libre", rol: "Pendiente de aprobación", slotId: "eq-db" }
+    ];
+    const equiposSeguidosJugadorBase = [
+      { nombre: "Racing del Barrio", categoria: "Masculino · Libre", slotId: "eq-rc" }
+    ];
+    const torneosBase = [
+      { nombre: "Copa Otoño F5", fecha: "Fecha 7 de 11", categoria: "Masculino · F5", posicion: "2°", slotId: "tr-cof5", miEquipoEnTorneo: "Los Pibes del Fondo" },
+      { nombre: "Liga Barrial Sur", fecha: "Fecha 3 de 9", categoria: "Mixto · F7", posicion: "5°", slotId: "tr-lbs", miEquipoEnTorneo: "Racing del Barrio" }
+    ];
+    const badgeRolEquipo = rol => {
+      if (rol === "Capitán") return { bg: "#E4F3E8", fg: "#12662C", dot: "#1B8A3C", radio: "999px", rot: "none" };
+      if (rol === "Pendiente de aprobación") return { bg: "#FBEBD3", fg: "#7A4600", dot: "#A25C00", radio: "0", rot: "rotate(45deg)" };
+      return { bg: "#EFF2F4", fg: "#414E57", dot: "#5C6A74", radio: "999px", rot: "none" };
+    };
+    const equipos = (a === "nuevo" ? [] : equiposBase).map(eq => Object.assign({ ir: () => {} }, eq, badgeRolEquipo(eq.rol)));
+    const equiposSeguidosJugador = (a === "nuevo" ? [] : equiposSeguidosJugadorBase).map(eq => Object.assign({ ir: () => {} }, eq));
+    const torneosSeguidos = (a === "nuevo" ? [] : torneosBase).map(tr => Object.assign({ ir: () => {} }, tr));
+
+    const modoActivo = a === "organizador" ? "organizador" : "jugador";
+
+    const badgeEstadoTorneo = estado => {
+      const m = {
+        "Borrador": { estadoBg: "#EFF2F4", estadoFg: "#414E57", estadoDot: "#5C6A74", estadoRadio: "0", estadoRot: "none" },
+        "Inscripciones abiertas": { estadoBg: "#E4F3E8", estadoFg: "#12662C", estadoDot: "#1B8A3C", estadoRadio: "999px", estadoRot: "none" },
+        "En curso": { estadoBg: "#E4F3E8", estadoFg: "#12662C", estadoDot: "#1B8A3C", estadoRadio: "999px", estadoRot: "none" },
+        "Finalizado": { estadoBg: "#EFF2F4", estadoFg: "#414E57", estadoDot: "#5C6A74", estadoRadio: "0", estadoRot: "none" }
+      };
+      return Object.assign({ estadoLabel: estado }, m[estado] || m["Borrador"]);
+    };
+    const torneosAdministradosBase = [
+      { nombre: "Copa Otoño F5", categoria: "Masculino · F5 · Zona Norte", fecha: "12 de abril", inscriptos: 12, cupo: 16, estado: "En curso", slotId: "adm-cof5" },
+      { nombre: "Copa Primavera F7", categoria: "Mixto · F7 · Zona Norte", fecha: "sin definir", inscriptos: 0, cupo: 12, estado: "Borrador", slotId: "adm-cpf7" }
+    ];
+    const equiposSeguidosOrg = [
+      { nombre: "Deportivo Belgrano", categoria: "Masculino · Libre", slotId: "eqsig-db" }
+    ];
+    const torneosAdministrados = (a === "organizador" ? torneosAdministradosBase : []).map(t => Object.assign({ ir: () => {} }, t, badgeEstadoTorneo(t.estado)));
+    const equiposSeguidos = (a === "organizador" ? equiposSeguidosOrg : []).map(eq => Object.assign({ ir: () => {} }, eq));
+
+    return Object.assign({
+      perfiles,
+      etiquetaActor: e.etiqueta,
+      zonaActual: "Zona Norte",
+      mostrarSwitchModo: !!(actorBase.esJugador && actorBase.esOrganizador),
+      bgModoJugador: modoActivo === "jugador" ? "#00A8CC" : "transparent",
+      fgModoJugador: modoActivo === "jugador" ? "#0E1720" : "#A9B4BC",
+      bgModoOrganizador: modoActivo === "organizador" ? "#00A8CC" : "transparent",
+      fgModoOrganizador: modoActivo === "organizador" ? "#0E1720" : "#A9B4BC",
+      irModoJugador: () => this.setState({ modo: "jugador" }),
+      irModoOrganizador: () => this.setState({ modo: "organizador" }),
+      hayProximoPartido: !!e.torneoNombre,
+      mostrarPasoSiguiente: !e.torneoNombre && a !== "nuevo",
+      esRecienLlegado: a === "nuevo",
+      notaEstado: notas[a],
+      equipos, torneosSeguidos, equiposSeguidosJugador,
+      mostrarBloqueOrganizador: a === "organizador",
+      mostrarMisEquiposMisTorneos: a !== "organizador" && a !== "nuevo",
+      torneosAdministrados, equiposSeguidos,
+      irNotifs: () => {}, irEquipos: () => {}, irTorneos: () => {}, irPerfil: () => {}, irBuscar: () => {},
+      irDescubrir: () => {}, irCrearEquipo: () => {}, irCrearTorneo: () => {},
+      pasoSiguienteAccion: () => {}
+    }, e);
+  }
+}
+
+</script>
+</body>
+</html>

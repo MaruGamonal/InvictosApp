@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Invictos — Selector de ciudad (componente compartido)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #142230; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  input { font-family: Barlow, sans-serif; }
+  input::placeholder { color: #A9B4BC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="font-family: Barlow, system-ui, sans-serif; color: #142230; min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 16px 40px">
+
+  <div style="width: 100%; max-width: 390px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+    <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; line-height: 1; text-transform: uppercase; color: #FFFFFF">Invictos</div>
+    <div style="font: 600 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95">Componente compartido · Selector de ciudad</div>
+  </div>
+
+  <div style="width: 390px; height: 844px; flex: none; background: #0E1720; border-radius: 34px; padding: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.45)">
+    <div style="width: 100%; height: 100%; background: #FFFFFF; border-radius: 27px; overflow: hidden; position: relative; display: flex; flex-direction: column">
+
+      <div style="padding: 16px 18px 0; flex: none; display: flex; align-items: center; justify-content: space-between">
+        <div onClick="{{ irAtras }}" style="font: 400 24px/1 Barlow; color: #414E57; cursor: pointer; width: 24px">‹</div>
+        <div style="font: 700 15px/1 Barlow">Elegí tu ciudad</div>
+        <div onClick="{{ confirmar }}" style="font: 700 13px/1 Barlow; color: {{ confirmarColor }}; cursor: pointer">Listo</div>
+      </div>
+
+      <div style="padding: 12px 18px 0; flex: none">
+        <div style="background: #F7F9FA; border: 1px solid #E3E8EB; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E8B95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          <input value="{{ busqueda }}" onInput="{{ onBusqueda }}" type="text" placeholder="Buscá tu ciudad" style="border: none; outline: none; background: transparent; flex: 1; font: 400 15px/1 Barlow; color: #142230" />
+        </div>
+      </div>
+
+      <sc-if value="{{ hayCiudadesSeleccionadas }}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 12px 18px 0; flex: none; display: flex; flex-wrap: wrap; gap: 6px">
+          <sc-for list="{{ ciudadesSeleccionadas }}" as="cs" hint-placeholder-count="2">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #142230; color: #FFFFFF; padding: 6px 10px; border-radius: 999px">
+              <span style="font: 600 12px/1 Barlow">{{ cs.nombre }}</span>
+              <div onClick="{{ cs.quitar }}" style="font: 600 14px/1 Barlow; cursor: pointer; color: #A9B4BC">×</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding: 4px 18px 0; flex: none; font: 400 11px/1.3 Barlow; color: #7E8B95">{{ ciudadesSeleccionadas.length }} de {{ maxCiudades }} — para cubrir zonas como AMBA, donde se juega en varios municipios.</div>
+      </sc-if>
+
+      <div style="flex: 1; overflow-y: auto; padding: 14px 18px 24px; margin-top: 4px">
+        <sc-for list="{{ gruposProvincia }}" as="gp" hint-placeholder-count="3">
+          <div style="margin-bottom: 18px">
+            <div style="font: 700 11px/1 Barlow; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8B95; margin-bottom: 8px">{{ gp.provincia }}</div>
+            <sc-for list="{{ gp.ciudades }}" as="c" hint-placeholder-count="3">
+              <div onClick="{{ c.toggle }}" style="display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #EFF2F4; cursor: pointer">
+                <div style="width: 20px; height: 20px; flex: none; border-radius: 4px; border: 1.5px solid {{ c.checkBorde }}; background: {{ c.checkBg }}; display: flex; align-items: center; justify-content: center">
+                  <sc-if value="{{ c.seleccionada }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7" /></svg></sc-if>
+                </div>
+                <div style="flex: 1; font: {{ c.peso }} 14px/1.2 Barlow; color: {{ c.color }}">{{ c.nombre }}</div>
+                <sc-if value="{{ c.tieneTorneos }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: inline-flex; align-items: center; gap: 4px; background: #E4F3E8; padding: 3px 8px; border-radius: 999px"><div style="width: 5px; height: 5px; border-radius: 999px; background: #1B8A3C"></div><span style="font: 700 10px/1 Barlow; letter-spacing: 0.03em; text-transform: uppercase; color: #12662C">{{ c.cantidadTorneos }}</span></div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 390px; font: 400 13px/1.6 Barlow; color: #7E8B95; text-wrap: pretty">Componente único, reusado en Descubrimiento, Crear torneo, Crear equipo y Mi perfil. Se escribe para buscar — no se navega la lista. Ciudades con torneos primero y marcadas; agrupado por provincia porque hay más de un "San Martín" en el país. Hasta {{ maxCiudades }} ciudades a la vez, pensado para quien juega en más de un municipio del mismo conurbano.</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 480, &quot;height&quot;: 1000 }
+}">
+class Component extends DCLogic {
+  state = { busqueda: "", seleccionadas: ["San Isidro"] };
+
+  maxCiudades = 3;
+
+  catalogoBase = [
+    { provincia: "Buenos Aires (AMBA)", ciudades: [
+      { nombre: "CABA", tieneTorneos: true, cantidadTorneos: 46 },
+      { nombre: "San Isidro", tieneTorneos: true, cantidadTorneos: 12 },
+      { nombre: "Vicente López", tieneTorneos: true, cantidadTorneos: 8 },
+      { nombre: "San Fernando", tieneTorneos: false, cantidadTorneos: 0 }
+    ]},
+    { provincia: "Córdoba", ciudades: [
+      { nombre: "Córdoba", tieneTorneos: true, cantidadTorneos: 21 },
+      { nombre: "Río Cuarto", tieneTorneos: false, cantidadTorneos: 0 }
+    ]},
+    { provincia: "Santa Fe", ciudades: [
+      { nombre: "Rosario", tieneTorneos: true, cantidadTorneos: 17 },
+      { nombre: "San Martín", tieneTorneos: false, cantidadTorneos: 0 }
+    ]},
+    { provincia: "Mendoza", ciudades: [
+      { nombre: "San Martín", tieneTorneos: false, cantidadTorneos: 0 },
+      { nombre: "Godoy Cruz", tieneTorneos: false, cantidadTorneos: 0 }
+    ]}
+  ];
+
+  renderVals() {
+    const s = this.state;
+    const q = s.busqueda.trim().toLowerCase();
+
+    const gruposProvincia = this.catalogoBase.map(gp => {
+      const ciudades = gp.ciudades
+        .filter(c => !q || c.nombre.toLowerCase().indexOf(q) >= 0)
+        .slice()
+        .sort((a, b) => (b.tieneTorneos ? 1 : 0) - (a.tieneTorneos ? 1 : 0))
+        .map(c => {
+          const seleccionada = s.seleccionadas.indexOf(c.nombre) >= 0;
+          return {
+            nombre: c.nombre, tieneTorneos: c.tieneTorneos, cantidadTorneos: c.cantidadTorneos,
+            seleccionada, checkBorde: seleccionada ? "#00A8CC" : "#CBD3D8", checkBg: seleccionada ? "#00A8CC" : "transparent",
+            peso: c.tieneTorneos ? 700 : 400, color: c.tieneTorneos ? "#142230" : "#A9B4BC",
+            toggle: () => this.setState(st => {
+              const has = st.seleccionadas.indexOf(c.nombre) >= 0;
+              if (has) return { seleccionadas: st.seleccionadas.filter(n => n !== c.nombre) };
+              if (st.seleccionadas.length >= this.maxCiudades) return {};
+              return { seleccionadas: [...st.seleccionadas, c.nombre] };
+            })
+          };
+        });
+      return { provincia: gp.provincia, ciudades };
+    }).filter(gp => gp.ciudades.length);
+
+    const ciudadesSeleccionadas = s.seleccionadas.map(nombre => ({ nombre, quitar: () => this.setState(st => ({ seleccionadas: st.seleccionadas.filter(n => n !== nombre) })) }));
+
+    return {
+      busqueda: s.busqueda, onBusqueda: e => this.setState({ busqueda: e.target.value }),
+      gruposProvincia, maxCiudades: this.maxCiudades,
+      hayCiudadesSeleccionadas: ciudadesSeleccionadas.length > 0, ciudadesSeleccionadas,
+      confirmarColor: s.seleccionadas.length ? "#00A8CC" : "#CBD3D8",
+      confirmar: () => {}, irAtras: () => {}
+    };
+  }
+}
+
+</script>
+</body>
+</html>
