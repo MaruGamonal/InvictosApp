@@ -7,6 +7,8 @@ const TORNEO = '11111111-1111-1111-1111-111111111111';
 const ORG = '22222222-2222-2222-2222-222222222222';
 const EQUIPO_A = '33333333-3333-3333-3333-333333333333';
 const EQUIPO_B = '44444444-4444-4444-4444-444444444444';
+const FASE_LIGA = '55555555-5555-5555-5555-555555555555';
+const FASE_ELIMINACION = '66666666-6666-6666-6666-666666666666';
 
 beforeEach(() => vi.resetModules());
 
@@ -14,6 +16,7 @@ function filaPartido(over: Partial<Record<string, unknown>> = {}) {
   return {
     id: 'partido-1',
     numero_fecha: 1,
+    fase_id: FASE_LIGA,
     fase_nombre: 'Fase única',
     grupo_nombre: 'Zona A',
     estado: 'scheduled',
@@ -82,7 +85,7 @@ describe('obtenerFixturePublico', () => {
     });
     const { obtenerFixturePublico } = await import('./obtenerFixturePublico');
     const fixture = await obtenerFixturePublico({ torneoId: TORNEO }, VISITANTE);
-    expect(fixture.fechaVigente).toBe(2);
+    expect(fixture.fechaVigente).toEqual({ faseId: FASE_LIGA, numeroFecha: 2 });
   });
 
   it('con todo resuelto, la fecha vigente es la última', async () => {
@@ -100,7 +103,24 @@ describe('obtenerFixturePublico', () => {
     });
     const { obtenerFixturePublico } = await import('./obtenerFixturePublico');
     const fixture = await obtenerFixturePublico({ torneoId: TORNEO }, VISITANTE);
-    expect(fixture.fechaVigente).toBe(2);
+    expect(fixture.fechaVigente).toEqual({ faseId: FASE_LIGA, numeroFecha: 2 });
+  });
+
+  it('groups_knockout: la fecha vigente respeta el orden de fase, no solo numero_fecha', async () => {
+    // La llave de eliminación directa vuelve a numerar desde 1 (`_bracket.ts`):
+    // "Fecha 1" de la fase eliminatoria no es "más vigente" que "Fecha 2" de
+    // la liga solo por tener un número menor — la fase que viene antes en el
+    // torneo manda.
+    mockearDb({
+      partidos: [
+        filaPartido({ fase_id: FASE_LIGA, numero_fecha: 1, estado: 'played' }),
+        filaPartido({ id: 'p2', fase_id: FASE_LIGA, numero_fecha: 2, estado: 'postponed' }),
+        filaPartido({ id: 'p3', fase_id: FASE_ELIMINACION, numero_fecha: 1, estado: 'scheduled' }),
+      ],
+    });
+    const { obtenerFixturePublico } = await import('./obtenerFixturePublico');
+    const fixture = await obtenerFixturePublico({ torneoId: TORNEO }, VISITANTE);
+    expect(fixture.fechaVigente).toEqual({ faseId: FASE_LIGA, numeroFecha: 2 });
   });
 
   it('un torneo sin partidos todavía: fechaVigente null y lista vacía', async () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
@@ -17,9 +18,17 @@ import styles from './pagina.module.css';
  * equipos (`02`, UC-04) — el servicio ya resuelve ese filtro.
  */
 
+// `generateMetadata` y la página piden el mismo perfil; `cache()` de React
+// deduplica ambas llamadas dentro del mismo request (sin esto, el sin-caché
+// deliberado de este perfil — a diferencia de equipo/torneo — duplicaba el
+// trabajo contra la base en cada visita).
+const obtenerPerfilCacheado = cache((perfilId: string) =>
+  obtenerPerfilPublico({ perfilId }, CONTEXTO_PUBLICO),
+);
+
 async function obtenerPerfilOFallar(perfilId: string): Promise<PerfilPublico> {
   try {
-    return await obtenerPerfilPublico({ perfilId }, CONTEXTO_PUBLICO);
+    return await obtenerPerfilCacheado(perfilId);
   } catch (error) {
     if (esErrorDeAplicacion(error) && error.codigo === 'NO_ENCONTRADO') notFound();
     throw error;
@@ -34,7 +43,7 @@ export async function generateMetadata({
   const { id } = await params;
   let perfil: PerfilPublico;
   try {
-    perfil = await obtenerPerfilPublico({ perfilId: id }, CONTEXTO_PUBLICO);
+    perfil = await obtenerPerfilCacheado(id);
   } catch {
     return {};
   }

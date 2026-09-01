@@ -15,8 +15,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const [ficha, fixture] = await Promise.all([obtenerFichaOFallar(id), obtenerFixtureCacheado(id)]);
-  const descripcion =
-    fixture?.fechaVigente != null ? `Fecha ${fixture.fechaVigente}` : 'Todavía sin fixture';
+  const descripcion = fixture?.fechaVigente
+    ? `Fecha ${fixture.fechaVigente.numeroFecha}`
+    : 'Todavía sin fixture';
 
   return {
     title: `Fixture — ${ficha.nombre} — INVICTOS`,
@@ -44,25 +45,54 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
     return <EstadoVacio mensaje="Todavía no hay fixture generado para este torneo." />;
   }
 
-  const fechas = new Map<number, typeof fixture.partidos>();
+  // `numero_fecha` vuelve a empezar en cada fase (`groups_knockout`: la
+  // llave de eliminación directa arranca en 1, sin importar en qué fecha
+  // terminó la liga) — agrupar solo por número mezclaría fases distintas
+  // bajo un mismo título "Fecha 1". La clave es fase + número.
+  type GrupoFecha = {
+    faseId: string;
+    faseNombre: string;
+    numeroFecha: number;
+    partidos: typeof fixture.partidos;
+  };
+  const grupos: GrupoFecha[] = [];
+  const indicePorClave = new Map<string, number>();
   for (const partido of fixture.partidos) {
-    const grupo = fechas.get(partido.numeroFecha) ?? [];
-    grupo.push(partido);
-    fechas.set(partido.numeroFecha, grupo);
+    const clave = `${partido.faseId}:${partido.numeroFecha}`;
+    const indiceExistente = indicePorClave.get(clave);
+    if (indiceExistente !== undefined) {
+      grupos[indiceExistente]!.partidos.push(partido);
+    } else {
+      indicePorClave.set(clave, grupos.length);
+      grupos.push({
+        faseId: partido.faseId,
+        faseNombre: partido.faseNombre,
+        numeroFecha: partido.numeroFecha,
+        partidos: [partido],
+      });
+    }
   }
-
-  const fechasOrdenadas = [...fechas.entries()].sort(([a], [b]) => a - b);
+  const hayVariasFases = new Set(fixture.partidos.map((p) => p.faseId)).size > 1;
 
   return (
     <div className={styles.pagina}>
-      {fechasOrdenadas.map(([numeroFecha, partidos], indice) => (
-        <Fragment key={numeroFecha}>
+      {grupos.map((grupo, indice) => (
+        <Fragment key={`${grupo.faseId}:${grupo.numeroFecha}`}>
           <section
-            className={numeroFecha === fixture.fechaVigente ? styles.fechaVigente : styles.fecha}
+            className={
+              grupo.faseId === fixture.fechaVigente?.faseId &&
+              grupo.numeroFecha === fixture.fechaVigente?.numeroFecha
+                ? styles.fechaVigente
+                : styles.fecha
+            }
           >
-            <h2 className={styles.tituloFecha}>Fecha {numeroFecha}</h2>
+            <h2 className={styles.tituloFecha}>
+              {hayVariasFases
+                ? `${grupo.faseNombre} · Fecha ${grupo.numeroFecha}`
+                : `Fecha ${grupo.numeroFecha}`}
+            </h2>
             <div className={styles.listaPartidos}>
-              {partidos.map((partido) => (
+              {grupo.partidos.map((partido) => (
                 <div key={partido.id} className={styles.filaConSede}>
                   <FilaPartido
                     estado={partido.estado as EstadoPartido}

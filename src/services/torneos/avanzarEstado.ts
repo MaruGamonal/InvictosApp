@@ -4,7 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
-import { invalidarCacheTorneo } from '@/lib/cache';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
@@ -80,6 +80,17 @@ export const avanzarEstado: Servicio<AvanzarEstadoInput, { estado: string }> = a
   }
 
   invalidarCacheTorneo(datos.torneoId);
+
+  // El perfil público de cada equipo inscripto muestra el estado del
+  // torneo en su historial (obtenerEquipoPublico) — sin esto quedaría
+  // desactualizado hasta que a ese equipo le pasara otra cosa.
+  const { rows: inscriptos } = await pool.query<{ equipo_id: string }>(
+    `SELECT equipo_id FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved'`,
+    [datos.torneoId],
+  );
+  for (const { equipo_id: equipoId } of inscriptos) {
+    invalidarCacheEquipo(equipoId);
+  }
 
   return { estado: datos.estadoDestino };
 };

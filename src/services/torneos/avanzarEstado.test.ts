@@ -16,6 +16,7 @@ function mockearDb(opciones: {
   rolEnOrganizacion?: 'owner' | 'admin';
   estadoTorneo?: string;
   hayPartidos?: boolean;
+  equiposInscriptos?: string[];
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -34,6 +35,9 @@ function mockearDb(opciones: {
         }
         if (texto.includes('FROM partido WHERE torneo_id')) {
           return { rows: opciones.hayPartidos ? [{}] : [] };
+        }
+        if (texto.includes('SELECT equipo_id FROM inscripcion')) {
+          return { rows: (opciones.equiposInscriptos ?? []).map((equipo_id) => ({ equipo_id })) };
         }
         return { rows: [] };
       },
@@ -86,6 +90,20 @@ describe('avanzarEstado', () => {
     await avanzarEstado({ torneoId: TORNEO, estadoDestino: 'finished' }, contextoCon('usuario-1'));
 
     expect(notificarCambio).toHaveBeenCalledWith(TORNEO, 'tournament_finished', expect.anything());
+  });
+
+  it('avanzar el estado no rompe cuando hay equipos inscriptos (su perfil público muestra el estado del torneo)', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      estadoTorneo: 'in_progress',
+      equiposInscriptos: ['equipo-1', 'equipo-2'],
+    });
+    mockearNotificarCambio();
+    const { avanzarEstado } = await import('./avanzarEstado');
+
+    await expect(
+      avanzarEstado({ torneoId: TORNEO, estadoDestino: 'finished' }, contextoCon('usuario-1')),
+    ).resolves.toEqual({ estado: 'finished' });
   });
 
   it('draft no puede saltar directo a in_progress (eso es publicarTorneo)', async () => {

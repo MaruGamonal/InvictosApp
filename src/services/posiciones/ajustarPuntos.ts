@@ -4,7 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
-import { invalidarCacheTorneo } from '@/lib/cache';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 
 /**
  * UC-35 — Quita o bonificación de puntos aplicada por el organizador
@@ -77,6 +77,7 @@ export const ajustarPuntos: Servicio<AjustarPuntosInput, PosicionActualizada> = 
   );
 
   invalidarCacheTorneo(datos.torneoId);
+  invalidarCacheEquipo(datos.equipoId);
 
   const posicion = rows[0]!;
   return {

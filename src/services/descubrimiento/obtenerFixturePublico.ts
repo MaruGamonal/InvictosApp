@@ -18,6 +18,7 @@ export type ObtenerFixturePublicoInput = z.infer<typeof esquemaEntrada>;
 export interface PartidoFixturePublico {
   id: string;
   numeroFecha: number;
+  faseId: string;
   faseNombre: string;
   grupoNombre: string | null;
   estado: string;
@@ -30,9 +31,20 @@ export interface PartidoFixturePublico {
   sedeNombre: string | null;
 }
 
+export interface FechaVigente {
+  faseId: string;
+  numeroFecha: number;
+}
+
 export interface FixturePublico {
-  /** La fecha (numero_fecha) que conviene mostrar primero: la próxima sin resolver, o la última si el torneo ya terminó. */
-  fechaVigente: number | null;
+  /**
+   * La fecha que conviene mostrar primero: la próxima sin resolver, o la
+   * última si el torneo ya terminó. Lleva `faseId` porque `numero_fecha`
+   * arranca de nuevo en cada fase (`groups_knockout`: la llave de
+   * eliminación directa vuelve a empezar en 1) — un número solo no
+   * identifica una fecha sin ambigüedad.
+   */
+  fechaVigente: FechaVigente | null;
   partidos: PartidoFixturePublico[];
 }
 
@@ -61,6 +73,7 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
   const { rows } = await pool.query<{
     id: string;
     numero_fecha: number;
+    fase_id: string;
     fase_nombre: string;
     grupo_nombre: string | null;
     estado: string;
@@ -76,7 +89,7 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
     fecha_hora_original: Date | null;
     sede_nombre: string | null;
   }>(
-    `SELECT p.id, p.numero_fecha, f.nombre AS fase_nombre, g.nombre AS grupo_nombre, p.estado,
+    `SELECT p.id, p.numero_fecha, f.id AS fase_id, f.nombre AS fase_nombre, g.nombre AS grupo_nombre, p.estado,
             el.id AS local_id, el.nombre AS local_nombre, el.escudo_url AS local_escudo,
             ev.id AS visitante_id, ev.nombre AS visitante_nombre, ev.escudo_url AS visitante_escudo,
             p.goles_local, p.goles_visitante, p.fecha_hora_programada, p.fecha_hora_original,
@@ -95,6 +108,7 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
   const partidos: PartidoFixturePublico[] = rows.map((fila) => ({
     id: fila.id,
     numeroFecha: fila.numero_fecha,
+    faseId: fila.fase_id,
     faseNombre: fila.fase_nombre,
     grupoNombre: fila.grupo_nombre,
     estado: fila.estado,
@@ -111,11 +125,14 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
     sedeNombre: fila.sede_nombre,
   }));
 
+  // `partidos` ya viene ordenado por fase (f.orden) y luego numero_fecha:
+  // el primer pendiente en ese orden es la fecha vigente, no la de menor
+  // numero_fecha sin más — ese número vuelve a empezar en cada fase.
   const pendientes = partidos.filter((p) => ESTADOS_SIN_RESOLVER.includes(p.estado));
-  const fechaVigente =
-    pendientes.length > 0
-      ? Math.min(...pendientes.map((p) => p.numeroFecha))
-      : (partidos.at(-1)?.numeroFecha ?? null);
+  const partidoDeReferencia = pendientes[0] ?? partidos.at(-1) ?? null;
+  const fechaVigente: FechaVigente | null = partidoDeReferencia
+    ? { faseId: partidoDeReferencia.faseId, numeroFecha: partidoDeReferencia.numeroFecha }
+    : null;
 
   return { fechaVigente, partidos };
 };

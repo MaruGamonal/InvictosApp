@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
@@ -19,9 +20,15 @@ import styles from './pagina.module.css';
  * ya excluye los cancelados y los que no terminaron.
  */
 
+// Mismo criterio que /jugador/[id]: `cache()` deduplica generateMetadata
+// y la página dentro del mismo request.
+const obtenerPerfilCacheado = cache((organizacionId: string) =>
+  obtenerPerfilOrganizador({ organizacionId }, CONTEXTO_PUBLICO),
+);
+
 async function obtenerPerfilOFallar(organizacionId: string): Promise<PerfilOrganizador> {
   try {
-    return await obtenerPerfilOrganizador({ organizacionId }, CONTEXTO_PUBLICO);
+    return await obtenerPerfilCacheado(organizacionId);
   } catch (error) {
     if (esErrorDeAplicacion(error) && error.codigo === 'NO_ENCONTRADO') notFound();
     throw error;
@@ -36,7 +43,7 @@ export async function generateMetadata({
   const { id } = await params;
   let perfil: PerfilOrganizador;
   try {
-    perfil = await obtenerPerfilOrganizador({ organizacionId: id }, CONTEXTO_PUBLICO);
+    perfil = await obtenerPerfilCacheado(id);
   } catch {
     return {};
   }
