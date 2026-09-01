@@ -4,16 +4,24 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
  * UC-19 — Actualizar la configuración de un torneo. El cupo **no puede
  * bajarse** por debajo de la cantidad de equipos ya aprobados (`06`,
  * A-04, confirmado en D-68).
  *
- * Qué campos disparan notificación al modificar un torneo **publicado**
- * (`06`, D-22b) es una regla que solo aplica una vez que el torneo deja
- * `draft` — T10, que además es quien construye `notificar()` para D4.
- * Este ticket no envía notificaciones.
+ * De los cinco campos que disparan notificación al modificar un torneo
+ * **publicado** (`06`, D-22b: fecha de inicio, sede, formato, cupo y
+ * reglamento), este servicio toca tres —`direccion` hace de "sede" del
+ * torneo, ya que no hay un `sede_id` a nivel torneo—; formato es de
+ * `definirFormato` y reglamento es de T11. `04`, 4.12 no tiene un tipo
+ * de notificación propio para estos cambios de configuración —solo
+ * `tournament_rules_updated` para el reglamento (UC-51)—, así que se
+ * reutiliza ese mismo tipo: es "cambió algo importante de tu torneo",
+ * no exclusivamente el reglamento. El resto de los campos se guarda en
+ * silencio. No notifica si el torneo sigue en `draft`: ahí no hay a
+ * quién avisarle todavía.
  */
 
 const CRITERIOS_DESEMPATE_VALIDOS = ['goal_difference', 'goals_for', 'head_to_head'] as const;
@@ -75,6 +83,13 @@ export const actualizarTorneo: Servicio<ActualizarTorneoInput, { id: string }> =
 
   const pool = obtenerPool();
 
+  const { rows: torneoActual } = await pool.query<{ estado: string }>(
+    'SELECT estado FROM torneo WHERE id = $1',
+    [datos.torneoId],
+  );
+  if (!torneoActual[0]) throw crearError('NO_ENCONTRADO');
+  const estaPublicado = torneoActual[0].estado !== 'draft';
+
   if (datos.cupoEquipos !== undefined) {
     const { rows } = await pool.query<{ count: string }>(
       `SELECT count(*) FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved'`,
@@ -111,6 +126,16 @@ export const actualizarTorneo: Servicio<ActualizarTorneoInput, { id: string }> =
     valores,
   );
   if (rowCount === 0) throw crearError('NO_ENCONTRADO');
+
+  const CAMPOS_QUE_NOTIFICAN: Array<keyof ActualizarTorneoInput> = [
+    'fechaInicioEstimada',
+    'direccion',
+    'cupoEquipos',
+  ];
+  const tocaCampoRelevante = CAMPOS_QUE_NOTIFICAN.some((campo) => datos[campo] !== undefined);
+  if (estaPublicado && tocaCampoRelevante) {
+    await notificarCambioDeTorneo(datos.torneoId, 'tournament_rules_updated', contexto);
+  }
 
   return { id: datos.torneoId };
 };

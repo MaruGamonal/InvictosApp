@@ -15,14 +15,18 @@ beforeEach(() => vi.resetModules());
 function mockearDb(opciones: {
   rolEnOrganizacion?: 'owner' | 'admin';
   hayPartidosJugados?: boolean;
+  estadoTorneo?: string;
 }) {
   let contadorFase = 0;
   const consultasCliente: string[] = [];
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
-        if (texto.includes('FROM torneo WHERE id')) {
+        if (texto.includes('organizacion_id FROM torneo')) {
           return { rows: [{ organizacion_id: ORG }] };
+        }
+        if (texto.startsWith('SELECT estado FROM torneo')) {
+          return { rows: [{ estado: opciones.estadoTorneo ?? 'draft' }] };
         }
         if (texto.includes('FROM miembro_organizacion')) {
           return { rows: opciones.rolEnOrganizacion ? [{ rol: opciones.rolEnOrganizacion }] : [] };
@@ -49,6 +53,12 @@ function mockearDb(opciones: {
     }),
   }));
   return consultasCliente;
+}
+
+function mockearNotificarCambio() {
+  const spy = vi.fn(async () => {});
+  vi.doMock('./_notificarCambio', () => ({ notificarCambioDeTorneo: spy }));
+  return spy;
 }
 
 describe('definirFormato', () => {
@@ -130,5 +140,29 @@ describe('definirFormato', () => {
       // @ts-expect-error entrada deliberadamente inválida
       definirFormato({ torneoId: TORNEO, formato: 'groups_knockout' }, contextoCon('usuario-1')),
     ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('redefinir el formato de un torneo publicado notifica (D-22b)', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'registration_open' });
+    const notificarCambio = mockearNotificarCambio();
+    const { definirFormato } = await import('./definirFormato');
+
+    await definirFormato({ torneoId: TORNEO, formato: 'league' }, contextoCon('usuario-1'));
+
+    expect(notificarCambio).toHaveBeenCalledWith(
+      TORNEO,
+      'tournament_rules_updated',
+      expect.anything(),
+    );
+  });
+
+  it('definir el formato de un torneo en draft no notifica', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'draft' });
+    const notificarCambio = mockearNotificarCambio();
+    const { definirFormato } = await import('./definirFormato');
+
+    await definirFormato({ torneoId: TORNEO, formato: 'league' }, contextoCon('usuario-1'));
+
+    expect(notificarCambio).not.toHaveBeenCalled();
   });
 });

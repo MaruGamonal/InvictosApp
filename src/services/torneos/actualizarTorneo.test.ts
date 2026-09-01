@@ -16,12 +16,16 @@ function mockearDb(opciones: {
   rolEnOrganizacion?: 'owner' | 'admin';
   equiposAprobados?: number;
   rowCountUpdate?: number;
+  estadoTorneo?: string;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
-        if (texto.includes('FROM torneo WHERE id')) {
+        if (texto.includes('organizacion_id FROM torneo')) {
           return { rows: [{ organizacion_id: ORG }] };
+        }
+        if (texto.startsWith('SELECT estado FROM torneo')) {
+          return { rows: [{ estado: opciones.estadoTorneo ?? 'draft' }] };
         }
         if (texto.includes('FROM miembro_organizacion')) {
           return { rows: opciones.rolEnOrganizacion ? [{ rol: opciones.rolEnOrganizacion }] : [] };
@@ -39,6 +43,12 @@ function mockearDb(opciones: {
       },
     }),
   }));
+}
+
+function mockearNotificarCambio() {
+  const spy = vi.fn(async () => {});
+  vi.doMock('./_notificarCambio', () => ({ notificarCambioDeTorneo: spy }));
+  return spy;
 }
 
 describe('actualizarTorneo', () => {
@@ -88,5 +98,48 @@ describe('actualizarTorneo', () => {
     await expect(
       actualizarTorneo({ torneoId: TORNEO, nombre: 'X' }, contextoCon('usuario-1')),
     ).rejects.toMatchObject({ codigo: 'NO_ENCONTRADO' });
+  });
+
+  it('en un torneo publicado, cambiar la fecha de inicio notifica (D-22b)', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'registration_open' });
+    const notificarCambio = mockearNotificarCambio();
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, fechaInicioEstimada: '2026-05-01T00:00:00.000Z' },
+      contextoCon('usuario-1'),
+    );
+
+    expect(notificarCambio).toHaveBeenCalledWith(
+      TORNEO,
+      'tournament_rules_updated',
+      expect.anything(),
+    );
+  });
+
+  it('en un torneo publicado, cambiar solo la descripción no notifica', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'registration_open' });
+    const notificarCambio = mockearNotificarCambio();
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, descripcion: 'Nueva descripción' },
+      contextoCon('usuario-1'),
+    );
+
+    expect(notificarCambio).not.toHaveBeenCalled();
+  });
+
+  it('en un torneo todavía en draft, cambiar la fecha no notifica', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'draft' });
+    const notificarCambio = mockearNotificarCambio();
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, fechaInicioEstimada: '2026-05-01T00:00:00.000Z' },
+      contextoCon('usuario-1'),
+    );
+
+    expect(notificarCambio).not.toHaveBeenCalled();
   });
 });

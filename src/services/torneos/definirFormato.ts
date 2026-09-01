@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
  * UC-17 — Definir el formato del torneo: crea **fases y grupos** (`03`,
@@ -58,6 +59,13 @@ export const definirFormato: Servicio<DefinirFormatoInput, DefinirFormatoResulta
   await verificarPermisoTorneo(contexto, datos.torneoId, 'configurar_torneo');
 
   const pool = obtenerPool();
+  const { rows: torneoActual } = await pool.query<{ estado: string }>(
+    'SELECT estado FROM torneo WHERE id = $1',
+    [datos.torneoId],
+  );
+  if (!torneoActual[0]) throw crearError('NO_ENCONTRADO');
+  const estaPublicado = torneoActual[0].estado !== 'draft';
+
   const { rows: jugados } = await pool.query(
     `SELECT 1 FROM partido WHERE torneo_id = $1 AND estado = 'played' LIMIT 1`,
     [datos.torneoId],
@@ -121,6 +129,11 @@ export const definirFormato: Servicio<DefinirFormatoInput, DefinirFormatoResulta
     }
 
     await cliente.query('COMMIT');
+
+    if (estaPublicado) {
+      await notificarCambioDeTorneo(datos.torneoId, 'tournament_rules_updated', contexto);
+    }
+
     return { fases };
   } catch (error) {
     await cliente.query('ROLLBACK');
