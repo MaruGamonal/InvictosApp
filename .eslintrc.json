@@ -43,7 +43,10 @@
           },
           {
             "from": { "element": { "type": "lib" } },
-            "allow": [{ "to": { "element": { "type": "lib" } } }]
+            "allow": [
+              { "to": { "element": { "type": "lib" } } },
+              { "to": { "element": { "type": "db" } } }
+            ]
           }
         ]
       }
