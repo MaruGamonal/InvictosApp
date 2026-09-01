@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PoolClient } from 'pg';
-import { aplicarResultadoAPosicion, revertirEfectoDePosicion } from './_recalcularPosicion';
+import {
+  aplicarEfectoAUnEquipo,
+  aplicarResultadoAPosicion,
+  revertirEfectoDePosicion,
+} from './_recalcularPosicion';
 
 const GRUPO = 'grupo-1';
 const EQUIPO_A = 'equipo-a';
@@ -81,5 +85,16 @@ describe('revertirEfectoDePosicion', () => {
     expect(consultas).toHaveLength(2);
     expect(consultas[0]!.valores).toEqual([GRUPO, EQUIPO_A, -3, -1, -1, 0, 0, -3, 0, -3]);
     expect(consultas[1]!.valores).toEqual([GRUPO, EQUIPO_B, 0, -1, 0, 0, -1, 0, -3, 3]);
+  });
+});
+
+describe('aplicarEfectoAUnEquipo', () => {
+  it('aplica el efecto a un solo equipo, sin tocar al rival (T17, baja con walkover al rival)', async () => {
+    const { cliente, consultas } = crearClienteFalso();
+
+    await aplicarEfectoAUnEquipo(cliente, GRUPO, EQUIPO_A, 3, 0, PUNTAJES);
+
+    expect(consultas).toHaveLength(1);
+    expect(consultas[0]!.valores).toEqual([GRUPO, EQUIPO_A, 3, 1, 1, 0, 0, 3, 0, 3]);
   });
 });

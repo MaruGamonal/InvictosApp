@@ -163,3 +163,27 @@ export async function revertirEfectoDePosicion(
   await aplicarDelta(cliente, grupoId, equipoLocalId, negar(anteriorLocal));
   await aplicarDelta(cliente, grupoId, equipoVisitanteId, negar(anteriorVisitante));
 }
+
+/**
+ * Aplica el efecto de un resultado a **un solo equipo**, sin tocar al
+ * rival — lo que necesita T17 cuando un equipo se da de baja del torneo:
+ * sus partidos pendientes se dan por ganados a cada rival, pero la baja
+ * "recalcula la posición de todos sus rivales, no la suya" (`11`, T17).
+ * El equipo que se va no vuelve a aparecer en ninguna escritura de
+ * `posicion` a partir de acá.
+ */
+export async function aplicarEfectoAUnEquipo(
+  cliente: PoolClient,
+  grupoId: string,
+  equipoId: string,
+  golesPropios: number,
+  golesRivales: number,
+  puntajes: PuntajesTorneo,
+): Promise<void> {
+  await aplicarDelta(
+    cliente,
+    grupoId,
+    equipoId,
+    calcularEfecto(golesPropios, golesRivales, puntajes),
+  );
+}
