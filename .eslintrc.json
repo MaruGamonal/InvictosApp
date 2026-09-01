@@ -6,6 +6,7 @@
     "boundaries/include": ["src/**/*.ts", "src/**/*.tsx"],
     "boundaries/elements": [
       { "type": "app", "pattern": "src/app/**" },
+      { "type": "components", "pattern": "src/components/**" },
       { "type": "services", "pattern": "src/services/**" },
       { "type": "db", "pattern": "src/db/**" },
       { "type": "lib", "pattern": "src/lib/**" }
@@ -21,8 +22,16 @@
             "from": { "element": { "type": "app" } },
             "allow": [
               { "to": { "element": { "type": "app" } } },
+              { "to": { "element": { "type": "components" } } },
               { "to": { "element": { "type": "services" } } },
               { "to": { "element": { "type": "db" } } },
+              { "to": { "element": { "type": "lib" } } }
+            ]
+          },
+          {
+            "from": { "element": { "type": "components" } },
+            "allow": [
+              { "to": { "element": { "type": "components" } } },
               { "to": { "element": { "type": "lib" } } }
             ]
           },

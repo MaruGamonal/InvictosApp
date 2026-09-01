@@ -1,0 +1,139 @@
+/**
+ * Tokens del sistema de diseño (T6; `08`, secciones 6, 7).
+ *
+ * Todo color, radio y espaciado que use un componente sale de acá — nunca
+ * un valor escrito directo (`08`, 11.10). El tema de arranque es el claro
+ * completo (`06`, D-71); las superficies de identidad (hero, cabeceras de
+ * perfil, tarjeta compartible) usan los tokens oscuros directamente,
+ * siempre, sin depender del tema (`08`, 6.1). El tema oscuro completo es
+ * de la segunda etapa: cuando llegue, es un bloque nuevo de valores acá,
+ * no un rediseño de los componentes.
+ */
+
+:root {
+  /* Escala de neutros (oscuro de marca -> claro), del handoff de diseño */
+  --ink-900: #0e1720;
+  --ink-800: #142230;
+  --ink-700: #2c383f;
+  --ink-600: #414e57;
+  --gris-secundario: #5c6a74;
+  --gris-terciario: #7e8b95;
+  --gris-claro-sobre-oscuro: #a9b4bc;
+  --borde-neutro: #cbd3d8;
+  --borde-sutil: #e3e8eb;
+  --fondo-sutil: #eff2f4;
+  --fondo-pagina: #f7f9fa;
+  --blanco: #ffffff;
+
+  /* Acento único de marca — ni verde ni éxito ni rojo de error (`06`, D-74) */
+  --acento: #00a8cc;
+  --acento-oscuro: #007d99;
+  --acento-texto-sobre: var(--ink-900);
+
+  /* Semántica (`04`, sección 6) — un color por categoría, en todo el sistema */
+  --exito: #1b8a3c;
+  --exito-texto: #12662c;
+  --exito-fondo: #e4f3e8;
+  --exito-vivo: #4ade80; /* sobre fondo oscuro, ej. punto "en vivo" */
+
+  --informacion: #4038c2;
+  --informacion-texto: #322ba0;
+  --informacion-fondo: #e7e9fb;
+
+  --advertencia: #a25c00;
+  --advertencia-texto: #7a4600;
+  --advertencia-fondo: #fbebd3;
+
+  --error: #c42b1c;
+  --error-texto: #a11f12;
+  --error-fondo: #fef7f6;
+  --error-borde: #f2cfca;
+
+  --neutro: var(--gris-secundario);
+  --neutro-texto: var(--ink-700);
+  --neutro-fondo: var(--fondo-sutil);
+
+  /* Superficies y texto del cuerpo de la aplicación (tema claro) */
+  --color-fondo: var(--fondo-pagina);
+  --color-superficie: var(--blanco);
+  --color-texto: var(--ink-800);
+  --color-texto-secundario: var(--gris-secundario);
+  --color-texto-terciario: var(--gris-terciario);
+  --color-borde: var(--borde-sutil);
+
+  /* Superficies de identidad: siempre oscuras, en cualquier tema */
+  --identidad-fondo: linear-gradient(165deg, #0e1720 0%, #142230 65%, #1b2a38 100%);
+  --identidad-texto: var(--blanco);
+  --identidad-texto-secundario: var(--gris-claro-sobre-oscuro);
+
+  /* Tipografía */
+  --fuente-display: var(--font-barlow-condensed), sans-serif;
+  --fuente-texto: var(--font-barlow), sans-serif;
+
+  /* Radios */
+  --radio-tarjeta: 10px;
+  --radio-boton: 8px;
+  --radio-pill: 999px;
+
+  /* Espaciado base (densidad estándar) */
+  --espacio-pantalla-x: 20px;
+  --espacio-gap-lista: 12px;
+  --espacio-gap-seccion: 20px;
+
+  --sombra-tarjeta: 0 1px 2px rgba(14, 23, 32, 0.06);
+}
+
+/* Tres densidades (`08`, 6.5), aplicables por pantalla con un atributo. */
+[data-densidad='compacta'] {
+  --espacio-gap-lista: 8px;
+  --espacio-gap-seccion: 14px;
+}
+[data-densidad='estandar'] {
+  --espacio-gap-lista: 12px;
+  --espacio-gap-seccion: 20px;
+}
+[data-densidad='amplia'] {
+  --espacio-gap-lista: 14px;
+  --espacio-gap-seccion: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Números tabulares obligatorios (`08`, sección 7) — criterio de descarte,
+   no preferencia: sin esto una tabla de posiciones no alinea columnas. */
+body,
+.fuente-display {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.fuente-display {
+  font-family: var(--fuente-display);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

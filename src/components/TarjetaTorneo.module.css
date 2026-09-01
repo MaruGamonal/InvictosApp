@@ -1,0 +1,42 @@
+.tarjeta {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  text-decoration: none;
+  color: inherit;
+}
+
+.contenido {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nombre {
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--color-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.punto::before {
+  content: '·';
+  margin: 0 2px;
+}

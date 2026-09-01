@@ -1,0 +1,19 @@
+.contenedor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  padding: 12px;
+  border: 1px dashed var(--borde-neutro);
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-sutil);
+}
+
+.etiqueta {
+  font-family: var(--fuente-texto);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+}

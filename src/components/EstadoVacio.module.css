@@ -1,0 +1,27 @@
+.estadoVacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 32px 20px;
+}
+
+.mensaje {
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-texto-secundario);
+  max-width: 32ch;
+}
+
+.accion {
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--acento-texto-sobre);
+  background: var(--acento);
+  border: none;
+  border-radius: var(--radio-boton);
+  padding: 10px 20px;
+  cursor: pointer;
+}

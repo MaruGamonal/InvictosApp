@@ -1,0 +1,64 @@
+.marcador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--identidad-fondo);
+  color: var(--identidad-texto);
+}
+
+.equipo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nombreEquipo {
+  font-family: var(--fuente-texto);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--identidad-texto-secundario);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.goles {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: clamp(48px, 10vw, 64px);
+  line-height: 1;
+}
+
+.separador {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: clamp(32px, 6vw, 44px);
+  color: var(--identidad-texto-secundario);
+}
+
+.enVivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--exito-vivo);
+}
+
+.puntoEnVivo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--exito-vivo);
+  animation: pulso 1.4s infinite;
+}

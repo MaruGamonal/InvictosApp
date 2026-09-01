@@ -1,0 +1,66 @@
+.fila {
+  display: grid;
+  grid-template-columns: 28px 1fr repeat(7, 32px);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-superficie);
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--borde-sutil);
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+}
+
+.clasifica {
+  border-left-color: var(--acento);
+}
+
+.posicion {
+  font-weight: 700;
+  color: var(--color-texto-secundario);
+}
+
+.equipo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nombreEquipo {
+  font-weight: 600;
+  color: var(--color-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.numero {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--color-texto-secundario);
+}
+
+.puntos {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.encabezado {
+  background: var(--ink-900);
+  color: var(--identidad-texto-secundario);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: none;
+}
+
+.encabezado .nombreEquipo,
+.encabezado .puntos {
+  color: inherit;
+}
