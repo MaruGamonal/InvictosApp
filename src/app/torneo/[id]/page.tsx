@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
+import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { obtenerFichaOFallar } from './_datos';
 import styles from './pagina.module.css';
@@ -137,6 +138,9 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
       <button type="button" className={styles.enlaceSecundario}>
         Seguir este torneo
       </button>
+
+      {/* Publicidad (T24, `06` D-63): una de las tres superficies habilitadas. */}
+      <ContenedorPublicidad />
     </div>
   );
 }

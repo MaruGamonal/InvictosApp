@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { TarjetaTorneo } from '@/components/TarjetaTorneo';
+import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { NOMBRE_COOKIE_CIUDAD } from './_constantes';
@@ -16,6 +18,9 @@ export const metadata: Metadata = {
 
 const MODALIDADES = ['f5', 'f7', 'f8', 'f9', 'f11'] as const;
 const CATEGORIAS_EDAD = ['open', 'u13', 'u15', 'u17', 'u20', 'veterans_35', 'veterans_45'] as const;
+
+/** Después de la 3ª tarjeta (`06`, D-63): visible sin dominar el primer vistazo al listado. */
+const INDICE_PUBLICIDAD_EN_LISTA = 2;
 
 interface SearchParams {
   modalidad?: string;
@@ -124,16 +129,20 @@ export default async function PaginaDescubrimiento({
         />
       ) : (
         <div className={styles.lista}>
-          {resultado.torneos.map((torneo) => (
-            <Link key={torneo.id} href={`/torneo/${torneo.id}`} className={styles.tarjetaEnlace}>
-              <TarjetaTorneo
-                nombre={torneo.nombre}
-                imagenUrl={torneo.imagenUrl}
-                ciudad={ciudadActual?.nombre ?? ''}
-                modalidad={torneo.modalidad}
-                estado={torneo.estado}
-              />
-            </Link>
+          {resultado.torneos.map((torneo, indice) => (
+            <Fragment key={torneo.id}>
+              <Link href={`/torneo/${torneo.id}`} className={styles.tarjetaEnlace}>
+                <TarjetaTorneo
+                  nombre={torneo.nombre}
+                  imagenUrl={torneo.imagenUrl}
+                  ciudad={ciudadActual?.nombre ?? ''}
+                  modalidad={torneo.modalidad}
+                  estado={torneo.estado}
+                />
+              </Link>
+              {/* Publicidad (T24, `06` D-63): dentro del listado, en su propio contenedor (D-75) para que nunca se confunda con una tarjeta. */}
+              {indice === INDICE_PUBLICIDAD_EN_LISTA && <ContenedorPublicidad />}
+            </Fragment>
           ))}
         </div>
       )}

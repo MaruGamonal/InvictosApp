@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { FilaPartido, type EstadoPartido } from '@/components/FilaPartido';
+import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerFichaOFallar, obtenerFixtureCacheado } from '../_datos';
 import styles from './pagina.module.css';
@@ -49,13 +51,13 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
     fechas.set(partido.numeroFecha, grupo);
   }
 
+  const fechasOrdenadas = [...fechas.entries()].sort(([a], [b]) => a - b);
+
   return (
     <div className={styles.pagina}>
-      {[...fechas.entries()]
-        .sort(([a], [b]) => a - b)
-        .map(([numeroFecha, partidos]) => (
+      {fechasOrdenadas.map(([numeroFecha, partidos], indice) => (
+        <Fragment key={numeroFecha}>
           <section
-            key={numeroFecha}
             className={numeroFecha === fixture.fechaVigente ? styles.fechaVigente : styles.fecha}
           >
             <h2 className={styles.tituloFecha}>Fecha {numeroFecha}</h2>
@@ -75,7 +77,10 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
               ))}
             </div>
           </section>
-        ))}
+          {/* Publicidad (T24, `06` D-63): una de las tres superficies habilitadas, tras la primera fecha. */}
+          {indice === 0 && <ContenedorPublicidad />}
+        </Fragment>
+      ))}
     </div>
   );
 }
