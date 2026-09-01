@@ -1,0 +1,93 @@
+.pagina {
+  min-height: 100vh;
+  background: var(--color-fondo);
+}
+
+/* Superficie de identidad: tokens oscuros directos, sin depender del tema (`08`, 6.1). */
+.hero {
+  background: var(--ink-900);
+  color: var(--blanco);
+  padding: 28px var(--espacio-pantalla-x) 22px;
+}
+
+.heroContenido {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.heroTexto {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nombre {
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--blanco);
+  overflow-wrap: break-word;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--gris-claro-sobre-oscuro);
+}
+
+.contenido {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
+}
+
+.tituloSeccion {
+  font-family: var(--fuente-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-secundario);
+  margin-bottom: 10px;
+}
+
+.sinEquipos {
+  color: var(--color-texto-secundario);
+}
+
+.listaEquipos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  overflow: hidden;
+}
+
+.equipo {
+  border-bottom: 1px solid var(--borde-sutil);
+}
+
+.equipo:last-child {
+  border-bottom: none;
+}
+
+.enlaceEquipo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--color-texto);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.enlaceEquipo:hover {
+  text-decoration: underline;
+}

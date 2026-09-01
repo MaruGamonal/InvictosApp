@@ -67,3 +67,12 @@ export function cachearLecturaDeTorneo<T>(
 ): () => Promise<T> {
   return unstable_cache(fn, [nombre, torneoId], { tags: [etiquetaTorneo(torneoId)] });
 }
+
+/** Igual que `cachearLecturaDeTorneo`, pero con la etiqueta de un equipo (T23: perfil público). */
+export function cachearLecturaDeEquipo<T>(
+  nombre: string,
+  equipoId: string,
+  fn: () => Promise<T>,
+): () => Promise<T> {
+  return unstable_cache(fn, [nombre, equipoId], { tags: [etiquetaEquipo(equipoId)] });
+}
