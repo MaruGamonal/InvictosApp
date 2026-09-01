@@ -26,6 +26,7 @@ const SERVICIOS_DIR = join(__dirname, '..', 'services');
 // ese vínculo (no decidir un permiso con él).
 const EXCEPCIONES = new Set<string>([
   'organizadores/crearOrganizacion.ts', // T7 — crea el vínculo de titular al crear la organización
+  'identidad/obtenerPerfilPublico.ts', // T18 — lista los equipos del perfil; es la participación pública, no una decisión de permiso
 ]);
 
 function listarArchivosTs(dir: string): string[] {
