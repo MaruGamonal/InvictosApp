@@ -47,6 +47,7 @@ const EXCEPCIONES = new Set<string>([
   'inscripciones/solicitarInscripcion.ts', // T20 — sigue automáticamente al torneo desde cada integrante activo del plantel; no decide un permiso
   'inscripciones/confirmarPlantel.ts', // T20 — valida que cada integrante de la lista de buena fe pertenezca al plantel; no decide un permiso
   'fixture/programarPartido.ts', // T14 — resuelve destinatarios (capitán/delegados de los dos equipos) para notificar; no decide un permiso
+  'competencia/cargarResultado.ts', // T15 — resuelve destinatarios (capitán/delegados de los dos equipos) para notificar; no decide un permiso
 ]);
 
 function listarArchivosTs(dir: string): string[] {
