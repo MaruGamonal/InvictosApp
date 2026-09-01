@@ -37,6 +37,8 @@ npm run dev
 
 Comandos útiles:
 
-- `npm run verify` — formato, lint, tipos y tests en un solo paso.
+- `npm run verify` — formato, lint, tipos, tests unitarios y tests de integración en un solo paso.
+- `npm test` — solo los tests unitarios (mockean la base; no necesitan Postgres levantado).
+- `npm run test:integracion` — la suite de integración: recrea una base de pruebas efímera (`<nombre-de-tu-base>_test`), le aplica todas las migraciones y corre contra ella de verdad — nunca contra la base de desarrollo. El rol de `DATABASE_URL` necesita permiso `CREATEDB` para poder crearla y borrarla (`ALTER ROLE <rol> CREATEDB;`, una sola vez).
 - `npm run migrate:create -- nombre` — crea una migración nueva.
 - `npm run migrate:up` / `migrate:down` — aplica / revierte migraciones.

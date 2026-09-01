@@ -36,6 +36,7 @@ function mockearDb(opciones: {
   puntosVictoria?: number;
   puntosEmpate?: number;
   puntosDerrota?: number;
+  updateAfectaCeroFilas?: boolean;
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
   vi.doMock('@/db/cliente', () => ({
@@ -91,6 +92,7 @@ function mockearDb(opciones: {
           const t = texto.trim();
           consultasCliente.push({ texto: t, valores });
           if (t.startsWith('UPDATE partido')) {
+            if (opciones.updateAfectaCeroFilas) return { rows: [] };
             return { rows: [{ version: (opciones.version ?? 1) + 1 }] };
           }
           return { rows: [] };
@@ -122,7 +124,7 @@ describe('cargarResultado', () => {
     expect(consultas[0]!.texto).toBe('BEGIN');
     const update = consultas.find((c) => c.texto.startsWith('UPDATE partido'));
     expect(update?.texto).toContain("estado = 'played'");
-    expect(update?.valores).toEqual([PARTIDO, 2, 1, 'confirmed', 'usuario-organizador']);
+    expect(update?.valores).toEqual([PARTIDO, 2, 1, 'confirmed', 'usuario-organizador', 1]);
     expect(consultas.at(-1)!.texto).toBe('COMMIT');
     expect(notificarMock).toHaveBeenCalledWith(
       expect.objectContaining({ tipo: 'result_published' }),
@@ -240,6 +242,26 @@ describe('cargarResultado', () => {
 
     expect(error.codigo).toBe('CONFLICTO_DE_VERSION');
     expect(error.detalle).toMatchObject({ version: 5, golesLocal: 2, golesVisitante: 1 });
+  });
+
+  it('otra escritura gana la carrera entre la lectura y el UPDATE: CONFLICTO_DE_VERSION, y se revierte', async () => {
+    // Las dos lecturas previas (el SELECT y la verificación de versión)
+    // vieron la misma versión que la carga que está por mandarse — el
+    // mock la deja pasar hasta acá a propósito — pero el propio UPDATE,
+    // con `AND version = $version` en el WHERE, no afecta ninguna fila:
+    // alguien más ya escribió antes. Es la carrera real que un mock que
+    // siempre "acepta" el UPDATE nunca puede reproducir.
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', updateAfectaCeroFilas: true });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    const error = await cargarResultado(
+      { partidoId: PARTIDO, version: 1, golesLocal: 2, golesVisitante: 1 },
+      contextoCon('usuario-organizador'),
+    ).catch((e) => e);
+
+    expect(error.codigo).toBe('CONFLICTO_DE_VERSION');
+    expect(consultas.at(-1)!.texto).toBe('ROLLBACK');
+    expect(consultas.some((c) => c.texto.startsWith('INSERT INTO posicion'))).toBe(false);
   });
 
   it('torneo que no está in_progress: TORNEO_NO_EN_CURSO', async () => {

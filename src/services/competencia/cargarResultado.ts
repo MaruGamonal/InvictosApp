@@ -22,7 +22,13 @@ import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosi
  *    dos equipos.
  * 2. `version` del partido → `CONFLICTO_DE_VERSION` si cambió desde que
  *    se leyó (`10`, 2.5 / T-03): es el escenario real de dos
- *    colaboradores cargando la misma fecha desde el mismo complejo.
+ *    colaboradores cargando la misma fecha desde el mismo complejo. El
+ *    `UPDATE` mismo lleva `AND version = $version` en el `WHERE` —la
+ *    lectura previa solo evita el viaje a la transacción cuando ya se
+ *    sabe que va a fallar—, porque entre esa lectura y el `UPDATE` puede
+ *    colarse otra escritura: sin el `WHERE` repitiendo la condición, dos
+ *    cargas concurrentes que leyeron la misma versión se pisarían en
+ *    silencio en vez de que la segunda reciba `CONFLICTO_DE_VERSION`.
  * 3. El torneo tiene que estar `in_progress`, y el partido no `cancelled`.
  * 4. Escribe goles, pasa a `played` y fija `estado_resultado`: `loaded`
  *    si cargó un capitán, `confirmed` si cargó el organizador o un
@@ -35,8 +41,7 @@ import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosi
  *
  * Fuera de alcance (`11`, T15): eventos del partido y estadísticas de
  * jugador (T30), confirmación/disputa del otro equipo (T29), partidos no
- * disputados (T16). La invalidación de caché (`10`, 4.7, paso 8) es un
- * no-op: todavía no existe capa de caché en el proyecto.
+ * disputados (T16).
  */
 
 const esquemaEntrada = z.object({
@@ -150,7 +155,7 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
        SET goles_local = $2, goles_visitante = $3, estado = 'played',
            estado_resultado = $4, cargado_por_usuario_id = $5, fecha_carga_resultado = now(),
            version = version + 1
-       WHERE id = $1
+       WHERE id = $1 AND version = $6
        RETURNING version`,
       [
         datos.partidoId,
@@ -158,8 +163,20 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
         datos.golesVisitante,
         estadoResultado,
         contexto.usuarioId,
+        datos.version,
       ],
     );
+    if (actualizadas.length === 0) {
+      // Alguien más ganó la carrera entre la lectura de arriba y este
+      // UPDATE: mismo error que el chequeo previo, con el detalle que
+      // ya se tenía a mano (no hace falta releer para informarlo).
+      throw crearError('CONFLICTO_DE_VERSION', {
+        version: partido.version,
+        golesLocal: partido.goles_local,
+        golesVisitante: partido.goles_visitante,
+        estado: partido.estado,
+      });
+    }
     nuevaVersion = actualizadas[0]!.version;
 
     if (partido.grupo_id) {

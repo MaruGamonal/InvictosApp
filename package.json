@@ -14,10 +14,12 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run",
+    "pretest:integracion": "dotenv -e .env -q -- node scripts/preparar-base-pruebas.mjs",
+    "test:integracion": "dotenv -e .env -q -- vitest run --config vitest.integration.config.ts",
     "migrate:create": "node-pg-migrate create --migrations-dir db/migrations --",
     "migrate:up": "dotenv -e .env -q -- node-pg-migrate up --migrations-dir db/migrations",
     "migrate:down": "dotenv -e .env -q -- node-pg-migrate down --migrations-dir db/migrations",
-    "verify": "npm run format && npm run lint && npm run typecheck && npm run test"
+    "verify": "npm run format && npm run lint && npm run typecheck && npm run test && npm run test:integracion"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",
