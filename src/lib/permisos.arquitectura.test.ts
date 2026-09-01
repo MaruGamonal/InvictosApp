@@ -37,6 +37,11 @@ const EXCEPCIONES = new Set<string>([
   'equipos/solicitarIngreso.ts', // T19 — crea el vínculo requested; consulta capitán/delegados solo para notificarles, no para decidir permiso
   'equipos/resolverSolicitudIngreso.ts', // T19 — resuelve el vínculo requested propuesto por la persona
   'equipos/retirarSolicitudIngreso.ts', // T19 — cancela el vínculo requested propio
+  'organizadores/invitarMiembro.ts', // T8 — crea el vínculo de administrador
+  'organizadores/quitarMiembro.ts', // T8 — borra el vínculo de administrador
+  'organizadores/listarMiembros.ts', // T8 — lista el equipo de trabajo; es el propio dato que gestiona, no una decisión de permiso
+  'organizadores/asignarColaborador.ts', // T8 — crea/reactiva el vínculo de colaborador de un torneo
+  'organizadores/quitarColaborador.ts', // T8 — da de baja lógica el vínculo de colaborador
 ]);
 
 function listarArchivosTs(dir: string): string[] {
