@@ -87,6 +87,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'No podés cambiar el formato de un torneo que ya tiene partidos jugados.',
   },
+  CUPO_MENOR_A_INSCRIPTOS: {
+    httpStatus: 409,
+    mensaje: 'No podés bajar el cupo por debajo de la cantidad de equipos ya aprobados.',
+  },
   TRANSICION_NO_PERMITIDA: {
     httpStatus: 409,
     mensaje: 'El torneo no puede pasar a ese estado desde donde está ahora.',

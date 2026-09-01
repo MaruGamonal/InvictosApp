@@ -4,8 +4,12 @@ import { CODIGOS_ERROR, crearError, esErrorDeAplicacion, type CodigoError } from
 describe('CODIGOS_ERROR', () => {
   const codigos = Object.keys(CODIGOS_ERROR) as CodigoError[];
 
-  it('tiene los 6 códigos transversales y los 18 de negocio de `10`, sección 8', () => {
-    expect(codigos).toHaveLength(24);
+  it('tiene los 6 códigos transversales y los de negocio de `10`, sección 8, más los que sumó el backlog', () => {
+    // Los 24 originales de `10`, sección 8, más CUPO_MENOR_A_INSCRIPTOS
+    // (T9): el catálogo original no preveía la regla de que el cupo de
+    // un torneo no puede bajarse por debajo de los equipos ya
+    // aprobados (`06`, A-04/D-68), así que no tenía un código para eso.
+    expect(codigos).toHaveLength(25);
   });
 
   it.each(codigos)(
