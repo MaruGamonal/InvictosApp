@@ -44,6 +44,8 @@ const EXCEPCIONES = new Set<string>([
   'organizadores/quitarColaborador.ts', // T8 — da de baja lógica el vínculo de colaborador
   'torneos/_notificarCambio.ts', // T10 — resuelve destinatarios (capitán/delegados) para notificar; no decide un permiso
   'inscripciones/resolverInscripcion.ts', // T12 — resuelve destinatarios (capitán/delegados del equipo) para notificar; no decide un permiso
+  'inscripciones/solicitarInscripcion.ts', // T20 — sigue automáticamente al torneo desde cada integrante activo del plantel; no decide un permiso
+  'inscripciones/confirmarPlantel.ts', // T20 — valida que cada integrante de la lista de buena fe pertenezca al plantel; no decide un permiso
 ]);
 
 function listarArchivosTs(dir: string): string[] {
