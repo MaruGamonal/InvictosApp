@@ -46,7 +46,8 @@ type Campo =
   | 'scoreEquipo.estado'
   | 'seguimiento.tipoSeguido'
   | 'reglamento.estado'
-  | 'notificacion.canal';
+  | 'notificacion.canal'
+  | 'notificacion.tipo';
 
 const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
   'usuario.estado': {
@@ -212,6 +213,33 @@ const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
   'notificacion.canal': {
     in_app: { etiqueta: 'Dentro del producto', color: 'neutro' },
     email: { etiqueta: 'Email', color: 'neutro' },
+  },
+  'notificacion.tipo': {
+    team_invitation: { etiqueta: 'Te invitaron a un equipo', color: 'advertencia' },
+    team_join_requested: { etiqueta: 'Alguien quiere sumarse a tu equipo', color: 'advertencia' },
+    team_join_resolved: { etiqueta: 'Resolvieron tu solicitud', color: 'advertencia' },
+    registration_received: { etiqueta: 'Nueva inscripción en tu torneo', color: 'advertencia' },
+    registration_resolved: { etiqueta: 'Resolvieron tu inscripción', color: 'advertencia' },
+    roster_required: { etiqueta: 'Falta confirmar tu plantel', color: 'advertencia' },
+    match_scheduled: { etiqueta: 'Se programó tu partido', color: 'advertencia' },
+    match_rescheduled: { etiqueta: 'Cambió el horario de tu partido', color: 'advertencia' },
+    result_pending_confirmation: {
+      etiqueta: 'Confirmá el resultado de tu partido',
+      color: 'advertencia',
+    },
+    result_disputed: { etiqueta: 'Objetaron un resultado de tu torneo', color: 'advertencia' },
+    tournament_published: {
+      etiqueta: 'Se publicó un torneo que puede interesarte',
+      color: 'neutro',
+    },
+    tournament_started: { etiqueta: 'Empezó un torneo que seguís', color: 'neutro' },
+    tournament_finished: { etiqueta: 'Terminó un torneo que seguís', color: 'neutro' },
+    tournament_cancelled: { etiqueta: 'Se canceló un torneo que seguís', color: 'advertencia' },
+    tournament_rules_updated: {
+      etiqueta: 'Cambió el reglamento de tu torneo',
+      color: 'advertencia',
+    },
+    result_published: { etiqueta: 'Nuevo resultado en un torneo que seguís', color: 'neutro' },
   },
 };
 
