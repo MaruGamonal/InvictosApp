@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
 
 /**
@@ -123,6 +124,8 @@ export const programarPartido: Servicio<ProgramarPartidoInput, { estado: 'schedu
     },
     contexto,
   );
+
+  invalidarCacheTorneo(partido.torneo_id);
 
   return { estado: 'scheduled' };
 };

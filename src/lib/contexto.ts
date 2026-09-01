@@ -31,6 +31,17 @@ export function contextoDeSistema(): Contexto {
 }
 
 /**
+ * Contexto fijo de visitante anónimo, para las superficies públicas con
+ * caché (T21, `10` 2.8): las páginas de `/torneo/[id]/**` siempre leen
+ * con este contexto, nunca con el de la sesión real de quien mira. Es lo
+ * que hace segura la caché — lo que se cachea es exactamente lo que
+ * cualquier visitante sin cuenta vería, nunca algo que dependiera de
+ * quién pidió la página — y coincide con D-04b: esas rutas se sirven
+ * igual haya o no sesión.
+ */
+export const CONTEXTO_PUBLICO: Contexto = { usuarioId: null, permisos: {}, esSistema: false };
+
+/**
  * Contexto de una petición real, resuelto en el servidor a partir de la
  * sesión de Supabase Auth. `usuarioId` es `null` cuando no hay sesión —
  * un estado válido (`06`, D-04b), no un error: las superficies públicas

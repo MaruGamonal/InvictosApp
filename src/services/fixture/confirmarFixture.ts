@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 
 /**
  * UC-29 — Confirma la propuesta (ya ajustada por el organizador si
@@ -98,6 +99,7 @@ export const confirmarFixture: Servicio<
     }
 
     await cliente.query('COMMIT');
+    invalidarCacheTorneo(fase.torneo_id);
     return { partidosCreados: datos.partidos.length };
   } catch (error) {
     await cliente.query('ROLLBACK');

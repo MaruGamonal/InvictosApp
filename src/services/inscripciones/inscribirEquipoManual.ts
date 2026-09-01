@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { cerrarTorneoSiCupoCompleto } from './_cupo';
 
 /**
@@ -118,6 +119,7 @@ export const inscribirEquipoManual: Servicio<
     await cerrarTorneoSiCupoCompleto(cliente, datos.torneoId);
 
     await cliente.query('COMMIT');
+    invalidarCacheTorneo(datos.torneoId);
     return { equipoId, advertenciaCategoria };
   } catch (error) {
     await cliente.query('ROLLBACK');

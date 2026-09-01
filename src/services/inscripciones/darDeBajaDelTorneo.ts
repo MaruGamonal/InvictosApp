@@ -5,6 +5,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError, esErrorDeAplicacion } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo, verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import { aplicarEfectoAUnEquipo } from '@/services/posiciones/_recalcularPosicion';
 import { promoverListaDeEspera } from './_cupo';
 
@@ -141,6 +142,7 @@ export const darDeBajaDelTorneo: Servicio<
   const cliente = await pool.connect();
   let equipoPromovidoDeListaDeEspera: string | null = null;
   let partidosAfectados = 0;
+  const rivalesConPosicionRecalculada = new Set<string>();
   try {
     await cliente.query('BEGIN');
 
@@ -224,6 +226,7 @@ export const darDeBajaDelTorneo: Servicio<
               puntosDerrota: torneo.puntos_derrota,
             },
           );
+          rivalesConPosicionRecalculada.add(equipoGanador!);
         }
         partidosAfectados += 1;
       }
@@ -236,6 +239,10 @@ export const darDeBajaDelTorneo: Servicio<
   } finally {
     cliente.release();
   }
+
+  invalidarCacheTorneo(datos.torneoId);
+  invalidarCacheEquipo(datos.equipoId);
+  for (const rivalId of rivalesConPosicionRecalculada) invalidarCacheEquipo(rivalId);
 
   return { estado: estadoResultante, equipoPromovidoDeListaDeEspera, partidosAfectados };
 };

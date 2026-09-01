@@ -35,6 +35,8 @@ export type ObtenerTablaInput = z.infer<typeof esquemaEntrada>;
 
 export interface FilaTabla {
   equipoId: string;
+  equipoNombre: string;
+  equipoEscudoUrl: string | null;
   puntos: number;
   ajustePuntos: number;
   partidosJugados: number;
@@ -57,6 +59,8 @@ type CriterioDesempate = 'goal_difference' | 'goals_for' | 'head_to_head';
 
 interface FilaPosicionCruda {
   equipo_id: string;
+  equipo_nombre: string;
+  equipo_escudo_url: string | null;
   puntos: number;
   ajuste_puntos: number;
   partidos_jugados: number;
@@ -71,6 +75,8 @@ interface FilaPosicionCruda {
 function aFila(fila: FilaPosicionCruda): FilaTabla {
   return {
     equipoId: fila.equipo_id,
+    equipoNombre: fila.equipo_nombre,
+    equipoEscudoUrl: fila.equipo_escudo_url,
     puntos: fila.puntos,
     ajustePuntos: fila.ajuste_puntos,
     partidosJugados: fila.partidos_jugados,
@@ -167,10 +173,13 @@ async function construirTablaDeGrupo(
 ): Promise<TablaDeGrupo> {
   const pool = obtenerPool();
   const { rows } = await pool.query<FilaPosicionCruda>(
-    `SELECT equipo_id, puntos, ajuste_puntos, partidos_jugados, ganados, empatados, perdidos, goles_favor, goles_contra, diferencia_gol
-     FROM posicion
-     WHERE grupo_id = $1
-     ORDER BY (puntos + ajuste_puntos) DESC, diferencia_gol DESC, goles_favor DESC`,
+    `SELECT p.equipo_id, e.nombre AS equipo_nombre, e.escudo_url AS equipo_escudo_url,
+            p.puntos, p.ajuste_puntos, p.partidos_jugados, p.ganados, p.empatados, p.perdidos,
+            p.goles_favor, p.goles_contra, p.diferencia_gol
+     FROM posicion p
+     JOIN equipo e ON e.id = p.equipo_id
+     WHERE p.grupo_id = $1
+     ORDER BY (p.puntos + p.ajuste_puntos) DESC, p.diferencia_gol DESC, p.goles_favor DESC`,
     [grupo.id],
   );
   let filas = rows.map(aFila);

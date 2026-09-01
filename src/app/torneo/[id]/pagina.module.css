@@ -1,0 +1,106 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.destacado {
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tituloSeccion {
+  font-family: var(--fuente-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-secundario);
+}
+
+.cta {
+  align-self: flex-start;
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radio-boton);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.enlaceSecundario {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--fuente-texto);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.proximoPartido {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.equipoProximo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fechaProxima {
+  color: var(--color-texto-secundario);
+  font-size: 14px;
+}
+
+.campeon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nombreCampeon {
+  font-family: var(--fuente-display);
+  font-size: 20px;
+}
+
+.descripcion {
+  color: var(--color-texto);
+  line-height: 1.5;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  padding: 16px;
+}
+
+.datos dt {
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.datos dd {
+  font-weight: 600;
+  margin: 0;
+}

@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
 import { cerrarTorneoSiCupoCompleto } from './_cupo';
 
@@ -71,6 +72,7 @@ export const resolverInscripcion: Servicio<
     }
 
     await cliente.query('COMMIT');
+    invalidarCacheTorneo(datos.torneoId);
 
     const { rows: gestores } = await pool.query<{ usuario_id: string | null }>(
       `SELECT pd.usuario_id

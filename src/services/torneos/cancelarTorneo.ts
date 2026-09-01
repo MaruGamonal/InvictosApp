@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
@@ -66,6 +67,7 @@ export const cancelarTorneo: Servicio<CancelarTorneoInput, { estado: 'cancelled'
   );
 
   await notificarCambioDeTorneo(datos.torneoId, 'tournament_cancelled', contexto);
+  invalidarCacheTorneo(datos.torneoId);
 
   return { estado: 'cancelled' };
 };

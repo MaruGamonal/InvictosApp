@@ -1,0 +1,36 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-gap-seccion);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tituloGrupo {
+  font-family: var(--fuente-display);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.provisorio {
+  font-size: 13px;
+  color: var(--advertencia-texto);
+  background: var(--advertencia-fondo);
+  border-radius: var(--radio-boton);
+  padding: 8px 12px;
+}
+
+/* Las nueve columnas de FilaTabla no entran en un ancho de mano angosto
+   (`08`, 11.10, columnas fijas): en vez de recortarlas en silencio,
+   scrollea horizontal solo la tabla, nunca la página entera. */
+.tabla {
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  overflow-x: auto;
+}

@@ -5,6 +5,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError, esErrorDeAplicacion } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { obtenerRolesEnEquipo, verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
 import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosicion';
 
@@ -186,6 +187,10 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
   } finally {
     cliente.release();
   }
+
+  invalidarCacheTorneo(partido.torneo_id);
+  invalidarCacheEquipo(partido.equipo_local_id);
+  invalidarCacheEquipo(partido.equipo_visitante_id);
 
   const { rows: gestores } = await pool.query<{ usuario_id: string | null }>(
     `SELECT pd.usuario_id

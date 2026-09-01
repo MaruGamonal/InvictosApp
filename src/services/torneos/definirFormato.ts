@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
@@ -133,6 +134,8 @@ export const definirFormato: Servicio<DefinirFormatoInput, DefinirFormatoResulta
     if (estaPublicado) {
       await notificarCambioDeTorneo(datos.torneoId, 'tournament_rules_updated', contexto);
     }
+
+    invalidarCacheTorneo(datos.torneoId);
 
     return { fases };
   } catch (error) {

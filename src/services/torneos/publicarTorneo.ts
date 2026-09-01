@@ -5,6 +5,7 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { CONFIGURACION } from '@/lib/configuracion';
+import { invalidarCacheTorneo } from '@/lib/cache';
 
 /**
  * UC-18 — Publicar un torneo: `draft → registration_open`, sin estado
@@ -95,6 +96,8 @@ export const publicarTorneo: Servicio<PublicarTorneoInput, PublicarTorneoResulta
      WHERE id = $2`,
     [visibilidad, datos.torneoId],
   );
+
+  invalidarCacheTorneo(datos.torneoId);
 
   return {
     id: datos.torneoId,

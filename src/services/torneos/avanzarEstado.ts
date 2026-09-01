@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
@@ -77,6 +78,8 @@ export const avanzarEstado: Servicio<AvanzarEstadoInput, { estado: string }> = a
   } else if (datos.estadoDestino === 'finished') {
     await notificarCambioDeTorneo(datos.torneoId, 'tournament_finished', contexto);
   }
+
+  invalidarCacheTorneo(datos.torneoId);
 
   return { estado: datos.estadoDestino };
 };

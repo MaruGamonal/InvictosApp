@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import {
   aplicarResultadoAPosicion,
   revertirEfectoDePosicion,
@@ -192,6 +193,10 @@ export const registrarNoDisputado: Servicio<
   } finally {
     cliente.release();
   }
+
+  invalidarCacheTorneo(partido.torneo_id);
+  invalidarCacheEquipo(partido.equipo_local_id);
+  invalidarCacheEquipo(partido.equipo_visitante_id);
 
   return { estado: datos.resolucion, golesLocal, golesVisitante, version: nuevaVersion };
 };

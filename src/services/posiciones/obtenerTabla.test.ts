@@ -13,6 +13,8 @@ beforeEach(() => vi.resetModules());
 function filaPosicion(equipoId: string, over: Partial<Record<string, unknown>> = {}) {
   return {
     equipo_id: equipoId,
+    equipo_nombre: `Equipo ${equipoId}`,
+    equipo_escudo_url: null,
     puntos: 3,
     ajuste_puntos: 0,
     partidos_jugados: 1,
@@ -65,7 +67,7 @@ function mockearDb(opciones: {
             ],
           };
         }
-        if (t.startsWith('SELECT equipo_id, puntos')) {
+        if (t.startsWith('SELECT p.equipo_id, e.nombre')) {
           const grupoId = valores[0] as string;
           return { rows: opciones.posicionPorGrupo?.[grupoId] ?? [] };
         }

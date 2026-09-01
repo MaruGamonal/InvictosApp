@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
@@ -81,6 +82,7 @@ export const publicarReglamento: Servicio<
     await cliente.query('COMMIT');
 
     await notificarCambioDeTorneo(datos.torneoId, 'tournament_rules_updated', contexto);
+    invalidarCacheTorneo(datos.torneoId);
 
     return { id: rows[0]!.id, numeroVersion: siguienteVersion };
   } catch (error) {

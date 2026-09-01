@@ -1,0 +1,42 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.version {
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.texto {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--color-texto);
+}
+
+.enlaceArchivo {
+  align-self: flex-start;
+  font-weight: 600;
+  color: var(--acento-oscuro);
+}
+
+.historial {
+  border-top: 1px solid var(--borde-sutil);
+  padding-top: 12px;
+}
+
+.tituloHistorial {
+  font-family: var(--fuente-display);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-secundario);
+  margin-bottom: 8px;
+}
+
+.historial li {
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+  padding: 4px 0;
+}
