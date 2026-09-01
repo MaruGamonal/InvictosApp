@@ -115,6 +115,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'Este perfil ya está asociado a una cuenta.',
   },
+  RESULTADO_NO_CONFIRMABLE: {
+    httpStatus: 409,
+    mensaje: 'Este resultado no está en condiciones de confirmarse todavía.',
+  },
 } as const;
 
 export type CodigoError = keyof typeof CODIGOS_ERROR;

@@ -9,7 +9,9 @@ describe('CODIGOS_ERROR', () => {
     // (T9): el catálogo original no preveía la regla de que el cupo de
     // un torneo no puede bajarse por debajo de los equipos ya
     // aprobados (`06`, A-04/D-68), así que no tenía un código para eso.
-    expect(codigos).toHaveLength(25);
+    // Más PERFIL_YA_RECLAMADO (T18) y RESULTADO_NO_CONFIRMABLE (T26):
+    // mismo motivo, una regla que el catálogo original no anticipaba.
+    expect(codigos).toHaveLength(26);
   });
 
   it.each(codigos)(
