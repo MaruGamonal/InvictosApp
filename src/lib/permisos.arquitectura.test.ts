@@ -43,6 +43,7 @@ const EXCEPCIONES = new Set<string>([
   'organizadores/asignarColaborador.ts', // T8 — crea/reactiva el vínculo de colaborador de un torneo
   'organizadores/quitarColaborador.ts', // T8 — da de baja lógica el vínculo de colaborador
   'torneos/_notificarCambio.ts', // T10 — resuelve destinatarios (capitán/delegados) para notificar; no decide un permiso
+  'inscripciones/resolverInscripcion.ts', // T12 — resuelve destinatarios (capitán/delegados del equipo) para notificar; no decide un permiso
 ]);
 
 function listarArchivosTs(dir: string): string[] {
