@@ -202,6 +202,32 @@ describe('verificarPermisoEquipo', () => {
       ),
     ).resolves.toBeUndefined();
   });
+
+  it('un delegado no puede hacer una acción exclusiva del capitán', async () => {
+    mockearPool({ rolesEnEquipo: { 'perfil-del:equipo-1': ['delegate'] } });
+    const { verificarPermisoEquipo } = await import('./permisos');
+    await expect(
+      verificarPermisoEquipo(
+        contextoDe('usuario-del'),
+        'perfil-del',
+        'equipo-1',
+        'accion_de_capitan',
+      ),
+    ).rejects.toMatchObject({ codigo: 'SIN_PERMISO' });
+  });
+
+  it('el capitán sí puede hacer una acción exclusiva del capitán', async () => {
+    mockearPool({ rolesEnEquipo: { 'perfil-cap:equipo-1': ['captain'] } });
+    const { verificarPermisoEquipo } = await import('./permisos');
+    await expect(
+      verificarPermisoEquipo(
+        contextoDe('usuario-cap'),
+        'perfil-cap',
+        'equipo-1',
+        'accion_de_capitan',
+      ),
+    ).resolves.toBeUndefined();
+  });
 });
 
 describe('verificarPuedeDejarEquipo', () => {

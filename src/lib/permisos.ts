@@ -41,7 +41,7 @@ export type AccionTorneo =
   | 'programar_partidos'
   | 'registrar_no_disputados';
 
-export type AccionEquipo = 'gestionar_plantel' | 'inscribir_a_torneo';
+export type AccionEquipo = 'gestionar_plantel' | 'inscribir_a_torneo' | 'accion_de_capitan';
 
 /** Roles activos de una persona en un equipo puntual. */
 export async function obtenerRolesEnEquipo(
@@ -164,9 +164,13 @@ export async function verificarPermisoTorneo(
 
 /**
  * Verifica que el contexto pueda hacer `accion` sobre un equipo. Capitán y
- * Delegado gestionan; Jugador y DT no, sin importar cuántos vínculos
- * tengan con el equipo (`06`, D-25): el rol `coach` es deportivo, nunca
- * administrativo por sí solo.
+ * Delegado gestionan el plantel y las inscripciones; Jugador y DT no, sin
+ * importar cuántos vínculos tengan con el equipo (`06`, D-25): el rol
+ * `coach` es deportivo, nunca administrativo por sí solo.
+ *
+ * `accion_de_capitan` es más estricta: designar o quitar roles internos
+ * y archivar el equipo son del **Capitán exclusivamente** (`10`, 4.3) —
+ * el Delegado gestiona el día a día, pero no reconfigura quién manda.
  *
  * `usuarioPerfilId` es el `perfil_deportivo_id` de quien invoca, no su
  * `usuario_id`: este vínculo se resuelve contra la identidad deportiva
@@ -176,14 +180,19 @@ export async function verificarPermisoEquipo(
   contexto: Contexto,
   usuarioPerfilId: string | null,
   equipoId: string,
-  _accion: AccionEquipo,
+  accion: AccionEquipo,
 ): Promise<void> {
   if (contexto.esSistema) return;
   if (!contexto.usuarioId || !usuarioPerfilId) throw crearError('NO_AUTENTICADO');
 
   const roles = await obtenerRolesEnEquipo(usuarioPerfilId, equipoId);
-  const puedeGestionar = roles.includes('captain') || roles.includes('delegate');
 
+  if (accion === 'accion_de_capitan') {
+    if (!roles.includes('captain')) throw crearError('SIN_PERMISO');
+    return;
+  }
+
+  const puedeGestionar = roles.includes('captain') || roles.includes('delegate');
   if (!puedeGestionar) throw crearError('SIN_PERMISO');
 }
 

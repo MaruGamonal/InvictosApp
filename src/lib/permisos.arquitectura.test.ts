@@ -27,6 +27,16 @@ const SERVICIOS_DIR = join(__dirname, '..', 'services');
 const EXCEPCIONES = new Set<string>([
   'organizadores/crearOrganizacion.ts', // T7 — crea el vínculo de titular al crear la organización
   'identidad/obtenerPerfilPublico.ts', // T18 — lista los equipos del perfil; es la participación pública, no una decisión de permiso
+  'equipos/_vinculo.ts', // T19 — helper interno que crea/reactiva el vínculo equipo+perfil+rol; es el plantel en sí
+  'equipos/crearEquipo.ts', // T19 — crea el vínculo de capitán al crear el equipo
+  'equipos/invitarIntegrante.ts', // T19 — gestiona el plantel: crea/reactiva vínculos invited o active
+  'equipos/responderInvitacion.ts', // T19 — resuelve el vínculo invited propio (aceptar/rechazar)
+  'equipos/cancelarInvitacion.ts', // T19 — cancela el vínculo invited que el equipo propuso
+  'equipos/cambiarRolIntegrante.ts', // T19 — designa/quita roles y transfiere la capitanía sobre el vínculo mismo
+  'equipos/quitarIntegrante.ts', // T19 — da de baja el vínculo (propio o de otro integrante)
+  'equipos/solicitarIngreso.ts', // T19 — crea el vínculo requested; consulta capitán/delegados solo para notificarles, no para decidir permiso
+  'equipos/resolverSolicitudIngreso.ts', // T19 — resuelve el vínculo requested propuesto por la persona
+  'equipos/retirarSolicitudIngreso.ts', // T19 — cancela el vínculo requested propio
 ]);
 
 function listarArchivosTs(dir: string): string[] {
