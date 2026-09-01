@@ -60,6 +60,21 @@ function restar(a: EfectoEquipo, b: EfectoEquipo): EfectoEquipo {
   };
 }
 
+function negar(e: EfectoEquipo): EfectoEquipo {
+  // `0 - x` en vez de `-x`: evita un -0 que `toEqual` en los tests trata
+  // distinto de 0 (y que en SQL es un valor idéntico, pero más raro de leer).
+  return {
+    puntos: 0 - e.puntos,
+    partidosJugados: 0 - e.partidosJugados,
+    ganados: 0 - e.ganados,
+    empatados: 0 - e.empatados,
+    perdidos: 0 - e.perdidos,
+    golesFavor: 0 - e.golesFavor,
+    golesContra: 0 - e.golesContra,
+    diferenciaGol: 0 - e.diferenciaGol,
+  };
+}
+
 async function aplicarDelta(
   cliente: PoolClient,
   grupoId: string,
@@ -123,4 +138,28 @@ export async function aplicarResultadoAPosicion(
 
   await aplicarDelta(cliente, grupoId, equipoLocalId, deltaLocal);
   await aplicarDelta(cliente, grupoId, equipoVisitanteId, deltaVisitante);
+}
+
+/**
+ * Deshace el efecto de un resultado ya reflejado en `posicion` sin
+ * reemplazarlo por uno nuevo — a diferencia de `aplicarResultadoAPosicion`,
+ * que siempre asume un resultado nuevo que reemplaza al anterior. Es lo
+ * que necesita T16 cuando un `walkover` se convierte en `postponed` o
+ * `cancelled`: la tabla vuelve a como estaba antes de ese walkover, sin
+ * aplicar nada en su lugar.
+ */
+export async function revertirEfectoDePosicion(
+  cliente: PoolClient,
+  grupoId: string,
+  equipoLocalId: string,
+  equipoVisitanteId: string,
+  golesLocalAnterior: number,
+  golesVisitanteAnterior: number,
+  puntajes: PuntajesTorneo,
+): Promise<void> {
+  const anteriorLocal = calcularEfecto(golesLocalAnterior, golesVisitanteAnterior, puntajes);
+  const anteriorVisitante = calcularEfecto(golesVisitanteAnterior, golesLocalAnterior, puntajes);
+
+  await aplicarDelta(cliente, grupoId, equipoLocalId, negar(anteriorLocal));
+  await aplicarDelta(cliente, grupoId, equipoVisitanteId, negar(anteriorVisitante));
 }

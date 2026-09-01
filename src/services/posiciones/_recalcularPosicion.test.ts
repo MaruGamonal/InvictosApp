@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PoolClient } from 'pg';
-import { aplicarResultadoAPosicion } from './_recalcularPosicion';
+import { aplicarResultadoAPosicion, revertirEfectoDePosicion } from './_recalcularPosicion';
 
 const GRUPO = 'grupo-1';
 const EQUIPO_A = 'equipo-a';
@@ -68,5 +68,18 @@ describe('aplicarResultadoAPosicion', () => {
     });
 
     expect(consultas[0]!.valores[2]).toBe(2);
+  });
+});
+
+describe('revertirEfectoDePosicion', () => {
+  it('deshace exactamente el efecto anterior, sin aplicar uno nuevo (T16, walkover -> cancelled)', async () => {
+    const { cliente, consultas } = crearClienteFalso();
+
+    // el walkover había sido 3-0 a favor del local
+    await revertirEfectoDePosicion(cliente, GRUPO, EQUIPO_A, EQUIPO_B, 3, 0, PUNTAJES);
+
+    expect(consultas).toHaveLength(2);
+    expect(consultas[0]!.valores).toEqual([GRUPO, EQUIPO_A, -3, -1, -1, 0, 0, -3, 0, -3]);
+    expect(consultas[1]!.valores).toEqual([GRUPO, EQUIPO_B, 0, -1, 0, 0, -1, 0, -3, 3]);
   });
 });
