@@ -103,6 +103,22 @@ describe('verificarPermisoOrganizacion', () => {
     ).rejects.toMatchObject({ codigo: 'NO_AUTENTICADO' });
   });
 
+  it('solicitar_verificacion es exclusivo del Titular — un Administrador recibe SIN_PERMISO', async () => {
+    mockearPool({ rolEnOrganizacion: { 'admin-1:org-1': 'admin' } });
+    const { verificarPermisoOrganizacion } = await import('./permisos');
+    await expect(
+      verificarPermisoOrganizacion(contextoDe('admin-1'), 'org-1', 'solicitar_verificacion'),
+    ).rejects.toMatchObject({ codigo: 'SIN_PERMISO' });
+  });
+
+  it('el Titular sí puede solicitar la verificación', async () => {
+    mockearPool({ rolEnOrganizacion: { 'titular:org-1': 'owner' } });
+    const { verificarPermisoOrganizacion } = await import('./permisos');
+    await expect(
+      verificarPermisoOrganizacion(contextoDe('titular'), 'org-1', 'solicitar_verificacion'),
+    ).resolves.toBeUndefined();
+  });
+
   it('un contexto de sistema (tareas programadas) pasa siempre', async () => {
     mockearPool({});
     const { verificarPermisoOrganizacion } = await import('./permisos');

@@ -26,6 +26,8 @@ export type RolOrganizacion = 'owner' | 'admin' | null;
 export type RolEquipo = 'captain' | 'delegate' | 'player' | 'coach';
 
 export type AccionOrganizacion =
+  | 'actualizar_organizacion'
+  | 'solicitar_verificacion'
   | 'gestionar_torneos'
   | 'gestionar_colaboradores'
   | 'gestionar_administradores'
@@ -109,9 +111,16 @@ export async function verificarPermisoOrganizacion(
   if (rol === 'owner') return;
 
   if (rol === 'admin') {
-    if (accion === 'gestionar_torneos' || accion === 'gestionar_colaboradores') return;
+    if (
+      accion === 'actualizar_organizacion' ||
+      accion === 'gestionar_torneos' ||
+      accion === 'gestionar_colaboradores'
+    ) {
+      return;
+    }
     if (accion === 'gestionar_administradores') throw crearError('ADMIN_NO_PUEDE_GESTIONAR_ADMINS');
     if (accion === 'transferir_titularidad') throw crearError('ROL_TITULAR_NO_GESTIONABLE');
+    // 'solicitar_verificacion' es exclusivo del Titular (`10`, 4.2): cae al SIN_PERMISO de abajo.
   }
 
   throw crearError('SIN_PERMISO');

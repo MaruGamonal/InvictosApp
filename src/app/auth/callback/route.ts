@@ -2,13 +2,15 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { construirContexto } from '@/lib/contexto';
 import { completarRegistro } from '@/services/identidad/completarRegistro';
+import { confirmarVerificacionBasica } from '@/services/organizadores/confirmarVerificacionBasica';
 
 /**
- * Adonde vuelve la persona después de tocar el enlace de acceso que le
- * mandó `iniciarRegistro` (o un ingreso posterior). Acá es donde la
- * sesión pasa a existir de verdad, y por eso es también donde se
- * completa UC-01: crear `usuario` y `perfil_deportivo` recién ahora que
- * el email quedó confirmado.
+ * Adonde vuelve la persona después de tocar cualquier enlace de acceso
+ * que le mandamos por email — el de `iniciarRegistro` (UC-01) o el de
+ * `solicitarVerificacionBasica` (UC-06). Los dos reutilizan el mismo
+ * mecanismo: un enlace que, al abrirse, prueba que la persona controla
+ * esa casilla. La metadata del enlace (`accion`) dice qué hacer una vez
+ * que la sesión ya existe.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -22,9 +24,17 @@ export async function GET(request: NextRequest) {
 
       if (!error && data.user) {
         const metadata = data.user.user_metadata as {
+          accion?: 'verificar_organizacion';
+          organizacion_id?: string;
           nombre_visible?: string;
           accion_pendiente?: { tipo: string; datos: Record<string, unknown> } | null;
         };
+        const contexto = await construirContexto();
+
+        if (metadata.accion === 'verificar_organizacion' && metadata.organizacion_id) {
+          await confirmarVerificacionBasica({ organizacionId: metadata.organizacion_id }, contexto);
+          return NextResponse.redirect(`${origin}${siguiente}`);
+        }
 
         await completarRegistro(
           {
@@ -33,7 +43,7 @@ export async function GET(request: NextRequest) {
             nombreVisible: metadata.nombre_visible ?? '',
             accionPendiente: metadata.accion_pendiente ?? undefined,
           },
-          await construirContexto(),
+          contexto,
         );
 
         return NextResponse.redirect(`${origin}${siguiente}`);
