@@ -8,6 +8,7 @@ import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
 import { cachearLecturaDeEquipo } from '@/lib/cache';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerEquipoPublico, type EquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
 import styles from './pagina.module.css';
 
@@ -41,7 +42,7 @@ export async function generateMetadata({
   const descripcion = equipo.ciudad?.nombre ?? 'Perfil público del equipo';
 
   return {
-    title: `${equipo.nombre} — INVICTOS`,
+    title: conNombreProducto(equipo.nombre),
     description: descripcion,
     openGraph: {
       title: equipo.nombre,

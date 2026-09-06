@@ -1,4 +1,4 @@
-# Roadmap funcional — INVICTOS
+# Roadmap funcional — INVICTA
 
 ## 1. Objetivo del documento
 

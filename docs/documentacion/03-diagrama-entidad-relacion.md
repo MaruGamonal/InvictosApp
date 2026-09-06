@@ -1,4 +1,4 @@
-# Diagrama de Entidad-Relación — INVICTOS
+# Diagrama de Entidad-Relación — INVICTA
 
 ## 1. Objetivo del documento
 
@@ -528,6 +528,8 @@ erDiagram
 | `fecha_habilitacion` | Cuándo se sumó. **[Definido]** El cierre de incorporaciones es **configurable por torneo**, con "siempre abierta" como default amateur (`06`, D-30b): en el amateur los planteles se completan sobre la marcha, en las ligas formales hay cierre de pases. |
 
 **[Definido] Por qué existe separada de Integrante de Equipo.** Son dos cosas distintas: el **plantel permanente** (quién es del equipo) y el **plantel habilitado** (quién puede participar de *este* torneo). Un equipo con 20 jugadores puede anotar 12 en un torneo y 15 en otro. Sin esta separación sería imposible responder "quién estaba habilitado en aquel torneo" — y las estadísticas individuales (UC-34) no tendrían contra qué validarse.
+
+**[Definido — D-98] Precondición: solo se habilita a quien está `active` en `INTEGRANTE_EQUIPO`.** Desde D-85 entrar a un plantel necesita el consentimiento de las dos partes, y ese consentimiento se pidió **precisamente porque** estar en un plantel puede terminar en una lista de buena fe (3.6). Una invitación pendiente **no habilita**: la persona figura en la pantalla como pendiente, sin registro en esta entidad, hasta que acepte.
 
 **[Definido] Su identidad es la combinación `torneo + equipo + perfil + rol_en_torneo`** — la misma persona no puede estar habilitada dos veces con el mismo rol por el mismo equipo en el mismo torneo, y puede figurar como jugador y como cuerpo técnico con dos registros (mismo patrón que 3.6).
 

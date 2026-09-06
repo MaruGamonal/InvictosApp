@@ -19,6 +19,15 @@ import { verificarPermisoEquipo } from '@/lib/permisos';
  * (`06`, D-17b) la aplica el trigger de `integrante_habilitado` (T2):
  * este servicio solo traduce esa excepción de Postgres al código
  * tipado del catálogo.
+ *
+ * **Revisión 15, D-98:** solo se habilita a quien tiene vínculo
+ * `active` con el equipo — una invitación `invited` pendiente no
+ * habilita, y se rechaza con `INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL`. La
+ * respuesta devuelve además quiénes están `invited` en el plantel
+ * (`pendientes`), sin exigir que figuren en la lista enviada: es lo que
+ * le permite al capitán ver a quién le falta responder antes del
+ * domingo, sin agregar ningún estado nuevo (el pendiente ya vive en
+ * `integrante_equipo.estado_vinculo`).
  */
 
 const esquemaEntrada = z.object({
@@ -36,9 +45,16 @@ const esquemaEntrada = z.object({
 });
 export type ConfirmarPlantelInput = z.infer<typeof esquemaEntrada>;
 
+export interface IntegrantePendiente {
+  perfilId: string;
+  nombreVisible: string;
+}
+
 export interface ConfirmarPlantelResultado {
   cantidadJugadores: number;
   advertenciaMinimoNoAlcanzado: boolean;
+  /** Quiénes están `invited` en el plantel del equipo — todavía no aceptaron, así que no pueden habilitarse (`06`, D-98). */
+  pendientes: IntegrantePendiente[];
 }
 
 export const confirmarPlantel: Servicio<ConfirmarPlantelInput, ConfirmarPlantelResultado> = async (
@@ -91,12 +107,7 @@ export const confirmarPlantel: Servicio<ConfirmarPlantelInput, ConfirmarPlantelR
   const perfilesDelPlantel = new Set(plantelActivo.map((f) => f.perfil_id));
   for (const integrante of datos.integrantes) {
     if (!perfilesDelPlantel.has(integrante.perfilId)) {
-      throw crearError('DATOS_INVALIDOS', [
-        {
-          campo: 'integrantes',
-          problema: 'Solo se puede anotar a quien integra el plantel del equipo.',
-        },
-      ]);
+      throw crearError('INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL');
     }
   }
 
@@ -136,7 +147,27 @@ export const confirmarPlantel: Servicio<ConfirmarPlantelInput, ConfirmarPlantelR
     );
 
     await cliente.query('COMMIT');
-    return { cantidadJugadores: jugadores.length, advertenciaMinimoNoAlcanzado };
+
+    const { rows: pendientesRows } = await pool.query<{
+      perfil_id: string;
+      nombre_visible: string;
+    }>(
+      `SELECT DISTINCT ie.perfil_id, pd.nombre_visible
+       FROM integrante_equipo ie
+       JOIN perfil_deportivo pd ON pd.id = ie.perfil_id
+       WHERE ie.equipo_id = $1 AND ie.estado_vinculo = 'invited'`,
+      [datos.equipoId],
+    );
+    const pendientes: IntegrantePendiente[] = pendientesRows.map((fila) => ({
+      perfilId: fila.perfil_id,
+      nombreVisible: fila.nombre_visible,
+    }));
+
+    return {
+      cantidadJugadores: jugadores.length,
+      advertenciaMinimoNoAlcanzado,
+      pendientes,
+    };
   } catch (error) {
     await cliente.query('ROLLBACK');
     if (

@@ -8,6 +8,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import {
   obtenerPerfilOrganizador,
   type PerfilOrganizador,
@@ -49,7 +50,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${perfil.nombre} — INVICTOS`,
+    title: conNombreProducto(perfil.nombre),
     description: perfil.descripcion ?? undefined,
     openGraph: {
       title: perfil.nombre,

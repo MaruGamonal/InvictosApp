@@ -7,6 +7,7 @@ import { TarjetaTorneo } from '@/components/TarjetaTorneo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { listarTodasLasEtiquetas } from '@/lib/etiquetas';
+import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { CambiarAcento } from './CambiarAcento';
 import styles from './pagina.module.css';
 
@@ -34,7 +35,7 @@ export default function PaginaCatalogo() {
 
   return (
     <main className={styles.pagina}>
-      <h1 className="fuente-display">Catálogo de componentes — INVICTOS</h1>
+      <h1 className="fuente-display">Catálogo de componentes — {NOMBRE_PRODUCTO}</h1>
       <CambiarAcento />
 
       <section className={styles.seccion}>

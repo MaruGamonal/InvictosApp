@@ -1,4 +1,4 @@
-# Revisión del handoff de diseño contra el set — INVICTOS
+# Revisión del handoff de diseño contra el set — INVICTA
 
 > **Nota de contexto, fuera del embudo.** Contrasta el paquete `design_handoff_invictos` (24 archivos: Design System, 11 dominios, 5 flujos) contra el set documental en **revisión 12**. No modifica ninguna decisión de `06`.
 

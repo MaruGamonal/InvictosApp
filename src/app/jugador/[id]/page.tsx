@@ -6,6 +6,7 @@ import { Escudo } from '@/components/Escudo';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import {
   obtenerPerfilPublico,
   type PerfilPublico,
@@ -49,7 +50,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${perfil.nombreVisible} — INVICTOS`,
+    title: conNombreProducto(perfil.nombreVisible),
     openGraph: {
       title: perfil.nombreVisible,
       images: perfil.fotoUrl ? [{ url: perfil.fotoUrl }] : undefined,

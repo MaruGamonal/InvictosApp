@@ -1,5 +1,9 @@
-# Reglas de negocio y decisiones — INVICTOS
+# Reglas de negocio y decisiones — INVICTA
 
+> **Revisión 15.** Al revisar la **lista de buena fe** aparece un choque que abrió la revisión 10 y nadie reconectó: UC-27 dice que sumar a alguien a la lista lo suma también al plantel permanente, pero desde D-85 entrar a un plantel **necesita el consentimiento de las dos partes**. La consecuencia es perversa — **la persona con cuenta se vuelve más difícil de sumar que la que no la tiene**. Se resuelve en D-98.
+>
+> **Revisión 14.** Se cierran las decisiones de infraestructura que T28 necesitaba: **proveedores, planes y región** (D-96) y el **dominio, `invicta.com.ar`** (D-97). Con eso T28 deja de estar bloqueado. El detalle técnico y el orden de ejecución están en las notas `decisiones-infraestructura-T28.md` y `pasos-infraestructura-T28.md`.
+>
 > **Revisión 13.** Surge de revisar el paquete de diseño contra el set. **Seis casos de uso de la segunda etapa pasan al MVP** —confirmar o disputar resultados, eventos del partido, estadísticas del torneo, historial del jugador, feed de actividad y preferencias de notificación (D-94)—, mientras **el score y los rankings se confirman como etapa futura**. Y se resuelve un hueco que el diseño puso a la vista: **el resultado que carga el organizador queda confirmado al instante, pero el rival conserva la objeción** (D-95).
 >
 > **Revisión 12.** **La inscripción a un torneo nunca es automática: siempre la valida el organizador** (D-93). La regla base ya era ésa (UC-25), pero existía una excepción configurable —la aprobación automática de D-28b— que queda **eliminada del MVP**. El motivo lo da el estado de la monetización: mientras el costo de inscripción se cobra fuera de la aplicación, la aprobación del organizador **es** la confirmación de que el equipo entró.
@@ -8,7 +12,7 @@
 >
 > **Revisión 10.** Se cierra la simetría del plantel: hasta ahora **solo el equipo podía proponer** (UC-11). Se suma el camino inverso —**solicitar sumarse a un equipo**, UC-53 (D-85)—, se define quién lo resuelve (D-86) y se registra explícitamente que **la baja es inmediata y sin confirmación** (D-87). El set pasa a tener **53 casos de uso**.
 >
-> **Revisión 9.** Surge del primer ejercicio de identidad visual, que puso a la vista un hueco del modelo: el **torneo** tenía categoría de género desde la revisión 1, pero el **equipo** no. Se cierra con cuatro decisiones: el equipo lleva su propia categoría de género (D-81), la compatibilidad con el torneo **avisa y no bloquea** (D-82), el **club** —agrupador de equipos de una misma institución— queda para la segunda etapa y **no se confunde con la organización** (D-83), y el producto pasa a llamarse **INVICTOS** (D-84).
+> **Revisión 9.** Surge del primer ejercicio de identidad visual, que puso a la vista un hueco del modelo: el **torneo** tenía categoría de género desde la revisión 1, pero el **equipo** no. Se cierra con cuatro decisiones: el equipo lleva su propia categoría de género (D-81), la compatibilidad con el torneo **avisa y no bloquea** (D-82), el **club** —agrupador de equipos de una misma institución— queda para la segunda etapa y **no se confunde con la organización** (D-83), y el producto pasa a llamarse **INVICTA** (D-84).
 >
 > **Revisión 8.** Se suman la **Especificación Técnica** (`10`) y el **Backlog Detallado** (`11`): el embudo documental queda completo, con los 52 casos de uso traducidos a servicios y a 33 tickets ejecutables. Se resuelve además una contradicción que la escritura del backlog dejó a la vista: la despublicación automática por inactividad es de la **segunda etapa**, no del MVP (D-80).
 >
@@ -270,7 +274,7 @@ D-69 y D-70 entran en tensión con D-71 y con el propio contenido del producto. 
 | **D-81** | ¿El equipo lleva categoría de género propia, o se infiere de los torneos que jugó? | **Propia.** `EQUIPO.categoria_genero` entra al modelo (`03`, 3.5) con **la misma enumeración que el torneo** —`male` / `female` / `mixed`— y es **obligatoria al crear el equipo** (UC-10) | Inferirla de los torneos jugados no funciona en ninguno de los dos extremos: un equipo recién creado no jugó nada y no tendría categoría, y un equipo que jugó un torneo masculino y uno mixto aparecería en dos rankings a la vez. **El ranking acotado (D-36b, UC-41) exige que la categoría sea un dato del equipo, no una derivación** — de lo contrario el recorte que sostiene todo el modelo de score no se puede calcular. Es un campo, es la misma lista que ya existe, y se pide una vez en la vida del equipo |
 | **D-82** | Si el género del equipo no coincide con el del torneo, ¿se bloquea la inscripción? | **Avisa, no bloquea.** El sistema muestra la advertencia a quien inscribe y **al organizador en la ficha de la inscripción** (UC-25); el organizador aprueba o rechaza. Un torneo `mixed` acepta cualquier equipo sin aviso | Mismo criterio que el nombre duplicado (D-16b): en el amateur el reglamento del torneo manda y el organizador ya está aprobando cada inscripción. Bloquear inventa una excepción que alguien va a necesitar —un equipo mixto en un torneo masculino es habitual— y la convierte en un pedido de soporte. Avisar cubre el error real, que es equivocarse de torneo, sin cerrarle la puerta al caso legítimo |
 | **D-83** | El ejercicio de identidad muestra "un solo club, dos equipos". ¿Existe el club en el modelo? | **No en el MVP: segunda etapa.** En el MVP son **dos equipos independientes** que comparten nombre y escudo, y una persona los ve juntos en "Mis equipos" porque es integrante de ambos. **El club no es `ORGANIZACION`** | `ORGANIZACION` es quien **organiza torneos** — tiene titular, administradores y nivel de verificación (D-51). Un club es quien **compite**. Meterlos en la misma entidad haría que verificar a un club lo habilite a publicar torneos, que es exactamente lo que la verificación existe para evitar. Y agregarlo como entidad nueva ahora costaría permisos, pantallas y un nivel más de jerarquía para resolver algo que en el MVP se resuelve mostrando dos tarjetas. **Lo que sí se hace desde el día uno es no impedirlo**: el equipo es transversal (D-10) y nada del modelo asume que un equipo esté solo |
-| **D-84** | Nombre del producto | **INVICTOS** | Cierra el último ítem abierto del set. En los documentos, "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio aparece en los títulos y donde se habla del producto como marca |
+| **D-84** | Nombre del producto | **INVICTA** | Cierra el último ítem abierto del set. En los documentos, "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio aparece en los títulos y donde se habla del producto como marca |
 
 **Qué cambia en el set (ya aplicado):** `EQUIPO.categoria_genero` en `03`, 3.5; la enumeración pasa a ser compartida en `04`, 5.2; el aviso de compatibilidad entra en UC-10 y UC-25 (`02`), en la validación de `03`, y en el servicio de inscripción de `10`. El recorte de ranking de UC-41 pasa a leer la categoría **del equipo**. El club queda registrado en el roadmap (`07`) como funcionalidad de segunda etapa.
 
@@ -348,6 +352,47 @@ D-69 y D-70 entran en tensión con D-71 y con el propio contenido del producto. 
 **[Definido — D-94] Consecuencia sobre la resolución de inscripciones.** UC-25 dice que el score del equipo es información para decidir a quién se acepta, pero **el score sigue siendo de etapa futura**: en el MVP el organizador resuelve con el equipo, su ciudad, su plantel y la advertencia de categoría cruzada (D-82), **sin score**. La pantalla de diseño lo muestra; hay que sacarlo de la versión del MVP o dejarlo como espacio previsto.
 
 **Qué cambia en el set (ya aplicado):** `07` mueve los seis casos de uso de la sección 4 a la 3 y deja el score en la tercera; `02` actualiza las notas de alcance de UC-32, UC-34, UC-36, UC-38, UC-44 y UC-47, y las reglas de confirmación de UC-31 y UC-32; `04`, 4.7 suma el cuarto camino hacia `confirmed`; `10` lo refleja en el servicio de carga; y `11` suma cinco tickets (T29 a T33).
+
+---
+
+### 4.14 Decisiones de la revisión 14 — infraestructura y dominio
+
+**De dónde sale:** de T28, el último ticket del backlog, que quedó apartado hasta tener resueltos hosting, observabilidad, íconos y dominio. `09` había definido los **roles** —observabilidad, tareas programadas, email, push— sin nombrar proveedores, a propósito; esta revisión los nombra.
+
+| # | Pregunta | Decisión | Fundamento |
+|---|---|---|---|
+| **D-96** | ¿Qué proveedores y con qué planes? | **Vercel + Supabase, los dos en San Pablo.** Se arranca en **Vercel Hobby** y **Supabase Free**, y se sube a **Supabase Pro antes del primer torneo real** — por los **backups diarios**, no por capacidad. Vercel Pro queda para cuando haya un segundo desarrollador que despliegue, no antes | El producto arranca sin ingresos (D-31), así que el costo de infraestructura tiene que ser cero mientras no haya nada que sostenerlo. La excepción es el backup: **con el torneo de un tercero adentro, perder datos no es un problema técnico sino de confianza**, y es lo único que el producto no puede permitirse en su primer mes. La región es la decisión que más pesa y no cuesta nada — ver T-10 |
+| **D-97** | ¿Cuál es el dominio? | **`invicta.com.ar`**, ya registrado | `.com.ar` es lo que la gente escribe sin pensar para un producto argentino y transmite localía, que es lo que corresponde a un **test de mercado local**. **[Definido]** La marca **no se registra por ahora**: hay una `I INVICTA` viva en clase 9 —Invicta S.p.A., Italia, vigente hasta 2031, con cobertura amplia— que haría inviable el registro. A la escala del test el riesgo de que eso se ejerza es despreciable, y la contrapartida es tenerlo presente: **si el test funciona, el nombre se revisa antes de formalizar** |
+
+**[Definido — D-96] Lo que se decidió deliberadamente NO contratar todavía:** Vercel Pro, Sentry Team y cualquier herramienta de analítica paga. **Los umbrales que hay que calibrar —D-51 y D-61— se responden con consultas a la base, no con analítica**: cuántos partidos confirmados tiene un equipo, cuántos torneos publicados sin inscripciones lleva una organización. Lo que sí hay que instrumentar desde el día uno es lo que **no deja rastro en la base** —cuánta gente abre una ficha y no se inscribe, si el estado vacío de una ciudad convierte o expulsa—, porque eso no se reconstruye hacia atrás.
+
+**[Definido — D-96] El límite que va a llegar primero no es la base: es el almacenamiento de imágenes.** Escudos, logos y fotos de perfil crecen con cada equipo. **Hay que fijar límite de tamaño y comprimir al subir desde el primer ticket que suba un archivo** — es mucho más barato que migrar después.
+
+**[Pendiente] La identidad gráfica sigue sin definirse** y **no bloquea el despliegue**: los íconos de la PWA se reemplazan cambiando archivos y el manifiesto, sin migración ni datos de por medio. Se arranca con un ícono tipográfico en los colores del Design System.
+
+---
+
+### 4.15 Decisiones de la revisión 15 — quién entra a la lista de buena fe
+
+**De dónde sale:** de revisar cómo se maneja la lista de buena fe. La entidad y el caso de uso estaban completos (`03`, 3.10; UC-27), pero **la revisión 10 les rompió un supuesto sin que se notara**. UC-27, paso 2, dice que el capitán *"agrega integrantes nuevos si hace falta, que se suman también al plantel permanente"* — escrito cuando sumar a alguien era inmediato. Desde **D-85**, entrar a un plantel necesita que las dos partes acepten.
+
+**El resultado es una inversión perversa**, y aparece en el peor momento posible — el viernes a la noche, cerrando la lista:
+
+| Quién es el refuerzo | Qué pasa hoy |
+|---|---|
+| **No tiene cuenta** | El capitán le crea el perfil `unclaimed`, el vínculo nace `active` (D-29b) y **queda habilitado en el acto** |
+| **Tiene cuenta** | Se le manda una invitación, y **hasta que la acepte no puede jugar** |
+
+Es decir: **la persona que ya es usuaria del producto es más difícil de sumar que la que nunca lo usó.** Y el atajo obvio para el capitán apurado es crear un perfil nuevo a nombre de alguien que ya tiene uno — que rompe el reclamo de perfil (UC-05) y le parte el historial en dos.
+
+| # | Pregunta | Decisión | Fundamento |
+|---|---|---|---|
+| **D-98** | ¿Se puede habilitar a alguien que todavía no aceptó entrar al plantel? | **No.** Solo se habilita a quien está `active` en el plantel permanente. Al agregarlo desde UC-27: **sin cuenta** → perfil `unclaimed`, vínculo `active`, habilitado en el acto; **con cuenta** → se crea la invitación (D-85) y **figura en la lista como pendiente**, sin poder ser anotado en una planilla hasta que acepte | Habilitar a alguien que no aceptó sería exactamente lo que D-85 evita: estar en un plantel es público y **puede terminar en una lista de buena fe**, que es el fundamento por el que se pidió el consentimiento. Lo que no se puede es dejar al capitán sin saberlo: **la lista tiene que mostrar quién está pendiente**, porque es la diferencia entre tener once el domingo y tener diez |
+| **D-98b** | ¿Cómo se evita el perfil duplicado que esto incentiva? | **El sistema avisa —sin bloquear— cuando el nombre coincide con un perfil existente**, al crear un perfil desde la lista. Mismo patrón que el nombre de equipo repetido (D-16b) | Es el atajo que el capitán apurado va a tomar, y el daño no se ve el domingo sino un año después: dos perfiles para una persona rompen UC-05 y dejan el historial partido. Avisar cubre el caso real —que es la distracción, no la mala fe— sin bloquear al que efectivamente tiene un homónimo |
+
+**[Definido — D-98] No hace falta ningún estado nuevo.** El "pendiente" no vive en `INTEGRANTE_HABILITADO` sino en el vínculo con el equipo, que ya tiene `invited` (`04`, 3.6). La lista de buena fe simplemente **no incluye** a quien no está `active`; lo que se agrega es que la pantalla lo muestre aparte, para que el capitán sepa a quién le falta responder.
+
+**Qué cambia en el set (ya aplicado):** UC-27 en `02` reescribe el paso 2 y suma las reglas; `03`, 3.10 aclara la precondición; `10`, 4.6 suma las dos validaciones a `confirmarPlantel`; y T20 en `11` las incorpora al alcance y a los criterios de aceptación.
 
 ---
 

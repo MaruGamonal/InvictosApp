@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../_datos';
 import styles from './pagina.module.css';
 
@@ -19,7 +20,7 @@ export async function generateMetadata({
   const { id } = await params;
   const ficha = await obtenerFichaOFallar(id);
   return {
-    title: `Reglamento — ${ficha.nombre} — INVICTOS`,
+    title: conNombreProducto(`Reglamento — ${ficha.nombre}`),
     openGraph: { title: ficha.nombre, description: 'Reglamento del torneo' },
   };
 }

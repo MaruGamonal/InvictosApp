@@ -16,6 +16,13 @@ import { upsertVinculo, type EstadoVinculo, type RolEquipo } from './_vinculo';
  *
  * El rol viaja en la invitación: una invitación con varios roles crea
  * **un vínculo por rol** (`06`, D-23).
+ *
+ * **Revisión 15, D-98b:** al crear un perfil nuevo (persona sin cuenta),
+ * avisa —sin bloquear— si el nombre coincide con uno ya existente.
+ * Mismo patrón que el nombre de equipo repetido (D-16b): es el atajo
+ * que toma el capitán apurado, y el daño de dos perfiles para la misma
+ * persona no se ve el domingo sino un año después, partiendo su
+ * historial en dos.
  */
 
 const ROLES_INVITABLES = ['player', 'delegate', 'coach'] as const;
@@ -37,6 +44,8 @@ export type InvitarIntegranteInput = z.infer<typeof esquemaEntrada>;
 export interface InvitarIntegranteResultado {
   perfilId: string;
   vinculos: Array<{ rol: RolEquipo; estado: EstadoVinculo }>;
+  /** Solo puede ser `true` cuando se creó un perfil nuevo (`06`, D-98b); si se invitó a uno existente, siempre `false`. */
+  advertenciaNombreDuplicado: boolean;
 }
 
 export const invitarIntegrante: Servicio<
@@ -57,6 +66,7 @@ export const invitarIntegrante: Servicio<
   const cliente = await pool.connect();
   let perfilId: string;
   let usuarioIdDestino: string | null;
+  let advertenciaNombreDuplicado = false;
   try {
     await cliente.query('BEGIN');
 
@@ -70,6 +80,12 @@ export const invitarIntegrante: Servicio<
       perfilId = perfil.id;
       usuarioIdDestino = perfil.usuario_id;
     } else {
+      const { rows: coincidencias } = await cliente.query(
+        'SELECT 1 FROM perfil_deportivo WHERE lower(nombre_visible) = lower($1)',
+        [datos.nombreVisible],
+      );
+      advertenciaNombreDuplicado = coincidencias.length > 0;
+
       const { rows } = await cliente.query<{ id: string }>(
         `INSERT INTO perfil_deportivo (nombre_visible, visibilidad, estado_reclamo, creado_por_usuario_id)
          VALUES ($1, 'restricted', 'unclaimed', $2) RETURNING id`,
@@ -108,7 +124,7 @@ export const invitarIntegrante: Servicio<
       );
     }
 
-    return { perfilId, vinculos };
+    return { perfilId, vinculos, advertenciaNombreDuplicado };
   } catch (error) {
     await cliente.query('ROLLBACK');
     throw error;

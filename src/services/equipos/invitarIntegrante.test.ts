@@ -20,6 +20,7 @@ function mockearDb(opciones: {
   rolesEnEquipo?: string[];
   perfilObjetivo?: { id: string; usuario_id: string | null } | null;
   estadoVinculoExistente?: string;
+  nombreYaExiste?: boolean;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -43,6 +44,9 @@ function mockearDb(opciones: {
                 ? [{ estado_vinculo: opciones.estadoVinculoExistente }]
                 : [],
             };
+          }
+          if (texto.trim().startsWith('SELECT 1 FROM perfil_deportivo WHERE lower')) {
+            return { rows: opciones.nombreYaExiste ? [{ '?column?': 1 }] : [] };
           }
           if (texto.trim().startsWith('INSERT INTO perfil_deportivo')) {
             return { rows: [{ id: 'perfil-nuevo-sin-cuenta' }] };
@@ -98,7 +102,50 @@ describe('invitarIntegrante', () => {
 
     expect(resultado.perfilId).toBe('perfil-nuevo-sin-cuenta');
     expect(resultado.vinculos).toEqual([{ rol: 'player', estado: 'active' }]);
+    expect(resultado.advertenciaNombreDuplicado).toBe(false);
     expect(notificarMock).not.toHaveBeenCalled();
+  });
+
+  it('avisa sin bloquear si el nombre del perfil nuevo coincide con uno existente (`06`, D-98b)', async () => {
+    mockearDb({
+      perfilPropioId: '22222222-2222-2222-2222-222222222222',
+      rolesEnEquipo: ['captain'],
+      nombreYaExiste: true,
+    });
+    const { invitarIntegrante } = await import('./invitarIntegrante');
+
+    const resultado = await invitarIntegrante(
+      {
+        equipoId: '11111111-1111-1111-1111-111111111111',
+        roles: ['player'],
+        nombreVisible: 'Homónimo',
+      },
+      contextoCon('usuario-cap'),
+    );
+
+    expect(resultado.advertenciaNombreDuplicado).toBe(true);
+    expect(resultado.perfilId).toBe('perfil-nuevo-sin-cuenta');
+  });
+
+  it('invitar a un perfil existente nunca levanta la advertencia de nombre duplicado', async () => {
+    mockearDb({
+      perfilPropioId: '22222222-2222-2222-2222-222222222222',
+      rolesEnEquipo: ['captain'],
+      perfilObjetivo: { id: '66666666-6666-6666-6666-666666666666', usuario_id: 'usuario-jugador' },
+      nombreYaExiste: true,
+    });
+    const { invitarIntegrante } = await import('./invitarIntegrante');
+
+    const resultado = await invitarIntegrante(
+      {
+        equipoId: '11111111-1111-1111-1111-111111111111',
+        roles: ['player'],
+        perfilId: '66666666-6666-6666-6666-666666666666',
+      },
+      contextoCon('usuario-cap'),
+    );
+
+    expect(resultado.advertenciaNombreDuplicado).toBe(false);
   });
 
   it('con roles de jugador y DT a la vez, quedan dos vínculos', async () => {

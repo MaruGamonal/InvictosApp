@@ -1,4 +1,4 @@
-# INVICTOS — Cambio en el manejo de ubicación · resumen para diseño
+# INVICTA — Cambio en el manejo de ubicación · resumen para diseño
 
 > **Para quien diseñe.** Reemplaza lo que digan sobre zonas el `05` (flujos) y el `08` (brief) hasta que se actualicen. Todo lo demás de esos documentos sigue vigente.
 

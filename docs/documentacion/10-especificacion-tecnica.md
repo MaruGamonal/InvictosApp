@@ -1,4 +1,4 @@
-# Especificación Técnica — INVICTOS (MVP)
+# Especificación Técnica — INVICTA (MVP)
 
 ## 1. Contexto
 
@@ -373,6 +373,10 @@ Cada publicación crea una versión nueva con `numero_version` incremental, pasa
 | Mínimo de jugadores configurado | **Avisa, no bloquea** — devuelve una advertencia en la respuesta |
 | Jugador ya habilitado en otro equipo del mismo torneo | **Bloquea al confirmar la lista** → `JUGADOR_YA_HABILITADO_EN_EL_TORNEO`, salvo que el torneo lo permita |
 | Cuerpo técnico | **No cuenta para el cupo de jugadores** (`06`, D-24) |
+| Perfil sin vínculo `active` con el equipo | **Bloquea** → `INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL` (`06`, D-98). Una invitación en `invited` **no habilita** |
+| Alta de un perfil nuevo cuyo nombre coincide con uno existente | **Avisa, no bloquea** — devuelve la coincidencia para que la interfaz la muestre (`06`, D-98b) |
+
+**[Definido — `06`, D-98] La respuesta de `confirmarPlantel` devuelve los pendientes por separado.** Quien fue invitado y no aceptó **no entra a `integrante_habilitado`**, pero el capitán tiene que verlo: es la diferencia entre tener once el domingo y tener diez. El estado "pendiente" no es de esta entidad — vive en `integrante_equipo.estado_vinculo` (`04`, 3.6), así que **no se agrega ningún valor nuevo de enumeración**.
 
 **`darDeBajaDelTorneo` — el caso difícil (`06`, D-08b)**
 
@@ -566,6 +570,7 @@ Módulo central de constantes; ningún servicio inventa códigos sueltos.
 | `CUPO_COMPLETO` | 409 | Solo si el torneo no admite lista de espera |
 | `REGLAMENTO_NO_ACEPTADO` | 400 | Inscribirse sin aceptar el reglamento vigente (D-54) |
 | `EXCEDE_MAXIMO_PLANTEL` | 409 | Lista de buena fe por encima del máximo (D-59) |
+| `INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL` | 409 | Se intentó habilitar a alguien que no aceptó entrar al plantel (`06`, D-98) |
 | `JUGADOR_YA_HABILITADO_EN_EL_TORNEO` | 409 | Mismo jugador en dos equipos del mismo torneo (D-17b) |
 | `INSCRIPCIONES_ABIERTAS` | 409 | Generar fixture antes de cerrarlas (UC-29) |
 | `FIXTURE_CON_PARTIDOS_JUGADOS` | 409 | Regenerar sobre partidos disputados |
@@ -603,6 +608,8 @@ Módulo central de constantes; ningún servicio inventa códigos sueltos.
 | **T-06** | ¿Qué pasa si dos personas invitan a la vez? | **Idempotencia por clave determinística** (2.6) | Con clave determinística la condición de carrera deja de ser posible, no solo inofensiva |
 | **T-07** | ¿El esquema se administra a mano? | **No: migraciones versionadas en el repositorio** (3.4) | Con un agente construyendo, un esquema que solo existe en el proveedor es un estado que nadie puede reproducir ni revisar |
 | **T-08** | ¿Se guarda por qué canal salió cada aviso? | **Sí, un registro por canal** (4.9) | Es la única forma de responder "¿le llegó el mail o solo lo vio en la app?" cuando alguien dice que no se enteró |
+| **T-10** | ¿Dónde se ejecutan las funciones? | **En San Pablo, junto a la base** — `gru1` en Vercel, `sa-east-1` en Supabase (`06`, D-96) | El valor por defecto de Vercel es Washington, así que **sin tocarlo cada página renderizada en servidor cruza el continente una vez por consulta**. Cae sobre la ficha del torneo, que es la superficie de adquisición (5). Cambiarlo es una línea de `vercel.json` y no cuesta nada; el plan gratuito admite una región y **permite elegir cuál** |
+| **T-11** | ¿Dónde corre la tarea horaria de confirmación? | **En `pg_cron` sobre Supabase**, llamando por HTTP con `pg_net` al endpoint del servicio, con un secreto en la cabecera (6.1) | El cron del plan gratuito de Vercel es **diario**, y una expresión horaria **falla en el despliegue**. Aflojar la regla a diaria sería cambiar una regla de negocio para acomodarse a un plan de hosting, y además rompe el contador visible de "quedan N horas". `pg_cron` deja el plazo de 72 horas **desacoplado del hosting** y, de paso, evita que el proyecto gratuito se pause por inactividad. **Llama al endpoint y no escribe SQL** para no romper 2.1: la tarea ejecuta el mismo código que un usuario |
 
 ---
 

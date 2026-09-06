@@ -22,11 +22,15 @@ function mockearDb(opciones: {
   maxJugadores?: number | null;
   fechaCierrePasada?: boolean;
   plantelActivo?: string[];
+  pendientes?: Array<{ perfil_id: string; nombre_visible: string }>;
   lanzarErrorJugadorHabilitado?: boolean;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
+        if (texto.startsWith('SELECT DISTINCT ie.perfil_id')) {
+          return { rows: opciones.pendientes ?? [] };
+        }
         if (texto.includes('FROM perfil_deportivo')) {
           return { rows: opciones.perfilId ? [{ id: opciones.perfilId }] : [] };
         }
@@ -93,7 +97,32 @@ describe('confirmarPlantel', () => {
       contextoCon('usuario-1'),
     );
 
-    expect(resultado).toEqual({ cantidadJugadores: 2, advertenciaMinimoNoAlcanzado: false });
+    expect(resultado).toEqual({
+      cantidadJugadores: 2,
+      advertenciaMinimoNoAlcanzado: false,
+      pendientes: [],
+    });
+  });
+
+  it('devuelve por separado a quienes están invited en el plantel, sin exigir que estén en la lista enviada', async () => {
+    mockearDb({
+      perfilId: 'perfil-cap',
+      pendientes: [{ perfil_id: 'perfil-pendiente', nombre_visible: 'Alguien Pendiente' }],
+    });
+    const { confirmarPlantel } = await import('./confirmarPlantel');
+
+    const resultado = await confirmarPlantel(
+      {
+        torneoId: TORNEO,
+        equipoId: EQUIPO,
+        integrantes: [{ perfilId: PERFIL_1, rolEnTorneo: 'player' }],
+      },
+      contextoCon('usuario-1'),
+    );
+
+    expect(resultado.pendientes).toEqual([
+      { perfilId: 'perfil-pendiente', nombreVisible: 'Alguien Pendiente' },
+    ]);
   });
 
   it('el cuerpo técnico no ocupa cupo de jugadores', async () => {
@@ -112,7 +141,11 @@ describe('confirmarPlantel', () => {
         },
         contextoCon('usuario-1'),
       ),
-    ).resolves.toEqual({ cantidadJugadores: 1, advertenciaMinimoNoAlcanzado: false });
+    ).resolves.toEqual({
+      cantidadJugadores: 1,
+      advertenciaMinimoNoAlcanzado: false,
+      pendientes: [],
+    });
   });
 
   it('supera el máximo configurado, EXCEDE_MAXIMO_PLANTEL', async () => {
@@ -166,7 +199,7 @@ describe('confirmarPlantel', () => {
     ).rejects.toMatchObject({ codigo: 'JUGADOR_YA_HABILITADO_EN_EL_TORNEO' });
   });
 
-  it('no se puede anotar a alguien que no integra el plantel', async () => {
+  it('no se puede habilitar a alguien que no está active en el plantel (`06`, D-98)', async () => {
     mockearDb({ perfilId: 'perfil-cap', plantelActivo: [PERFIL_1] });
     const { confirmarPlantel } = await import('./confirmarPlantel');
 
@@ -179,7 +212,7 @@ describe('confirmarPlantel', () => {
         },
         contextoCon('usuario-1'),
       ),
-    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+    ).rejects.toMatchObject({ codigo: 'INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL' });
   });
 
   it('con la lista ya cerrada, DATOS_INVALIDOS', async () => {

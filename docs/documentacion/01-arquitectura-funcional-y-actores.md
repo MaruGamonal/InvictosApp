@@ -1,6 +1,6 @@
-# Arquitectura funcional y mapa de actores — INVICTOS
+# Arquitectura funcional y mapa de actores — INVICTA
 
-> **Nombre del producto: INVICTOS** (`06`, D-84). En los documentos "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio se usa en los títulos y donde se habla del producto como marca.
+> **Nombre del producto: INVICTA** (`06`, D-84). En los documentos "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio se usa en los títulos y donde se habla del producto como marca.
 
 ## 1. Objetivo del documento
 

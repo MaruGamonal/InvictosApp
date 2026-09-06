@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { EncabezadoTabla, FilaTabla } from '@/components/FilaTabla';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerTablaCacheada } from '../_datos';
 import styles from './pagina.module.css';
 
@@ -22,7 +23,7 @@ export async function generateMetadata({
   const descripcion = lider ? `${lider.equipoNombre} está primero` : 'Tabla de posiciones';
 
   return {
-    title: `Tabla — ${ficha.nombre} — INVICTOS`,
+    title: conNombreProducto(`Tabla — ${ficha.nombre}`),
     description: descripcion,
     openGraph: { title: ficha.nombre, description: descripcion },
   };

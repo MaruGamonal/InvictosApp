@@ -1,4 +1,4 @@
-# INVICTOS
+# INVICTA
 
 Plataforma de gestión y descubrimiento de torneos de fútbol amateur.
 

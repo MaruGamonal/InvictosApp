@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar } from './_datos';
 import styles from './pagina.module.css';
 
@@ -31,7 +32,7 @@ export async function generateMetadata({
   const descripcion = `${modalidad} · ${ficha.ciudad.nombre} · ${obtenerEtiqueta('torneo.estado', ficha.estado).etiqueta}`;
 
   return {
-    title: `${ficha.nombre} — INVICTOS`,
+    title: conNombreProducto(ficha.nombre),
     description: descripcion,
     openGraph: {
       title: ficha.nombre,

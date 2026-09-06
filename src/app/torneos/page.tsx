@@ -6,13 +6,14 @@ import { TarjetaTorneo } from '@/components/TarjetaTorneo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { NOMBRE_COOKIE_CIUDAD } from './_constantes';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { SelectorDeCiudad } from './SelectorDeCiudad';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
-  title: 'Descubrí torneos — INVICTOS',
+  title: conNombreProducto('Descubrí torneos'),
   description: 'Encontrá torneos de fútbol amateur cerca tuyo.',
 };
 

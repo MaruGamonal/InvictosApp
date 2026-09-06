@@ -1,4 +1,4 @@
-# Casos de Uso — INVICTOS
+# Casos de Uso — INVICTA
 
 ## 1. Objetivo del documento
 
@@ -740,7 +740,7 @@ flowchart LR
 - **Precondiciones:** la inscripción está aprobada (UC-25).
 - **Flujo principal:**
   1. El capitán selecciona, de su plantel permanente (UC-11), quiénes participan de este torneo y **con qué rol** (jugador, DT o delegado).
-  2. Agrega integrantes nuevos si hace falta, que se suman también al plantel permanente.
+  2. **[Definido — D-98]** Agrega integrantes nuevos si hace falta, que se suman también al plantel permanente — y ahí el camino se bifurca: **si la persona no tiene cuenta**, se le crea el perfil y queda habilitada en el acto (D-29b); **si tiene cuenta**, se le manda una invitación (D-85) y **queda pendiente**, visible en la lista pero sin poder jugar hasta que acepte.
   3. Confirma la lista.
   4. El sistema la registra como el plantel habilitado del equipo **para ese torneo**.
 - **Flujos alternativos / excepciones:**
@@ -751,6 +751,8 @@ flowchart LR
   - **[Definido]** El plantel del equipo (permanente, UC-11) y el plantel habilitado en un torneo (puntual) son **dos cosas distintas**. Fundamento: un equipo con 20 jugadores puede anotar 12 en un torneo y 15 en otro; y las estadísticas de un jugador se acreditan por su participación en un torneo, no por pertenecer al equipo. Confundirlos haría imposible responder "quién estaba habilitado en aquel torneo".
   - **[Definido]** La lista habilitada incluye **jugadores y cuerpo técnico**, cada uno con su rol en el torneo. En la planilla real del partido figuran ambos, y un DT también puede ser sancionado. Ver `06`, D-24.
   - **[Definido]** El **cuerpo técnico no ocupa cupo de jugadores**: contarlo dentro del cupo rompería las validaciones de mínimo y de máximo de plantel (D-59, más arriba). Ver `06`, D-24.
+  - **[Definido — D-98] Solo se habilita a quien está activo en el plantel permanente.** Habilitar a alguien que todavía no aceptó sería justamente lo que D-85 evita: el consentimiento se pidió **porque** estar en un plantel puede terminar en una lista de buena fe. Lo que sí tiene que hacer la pantalla es **mostrar aparte a los pendientes**: para el capitán, la diferencia entre once y diez el domingo es saber a quién le falta responder.
+  - **[Definido — D-98b]** Al crear un perfil nuevo desde esta pantalla, el sistema **avisa —sin bloquear— si el nombre coincide con un perfil existente**. Es el atajo que va a tomar el capitán apurado cuando la invitación no llega a tiempo, y el daño no se ve el domingo sino un año después: dos perfiles para una persona rompen el reclamo (UC-05) y le parten el historial. Mismo criterio que el nombre de equipo repetido (D-16b).
   - **[Definido]** Un mismo jugador **no puede estar habilitado en dos equipos del mismo torneo**: está prohibido por default y es configurable por torneo. El sistema lo detecta **al confirmar la lista**, no cuando el partido ya se jugó — detectarlo tarde convierte un aviso en un conflicto. Ver `06`, D-17b.
 - **Resultado esperado:** queda registrado quién está habilitado por cada equipo en ese torneo y con qué rol, y sobre esa base se acreditan las estadísticas.
 

@@ -1,6 +1,6 @@
-# Brief de Diseño — INVICTOS
+# Brief de Diseño — INVICTA
 
-> **Nombre del producto: INVICTOS** (`06`, D-84). En los documentos "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio se usa en los títulos y donde se habla del producto como marca.
+> **Nombre del producto: INVICTA** (`06`, D-84). En los documentos "la plataforma" se conserva donde funciona como sustantivo común; el nombre propio se usa en los títulos y donde se habla del producto como marca.
 
 ## 1. Cómo usar este documento
 
@@ -363,12 +363,16 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 | **Inscribir mi equipo** | Postular al equipo | Elegir equipo · **aviso si la categoría del equipo no coincide con la del torneo**, sin bloquear · **aceptación del reglamento de un clic**, si el torneo tiene · confirmar | UC-24 · Inscripción, Reglamento |
 | **Crear equipo desde la inscripción** | No perder al capitán que todavía no tiene equipo | Alta mínima, **sin salir del contexto del torneo** | UC-10, UC-24 |
 | **Estado de mi inscripción** | Saber en qué quedó | Estado con su badge · motivo si fue rechazada · siguiente paso si fue aprobada | UC-25 · Inscripción |
-| **Lista de buena fe** | Definir quién está habilitado | Selección desde el plantel · rol de cada uno · número de camiseta opcional · **aviso de mínimo, bloqueo de máximo** | UC-27 · Integrante Habilitado |
+| **Lista de buena fe** | Definir quién está habilitado | Selección desde el plantel · rol de cada uno · número de camiseta opcional · **aviso de mínimo, bloqueo de máximo** · **bloque aparte con los pendientes de aceptar** | UC-27 · Integrante Habilitado |
 | **Confirmar o disputar resultado** | Validar lo que dice la tabla | Marcador cargado · confirmar o disputar con motivo · **tiempo restante del plazo de 72 horas** | UC-32 · Partido, Disputa |
 
 **[Definido] Crear el equipo ocurre dentro del flujo de inscripción, con el torneo esperando del otro lado.** Es el paso que más se rompe en productos de este tipo: un capitán que encontró el torneo que buscaba y tiene que salir a crear un equipo se pierde en el camino (`05`, 4.4).
 
 **[Definido] La aceptación del reglamento es un clic, no una pantalla.** Y solo aparece si el torneo tiene reglamento cargado (`06`, D-54, D-29).
+
+**[Definido — D-98] Los pendientes van en un bloque aparte, no mezclados con la lista.** Quien fue invitado y todavía no aceptó **no está habilitado** y no puede jugar, pero el capitán necesita verlo: es la diferencia entre tener once el domingo y tener diez. Dos grupos, etiquetados, y el pendiente con la acción de recordarle.
+
+**[Definido — D-98] Sumar a alguien desde acá se bifurca, y la pantalla tiene que decirlo antes del toque.** Si la persona no tiene cuenta, entra en el acto. Si la tiene, sale una invitación y hay que esperar. **Si el capitán no entiende esa diferencia mientras arma la lista, la descubre el domingo** — que es el peor momento posible.
 
 **[Definido] El plazo de confirmación se muestra.** Un resultado que va a quedar firme solo en 72 horas tiene que decirlo: es la diferencia entre "todavía puedo reclamar" y enterarse tarde (`06`, D-60).
 
@@ -435,7 +439,7 @@ Los que aparecen en más de una pantalla y por lo tanto **son sistema, no diseñ
 - **Pantallas post-MVP**: feed de actividad (UC-44), rankings (UC-41), reclamo de perfil (UC-05), preferencias de notificación (UC-47), administración de plataforma (UC-48 a UC-50).
 - **Tema oscuro completo**: se prepara con tokens, se entrega en la segunda etapa (6.1).
 - **Identidad de marca completa**: logo, isotipo, aplicaciones — este brief define la personalidad y el sistema, no la marca gráfica.
-- **Identidad gráfica de INVICTOS**: el nombre está definido (`06`, D-84); el logo, el isotipo y sus aplicaciones no son alcance de este brief.
+- **Identidad gráfica de INVICTA**: el nombre está definido (`06`, D-84); el logo, el isotipo y sus aplicaciones no son alcance de este brief.
 - **Piezas de la tienda de aplicaciones** (capturas, ficha, íconos).
 
 ---

@@ -67,6 +67,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'La lista supera la cantidad máxima de jugadores que permite este torneo.',
   },
+  INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL: {
+    httpStatus: 409,
+    mensaje: 'Esta persona todavía no aceptó sumarse al plantel, así que no se la puede habilitar.',
+  },
   JUGADOR_YA_HABILITADO_EN_EL_TORNEO: {
     httpStatus: 409,
     mensaje: 'Este jugador ya está habilitado en otro equipo de este mismo torneo.',

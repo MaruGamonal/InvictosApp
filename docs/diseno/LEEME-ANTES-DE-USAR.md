@@ -6,7 +6,17 @@ Este paquete de diseño es **referencia visual**: muestra cómo se ve y cómo se
 
 ---
 
-## La regla de precedencia
+## 0. El nombre cambió
+
+**El producto se llama INVICTA**, no INVICTOS (`06`, D-84). El dominio es `invicta.com.ar`.
+
+Las pantallas de este paquete todavía dicen INVICTOS en el copy y usan un escudo con la **I**, que sigue sirviendo tal cual. **Es un cambio de texto, no de diseño**: el sistema visual completo se mantiene.
+
+**Al implementar, el nombre va en una constante y en los textos de interfaz, nunca desparramado** por el código, los metadatos, el manifiesto y los correos. La marca no es registrable —hay una `I INVICTA` viva en clase 9 (`06`, D-97)— y la decisión fue seguir igual a la escala del test de mercado. Concentrar el nombre en un punto convierte un eventual cambio en una línea.
+
+---
+
+## 1. La regla de precedencia
 
 > **Ante cualquier diferencia entre una pantalla y la documentación, manda la documentación** — en particular `06-reglas-negocio-y-decisiones-pendientes.md`, donde cada regla tiene su identificador `D-nn` y su fundamento.
 
@@ -14,9 +24,9 @@ El paquete se construyó a partir de `02-casos-de-uso.md` en su versión vigente
 
 ---
 
-## Las cuatro diferencias conocidas
+## 2. Las cuatro diferencias conocidas
 
-### 1. Aprobación automática de inscripciones — **no existe**
+### 2.1 Aprobación automática de inscripciones — **no existe**
 
 **La pantalla `D6 Inscripciones` la muestra** ("Aprobación automática · Para torneos abiertos, sin revisar equipo por equipo"), y el `README-diseno.md` también la menciona.
 
@@ -24,7 +34,7 @@ El paquete se construyó a partir de `02-casos-de-uso.md` en su versión vigente
 
 **Por qué:** mientras el costo de inscripción se paga fuera de la aplicación, la aprobación del organizador es la única señal de que el equipo está realmente adentro. Y el fixture se genera desde las inscripciones aprobadas, así que un `approved` equivocado se propaga al calendario, a la tabla y al score.
 
-### 2. Validar el correo para sumarse a un plantel — **no**
+### 2.2 Validar el correo para sumarse a un plantel — **no**
 
 **Las pantallas `Entrada` y `Flujo Registro y primer torneo` dicen:** *"La validación de tu correo solo te la pedimos si más adelante querés sumarte a un equipo o publicar un torneo"*.
 
@@ -34,7 +44,7 @@ El paquete se construyó a partir de `02-casos-de-uso.md` en su versión vigente
 
 **Qué construir:** la validación de correo se pide **solo al publicar un torneo**.
 
-### 3. El ranking es por **ciudad**, no por zona
+### 2.3 El ranking es por **ciudad**, no por zona
 
 **La pantalla `D9 Reputación y Score` dice:** *"Rankings Zona Norte F5 Masculino · Acotado a esta zona, modalidad y categoría"*.
 
@@ -42,7 +52,7 @@ El recorte es **ciudad + modalidad + categoría** (`06`, **D-92**), y **"Zona No
 
 **Nota de alcance:** esta pantalla es de **etapa futura** — ver abajo.
 
-### 4. El checklist de publicación pide "Zona" — son **ciudad y dirección**
+### 2.4 El checklist de publicación pide "Zona" — son **ciudad y dirección**
 
 **La pantalla `D4 Torneos`,** en el resumen previo a publicar, dice *"Zona, fecha estimada y cupo"*.
 
@@ -50,9 +60,7 @@ El torneo lleva **ciudad y dirección**, dos campos con dos usos: la ciudad para
 
 ---
 
-## Alcance: qué de este paquete NO se construye ahora
-
-El paquete diseña pantallas de etapas posteriores. Algunas están marcadas y otras no.
+## 3. Alcance: qué de este paquete NO se construye ahora
 
 **Fuera del MVP — no construir:**
 
@@ -62,20 +70,20 @@ El paquete diseña pantallas de etapas posteriores. Algunas están marcadas y ot
 | Reclamar perfil (UC-05), en `D1` | Etapa posterior — el paquete ya lo marca |
 | Transferir titularidad (UC-09), en `D2` | Etapa posterior — el paquete ya lo marca |
 
-**Sí entran al MVP, aunque el paquete no las marque** (`06`, **D-94**, revisión 13): confirmar o disputar resultados (UC-32, ticket **T29**), eventos del partido (UC-34, **T30**), estadísticas del torneo e historial del jugador (UC-36, UC-38, **T31**), feed de actividad (UC-44, **T32**) y preferencias de notificación (UC-47, **T33**).
+**Sí entran al MVP, aunque el paquete no las marque** (`06`, **D-94**): confirmar o disputar resultados (UC-32, ticket **T29**), eventos del partido (UC-34, **T30**), estadísticas del torneo e historial del jugador (UC-36, UC-38, **T31**), feed de actividad (UC-44, **T32**) y preferencias de notificación (UC-47, **T33**).
 
-**Una consecuencia concreta:** la pantalla de **resolver inscripciones** muestra el score del equipo como información para decidir. **En el MVP el score no existe todavía**, así que esa pantalla se construye con equipo, ciudad, plantel y la advertencia de categoría cruzada — sin score. Dejar el espacio previsto está bien; mostrar un número inventado, no.
+**Una consecuencia concreta:** la pantalla de **resolver inscripciones** muestra el score del equipo como información para decidir. **En el MVP el score no existe todavía**, así que se construye con equipo, ciudad, plantel y la advertencia de categoría cruzada — sin score. Dejar el espacio previsto está bien; mostrar un número inventado, no.
 
 ---
 
-## Dos cosas del paquete que sí conviene seguir al pie de la letra
+## 4. Dos cosas del paquete que sí conviene seguir al pie de la letra
 
 - **El Design System (`Invictos Design System.dc.html`) es la fuente de verdad de estilo.** Resuelve bien las dos tensiones del brief: identidad oscura sobre lienzo claro, y la energía puesta en tipografía, contraste y "momentos" en vez de en color de fondo. El acento cian respeta que no podía ser ni verde ni rojo, porque esos ya están tomados por la semántica de estado (`08`, 6.2). **Cualquier ambigüedad visual se resuelve consultándolo.**
-- **El selector de ciudad admite hasta 3 ciudades simultáneas**, pensado para el AMBA. Es la respuesta del diseño a la única decisión de negocio que el set tiene abierta (`06`, 4.11) y **es la que hay que construir**. Falta registrarla formalmente en `06`; la dirección no está en discusión.
+- **El selector de ciudad admite hasta 3 ciudades simultáneas**, pensado para el AMBA. Es la respuesta del diseño a la única decisión de negocio que el set tenía abierta (`06`, 4.11) y **es la que hay que construir**.
 
 ---
 
-## Qué mirar en la documentación
+## 5. Qué mirar en la documentación
 
 - **`06`** — el porqué de cada regla, con su `D-nn`. Es donde se resuelve cualquier duda.
 - **`04`** — la etiqueta visible y el color semántico exactos de cada estado. **No reinterpretar los badges**: están todos ahí.

@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { FilaPartido, type EstadoPartido } from '@/components/FilaPartido';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerFixtureCacheado } from '../_datos';
 import styles from './pagina.module.css';
 
@@ -20,7 +21,7 @@ export async function generateMetadata({
     : 'Todavía sin fixture';
 
   return {
-    title: `Fixture — ${ficha.nombre} — INVICTOS`,
+    title: conNombreProducto(`Fixture — ${ficha.nombre}`),
     description: descripcion,
     openGraph: { title: ficha.nombre, description: descripcion },
   };

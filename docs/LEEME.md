@@ -1,4 +1,4 @@
-# INVICTOS — Documentación completa
+# INVICTA — Documentación completa
 
 **Plataforma de gestión y descubrimiento de torneos de fútbol amateur.**
 
@@ -14,22 +14,7 @@ Este paquete contiene la documentación funcional y técnica completa del produc
 >
 > **Revisión 10.** Se cierra la simetría del plantel: además de que el equipo invite (UC-11), **una persona puede pedir sumarse** (UC-53) y queda pendiente hasta que el Capitán o un Delegado la resuelva (`06`, D-85, D-86). **Darse de baja, en cambio, es inmediato y no lo confirma nadie** (D-87). La regla que dejan las tres: **entrar requiere el consentimiento de las dos partes; salir, el de una sola.**
 >
-> **Revisión 9.** El nombre del producto es **INVICTOS** (`06`, D-84) y el **equipo tiene categoría de género propia** (D-81), con la compatibilidad con el torneo resuelta como aviso y no como bloqueo (D-82). El **club** —agrupador de equipos de una misma institución— es de la segunda etapa y **no se modela como organización** (D-83).
-
----
-
-## 0. Cómo está armado este paquete
-
-```
-LEEME.md              ← estás acá
-documentacion/        Los 12 documentos del embudo (00 a 11). La fuente de verdad
-diseno/               El paquete de diseño: Design System, 11 dominios, 5 flujos
-                      ⚠ LEER PRIMERO diseno/LEEME-ANTES-DE-USAR.md
-contexto/             Notas fuera del embudo: monetización, revisión del handoff,
-                      resumen del cambio de ubicación. No habilitan a construir nada
-```
-
-> **Regla de precedencia, por si hay dudas:** **manda `documentacion/`.** El diseño es referencia visual de alta fidelidad —hay que recrearlo fielmente— pero no es la fuente de verdad de las reglas de negocio. Las cuatro diferencias que hoy existen entre el diseño y la documentación están listadas, con qué hacer en cada caso, en **`diseno/LEEME-ANTES-DE-USAR.md`**. Leerlo antes de escribir la primera pantalla.
+> **Revisión 9.** El nombre del producto es **INVICTA** (`06`, D-84) y el **equipo tiene categoría de género propia** (D-81), con la compatibilidad con el torneo resuelta como aviso y no como bloqueo (D-82). El **club** —agrupador de equipos de una misma institución— es de la segunda etapa y **no se modela como organización** (D-83).
 
 ---
 
@@ -67,7 +52,7 @@ Doce documentos que forman **un embudo**: cada uno responde una única pregunta 
 
 **Cuatro cosas que conviene tener presentes antes de empezar:**
 
-- **INVICTOS es el nombre**, ya aplicado a los títulos del set. La marca gráfica —logo, isotipo, aplicaciones— **no está definida**: el brief define personalidad y sistema, no identidad visual (`08`, 12).
+- **INVICTA es el nombre**, ya aplicado a los títulos del set. La marca gráfica —logo, isotipo, aplicaciones— **no está definida**: el brief define personalidad y sistema, no identidad visual (`08`, 12).
 - **Empezá por "cargar resultados"** (`08`, 11.5). Es el recorrido más repetido de todo el producto y el que decide si el organizador se queda. Todo lo demás puede esperar; eso no.
 - **La energía de la marca vive en la tipografía, el contraste y los momentos** — no en el color de fondo ni en la decoración (`08`, 5.1). Las dos pantallas más consultadas son cuadrículas de números que la gente mira apurada, en la calle.
 - **La identidad es oscura; el lienzo de trabajo es claro** (`08`, 6.1). Superficies de identidad en oscuro, cuerpo de la aplicación en claro, todo tokenizado para que el tema oscuro completo llegue después sin rediseño.
@@ -130,7 +115,7 @@ Doce documentos que forman **un embudo**: cada uno responde una única pregunta 
 |---|---|---|
 | **Valores de arranque a calibrar** con datos de uso | 3 | Umbrales del score y los dos controles de verificación (`06`, D-51 y D-61) |
 | **Catálogos a completar** | 3 | La **carga nacional de provincias y ciudades** —trabajo de datos por única vez—, motivos de baja y cancelación, posición del jugador (`04`, sección 8) |
-| **Identidad gráfica** | 1 | Logo e isotipo de INVICTOS. El nombre está definido (`06`, D-84); la marca gráfica no es alcance del brief (`08`, 12) |
+| **Identidad gráfica** | 1 | Logo e isotipo de INVICTA. El nombre está definido (`06`, D-84); la marca gráfica no es alcance del brief (`08`, 12) |
 
 La diferencia importa: una decisión abierta bloquea —no se construye hasta resolverla—; un valor de arranque no bloquea nada, se construye con él y se corrige mirando datos.
 

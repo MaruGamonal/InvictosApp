@@ -1,4 +1,4 @@
-# Catálogo de Enumeraciones y Valores Fijos — INVICTOS
+# Catálogo de Enumeraciones y Valores Fijos — INVICTA
 
 ## 1. Objetivo del documento
 

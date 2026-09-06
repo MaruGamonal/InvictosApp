@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Barlow, Barlow_Condensed } from 'next/font/google';
+import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import './globals.css';
 
 const barlow = Barlow({
@@ -17,7 +18,7 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'INVICTOS',
+  title: NOMBRE_PRODUCTO,
   description: 'Plataforma de gestión y descubrimiento de torneos de fútbol amateur.',
 };
 

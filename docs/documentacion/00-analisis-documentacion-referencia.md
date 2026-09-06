@@ -1,4 +1,4 @@
-# Análisis de la documentación de referencia y criterios adoptados — INVICTOS
+# Análisis de la documentación de referencia y criterios adoptados — INVICTA
 
 > **Alcance de este documento:** no describe el nuevo producto. Explica **qué metodología documental se identificó** en los 8 archivos del sistema de administración de almacenes, qué se decide conservar para la plataforma de torneos de fútbol, y qué pertenece exclusivamente al dominio de almacenes y por lo tanto no se traslada.
 

@@ -1,4 +1,4 @@
-# Diagrama de Arquitectura — INVICTOS
+# Diagrama de Arquitectura — INVICTA
 
 ## 1. Objetivo del documento
 
@@ -98,7 +98,7 @@ flowchart TB
 | **Web Push** | Entrega las notificaciones al dispositivo. En iOS **exige que la persona instale la PWA** en su pantalla de inicio — ver el riesgo en 8.1 | MVP |
 | **Tareas programadas** | Ejecuta lo que ocurre sin que nadie lo pida. En el MVP: **confirmar resultados vencidos a las 72 horas** (D-60) y dejar agendado el **recálculo del score** (UC-39, con los umbrales de D-61). En la segunda etapa se suma **despublicar torneos inactivos** (D-51): no entra al MVP porque un falso positivo despublicaría el torneo del primer organizador (D-80). No es infraestructura opcional: son requisitos que salen de decisiones ya tomadas | MVP |
 | **Red de publicidad** | Sirve los anuncios en las tres superficies de consulta. **Nunca** en los flujos de tarea del organizador ni en la inscripción (D-63) | MVP |
-| **Observabilidad** | Captura errores y rendimiento. Con el producto construido por un agente, es la única forma de enterarse de una regresión que los tests no cubrieron (7.3) | MVP |
+| **Observabilidad** | Captura errores y rendimiento. Con el producto construido por un agente, es la única forma de enterarse de una regresión que los tests no cubrieron (7.3). **[Definido — `06`, D-96]** El proveedor es **Sentry**, en su plan gratuito, incluido el monitoreo de la tarea programada por *check-in* — que hace falta justamente porque la tarea corre fuera del hosting (`10`, T-11) | MVP |
 | **App nativa (React Native / Expo)** | Misma experiencia en las tiendas, con push sin la fricción de iOS. Comparte lenguaje y lógica con la web | Fuera del MVP |
 | **WhatsApp Business Platform** | Canal de aviso **solo para reprogramaciones** (D-53), que es donde su costo por mensaje se justifica | Fuera del MVP |
 | **Pasarela de pagos** | Cobro de inscripciones y retención de la comisión — etapas 3 y 4 de la monetización (D-31) | Fuera del MVP |

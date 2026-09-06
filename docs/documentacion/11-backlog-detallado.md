@@ -1,4 +1,4 @@
-# Backlog Detallado — INVICTOS (MVP)
+# Backlog Detallado — INVICTA (MVP)
 
 ## 1. Cómo usar este documento
 
@@ -1115,7 +1115,7 @@ Se crea un equipo y se arma el plantel de las tres maneras: invitando a alguien 
 ## Ticket 20 — Inscripción del equipo, aceptación del reglamento y lista de buena fe
 
 **Dominio:** D6 Inscripciones | **Prioridad:** Alta | **Estado:** 🟢 MVP
-**Referencia:** Especificación sección 4.6 · Casos de uso UC-24, UC-27 · Decisiones D-17b, D-24, D-27b, D-30b, D-54, D-59, D-82 · Modelo `03`, 3.9, 3.10
+**Referencia:** Especificación sección 4.6 · Casos de uso UC-24, UC-27 · Decisiones D-17b, D-24, D-27b, D-30b, D-54, D-59, D-82, D-98 · Modelo `03`, 3.9, 3.10
 **Depende de:** T12, T19
 
 ### Contexto y objetivo
@@ -1144,6 +1144,10 @@ Contiene dos piezas que parecen chicas y no lo son. La **aceptación del reglame
 | Mínimo de jugadores configurado | **Avisa, no bloquea** — devuelve una advertencia en la respuesta |
 | Jugador ya habilitado en otro equipo del mismo torneo | **Bloquea al confirmar la lista** → `JUGADOR_YA_HABILITADO_EN_EL_TORNEO`, salvo que el torneo lo permita |
 | Cuerpo técnico | **No cuenta para el cupo de jugadores** (`06`, D-24) |
+| **Perfil sin vínculo `active` con el equipo** | **Bloquea** → `INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL` (`06`, D-98) |
+| **Nombre que coincide con un perfil existente**, al crear uno nuevo | **Avisa, no bloquea** (`06`, D-98b) |
+
+**El bloque que es fácil implementar mal, y es nuevo** (`06`, D-98): sumar a alguien a la lista **bifurca según tenga cuenta o no**. Sin cuenta → perfil `unclaimed`, vínculo `active`, habilitado en el acto. Con cuenta → invitación (D-85), y **queda pendiente sin entrar a `integrante_habilitado`**. La respuesta **devuelve los pendientes por separado** para que la pantalla los muestre: el capitán necesita saber a quién le falta responder antes del domingo. **No agregar ningún estado nuevo** — el pendiente vive en `integrante_equipo.estado_vinculo`.
 
 - Cierre de incorporaciones **configurable por torneo**, con "siempre abierta" como default (`06`, D-30b).
 - Los integrantes del plantel siguen a su equipo automáticamente, con `origen = automatico`.
@@ -1170,6 +1174,11 @@ Contiene dos piezas que parecen chicas y no lo son. La **aceptación del reglame
 - **Dado** ese mismo torneo, **cuando** se confirma una lista de catorce jugadores más dos del cuerpo técnico, **entonces** se acepta, porque el cuerpo técnico no ocupa cupo.
 - **Dado** un torneo con mínimo de diez y una lista de ocho, **cuando** se la confirma, **entonces** se acepta y la respuesta devuelve la advertencia.
 - **Dado** un jugador ya habilitado por otro equipo del mismo torneo, **cuando** se confirma la lista que lo incluye, **entonces** la operación se rechaza con `JUGADOR_YA_HABILITADO_EN_EL_TORNEO`.
+- **Dado** una persona **sin cuenta** agregada desde la lista de buena fe, **entonces** se le crea el perfil `unclaimed`, el vínculo nace `active` y **queda habilitada en el acto**.
+- **Dado** una persona **con cuenta** agregada desde la lista, **entonces** se le envía la invitación, **no entra a `integrante_habilitado`**, y la respuesta la devuelve como **pendiente**.
+- **Dado** esa misma persona, **cuando** acepta la invitación, **entonces** recién ahí puede confirmarse en la lista.
+- **Dado** un intento de habilitar a alguien con vínculo `invited`, **entonces** se rechaza con `INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL`.
+- **Dado** un perfil nuevo cuyo nombre coincide con uno existente, **cuando** se lo crea desde esta pantalla, **entonces** el sistema avisa y **lo crea igual**.
 - **Dado** un torneo femenino y un equipo masculino, **cuando** el capitán lo inscribe, **entonces** la inscripción **se crea igual** con `advertencia_categoria = true` y sin código de error, y la advertencia aparece en el panel del organizador.
 - **Dado** un torneo mixto, **cuando** se inscribe un equipo de cualquier categoría, **entonces** `advertencia_categoria` queda en `false`.
 - **Dado** una inscripción creada con advertencia, **cuando** el equipo cambia después su categoría a la del torneo, **entonces** la inscripción **sigue marcada**: la bandera se guardó al crearse y no se recalcula (`06`, D-82).
