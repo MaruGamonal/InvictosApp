@@ -19,6 +19,7 @@
     "migrate:create": "node-pg-migrate create --migrations-dir db/migrations --",
     "migrate:up": "dotenv -e .env -q -- node-pg-migrate up --migrations-dir db/migrations",
     "migrate:down": "dotenv -e .env -q -- node-pg-migrate down --migrations-dir db/migrations",
+    "migrate:deploy": "node-pg-migrate up --migrations-dir db/migrations",
     "verify": "npm run format && npm run lint && npm run typecheck && npm run test && npm run test:integracion"
   },
   "dependencies": {

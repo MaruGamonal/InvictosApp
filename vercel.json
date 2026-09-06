@@ -1,0 +1,4 @@
+{
+  "regions": ["gru1"],
+  "buildCommand": "npm run migrate:deploy && next build"
+}
