@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
+import { RegistrarEvento } from '@/components/RegistrarEvento';
+import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar } from './_datos';
@@ -57,6 +59,11 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
   return (
     <div className={styles.pagina}>
+      <RegistrarEvento
+        evento={EVENTOS_ANALITICA.fichaTorneoVista}
+        propiedades={{ torneoId: id, estado: ficha.estado }}
+      />
+
       {ficha.estado === 'registration_open' && (
         <section className={styles.destacado}>
           <h2 className={styles.tituloSeccion}>Inscripciones abiertas</h2>

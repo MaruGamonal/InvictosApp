@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { TarjetaTorneo } from '@/components/TarjetaTorneo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { RegistrarEvento } from '@/components/RegistrarEvento';
+import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { NOMBRE_COOKIE_CIUDAD } from './_constantes';
@@ -121,13 +123,24 @@ export default async function PaginaDescubrimiento({
       </form>
 
       {resultado.torneos.length === 0 ? (
-        <EstadoVacio
-          mensaje={
-            resultado.sugerenciaProvincia
-              ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
-              : 'No encontramos torneos con esos filtros.'
-          }
-        />
+        <>
+          <RegistrarEvento
+            evento={EVENTOS_ANALITICA.ciudadSinTorneos}
+            propiedades={{
+              ciudadId,
+              filtrado: Boolean(
+                parametros.modalidad || parametros.categoriaEdad || parametros.abiertas,
+              ),
+            }}
+          />
+          <EstadoVacio
+            mensaje={
+              resultado.sugerenciaProvincia
+                ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
+                : 'No encontramos torneos con esos filtros.'
+            }
+          />
+        </>
       ) : (
         <div className={styles.lista}>
           {resultado.torneos.map((torneo, indice) => (
