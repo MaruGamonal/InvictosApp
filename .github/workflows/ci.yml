@@ -1,0 +1,45 @@
+name: CI
+
+# T28 (`10`, sección 5, "entornos separados y verificación previa"):
+# corre la misma batería que exige `npm run verify` en cada push, para
+# que nada que rompa tipos, lint o tests llegue a integrarse.
+on:
+  push:
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: invictos
+          POSTGRES_PASSWORD: invictos_dev_local
+          POSTGRES_DB: invictos_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Los tests de integración (T27) leen DATABASE_URL de un .env con
+      # "dotenv -e .env" — no hay secretos acá, es la base efímera del job.
+      - name: Preparar .env para los tests de integración
+        run: |
+          echo "DATABASE_URL=postgresql://invictos:invictos_dev_local@127.0.0.1:5432/invictos_dev" >> .env
+          echo "CRON_SECRET=ci-secreto-de-verificacion" >> .env
+
+      - run: npm run verify
