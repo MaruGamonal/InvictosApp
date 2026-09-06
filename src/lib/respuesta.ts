@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { CODIGOS_ERROR, esErrorDeAplicacion, type CodigoError } from './errores';
 
 /** Forma única de respuesta (`10`, 2.4). */
@@ -14,7 +15,10 @@ export type RespuestaError = {
  * lo decide únicamente esta función, a partir del error tipado que lanzó.
  *
  * Un error no controlado se traduce a `ERROR_INTERNO` sin exponer nada del
- * interior — ni el mensaje original ni el stack.
+ * interior — ni el mensaje original ni el stack — pero sí se manda entero
+ * a Sentry (T28, `09` sección 4): es la única forma de enterarse de una
+ * regresión que los tests no cubrieron. Un error de aplicación (`esErrorDeAplicacion`)
+ * no se reporta: ya es un caso de negocio esperado, no una falla.
  */
 export async function comoRespuestaHttp<T>(handler: () => Promise<T>): Promise<NextResponse> {
   try {
@@ -28,6 +32,8 @@ export async function comoRespuestaHttp<T>(handler: () => Promise<T>): Promise<N
       };
       return NextResponse.json(body, { status: error.httpStatus });
     }
+
+    Sentry.captureException(error);
 
     const body: RespuestaError = {
       ok: false,
