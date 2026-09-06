@@ -21,6 +21,10 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: NOMBRE_PRODUCTO,
   description: 'Plataforma de gestión y descubrimiento de torneos de fútbol amateur.',
+  /** apple-touch-icon (T28, `09` 8.1): iOS no lee el manifiesto, así que necesita su propio link. */
+  icons: {
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 /**
@@ -30,10 +34,15 @@ export const metadata: Metadata = {
  * "parado en la calle", es el actor cuyo primer segundo de pantalla más
  * importa. No había hecho falta hasta T21 porque ninguna pantalla
  * anterior era la que ese visitante mira primero.
+ *
+ * `themeColor` (T28, `09` 8.1) pinta la barra de estado del navegador
+ * y la pantalla de carga de la PWA instalada con el ink del Design
+ * System, en vez del blanco por defecto.
  */
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#0e1720',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
