@@ -41,6 +41,46 @@
   color: var(--gris-claro-sobre-oscuro);
 }
 
+.accionesHero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 640px;
+  margin: 16px auto 0;
+}
+
+.pillPrimaria {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radio-pill);
+  cursor: pointer;
+}
+
+.pillSecundaria {
+  background: none;
+  color: var(--blanco);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--ink-600);
+  border-radius: var(--radio-pill);
+  cursor: pointer;
+}
+
+.avisoHero {
+  max-width: 640px;
+  margin: 10px auto 0;
+  color: var(--gris-claro-sobre-oscuro);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .contenido {
   max-width: 640px;
   margin: 0 auto;

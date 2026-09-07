@@ -22,18 +22,43 @@
   color: var(--color-texto-secundario);
 }
 
-.cta {
-  align-self: flex-start;
+.accionesHero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pillPrimaria {
   background: var(--acento);
   color: var(--acento-texto-sobre);
   font-family: var(--fuente-texto);
   font-weight: 700;
-  font-size: 14px;
-  padding: 10px 18px;
+  font-size: 13px;
+  padding: 10px 16px;
   border: none;
-  border-radius: var(--radio-boton);
-  text-decoration: none;
+  border-radius: var(--radio-pill);
   cursor: pointer;
+}
+
+.pillSecundaria {
+  background: none;
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--borde-neutro);
+  border-radius: var(--radio-pill);
+  cursor: pointer;
+}
+
+.direccion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-texto-secundario);
+  font-size: 14px;
+  margin: 0;
 }
 
 .enlaceSecundario {
@@ -103,4 +128,50 @@
 .datos dd {
   font-weight: 600;
   margin: 0;
+}
+
+.tituloConCantidad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cantidad {
+  font-family: var(--fuente-texto);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--color-texto-terciario);
+}
+
+.listaEquiposInscriptos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  overflow: hidden;
+}
+
+.listaEquiposInscriptos li + li {
+  border-top: 1px solid var(--fondo-sutil);
+}
+
+.filaEquipoInscripto {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: var(--color-texto);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.aviso {
+  color: var(--color-texto-terciario);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
 }

@@ -55,6 +55,39 @@
   line-height: 1.5;
 }
 
+.gridStats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.stat {
+  background: var(--fondo-pagina);
+  border-radius: var(--radio-boton);
+  padding: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statValor {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.statEtiqueta {
+  font-size: 11px;
+  color: var(--color-texto-terciario);
+}
+
+.caption {
+  color: var(--color-texto-terciario);
+  font-size: 12px;
+  line-height: 1.4;
+  margin: -8px 0 0;
+}
+
 .tituloSeccion {
   font-family: var(--fuente-display);
   font-size: 15px;

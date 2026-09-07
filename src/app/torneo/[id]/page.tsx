@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
+import { CompartirBoton } from '@/components/CompartirBoton';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
@@ -56,6 +57,7 @@ function formatearFecha(iso: string | null): string | null {
 export default async function PaginaFichaTorneo({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ficha = await obtenerFichaOFallar(id);
+  const urlDelSitio = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
   return (
     <div className={styles.pagina}>
@@ -64,21 +66,53 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         propiedades={{ torneoId: id, estado: ficha.estado }}
       />
 
+      {/*
+        D-04b: visible sin sesión, el registro se pide recién al accionar.
+        Todavía sin el flujo de clic (pedir cuenta y aceptar seguir/
+        inscribirse) — eso es UI cliente que no construye este ticket; por
+        eso son botones inertes y no links a una ruta que no existe.
+        Compartir sí es funcional: no necesita cuenta ni confirmación.
+      */}
+      <div className={styles.accionesHero}>
+        <button type="button" className={styles.pillSecundaria}>
+          Seguir
+        </button>
+        {ficha.estado === 'registration_open' && (
+          <button type="button" className={styles.pillPrimaria}>
+            Inscribir a mi equipo
+          </button>
+        )}
+        <CompartirBoton titulo={ficha.nombre} url={`${urlDelSitio}/torneo/${id}`} />
+      </div>
+
+      {ficha.direccion && (
+        <p className={styles.direccion}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          {ficha.direccion}
+        </p>
+      )}
+
+      {ficha.descripcion && <p className={styles.descripcion}>{ficha.descripcion}</p>}
+
       {ficha.estado === 'registration_open' && (
         <section className={styles.destacado}>
           <h2 className={styles.tituloSeccion}>Inscripciones abiertas</h2>
           <p>
             {ficha.equiposAprobados} de {ficha.cupoEquipos} equipos confirmados.
           </p>
-          {/*
-            D-04b: visible sin sesión, el registro se pide recién al accionar.
-            Todavía sin el flujo de clic (pedir cuenta y completar la
-            solicitud) — eso es UI cliente que no construye este ticket;
-            por eso es un botón inerte y no un link a una ruta que no existe.
-          */}
-          <button type="button" className={styles.cta}>
-            Inscribir a mi equipo
-          </button>
         </section>
       )}
 
@@ -125,8 +159,6 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         </section>
       )}
 
-      {ficha.descripcion && <p className={styles.descripcion}>{ficha.descripcion}</p>}
-
       <dl className={styles.datos}>
         <div>
           <dt>Modalidad</dt>
@@ -142,13 +174,32 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         </div>
       </dl>
 
-      {/* Mismo criterio que el botón de inscripción: visible, todavía sin el flujo de clic (D-04b). */}
-      <button type="button" className={styles.enlaceSecundario}>
-        Seguir este torneo
-      </button>
+      {ficha.equiposInscriptos.length > 0 && (
+        <section>
+          <div className={styles.tituloConCantidad}>
+            <h2 className={styles.tituloSeccion}>Equipos inscriptos</h2>
+            <span className={styles.cantidad}>{ficha.equiposInscriptos.length}</span>
+          </div>
+          <ul className={styles.listaEquiposInscriptos}>
+            {ficha.equiposInscriptos.map((equipo) => (
+              <li key={equipo.id}>
+                <Link href={`/equipo/${equipo.id}`} className={styles.filaEquipoInscripto}>
+                  <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={30} />
+                  <span>{equipo.nombre}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Publicidad (T24, `06` D-63): una de las tres superficies habilitadas. */}
       <ContenedorPublicidad />
+
+      <p className={styles.aviso}>
+        Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar
+        &quot;Seguir&quot; o &quot;Inscribir mi equipo&quot;.
+      </p>
     </div>
   );
 }

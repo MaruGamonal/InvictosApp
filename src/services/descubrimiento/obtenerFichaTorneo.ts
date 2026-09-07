@@ -31,6 +31,7 @@ export interface FichaTorneo {
   categoriaGenero: string;
   categoriaEdad: string;
   ciudad: { id: string; nombre: string };
+  direccion: string | null;
   estado: string;
   visibilidad: string;
   formato: string;
@@ -48,6 +49,8 @@ export interface FichaTorneo {
     fechaHoraProgramada: string | null;
   } | null;
   campeon: { equipoId: string; nombre: string; escudoUrl: string | null } | null;
+  /** Equipos con inscripción `approved` (`08` — Ficha pública, sección "Equipos inscriptos"). */
+  equiposInscriptos: Array<{ id: string; nombre: string; escudoUrl: string | null }>;
 }
 
 interface FilaTorneo {
@@ -59,6 +62,7 @@ interface FilaTorneo {
   categoria_edad: string;
   ciudad_id: string;
   ciudad_nombre: string;
+  direccion: string | null;
   estado: string;
   visibilidad: string;
   formato: string;
@@ -69,6 +73,21 @@ interface FilaTorneo {
   organizacion_nombre: string;
   organizacion_logo_url: string | null;
   organizacion_nivel_verificacion: string;
+}
+
+async function obtenerEquiposInscriptos(
+  pool: ReturnType<typeof obtenerPool>,
+  torneoId: string,
+): Promise<FichaTorneo['equiposInscriptos']> {
+  const { rows } = await pool.query<{ id: string; nombre: string; escudo_url: string | null }>(
+    `SELECT e.id, e.nombre, e.escudo_url
+     FROM inscripcion i
+     JOIN equipo e ON e.id = i.equipo_id
+     WHERE i.torneo_id = $1 AND i.estado = 'approved'
+     ORDER BY e.nombre ASC`,
+    [torneoId],
+  );
+  return rows.map((fila) => ({ id: fila.id, nombre: fila.nombre, escudoUrl: fila.escudo_url }));
 }
 
 async function obtenerProximoPartido(
@@ -189,7 +208,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
 
   const { rows } = await pool.query<FilaTorneo>(
     `SELECT t.id, t.nombre, t.descripcion, t.modalidad, t.categoria_genero, t.categoria_edad,
-            c.id AS ciudad_id, c.nombre AS ciudad_nombre,
+            c.id AS ciudad_id, c.nombre AS ciudad_nombre, t.direccion,
             t.estado, t.visibilidad, t.formato, t.cupo_equipos,
             t.fecha_inicio_estimada, t.fecha_fin_estimada,
             o.id AS organizacion_id, o.nombre AS organizacion_nombre,
@@ -217,9 +236,10 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     [datos.torneoId],
   );
 
-  const [proximoPartido, campeon] = await Promise.all([
+  const [proximoPartido, campeon, equiposInscriptos] = await Promise.all([
     torneo.estado === 'in_progress' ? obtenerProximoPartido(pool, datos.torneoId) : null,
     torneo.estado === 'finished' ? obtenerCampeon(pool, datos.torneoId) : null,
+    obtenerEquiposInscriptos(pool, datos.torneoId),
   ]);
 
   return {
@@ -230,6 +250,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     categoriaGenero: torneo.categoria_genero,
     categoriaEdad: torneo.categoria_edad,
     ciudad: { id: torneo.ciudad_id, nombre: torneo.ciudad_nombre },
+    direccion: torneo.direccion,
     estado: torneo.estado,
     visibilidad: torneo.visibilidad,
     formato: torneo.formato,
@@ -246,5 +267,6 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     tieneReglamento: reglamentoRows.length > 0,
     proximoPartido,
     campeon,
+    equiposInscriptos,
   };
 };

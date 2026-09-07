@@ -27,6 +27,7 @@ function filaTorneoBase(over: Partial<Record<string, unknown>> = {}) {
     categoria_edad: 'open',
     ciudad_id: CIUDAD,
     ciudad_nombre: 'Rosario',
+    direccion: null,
     estado: 'registration_open',
     visibilidad: 'public',
     formato: 'league',
@@ -48,6 +49,7 @@ function mockearDb(opciones: {
   proximoPartido?: Record<string, unknown> | null;
   rolEnOrganizacion?: 'owner' | 'admin';
   esColaborador?: boolean;
+  equiposInscriptos?: Array<{ id: string; nombre: string; escudo_url: string | null }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -73,6 +75,9 @@ function mockearDb(opciones: {
           return { rows: opciones.proximoPartido ? [opciones.proximoPartido] : [] };
         }
         if (t.startsWith('SELECT id, tipo_fase FROM fase')) return { rows: [] };
+        if (t.startsWith('SELECT e.id, e.nombre, e.escudo_url')) {
+          return { rows: opciones.equiposInscriptos ?? [] };
+        }
         return { rows: [] };
       },
     }),
@@ -92,6 +97,32 @@ describe('obtenerFichaTorneo', () => {
     expect(ficha.tieneReglamento).toBe(true);
     expect(ficha.imagenUrl).toBe('https://cdn.example.com/liga-sur.png');
     expect(ficha.organizacion).toEqual({ id: ORG, nombre: 'Liga Sur', nivelVerificacion: 'basic' });
+  });
+
+  it('trae la dirección de la sede y los equipos con inscripción aprobada, ordenados por nombre', async () => {
+    mockearDb({
+      torneo: filaTorneoBase({ direccion: 'Cancha 3, Parque Sarmiento' }),
+      equiposInscriptos: [
+        { id: EQUIPO_A, nombre: 'Atlético Central', escudo_url: null },
+        { id: EQUIPO_B, nombre: 'Deportivo Belgrano', escudo_url: 'https://cdn.example.com/b.png' },
+      ],
+    });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+
+    expect(ficha.direccion).toBe('Cancha 3, Parque Sarmiento');
+    expect(ficha.equiposInscriptos).toEqual([
+      { id: EQUIPO_A, nombre: 'Atlético Central', escudoUrl: null },
+      { id: EQUIPO_B, nombre: 'Deportivo Belgrano', escudoUrl: 'https://cdn.example.com/b.png' },
+    ]);
+  });
+
+  it('sin dirección cargada, la ficha no la inventa: null', async () => {
+    mockearDb({});
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.direccion).toBeNull();
+    expect(ficha.equiposInscriptos).toEqual([]);
   });
 
   it('un torneo sin reglamento no marca tieneReglamento', async () => {

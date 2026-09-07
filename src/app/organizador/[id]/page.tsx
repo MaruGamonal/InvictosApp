@@ -36,6 +36,13 @@ async function obtenerPerfilOFallar(organizacionId: string): Promise<PerfilOrgan
   }
 }
 
+/** Años completos desde el alta — nunca negativo, aunque el reloj del cliente esté mal. */
+function aniosActivo(fechaAltaIso: string): number {
+  const milisegundosPorAnio = 365.25 * 24 * 60 * 60 * 1000;
+  const transcurrido = Date.now() - new Date(fechaAltaIso).getTime();
+  return Math.max(0, Math.floor(transcurrido / milisegundosPorAnio));
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -90,6 +97,25 @@ export default async function PaginaPerfilOrganizador({
 
       <main className={styles.contenido}>
         {perfil.descripcion && <p className={styles.descripcion}>{perfil.descripcion}</p>}
+
+        <div className={styles.gridStats}>
+          <div className={styles.stat}>
+            <span className={`${styles.statValor} fuente-display`}>
+              {perfil.trayectoria.length}
+            </span>
+            <span className={styles.statEtiqueta}>Finalizados</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={`${styles.statValor} fuente-display`}>
+              {aniosActivo(perfil.fechaAlta)}
+            </span>
+            <span className={styles.statEtiqueta}>Años activo</span>
+          </div>
+        </div>
+        <p className={styles.caption}>
+          Trayectoria factual, no un puntaje: es lo único que se muestra hasta que haya volumen para
+          mostrar más.
+        </p>
 
         <section>
           <h2 className={styles.tituloSeccion}>Trayectoria</h2>

@@ -1,0 +1,18 @@
+.boton {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1.5px solid var(--ink-600);
+  border-radius: var(--radio-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  color: var(--identidad-texto);
+  padding: 0;
+}
+
+.boton:hover {
+  background: var(--ink-800);
+}

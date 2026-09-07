@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { CompartirBoton } from '@/components/CompartirBoton';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
@@ -56,6 +57,7 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
   const { id } = await params;
   const equipo = await obtenerEquipoCacheado(id);
   if (!equipo) notFound();
+  const urlDelSitio = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
   return (
     <div className={styles.pagina}>
@@ -77,6 +79,25 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
             </div>
           </div>
         </div>
+
+        {/*
+          D-04b: visible sin sesión, el registro se pide recién al accionar.
+          Todavía sin el flujo de clic (pedir cuenta y confirmar sumarse) —
+          eso es UI cliente que no construye este ticket; por eso son
+          botones inertes. Compartir sí es funcional.
+        */}
+        <div className={styles.accionesHero}>
+          <button type="button" className={styles.pillSecundaria}>
+            Seguir
+          </button>
+          <button type="button" className={styles.pillPrimaria}>
+            Pedir sumarme
+          </button>
+          <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
+        </div>
+        <p className={styles.avisoHero}>
+          Seguir es al toque. Sumarte al plantel necesita que el capitán lo confirme.
+        </p>
       </header>
 
       <main className={styles.contenido}>
