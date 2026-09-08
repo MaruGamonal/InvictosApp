@@ -12,8 +12,8 @@
 .foto {
   position: absolute;
   inset: 0;
-  height: 48vh;
-  min-height: 320px;
+  height: 62vh;
+  min-height: 420px;
 }
 
 .fotoImg {
@@ -21,14 +21,21 @@
   object-position: top center;
 }
 
+/*
+ * Degradé largo y temprano en vez de concentrado al final: así el corte
+ * contra el fondo sólido de abajo (identidad-fondo) queda invisible en
+ * vez de una línea recta.
+ */
 .fotoDegrade {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(14, 23, 32, 0.05) 0%,
-    rgba(14, 23, 32, 0.15) 55%,
-    var(--ink-900) 100%
+    rgba(14, 23, 32, 0) 0%,
+    rgba(14, 23, 32, 0) 25%,
+    rgba(14, 23, 32, 0.55) 55%,
+    rgba(14, 23, 32, 0.9) 78%,
+    var(--ink-900) 92%
   );
 }
 
