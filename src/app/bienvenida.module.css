@@ -1,9 +1,17 @@
+/*
+ * Fondo sólido --ink-900, no el degradé --identidad-fondo (que aclara
+ * hacia abajo, D-71): con la foto encima, el degradé de .fotoDegrade
+ * tiene que desvanecer exactamente contra el mismo color de fondo en
+ * cualquier punto de la pantalla, y solo un color plano garantiza eso
+ * — un degradé de fondo se corta contra el degradé de la foto en un
+ * borde visible en cuanto no coinciden pixel a pixel.
+ */
 .pantalla {
   position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--identidad-fondo);
+  background: var(--ink-900);
   color: var(--identidad-texto);
   padding: 24px 26px 36px;
   overflow: hidden;
