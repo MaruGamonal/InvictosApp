@@ -5,6 +5,8 @@ import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { CompartirBoton } from '@/components/CompartirBoton';
+import { BotonSeguir } from '@/components/BotonSeguir';
+import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
@@ -81,18 +83,13 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
         </div>
 
         {/*
-          D-04b: visible sin sesión, el registro se pide recién al accionar.
-          Todavía sin el flujo de clic (pedir cuenta y confirmar sumarse) —
-          eso es UI cliente que no construye este ticket; por eso son
-          botones inertes. Compartir sí es funcional.
+          D-04b: visible sin sesión, el registro se pide recién al accionar
+          (las dos redirigen a /ingresar sin sesión). Compartir es
+          funcional: no necesita cuenta ni confirmación.
         */}
         <div className={styles.accionesHero}>
-          <button type="button" className={styles.pillSecundaria}>
-            Seguir
-          </button>
-          <button type="button" className={styles.pillPrimaria}>
-            Pedir sumarme
-          </button>
+          <BotonSeguir tipoSeguido="team" entidadId={id} />
+          <BotonPedirSumarme equipoId={id} />
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>
         <p className={styles.avisoHero}>

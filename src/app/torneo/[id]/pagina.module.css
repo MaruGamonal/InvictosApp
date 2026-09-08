@@ -40,18 +40,6 @@
   cursor: pointer;
 }
 
-.pillSecundaria {
-  background: none;
-  color: var(--color-texto);
-  font-family: var(--fuente-texto);
-  font-weight: 700;
-  font-size: 13px;
-  padding: 10px 16px;
-  border: 1.5px solid var(--borde-neutro);
-  border-radius: var(--radio-pill);
-  cursor: pointer;
-}
-
 .direccion {
   display: flex;
   align-items: center;

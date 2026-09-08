@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { CompartirBoton } from '@/components/CompartirBoton';
+import { BotonSeguir } from '@/components/BotonSeguir';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
@@ -17,11 +18,11 @@ import styles from './pagina.module.css';
  * abiertas destaca la inscripción; en curso, la próxima fecha y la
  * tabla; finalizado, el campeón. Sin ningún pedido de registro — las
  * acciones que lo necesitan (seguir, inscribirse) quedan **visibles**
- * para cualquiera (`06`, D-04b); el flujo completo de esas dos acciones
- * (el modal de registro en el momento del clic) es la única pieza de
- * UI que este ticket no termina de cablear — la lectura pública sin
- * sesión, que es lo que no admite "después lo mejoramos", sí está
- * completa.
+ * para cualquiera (`06`, D-04b); Seguir ya está cableado a
+ * `POST /api/seguir` (manda a `/ingresar` si no hay sesión, D-04b: se
+ * pide recién al usarla). "Inscribir a mi equipo" sigue inerte —
+ * necesita elegir cuál de los equipos propios inscribir, un flujo más
+ * grande que este botón todavía no arma.
  */
 
 export async function generateMetadata({
@@ -68,15 +69,12 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
       {/*
         D-04b: visible sin sesión, el registro se pide recién al accionar.
-        Todavía sin el flujo de clic (pedir cuenta y aceptar seguir/
-        inscribirse) — eso es UI cliente que no construye este ticket; por
-        eso son botones inertes y no links a una ruta que no existe.
-        Compartir sí es funcional: no necesita cuenta ni confirmación.
+        Seguir ya pide cuenta al tocar (redirige a /ingresar sin sesión).
+        "Inscribir a mi equipo" sigue inerte — falta el flujo de elegir
+        equipo. Compartir es funcional: no necesita cuenta ni confirmación.
       */}
       <div className={styles.accionesHero}>
-        <button type="button" className={styles.pillSecundaria}>
-          Seguir
-        </button>
+        <BotonSeguir tipoSeguido="tournament" entidadId={id} />
         {ficha.estado === 'registration_open' && (
           <button type="button" className={styles.pillPrimaria}>
             Inscribir a mi equipo

@@ -1,0 +1,23 @@
+.boton {
+  background: none;
+  color: inherit;
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--ink-600);
+  border-radius: var(--radio-pill);
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.botonActivo {
+  composes: boton;
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  border-color: var(--acento);
+}
