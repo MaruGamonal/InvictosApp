@@ -34,6 +34,7 @@ describe('iniciarRegistro', () => {
         email: 'capitan@example.com',
         password: CONTRASENA,
         options: expect.objectContaining({
+          emailRedirectTo: expect.stringContaining('/auth/callback?next=/torneos'),
           data: expect.objectContaining({ nombre_visible: 'Capitán Uno' }),
         }),
       }),
