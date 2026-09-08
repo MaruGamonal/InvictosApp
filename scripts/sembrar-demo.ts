@@ -121,6 +121,9 @@ interface DefinicionCiudad {
   ciudad: string;
   provincia: string;
   torneos: DefinicionTorneo[];
+  /** Si no se da, usa `NOMBRES_EQUIPO` + el nombre de la ciudad como sufijo. */
+  nombresEquipo?: string[];
+  nombresJugador?: string[];
 }
 
 /**
@@ -226,6 +229,56 @@ const CIUDADES: DefinicionCiudad[] = [
       },
     ],
   },
+  {
+    ciudad: 'Posadas',
+    provincia: 'Misiones',
+    torneos: [
+      {
+        organizacion: '[DEMO] Liga Amateur Posadas',
+        nombre: '[DEMO] Apertura F5 Costanera',
+        modalidad: 'f5',
+        formato: 'league',
+        cupoEquipos: 8,
+        equiposAInscribir: 8,
+        conResultados: true,
+      },
+      {
+        organizacion: '[DEMO] Copa Norte Misiones',
+        nombre: '[DEMO] Copa Itaembé F7',
+        modalidad: 'f7',
+        formato: 'knockout',
+        cupoEquipos: 8,
+        equiposAInscribir: 5,
+        conResultados: false,
+      },
+    ],
+    // Nombres de barrios reales de Posadas (Itaembé Miní, Villa Cabello,
+    // Garupá, Miguel Lanús, Itaembé Guazú, Villa Sarita, Villa Urquiza,
+    // la Costanera) — sin usar el nombre de ningún club real existente
+    // (varios, como Guaraní Antonio Franco o La Picada, compiten de
+    // verdad en el Regional Federal Amateur: no corresponde simular que
+    // juegan acá).
+    nombresEquipo: [
+      'Itaembé Miní FC',
+      'Deportivo Villa Cabello',
+      'Atlético Garupá',
+      'Social Miguel Lanús',
+      'Villa Sarita FC',
+      'Unión Itaembé Guazú',
+      'Deportivo Villa Urquiza',
+      'Costanera FC',
+    ],
+    nombresJugador: [
+      'Ramón Duarte',
+      'Elías Benítez',
+      'Cristian Cardozo',
+      'Nahuel Acuña',
+      'Diego Ojeda',
+      'Matías Ríos',
+      'Gonzalo Almirón',
+      'Federico Sosa',
+    ],
+  },
 ];
 
 async function crearEquipoDemo(
@@ -234,10 +287,11 @@ async function crearEquipoDemo(
   ciudadId: string,
   categoriaGenero: 'male' | 'female' | 'mixed',
   indice: number,
+  nombresJugador: string[],
 ) {
   const capitan = await crearUsuarioDemo(
     pool,
-    NOMBRES_JUGADOR[indice % NOMBRES_JUGADOR.length]!,
+    nombresJugador[indice % nombresJugador.length]!,
     AVATAR('personas', `capitan-${nombre}-${indice}`),
   );
   const equipo = await crearEquipo(
@@ -255,7 +309,7 @@ async function crearEquipoDemo(
       {
         equipoId: equipo.id,
         roles: ['player'],
-        nombreVisible: `${NOMBRES_JUGADOR[(indice + j + 1) % NOMBRES_JUGADOR.length]} (${nombre})`,
+        nombreVisible: `${nombresJugador[(indice + j + 1) % nombresJugador.length]} (${nombre})`,
       },
       capitan.contexto,
     );
@@ -315,14 +369,21 @@ async function main() {
 
       await publicarTorneo({ torneoId: torneo.id }, titular.contexto);
 
+      const nombresEquipo = def.nombresEquipo ?? NOMBRES_EQUIPO;
+      const nombresJugador = def.nombresJugador ?? NOMBRES_JUGADOR;
       for (let i = 0; i < defTorneo.equiposAInscribir; i += 1) {
-        const nombreEquipo = `${NOMBRES_EQUIPO[i % NOMBRES_EQUIPO.length]} ${def.ciudad}`;
+        const nombreBase = nombresEquipo[i % nombresEquipo.length]!;
+        // Los nombres genéricos comparten ciudad si el catálogo se reusa
+        // sin sufijo; los propios de una ciudad (ej. Posadas) ya son
+        // locales de por sí, así que no hace falta repetir el nombre.
+        const nombreEquipo = def.nombresEquipo ? nombreBase : `${nombreBase} ${def.ciudad}`;
         const { equipoId, capitanContexto } = await crearEquipoDemo(
           pool,
           nombreEquipo,
           ciudadId,
           'mixed',
           i,
+          nombresJugador,
         );
         await solicitarInscripcion({ torneoId: torneo.id, equipoId }, capitanContexto);
         await resolverInscripcion(
