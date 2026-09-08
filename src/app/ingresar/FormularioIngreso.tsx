@@ -10,11 +10,15 @@ import styles from './pagina.module.css';
  * rutas distintas: a diferencia del flujo passwordless anterior, acá sí
  * hay una credencial que puede "no coincidir", así que ingresar y crear
  * cuenta son server-side dos operaciones distintas, no una sola.
+ *
+ * Crear cuenta deja la sesión abierta al toque (`FLOWS.md` Flujo 1: "No
+ * se pide validar el correo acá") — por eso los dos modos terminan
+ * igual, mandando a la siguiente pantalla del flujo en vez de mostrar un
+ * estado intermedio de "confirmá tu correo".
  */
 type Estado =
   | { paso: 'formulario' }
   | { paso: 'enviando' }
-  | { paso: 'confirmarCorreo'; correo: string }
   | { paso: 'error'; mensaje: string };
 
 interface Props {
@@ -52,28 +56,13 @@ export function FormularioIngreso({ modoInicial }: Props) {
         return;
       }
 
-      if (esCrear) {
-        setEstado({ paso: 'confirmarCorreo', correo: identificadorAcceso });
-      } else {
-        window.location.assign('/torneos');
-      }
+      window.location.assign(esCrear ? '/cuenta-creada' : '/torneos');
     } catch {
       setEstado({
         paso: 'error',
         mensaje: 'No pudimos conectar. Revisá tu conexión e intentá de nuevo.',
       });
     }
-  }
-
-  if (estado.paso === 'confirmarCorreo') {
-    return (
-      <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Ya casi. Confirmá tu correo</h1>
-        <p className={styles.texto}>
-          Te mandamos un enlace a <strong>{estado.correo}</strong>. Tocalo para activar la cuenta.
-        </p>
-      </div>
-    );
   }
 
   return (

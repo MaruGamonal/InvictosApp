@@ -4,25 +4,29 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
+import { obtenerClienteAdmin } from '@/lib/supabase/admin';
+import { contextoDeSistema } from '@/lib/contexto';
+import { completarRegistro } from './completarRegistro';
 
 /**
  * UC-01 — Registrarse. Pide identificador de acceso (email), nombre
- * visible y contraseña (`06`, D-52: registro mínimo — cualquier otro
- * dato se pide después).
+ * visible y contraseña (`06`, D-52: registro mínimo).
  *
- * Con contraseña: la cuenta se crea acá mismo (`supabase.auth.signUp`),
- * pero queda sin confirmar hasta que la persona toca el enlace que le
- * llega por correo — por eso este servicio tampoco escribe todavía la
- * fila de `usuario` propia: eso pasa recién en `completarRegistro`,
- * que corre desde `src/app/auth/callback` cuando el enlace se confirma.
+ * La cuenta queda lista al toque, sin esperar a que confirmen el correo:
+ * `FLOWS.md` (Flujo 1, pasos 2-3) es explícito — "No se pide validar el
+ * correo acá" — y D-90 ya había establecido que ni siquiera la ciudad se
+ * pide en el registro. Confirmar el correo sigue existiendo, pero como
+ * un paso posterior y opcional, ligado a `solicitarVerificacionBasica`
+ * (D-76: verificar la organización, no la cuenta, es lo que habilita
+ * publicar en el descubrimiento) — nunca bloquea usar la app.
  *
- * `next=/cuenta-creada`: sin esto, `auth/callback` manda por default a
- * `/` (la Bienvenida) — una pantalla pensada para quien todavía no
- * tiene sesión, así que sería un callejón sin salida para alguien que
- * recién confirmó la cuenta. `/cuenta-creada` es el siguiente paso del
- * diseño (`Flujo Registro y primer torneo.dc.html`, pantalla 3), y de
- * ahí el botón "Empezar" sigue a `/torneos`, que pide la ciudad si hace
- * falta (D-90) y ya muestra los torneos.
+ * Por eso esto usa el Admin API (`auth.admin.createUser` con
+ * `email_confirm: true`) en vez de `auth.signUp`: crea la cuenta ya
+ * confirmada del lado de Supabase Auth, completa `usuario` +
+ * `perfil_deportivo` en el mismo movimiento (reusa `completarRegistro`,
+ * la misma lógica que antes corría recién al volver del enlace de
+ * email) y después inicia sesión con el cliente atado a la request para
+ * que la cookie quede puesta antes de responder.
  */
 
 const esquemaEntrada = z.object({
@@ -34,11 +38,10 @@ const esquemaEntrada = z.object({
 
 export type IniciarRegistroInput = z.infer<typeof esquemaEntrada>;
 export interface IniciarRegistroResultado {
-  enviado: true;
+  cuentaCreada: true;
 }
 
 const LIMITE_REGISTRO = { maximoIntentos: 5, ventanaMs: 15 * 60 * 1000 };
-const URL_DEL_SITIO = () => process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResultado> = async (
   input,
@@ -55,22 +58,39 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
     ]);
   }
 
-  const supabase = await crearClienteServidor();
-  const { error } = await supabase.auth.signUp({
+  const admin = obtenerClienteAdmin();
+  const { data, error } = await admin.auth.admin.createUser({
     email: datos.identificadorAcceso,
     password: datos.password,
-    options: {
-      emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback?next=/cuenta-creada`,
-      data: {
-        nombre_visible: datos.nombreVisible,
-        accion_pendiente: datos.accionPendiente ?? null,
-      },
-    },
+    email_confirm: true,
+    user_metadata: { nombre_visible: datos.nombreVisible },
   });
 
-  if (error) {
+  if (error || !data.user) {
+    if (error?.message?.toLowerCase().includes('already')) {
+      throw crearError('CORREO_YA_REGISTRADO');
+    }
     throw crearError('ERROR_INTERNO', { motivo: 'no se pudo crear la cuenta' });
   }
 
-  return { enviado: true };
+  await completarRegistro(
+    {
+      usuarioId: data.user.id,
+      email: datos.identificadorAcceso,
+      nombreVisible: datos.nombreVisible,
+      accionPendiente: datos.accionPendiente,
+    },
+    contextoDeSistema(),
+  );
+
+  const supabase = await crearClienteServidor();
+  const { error: errorIngreso } = await supabase.auth.signInWithPassword({
+    email: datos.identificadorAcceso,
+    password: datos.password,
+  });
+  if (errorIngreso) {
+    throw crearError('ERROR_INTERNO', { motivo: 'la cuenta se creó pero no se pudo iniciar sesión' });
+  }
+
+  return { cuentaCreada: true };
 };

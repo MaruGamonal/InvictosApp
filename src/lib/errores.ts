@@ -39,6 +39,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 401,
     mensaje: 'Ese correo o esa contraseña no coinciden.',
   },
+  CORREO_YA_REGISTRADO: {
+    httpStatus: 409,
+    mensaje: 'Ese correo ya tiene una cuenta. Iniciá sesión en cambio.',
+  },
 
   // De negocio (`10`, 8.2)
   DATOS_MINIMOS_INCOMPLETOS: {

@@ -15,7 +15,10 @@ describe('CODIGOS_ERROR', () => {
     // está en el catálogo de `10`, sección 8, agregado en esa revisión.
     // Más CREDENCIALES_INVALIDAS: el ingreso con contraseña necesita
     // distinguir "no coinciden" de los códigos transversales existentes.
-    expect(codigos).toHaveLength(28);
+    // Más CORREO_YA_REGISTRADO: el registro inmediato (revisión del
+    // paquete de diseño, `FLOWS.md` Flujo 1) crea la cuenta al toque con
+    // el Admin API, que sí informa si el correo ya existe.
+    expect(codigos).toHaveLength(29);
   });
 
   it.each(codigos)(
