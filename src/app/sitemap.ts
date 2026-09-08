@@ -4,9 +4,9 @@ const URL_DEL_SITIO = () => process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhos
 
 /**
  * T28 (`10`, sección 5) — la puerta de entrada siempre pública. `/` es
- * un redirect a `/torneos` (`06`, D-90: la ubicación es un contexto, no
- * una home aparte — ver `next.config.js`), así que solo hace falta
- * listar el destino.
+ * la pantalla de bienvenida (Ingresar / Crear cuenta / Descubrir sin
+ * cuenta) y `/torneos` el destino de esa tercera opción — las dos son
+ * URLs reales y alcanzables hoy.
  *
  * Las rutas dinámicas (`/torneo/[id]` y las que cuelgan de ahí,
  * `/equipo/[id]`, `/jugador/[id]`, `/organizador/[id]`) no están acá
@@ -18,5 +18,8 @@ const URL_DEL_SITIO = () => process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhos
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = URL_DEL_SITIO();
-  return [{ url: `${base}/torneos`, changeFrequency: 'daily' }];
+  return [
+    { url: base, changeFrequency: 'weekly' },
+    { url: `${base}/torneos`, changeFrequency: 'daily' },
+  ];
 }

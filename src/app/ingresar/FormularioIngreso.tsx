@@ -15,8 +15,14 @@ type Estado =
   | { paso: 'enviado'; correo: string }
   | { paso: 'error'; mensaje: string };
 
-export function FormularioIngreso() {
+interface Props {
+  /** Solo cambia el copy — el formulario y el envío son idénticos en los dos modos. */
+  modoInicial: 'ingresar' | 'crear';
+}
+
+export function FormularioIngreso({ modoInicial }: Props) {
   const [estado, setEstado] = useState<Estado>({ paso: 'formulario' });
+  const esCrear = modoInicial === 'crear';
   const [identificadorAcceso, setIdentificadorAcceso] = useState('');
   const [nombreVisible, setNombreVisible] = useState('');
 
@@ -63,10 +69,11 @@ export function FormularioIngreso() {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Ingresar</h1>
+      <h1 className={`fuente-display ${styles.titulo}`}>{esCrear ? 'Crear cuenta' : 'Ingresar'}</h1>
       <p className={styles.texto}>
-        Escribí tu correo y te mandamos un enlace para entrar. Si todavía no tenés cuenta, se crea
-        sola con esto.
+        {esCrear
+          ? 'Escribí tu correo y tu nombre — te mandamos un enlace para entrar, sin contraseña.'
+          : 'Escribí tu correo y te mandamos un enlace para entrar. Si todavía no tenés cuenta, se crea sola con esto.'}
       </p>
 
       {estado.paso === 'error' && <p className={styles.error}>{estado.mensaje}</p>}
@@ -99,7 +106,7 @@ export function FormularioIngreso() {
       </div>
 
       <button type="submit" className={styles.boton} disabled={estado.paso === 'enviando'}>
-        {estado.paso === 'enviando' ? 'Enviando…' : 'Mandarme el enlace'}
+        {estado.paso === 'enviando' ? 'Enviando…' : esCrear ? 'Crear cuenta' : 'Mandarme el enlace'}
       </button>
     </form>
   );

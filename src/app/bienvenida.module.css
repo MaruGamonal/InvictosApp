@@ -1,0 +1,90 @@
+.pantalla {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--identidad-fondo);
+  color: var(--identidad-texto);
+  padding: 24px 26px 36px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.punto {
+  width: 10px;
+  height: 10px;
+  background: var(--acento);
+  flex: none;
+}
+
+.nombre {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.contenido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  max-width: 420px;
+}
+
+.titulo {
+  font-size: 52px;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.copy {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--identidad-texto-secundario);
+  max-width: 320px;
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.botonPrimario {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 18px;
+  border-radius: var(--radio-boton);
+  text-align: center;
+  text-decoration: none;
+}
+
+.botonSecundario {
+  border: 1.5px solid var(--ink-600);
+  color: var(--identidad-texto);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 16.5px;
+  border-radius: var(--radio-boton);
+  text-align: center;
+  text-decoration: none;
+}
+
+.enlaceDescubrir {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--identidad-texto-secundario);
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+}

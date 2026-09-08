@@ -3,16 +3,6 @@ const { withSentryConfig } = require('@sentry/nextjs/config');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  /**
-   * La ubicación es un contexto, no un filtro (`06`, D-90): "la
-   * aplicación abre mostrando los torneos de esa ciudad, sin que pida
-   * nada" — que es exactamente lo que ya hace `/torneos` (pide la
-   * ciudad recién ahí si hace falta). No hay una home distinta que
-   * construir; la raíz solo tiene que apuntar para allá.
-   */
-  async redirects() {
-    return [{ source: '/', destination: '/torneos', permanent: false }];
-  },
 };
 
 /**
