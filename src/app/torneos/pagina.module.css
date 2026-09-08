@@ -17,6 +17,21 @@
   gap: 8px;
 }
 
+.filaTitulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.enlaceIngresar {
+  flex: none;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+}
+
 .cambiarCiudad summary {
   cursor: pointer;
   font-weight: 600;

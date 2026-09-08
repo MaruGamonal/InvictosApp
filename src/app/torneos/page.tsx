@@ -56,7 +56,12 @@ export default async function PaginaDescubrimiento({
   if (!ciudadId) {
     return (
       <div className={styles.pagina}>
-        <h1 className="fuente-display">Descubrí torneos</h1>
+        <div className={styles.filaTitulo}>
+          <h1 className="fuente-display">Descubrí torneos</h1>
+          <Link href="/ingresar" className={styles.enlaceIngresar}>
+            Ingresar
+          </Link>
+        </div>
         <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
         <SelectorDeCiudad provincias={provincias} />
       </div>
@@ -84,7 +89,12 @@ export default async function PaginaDescubrimiento({
   return (
     <div className={styles.pagina}>
       <header className={styles.encabezado}>
-        <h1 className="fuente-display">Torneos en {ciudadActual?.nombre ?? 'tu ciudad'}</h1>
+        <div className={styles.filaTitulo}>
+          <h1 className="fuente-display">Torneos en {ciudadActual?.nombre ?? 'tu ciudad'}</h1>
+          <Link href="/ingresar" className={styles.enlaceIngresar}>
+            Ingresar
+          </Link>
+        </div>
         <details className={styles.cambiarCiudad}>
           <summary>Cambiar ciudad</summary>
           <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />

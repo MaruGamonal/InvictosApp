@@ -1,0 +1,91 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacio-pantalla-x);
+  background: var(--identidad-fondo);
+}
+
+.tarjeta {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.titulo {
+  font-size: 28px;
+  margin: 0;
+}
+
+.texto {
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-600);
+}
+
+.campo input {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 13px 14px;
+  font-family: var(--fuente-texto);
+  font-size: 15px;
+  min-height: 48px;
+  outline: none;
+  width: 100%;
+}
+
+.campo input:focus {
+  border: 2px solid var(--acento);
+  padding: 12px 13px;
+}
+
+.ayuda {
+  font-size: 12px;
+  color: var(--color-texto-terciario);
+}
+
+.boton {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radio-boton);
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  background: var(--error-fondo);
+  border: 1px solid var(--error-borde);
+  color: var(--error-texto);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
