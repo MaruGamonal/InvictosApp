@@ -13,7 +13,9 @@ describe('CODIGOS_ERROR', () => {
     // mismo motivo, una regla que el catálogo original no anticipaba.
     // Más INTEGRANTE_NO_ACTIVO_EN_EL_PLANTEL (revisión 15, D-98): sí
     // está en el catálogo de `10`, sección 8, agregado en esa revisión.
-    expect(codigos).toHaveLength(27);
+    // Más CREDENCIALES_INVALIDAS: el ingreso con contraseña necesita
+    // distinguir "no coinciden" de los códigos transversales existentes.
+    expect(codigos).toHaveLength(28);
   });
 
   it.each(codigos)(

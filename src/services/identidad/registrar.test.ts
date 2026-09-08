@@ -2,30 +2,37 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { reiniciarLimitesDeFrecuencia } from '@/lib/limiteFrecuencia';
 import { esErrorDeAplicacion } from '@/lib/errores';
 
-const signInWithOtp = vi.fn().mockResolvedValue({ error: null });
+const signUp = vi.fn().mockResolvedValue({ error: null });
 
-vi.mock('@/lib/supabase/admin', () => ({
-  obtenerClienteAdmin: () => ({ auth: { signInWithOtp } }),
+vi.mock('@/lib/supabase/servidor', () => ({
+  crearClienteServidor: async () => ({ auth: { signUp } }),
 }));
 
 beforeEach(() => {
   reiniciarLimitesDeFrecuencia();
-  signInWithOtp.mockClear();
-  signInWithOtp.mockResolvedValue({ error: null });
+  signUp.mockClear();
+  signUp.mockResolvedValue({ error: null });
 });
 
+const CONTRASENA = 'contraseñaSegura123';
+
 describe('iniciarRegistro', () => {
-  it('pide únicamente identificador de acceso y nombre visible (D-52)', async () => {
+  it('pide identificador de acceso, nombre visible y contraseña (D-52)', async () => {
     const { iniciarRegistro } = await import('./registrar');
     const resultado = await iniciarRegistro(
-      { identificadorAcceso: 'capitan@example.com', nombreVisible: 'Capitán Uno' },
+      {
+        identificadorAcceso: 'capitan@example.com',
+        nombreVisible: 'Capitán Uno',
+        password: CONTRASENA,
+      },
       { usuarioId: null, permisos: {}, esSistema: true },
     );
 
     expect(resultado).toEqual({ enviado: true });
-    expect(signInWithOtp).toHaveBeenCalledWith(
+    expect(signUp).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'capitan@example.com',
+        password: CONTRASENA,
         options: expect.objectContaining({
           data: expect.objectContaining({ nombre_visible: 'Capitán Uno' }),
         }),
@@ -37,11 +44,22 @@ describe('iniciarRegistro', () => {
     const { iniciarRegistro } = await import('./registrar');
     await expect(
       iniciarRegistro(
-        { identificadorAcceso: 'no-es-un-email', nombreVisible: 'Alguien' },
+        { identificadorAcceso: 'no-es-un-email', nombreVisible: 'Alguien', password: CONTRASENA },
         { usuarioId: null, permisos: {}, esSistema: true },
       ),
     ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
-    expect(signInWithOtp).not.toHaveBeenCalled();
+    expect(signUp).not.toHaveBeenCalled();
+  });
+
+  it('rechaza con DATOS_INVALIDOS una contraseña de menos de 8 caracteres', async () => {
+    const { iniciarRegistro } = await import('./registrar');
+    await expect(
+      iniciarRegistro(
+        { identificadorAcceso: 'alguien@example.com', nombreVisible: 'Alguien', password: 'corta' },
+        { usuarioId: null, permisos: {}, esSistema: true },
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+    expect(signUp).not.toHaveBeenCalled();
   });
 
   it('pasa la acción pendiente en la metadata, para que completarRegistro la ejecute', async () => {
@@ -50,12 +68,13 @@ describe('iniciarRegistro', () => {
       {
         identificadorAcceso: 'visitante@example.com',
         nombreVisible: 'Visitante',
+        password: CONTRASENA,
         accionPendiente: { tipo: 'seguir_torneo', datos: { torneoId: 't-1' } },
       },
       { usuarioId: null, permisos: {}, esSistema: true },
     );
 
-    expect(signInWithOtp).toHaveBeenCalledWith(
+    expect(signUp).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({
           data: expect.objectContaining({
@@ -68,7 +87,11 @@ describe('iniciarRegistro', () => {
 
   it('corta después del límite de intentos configurado desde el mismo identificador', async () => {
     const { iniciarRegistro } = await import('./registrar');
-    const input = { identificadorAcceso: 'insistente@example.com', nombreVisible: 'Alguien' };
+    const input = {
+      identificadorAcceso: 'insistente@example.com',
+      nombreVisible: 'Alguien',
+      password: CONTRASENA,
+    };
     const contexto = { usuarioId: null, permisos: {}, esSistema: true } as const;
 
     for (let i = 0; i < 5; i += 1) {
@@ -83,6 +106,6 @@ describe('iniciarRegistro', () => {
     }
 
     expect(esErrorDeAplicacion(error)).toBe(true);
-    expect(signInWithOtp).toHaveBeenCalledTimes(5);
+    expect(signUp).toHaveBeenCalledTimes(5);
   });
 });

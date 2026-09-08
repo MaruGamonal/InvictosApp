@@ -3,22 +3,24 @@ import type { Servicio } from '@/lib/servicio';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
-import { obtenerClienteAdmin } from '@/lib/supabase/admin';
+import { crearClienteServidor } from '@/lib/supabase/servidor';
 
 /**
- * UC-01 — Registrarse. Pide únicamente identificador de acceso (email) y
- * nombre visible (`06`, D-52); cualquier otro dato se pide después.
+ * UC-01 — Registrarse. Pide identificador de acceso (email), nombre
+ * visible y contraseña (`06`, D-52: registro mínimo — cualquier otro
+ * dato se pide después).
  *
- * Es passwordless: "una forma de autenticarse" (`02`, UC-01) es el enlace
- * que llega por email, no una contraseña — coherente con que el alta pide
- * solo dos campos. Por eso este servicio no crea todavía la fila de
- * `usuario`: eso pasa recién cuando la persona confirma el enlace, en
- * `completarRegistro`, que corre desde `src/app/auth/callback`.
+ * Con contraseña: la cuenta se crea acá mismo (`supabase.auth.signUp`),
+ * pero queda sin confirmar hasta que la persona toca el enlace que le
+ * llega por correo — por eso este servicio tampoco escribe todavía la
+ * fila de `usuario` propia: eso pasa recién en `completarRegistro`,
+ * que corre desde `src/app/auth/callback` cuando el enlace se confirma.
  */
 
 const esquemaEntrada = z.object({
   identificadorAcceso: z.string().trim().email(),
   nombreVisible: z.string().trim().min(1),
+  password: z.string().min(8, 'La contraseña tiene que tener al menos 8 caracteres.'),
   accionPendiente: z.object({ tipo: z.string(), datos: z.record(z.unknown()) }).optional(),
 });
 
@@ -45,11 +47,11 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
     ]);
   }
 
-  const supabase = obtenerClienteAdmin();
-  const { error } = await supabase.auth.signInWithOtp({
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.auth.signUp({
     email: datos.identificadorAcceso,
+    password: datos.password,
     options: {
-      shouldCreateUser: true,
       emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback`,
       data: {
         nombre_visible: datos.nombreVisible,
@@ -59,7 +61,7 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
   });
 
   if (error) {
-    throw crearError('ERROR_INTERNO', { motivo: 'no se pudo enviar el enlace de acceso' });
+    throw crearError('ERROR_INTERNO', { motivo: 'no se pudo crear la cuenta' });
   }
 
   return { enviado: true };

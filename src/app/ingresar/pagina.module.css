@@ -64,6 +64,31 @@
   color: var(--color-texto-terciario);
 }
 
+.filaEtiqueta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.enlaceChico {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+}
+
+.textoCentrado {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-texto-secundario);
+}
+
+.textoCentrado a {
+  color: var(--acento-oscuro);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .boton {
   background: var(--acento);
   color: var(--acento-texto-sobre);

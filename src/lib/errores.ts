@@ -35,6 +35,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 500,
     mensaje: 'Algo salió mal de nuestro lado. Probá de nuevo en un momento.',
   },
+  CREDENCIALES_INVALIDAS: {
+    httpStatus: 401,
+    mensaje: 'Ese correo o esa contraseña no coinciden.',
+  },
 
   // De negocio (`10`, 8.2)
   DATOS_MINIMOS_INCOMPLETOS: {

@@ -9,15 +9,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * UC-01 — la puerta de entrada que no existía: el backend (`iniciarRegistro`,
- * `POST /api/registro`, `auth/callback`) estaba completo desde T3, pero
- * ninguna pantalla lo llamaba. Un solo formulario para ingresar y para
- * registrarse (D-52: passwordless, alta mínima) — no hay "olvidé mi
- * contraseña" que ofrecer porque no hay contraseña.
- *
- * `modo` solo cambia el copy: viene de qué botón se tocó en la
- * bienvenida (`/`, "Ingresar" vs "Crear cuenta"), pero el formulario y
- * el envío son exactamente los mismos en los dos casos.
+ * UC-01 — con contraseña: ingresar (`POST /api/ingresar`) y crear
+ * cuenta (`POST /api/registro`) son dos operaciones distintas que
+ * comparten esta misma pantalla — `modo` decide cuál mostrar y a cuál
+ * ruta mandar el formulario. Viene de qué botón se tocó en la
+ * bienvenida (`/`, "Ingresar" vs "Crear cuenta").
  */
 export default async function PaginaIngresar({
   searchParams,
