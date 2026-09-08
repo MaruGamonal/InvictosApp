@@ -1,0 +1,66 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 30px;
+  background: var(--identidad-fondo);
+  color: var(--identidad-texto);
+}
+
+.icono {
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  background: rgba(0, 168, 204, 0.15);
+  color: var(--acento);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titulo {
+  font-size: 28px;
+  margin: 0;
+}
+
+.texto {
+  margin: 0;
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--identidad-texto-secundario);
+  text-wrap: pretty;
+}
+
+.puntos {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.punto,
+.puntoActivo {
+  width: 26px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ink-700);
+}
+
+.puntoActivo {
+  background: var(--acento);
+}
+
+.boton {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 15px 24px;
+  border-radius: var(--radio-boton);
+  text-decoration: none;
+  margin-top: 8px;
+}

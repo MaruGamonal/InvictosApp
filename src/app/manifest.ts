@@ -6,11 +6,8 @@ import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
  * mínimo para que el navegador ofrezca "Agregar a la pantalla de
  * inicio", que en iOS es lo que habilita el push más adelante.
  *
- * Los íconos son un placeholder tipográfico (la "I" en Barlow Condensed
- * 700, cian sobre el fondo oscuro del Design System) hasta que exista
- * identidad gráfica real — se ve intencional porque usa los mismos
- * tokens que el resto del producto, no colores inventados para la
- * ocasión.
+ * Los íconos salen del isotipo real de la marca (`public/imagenes/logo.png`),
+ * recortado al glifo — el nombre completo no entra legible a 192px.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {

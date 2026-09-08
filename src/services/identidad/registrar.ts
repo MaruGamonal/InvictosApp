@@ -16,13 +16,13 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
  * fila de `usuario` propia: eso pasa recién en `completarRegistro`,
  * que corre desde `src/app/auth/callback` cuando el enlace se confirma.
  *
- * `next=/torneos`: sin esto, `auth/callback` manda por default a `/`
- * (la Bienvenida) — una pantalla pensada para quien todavía no tiene
- * sesión, así que sería un callejón sin salida para alguien que recién
- * confirmó la cuenta. `/torneos` sigue el flujo del diseño (`Flujo
- * Registro y primer torneo.dc.html`): de ahí en más pide la ciudad si
- * hace falta (D-90) y ya muestra los torneos, sin pantallas nuevas que
- * construir.
+ * `next=/cuenta-creada`: sin esto, `auth/callback` manda por default a
+ * `/` (la Bienvenida) — una pantalla pensada para quien todavía no
+ * tiene sesión, así que sería un callejón sin salida para alguien que
+ * recién confirmó la cuenta. `/cuenta-creada` es el siguiente paso del
+ * diseño (`Flujo Registro y primer torneo.dc.html`, pantalla 3), y de
+ * ahí el botón "Empezar" sigue a `/torneos`, que pide la ciudad si hace
+ * falta (D-90) y ya muestra los torneos.
  */
 
 const esquemaEntrada = z.object({
@@ -60,7 +60,7 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
     email: datos.identificadorAcceso,
     password: datos.password,
     options: {
-      emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback?next=/torneos`,
+      emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback?next=/cuenta-creada`,
       data: {
         nombre_visible: datos.nombreVisible,
         accion_pendiente: datos.accionPendiente ?? null,

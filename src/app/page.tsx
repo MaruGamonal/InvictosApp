@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { NOMBRE_PRODUCTO, conNombreProducto } from '@/lib/nombreProducto';
 import styles from './bienvenida.module.css';
@@ -20,15 +21,25 @@ export const metadata: Metadata = {
  * lleva directo a `/torneos`, que es exactamente donde D-90 dice que
  * tiene que abrir quien no quiere loguearse.
  *
- * Ingresar y Crear cuenta llevan al mismo formulario (`/ingresar`): el
- * acceso es passwordless (D-52) — no hay contraseña que distinga un
- * login de un alta, así que no hay dos flujos reales que separar, solo
- * dos puertas de entrada al mismo lugar con el copy que corresponde a
- * la intención de cada botón.
+ * Ingresar y Crear cuenta llevan al mismo formulario (`/ingresar`), con
+ * el campo de contraseña que corresponde a cada uno — solo cambia el
+ * copy y a qué ruta se manda el formulario.
  */
 export default function PaginaBienvenida() {
   return (
     <div className={styles.pantalla}>
+      <div className={styles.foto}>
+        <Image
+          src="/imagenes/bienvenida-hero.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className={styles.fotoImg}
+        />
+        <div className={styles.fotoDegrade} />
+      </div>
+
       <div className={styles.marca}>
         <span className={styles.punto} />
         <span className={styles.nombre}>{NOMBRE_PRODUCTO}</span>
