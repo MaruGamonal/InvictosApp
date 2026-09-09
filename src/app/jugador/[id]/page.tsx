@@ -58,6 +58,12 @@ export async function generateMetadata({
   };
 }
 
+function comoAño(fechaIso: string | null): string | null {
+  if (!fechaIso) return null;
+  const año = new Date(fechaIso).getFullYear();
+  return Number.isNaN(año) ? null : String(año);
+}
+
 export default async function PaginaPerfilPublico({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const perfil = await obtenerPerfilOFallar(id);
@@ -69,9 +75,15 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
           <Escudo src={perfil.fotoUrl} nombre={perfil.nombreVisible} tamano={64} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{perfil.nombreVisible}</h1>
-            {perfil.posicion && (
+            {(perfil.posicion || perfil.ciudadNombre) && (
               <div className={styles.meta}>
-                <span>{obtenerEtiqueta('perfilDeportivo.posicion', perfil.posicion).etiqueta}</span>
+                {perfil.posicion && (
+                  <span>
+                    {obtenerEtiqueta('perfilDeportivo.posicion', perfil.posicion).etiqueta}
+                  </span>
+                )}
+                {perfil.posicion && perfil.ciudadNombre && <span aria-hidden>·</span>}
+                {perfil.ciudadNombre && <span>{perfil.ciudadNombre}</span>}
               </div>
             )}
           </div>
@@ -85,14 +97,25 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
             <p className={styles.sinEquipos}>Todavía no integra ningún equipo.</p>
           ) : (
             <ul className={styles.listaEquipos}>
-              {perfil.equipos.map((equipo) => (
-                <li key={equipo.id} className={styles.equipo}>
-                  <Link href={`/equipo/${equipo.id}`} className={styles.enlaceEquipo}>
-                    <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={32} />
-                    <span>{equipo.nombre}</span>
-                  </Link>
-                </li>
-              ))}
+              {perfil.equipos.map((equipo) => {
+                const inicio = comoAño(equipo.temporadaInicio);
+                const fin = equipo.esActual ? 'presente' : comoAño(equipo.temporadaFin);
+                return (
+                  <li key={equipo.id} className={styles.equipo}>
+                    <Link href={`/equipo/${equipo.id}`} className={styles.enlaceEquipo}>
+                      <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={40} />
+                      <div className={styles.equipoTexto}>
+                        <span className={styles.equipoNombre}>{equipo.nombre}</span>
+                        <span className={styles.equipoDetalle}>
+                          {inicio && fin && `${inicio} — ${fin} · `}
+                          {obtenerEtiqueta('integranteEquipo.rolEquipo', equipo.rolEquipo).etiqueta}
+                        </span>
+                      </div>
+                      {equipo.esActual && <span className={styles.badgeActual}>Actual</span>}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

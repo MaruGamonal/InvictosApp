@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import Link from 'next/link';
 import type { MiPerfil } from '@/services/identidad/obtenerMiPerfil';
 import { BuscadorCiudad, type ProvinciaConCiudades } from '@/components/BuscadorCiudad';
 import styles from '../../ingresar/pagina.module.css';
+import propios from './FormularioEditarPerfil.module.css';
 
 interface Props {
   perfil: MiPerfil;
@@ -61,7 +63,12 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Editar perfil</h1>
+      <div className={styles.filaEtiqueta}>
+        <h1 className={`fuente-display ${styles.titulo}`}>Mi perfil</h1>
+        <Link href={`/jugador/${perfil.id}`} className={styles.enlaceChico}>
+          Ver como lo ven
+        </Link>
+      </div>
       <p className={styles.texto}>Todo acá es opcional — nada de esto te bloquea nada.</p>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -79,21 +86,6 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor="posicion">Posición</label>
-        <select
-          id="posicion"
-          value={posicion}
-          onChange={(evento) => setPosicion(evento.target.value)}
-        >
-          {POSICIONES.map((opcion) => (
-            <option key={opcion.valor} value={opcion.valor}>
-              {opcion.etiqueta}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className={styles.campo}>
         <label htmlFor="ciudadId">Ciudad</label>
         <BuscadorCiudad
           id="ciudadId"
@@ -101,22 +93,54 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
           value={ciudadId}
           onChange={setCiudadId}
         />
+        <span className={styles.ayuda}>Se muestra en tu perfil público.</span>
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor="visibilidad">Visibilidad del perfil</label>
-        <select
-          id="visibilidad"
-          value={visibilidad}
-          onChange={(evento) => setVisibilidad(evento.target.value as 'public' | 'restricted')}
-        >
-          <option value="public">Público</option>
-          <option value="restricted">Restringido</option>
-        </select>
-        <span className={styles.ayuda}>
-          Restringido oculta tu foto, posición y ciudad en los planteles donde participás — tu
-          participación en sí nunca se oculta.
-        </span>
+        <span>Posición (opcional)</span>
+        <div className={propios.chips}>
+          {POSICIONES.map((opcion) => (
+            <button
+              key={opcion.valor}
+              type="button"
+              onClick={() => setPosicion(opcion.valor)}
+              className={`${propios.chip} ${posicion === opcion.valor ? propios.chipActiva : ''}`}
+              aria-pressed={posicion === opcion.valor}
+            >
+              {opcion.etiqueta}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.campo}>
+        <span>Visibilidad del perfil</span>
+        <div className={propios.cards}>
+          <button
+            type="button"
+            onClick={() => setVisibilidad('public')}
+            className={`${propios.card} ${visibilidad === 'public' ? propios.cardActiva : ''}`}
+            aria-pressed={visibilidad === 'public'}
+          >
+            <div className={propios.cardTitulo}>Público</div>
+            <div className={propios.cardDescripcion}>
+              Cualquiera ve tu foto, tu posición y tu ciudad. Es lo que hace que un capitán te
+              encuentre.
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setVisibilidad('restricted')}
+            className={`${propios.card} ${visibilidad === 'restricted' ? propios.cardActiva : ''}`}
+            aria-pressed={visibilidad === 'restricted'}
+          >
+            <div className={propios.cardTitulo}>Restringido</div>
+            <div className={propios.cardDescripcion}>
+              Ocultás tu foto, tu posición y tu ciudad. Tu nombre y tus equipos siguen siendo
+              públicos — tu participación en sí nunca se oculta.
+            </div>
+          </button>
+        </div>
       </div>
 
       <button type="submit" className={styles.boton} disabled={enviando}>

@@ -22,6 +22,7 @@ function mockearDb(perfil: { usuario_id: string | null; visibilidad: 'public' | 
                 foto_url: 'https://ejemplo.com/foto.jpg',
                 posicion: 'goalkeeper',
                 ciudad_id: 'ciudad-1',
+                ciudad_nombre: 'La Plata',
                 visibilidad: perfil.visibilidad,
               },
             ],
@@ -29,7 +30,16 @@ function mockearDb(perfil: { usuario_id: string | null; visibilidad: 'public' | 
         }
         return {
           rows: [
-            { id: 'equipo-1', nombre: 'Equipo A', escudo_url: null, categoria_genero: 'male' },
+            {
+              id: 'equipo-1',
+              nombre: 'Equipo A',
+              escudo_url: null,
+              categoria_genero: 'male',
+              rol_equipo: 'player',
+              estado_vinculo: 'active',
+              fecha_incorporacion: '2024-01-01T00:00:00.000Z',
+              fecha_baja: null,
+            },
           ],
         };
       },
@@ -56,11 +66,21 @@ describe('obtenerPerfilPublico', () => {
 
     expect(perfil.nombreVisible).toBe('Juan Pérez');
     expect(perfil.equipos).toEqual([
-      { id: 'equipo-1', nombre: 'Equipo A', escudoUrl: null, categoriaGenero: 'male' },
+      {
+        id: 'equipo-1',
+        nombre: 'Equipo A',
+        escudoUrl: null,
+        categoriaGenero: 'male',
+        rolEquipo: 'player',
+        esActual: true,
+        temporadaInicio: '2024-01-01T00:00:00.000Z',
+        temporadaFin: null,
+      },
     ]);
     expect(perfil.fotoUrl).toBeNull();
     expect(perfil.posicion).toBeNull();
     expect(perfil.ciudadId).toBeNull();
+    expect(perfil.ciudadNombre).toBeNull();
     vi.doUnmock('@/db/cliente');
   });
 

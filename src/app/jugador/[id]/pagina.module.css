@@ -84,10 +84,36 @@
   gap: 12px;
   padding: 12px 16px;
   color: var(--color-texto);
-  font-weight: 600;
   text-decoration: none;
 }
 
-.enlaceEquipo:hover {
+.enlaceEquipo:hover .equipoNombre {
   text-decoration: underline;
+}
+
+.equipoTexto {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.equipoNombre {
+  font-weight: 600;
+}
+
+.equipoDetalle {
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+}
+
+.badgeActual {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--exito-texto);
+  background: var(--exito-fondo);
+  padding: 3px 8px;
+  border-radius: 999px;
 }

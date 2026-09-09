@@ -1,0 +1,57 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.chipActiva {
+  background: var(--ink-900);
+  color: var(--blanco);
+  border-color: var(--ink-900);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  display: block;
+  text-align: left;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  background: var(--color-superficie);
+  cursor: pointer;
+}
+
+.cardActiva {
+  border: 2px solid var(--acento);
+  padding: 13px 15px;
+}
+
+.cardTitulo {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-texto);
+}
+
+.cardDescripcion {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+  line-height: 1.4;
+}

@@ -18,13 +18,27 @@ import { validarEntrada } from '@/lib/validacion';
 const esquemaEntrada = z.object({ perfilId: z.string().uuid() });
 export type ObtenerPerfilPublicoInput = z.infer<typeof esquemaEntrada>;
 
+export interface EquipoDelPerfil {
+  id: string;
+  nombre: string;
+  escudoUrl: string | null;
+  categoriaGenero: string;
+  rolEquipo: string;
+  esActual: boolean;
+  /** Fecha ISO de alta en el plantel, o `null` si no se registró. */
+  temporadaInicio: string | null;
+  /** Fecha ISO de baja, o `null` — sin baja y `esActual`, es el equipo de hoy. */
+  temporadaFin: string | null;
+}
+
 export interface PerfilPublico {
   id: string;
   nombreVisible: string;
-  equipos: Array<{ id: string; nombre: string; escudoUrl: string | null; categoriaGenero: string }>;
+  equipos: EquipoDelPerfil[];
   fotoUrl: string | null;
   posicion: string | null;
   ciudadId: string | null;
+  ciudadNombre: string | null;
   visibilidad: 'public' | 'restricted';
 }
 
@@ -42,27 +56,42 @@ export const obtenerPerfilPublico: Servicio<ObtenerPerfilPublicoInput, PerfilPub
     foto_url: string | null;
     posicion: string | null;
     ciudad_id: string | null;
+    ciudad_nombre: string | null;
     visibilidad: 'public' | 'restricted';
   }>(
-    `SELECT id, usuario_id, nombre_visible, foto_url, posicion, ciudad_id, visibilidad
-     FROM perfil_deportivo WHERE id = $1`,
+    `SELECT p.id, p.usuario_id, p.nombre_visible, p.foto_url, p.posicion, p.ciudad_id,
+            c.nombre AS ciudad_nombre, p.visibilidad
+     FROM perfil_deportivo p
+     LEFT JOIN ciudad c ON c.id = p.ciudad_id
+     WHERE p.id = $1`,
     [datos.perfilId],
   );
   const perfil = rows[0];
   if (!perfil) throw crearError('NO_ENCONTRADO');
 
+  // Un equipo puede tener más de una fila histórica (p. ej. jugadora y
+  // luego capitana): `DISTINCT ON` se queda con el vínculo más reciente
+  // por equipo — la lista muestra la trayectoria, no cada cambio de rol.
   const { rows: equipos } = await pool.query<{
     id: string;
     nombre: string;
     escudo_url: string | null;
     categoria_genero: string;
+    rol_equipo: string;
+    estado_vinculo: string;
+    fecha_incorporacion: string | null;
+    fecha_baja: string | null;
   }>(
-    `SELECT e.id, e.nombre, e.escudo_url, e.categoria_genero
+    `SELECT DISTINCT ON (e.id)
+            e.id, e.nombre, e.escudo_url, e.categoria_genero,
+            ie.rol_equipo, ie.estado_vinculo, ie.fecha_incorporacion, ie.fecha_baja
      FROM integrante_equipo ie
      JOIN equipo e ON e.id = ie.equipo_id
-     WHERE ie.perfil_id = $1 AND ie.estado_vinculo = 'active'`,
+     WHERE ie.perfil_id = $1 AND ie.estado_vinculo IN ('active', 'left')
+     ORDER BY e.id, ie.fecha_incorporacion DESC NULLS LAST`,
     [datos.perfilId],
   );
+  equipos.sort((a, b) => (b.fecha_incorporacion ?? '').localeCompare(a.fecha_incorporacion ?? ''));
 
   const esElPropioDueño = contexto.usuarioId !== null && contexto.usuarioId === perfil.usuario_id;
   const mostrarCompleto = perfil.visibilidad === 'public' || esElPropioDueño;
@@ -75,10 +104,15 @@ export const obtenerPerfilPublico: Servicio<ObtenerPerfilPublicoInput, PerfilPub
       nombre: e.nombre,
       escudoUrl: e.escudo_url,
       categoriaGenero: e.categoria_genero,
+      rolEquipo: e.rol_equipo,
+      esActual: e.estado_vinculo === 'active',
+      temporadaInicio: e.fecha_incorporacion,
+      temporadaFin: e.fecha_baja,
     })),
     fotoUrl: mostrarCompleto ? perfil.foto_url : null,
     posicion: mostrarCompleto ? perfil.posicion : null,
     ciudadId: mostrarCompleto ? perfil.ciudad_id : null,
+    ciudadNombre: mostrarCompleto ? perfil.ciudad_nombre : null,
     visibilidad: perfil.visibilidad,
   };
 };
