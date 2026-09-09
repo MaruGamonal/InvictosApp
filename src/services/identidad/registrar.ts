@@ -89,7 +89,9 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
     password: datos.password,
   });
   if (errorIngreso) {
-    throw crearError('ERROR_INTERNO', { motivo: 'la cuenta se creó pero no se pudo iniciar sesión' });
+    throw crearError('ERROR_INTERNO', {
+      motivo: 'la cuenta se creó pero no se pudo iniciar sesión',
+    });
   }
 
   return { cuentaCreada: true };

@@ -16,7 +16,12 @@ export function BotonCerrarSesion() {
   }
 
   return (
-    <button type="button" className={styles.botonCerrarSesion} onClick={cerrarSesion} disabled={enviando}>
+    <button
+      type="button"
+      className={styles.botonCerrarSesion}
+      onClick={cerrarSesion}
+      disabled={enviando}
+    >
       {enviando ? 'Cerrando…' : 'Cerrar sesión'}
     </button>
   );

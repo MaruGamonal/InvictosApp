@@ -16,10 +16,7 @@ import styles from './pagina.module.css';
  * igual, mandando a la siguiente pantalla del flujo en vez de mostrar un
  * estado intermedio de "confirmá tu correo".
  */
-type Estado =
-  | { paso: 'formulario' }
-  | { paso: 'enviando' }
-  | { paso: 'error'; mensaje: string };
+type Estado = { paso: 'formulario' } | { paso: 'enviando' } | { paso: 'error'; mensaje: string };
 
 interface Props {
   modoInicial: 'ingresar' | 'crear';

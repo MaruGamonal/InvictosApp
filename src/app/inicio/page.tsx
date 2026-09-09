@@ -86,7 +86,9 @@ export default async function PaginaInicio({
         {inicio.esRecienLlegado && (
           <>
             <div className={styles.bienvenida}>
-              <div className={`fuente-display ${styles.bienvenidaTitulo}`}>Bienvenida a Invicta</div>
+              <div className={`fuente-display ${styles.bienvenidaTitulo}`}>
+                Bienvenida a Invicta
+              </div>
               <p className={styles.bienvenidaTexto}>
                 Elegí por dónde arrancar. Podés hacer las dos cosas cuando quieras.
               </p>
@@ -140,7 +142,9 @@ export default async function PaginaInicio({
                   </div>
                   <div className={styles.partidoPie}>
                     <span>
-                      {FORMATO_FECHA.format(new Date(inicio.jugador.proximoPartido.fechaHoraProgramada))}
+                      {FORMATO_FECHA.format(
+                        new Date(inicio.jugador.proximoPartido.fechaHoraProgramada),
+                      )}
                     </span>
                     {inicio.jugador.proximoPartido.sedeNombre && (
                       <span>{inicio.jugador.proximoPartido.sedeNombre}</span>

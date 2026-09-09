@@ -27,7 +27,14 @@ function mockearDb(opciones: Opciones) {
     obtenerPool: () => ({
       query: async (texto: string) => {
         if (texto.includes('FROM perfil_deportivo')) {
-          return { rows: opciones.perfil === undefined ? [{ id: 'perfil-1', nombre_visible: 'Vale' }] : opciones.perfil ? [opciones.perfil] : [] };
+          return {
+            rows:
+              opciones.perfil === undefined
+                ? [{ id: 'perfil-1', nombre_visible: 'Vale' }]
+                : opciones.perfil
+                  ? [opciones.perfil]
+                  : [],
+          };
         }
         if (texto.includes('FROM integrante_equipo')) {
           return { rows: opciones.equipos ?? [] };
@@ -85,7 +92,9 @@ describe('obtenerInicio', () => {
 
   it('jugador con próximo partido: arma el bloque con el rival y mi equipo bien distinguidos', async () => {
     mockearDb({
-      equipos: [{ id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'captain' }],
+      equipos: [
+        { id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'captain' },
+      ],
       organizaciones: [],
       partido: {
         torneo_id: 't-1',

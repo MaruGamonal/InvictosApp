@@ -155,9 +155,13 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         numeroFecha: filaPartido.numero_fecha,
         categoriaGenero: filaPartido.categoria_genero,
         miEquipoId: esLocal ? filaPartido.equipo_local_id : filaPartido.equipo_visitante_id,
-        miEquipoNombre: esLocal ? filaPartido.equipo_local_nombre : filaPartido.equipo_visitante_nombre,
+        miEquipoNombre: esLocal
+          ? filaPartido.equipo_local_nombre
+          : filaPartido.equipo_visitante_nombre,
         rivalId: esLocal ? filaPartido.equipo_visitante_id : filaPartido.equipo_local_id,
-        rivalNombre: esLocal ? filaPartido.equipo_visitante_nombre : filaPartido.equipo_local_nombre,
+        rivalNombre: esLocal
+          ? filaPartido.equipo_visitante_nombre
+          : filaPartido.equipo_local_nombre,
         fechaHoraProgramada: filaPartido.fecha_hora_programada.toISOString(),
         sedeNombre: filaPartido.sede_nombre,
       };

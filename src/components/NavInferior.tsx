@@ -13,9 +13,7 @@ const PESTANAS: Array<{
     id: 'inicio',
     href: '/inicio',
     etiqueta: 'Inicio',
-    icono: (
-      <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
-    ),
+    icono: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />,
   },
   {
     id: 'buscar',

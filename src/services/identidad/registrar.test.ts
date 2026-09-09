@@ -106,7 +106,11 @@ describe('iniciarRegistro', () => {
     const { iniciarRegistro } = await import('./registrar');
     await expect(
       iniciarRegistro(
-        { identificadorAcceso: 'ya-existe@example.com', nombreVisible: 'Alguien', password: CONTRASENA },
+        {
+          identificadorAcceso: 'ya-existe@example.com',
+          nombreVisible: 'Alguien',
+          password: CONTRASENA,
+        },
         CONTEXTO_SISTEMA,
       ),
     ).rejects.toMatchObject({ codigo: 'CORREO_YA_REGISTRADO' });

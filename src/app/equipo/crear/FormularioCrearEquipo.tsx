@@ -92,7 +92,11 @@ export function FormularioCrearEquipo({ provincias }: Props) {
 
       <div className={styles.campo}>
         <label htmlFor="ciudadId">Ciudad (opcional)</label>
-        <select id="ciudadId" value={ciudadId} onChange={(evento) => setCiudadId(evento.target.value)}>
+        <select
+          id="ciudadId"
+          value={ciudadId}
+          onChange={(evento) => setCiudadId(evento.target.value)}
+        >
           <option value="">Sin definir</option>
           {provincias.map((provincia) => (
             <optgroup key={provincia.id} label={provincia.nombre}>

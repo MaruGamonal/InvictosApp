@@ -9,16 +9,17 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 
 beforeEach(() => vi.resetModules());
 
-function mockearDb(opciones: {
-  organizacionPropiaId?: string | null;
-  nombreVisible?: string;
-}) {
+function mockearDb(opciones: { organizacionPropiaId?: string | null; nombreVisible?: string }) {
   const consultasCliente: string[] = [];
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
         if (texto.includes('FROM miembro_organizacion')) {
-          return { rows: opciones.organizacionPropiaId ? [{ organizacion_id: opciones.organizacionPropiaId }] : [] };
+          return {
+            rows: opciones.organizacionPropiaId
+              ? [{ organizacion_id: opciones.organizacionPropiaId }]
+              : [],
+          };
         }
         if (texto.includes('FROM perfil_deportivo')) {
           return { rows: [{ nombre_visible: opciones.nombreVisible ?? 'Vale' }] };
