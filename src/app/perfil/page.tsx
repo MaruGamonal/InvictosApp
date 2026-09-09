@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
@@ -11,12 +12,7 @@ import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Mi perfil') };
 
-/**
- * UC-02 — Mi perfil, en modo lectura. La edición (nombre, posición,
- * visibilidad) todavía no tiene formulario propio — igual que "Cargar
- * resultados" en Inicio, es gestión que ya tiene servicio de backend
- * (`actualizarMiPerfil`) pero ninguna pantalla todavía.
- */
+/** UC-02 — Mi perfil. La edición vive en `/perfil/editar`. */
 export default async function PaginaPerfil() {
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
@@ -53,6 +49,10 @@ export default async function PaginaPerfil() {
           <dd>{obtenerEtiqueta('perfilDeportivo.visibilidad', perfil.visibilidad).etiqueta}</dd>
         </div>
       </dl>
+
+      <Link href="/perfil/editar" className={styles.enlaceEditar}>
+        Editar perfil
+      </Link>
 
       <BotonCerrarSesion />
 

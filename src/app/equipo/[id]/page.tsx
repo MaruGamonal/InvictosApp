@@ -96,6 +96,15 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
         <p className={styles.avisoHero}>
           Seguir es al toque. Sumarte al plantel necesita que el capitán lo confirme.
         </p>
+        {/*
+          Visible para cualquiera, igual que el resto de accionesHero: la
+          página no sabe quién la mira (D-04b). El permiso real —Capitán
+          o Delegado— se resuelve recién adentro de /gestionar, que sí
+          puede leer la sesión.
+        */}
+        <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceGestionar}>
+          Gestionar equipo
+        </Link>
       </header>
 
       <main className={styles.contenido}>

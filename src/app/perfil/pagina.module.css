@@ -69,6 +69,16 @@
   font: 600 14px/1 var(--fuente-texto);
 }
 
+.enlaceEditar {
+  text-align: center;
+  font: 700 15px/1 var(--fuente-texto);
+  color: var(--acento-oscuro);
+  text-decoration: none;
+  padding: 14px;
+  border: 1.5px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+}
+
 .botonCerrarSesion {
   background: none;
   border: 1.5px solid var(--borde-neutro);

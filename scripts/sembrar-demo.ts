@@ -459,8 +459,7 @@ export async function sembrarDemo() {
 
 /** Corre solo cuando el archivo se ejecuta directo (`tsx scripts/sembrar-demo.ts`), no cuando `sembrarDemo` se importa desde la ruta de API. */
 const esEntrypointDirecto =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (esEntrypointDirecto) {
   sembrarDemo()
