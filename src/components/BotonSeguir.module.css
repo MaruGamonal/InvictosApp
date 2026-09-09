@@ -21,3 +21,15 @@
   color: var(--acento-texto-sobre);
   border-color: var(--acento);
 }
+
+.envoltorio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mensajeError {
+  font-family: var(--fuente-texto);
+  font-size: 12px;
+  color: var(--gris-claro-sobre-oscuro);
+}

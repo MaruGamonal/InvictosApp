@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { obtenerPool } from '@/db/cliente';
 import type { Contexto } from '@/lib/contexto';
 import { crearOrganizacion } from '@/services/organizadores/crearOrganizacion';
@@ -317,7 +318,16 @@ async function crearEquipoDemo(
   return { equipoId: equipo.id, capitanContexto: capitan.contexto };
 }
 
-async function main() {
+/**
+ * Exportada (no solo invocada al fondo del archivo) para que
+ * `src/app/api/admin/sembrar-demo/route.ts` pueda dispararla sin
+ * terminal — pensado para quien no tiene Node local a mano y solo
+ * cuenta con el panel de Supabase. A diferencia del entrypoint de CLI
+ * de más abajo, esta función NO cierra el pool: en la ruta de API el
+ * pool es el mismo singleton que atiende al resto de la app, cerrarlo
+ * ahí rompería las próximas requests de esa misma instancia tibia.
+ */
+export async function sembrarDemo() {
   const pool = obtenerPool();
 
   for (const def of CIUDADES) {
@@ -445,10 +455,18 @@ async function main() {
   }
 
   console.log('\nListo. Todo lo creado lleva el prefijo "[DEMO]".');
-  await pool.end();
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+/** Corre solo cuando el archivo se ejecuta directo (`tsx scripts/sembrar-demo.ts`), no cuando `sembrarDemo` se importa desde la ruta de API. */
+const esEntrypointDirecto =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (esEntrypointDirecto) {
+  sembrarDemo()
+    .then(() => obtenerPool().end())
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

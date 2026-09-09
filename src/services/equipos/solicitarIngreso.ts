@@ -47,9 +47,9 @@ export const solicitarIngreso: Servicio<
   if (!perfilId) throw crearError('NO_ENCONTRADO');
 
   const rolesActuales = await obtenerRolesEnEquipo(perfilId, datos.equipoId);
-  if (rolesActuales.includes('player')) {
+  if (rolesActuales.length > 0) {
     throw crearError('DATOS_INVALIDOS', [
-      { campo: 'equipoId', problema: 'Ya integrás este plantel como jugador.' },
+      { campo: 'equipoId', problema: 'Ya sos parte de este equipo.' },
     ]);
   }
 

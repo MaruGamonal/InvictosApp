@@ -43,4 +43,19 @@ describe('BotonPedirSumarme', () => {
 
     await waitFor(() => expect(push).toHaveBeenCalledWith('/ingresar'));
   });
+
+  it('si ya sos parte del equipo, muestra el mensaje del servidor en vez de fallar en silencio', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ ok: false, error: { mensaje: 'Ya sos parte de este equipo.' } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByRole, getByText } = render(<BotonPedirSumarme equipoId="e-1" />);
+    fireEvent.click(getByRole('button', { name: 'Pedir sumarme' }));
+
+    await waitFor(() => expect(getByText('Ya sos parte de este equipo.')).toBeTruthy());
+    expect(getByRole('button', { name: 'Pedir sumarme' })).not.toBeDisabled();
+  });
 });

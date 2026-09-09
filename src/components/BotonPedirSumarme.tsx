@@ -14,13 +14,19 @@ export interface BotonPedirSumarmeProps {
  * resuelve desde la gestión del equipo, que no es parte de esta
  * pantalla pública.
  */
+type Estado =
+  | { paso: 'inicial' }
+  | { paso: 'enviando' }
+  | { paso: 'enviado' }
+  | { paso: 'error'; mensaje: string };
+
 export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
   const router = useRouter();
-  const [estado, setEstado] = useState<'inicial' | 'enviando' | 'enviado'>('inicial');
+  const [estado, setEstado] = useState<Estado>({ paso: 'inicial' });
 
   async function alTocar() {
-    if (estado !== 'inicial') return;
-    setEstado('enviando');
+    if (estado.paso !== 'inicial' && estado.paso !== 'error') return;
+    setEstado({ paso: 'enviando' });
 
     try {
       const respuesta = await fetch('/api/solicitar-ingreso', {
@@ -28,33 +34,40 @@ export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ equipoId }),
       });
+      const cuerpo = await respuesta.json().catch(() => null);
 
       if (respuesta.status === 401) {
         router.push('/ingresar');
         return;
       }
       if (!respuesta.ok) {
-        setEstado('inicial');
+        setEstado({
+          paso: 'error',
+          mensaje: cuerpo?.error?.mensaje ?? 'No pudimos enviar el pedido. Probá de nuevo.',
+        });
         return;
       }
-      setEstado('enviado');
+      setEstado({ paso: 'enviado' });
     } catch {
-      setEstado('inicial');
+      setEstado({ paso: 'error', mensaje: 'No pudimos conectar. Probá de nuevo.' });
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={alTocar}
-      disabled={estado !== 'inicial'}
-      className={styles.botonActivo}
-    >
-      {estado === 'enviado'
-        ? 'Pedido enviado ✓'
-        : estado === 'enviando'
-          ? 'Enviando…'
-          : 'Pedir sumarme'}
-    </button>
+    <div className={styles.envoltorio}>
+      <button
+        type="button"
+        onClick={alTocar}
+        disabled={estado.paso === 'enviando' || estado.paso === 'enviado'}
+        className={styles.botonActivo}
+      >
+        {estado.paso === 'enviado'
+          ? 'Pedido enviado ✓'
+          : estado.paso === 'enviando'
+            ? 'Enviando…'
+            : 'Pedir sumarme'}
+      </button>
+      {estado.paso === 'error' && <span className={styles.mensajeError}>{estado.mensaje}</span>}
+    </div>
   );
 }

@@ -115,6 +115,21 @@ describe('solicitarIngreso', () => {
     ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
   });
 
+  it('ya es capitán (o cualquier otro rol activo): tampoco hay nada que solicitar', async () => {
+    mockearDb({
+      estadoEquipo: 'active',
+      perfilId: '21111111-1111-1111-1111-111111111111',
+      rolesEnEquipo: ['captain'],
+    });
+    const { solicitarIngreso } = await import('./solicitarIngreso');
+    await expect(
+      solicitarIngreso(
+        { equipoId: '11111111-1111-1111-1111-111111111111' },
+        contextoCon('usuario-1'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
   it('un equipo archivado no admite solicitudes', async () => {
     mockearDb({ estadoEquipo: 'archived', perfilId: '21111111-1111-1111-1111-111111111111' });
     const { solicitarIngreso } = await import('./solicitarIngreso');
