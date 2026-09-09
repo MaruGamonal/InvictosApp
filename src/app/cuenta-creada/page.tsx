@@ -8,13 +8,13 @@ export const metadata: Metadata = {
 };
 
 /**
- * Paso intermedio entre confirmar el correo y `/torneos`
- * (`Flujo Registro y primer torneo.dc.html`, pantalla 3 — "Cuenta
- * creada"). `auth/callback` llega acá (`?next=/cuenta-creada`) recién
- * cuando el enlace de confirmación ya canjeó el código: a esta altura
- * la cuenta existe de verdad y el correo ya está validado, así que a
- * diferencia del copy del mockup (pensado para una cuenta que funciona
- * *antes* de confirmar el correo) acá no hay nada pendiente que avisar.
+ * Paso 3 de Flujo 1 (`FLOWS.md`): confirmación inmediata después de
+ * "Registro mínimo", sin esperar a validar el correo — `iniciarRegistro`
+ * ya deja la cuenta creada y con sesión abierta en el mismo paso
+ * (`src/services/identidad/registrar.ts`). El botón "Empezar" sigue al
+ * paso 5 del flujo, Inicio (`/inicio`); pedir la ciudad si hace falta
+ * (D-90) ya no es un paso propio de este flujo — se resuelve, como
+ * siempre, en el primer uso del descubrimiento (`/torneos`).
  */
 export default function PaginaCuentaCreada() {
   return (
@@ -43,7 +43,7 @@ export default function PaginaCuentaCreada() {
         <span className={styles.punto} />
         <span className={styles.punto} />
       </div>
-      <Link href="/torneos" className={styles.boton}>
+      <Link href="/inicio" className={styles.boton}>
         Empezar
       </Link>
     </div>

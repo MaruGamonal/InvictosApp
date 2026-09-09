@@ -46,7 +46,8 @@
   color: var(--ink-600);
 }
 
-.campo input {
+.campo input,
+.campo select {
   border: 1px solid var(--borde-neutro);
   border-radius: 6px;
   padding: 13px 14px;
@@ -55,9 +56,12 @@
   min-height: 48px;
   outline: none;
   width: 100%;
+  background: var(--color-superficie);
+  color: var(--color-texto);
 }
 
-.campo input:focus {
+.campo input:focus,
+.campo select:focus {
   border: 2px solid var(--acento);
   padding: 12px 13px;
 }

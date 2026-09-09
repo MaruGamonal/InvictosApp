@@ -1,0 +1,36 @@
+.espaciador {
+  height: 78px;
+}
+
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 8px 4px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-superficie);
+  border-top: 1px solid var(--color-borde);
+}
+
+.pestana,
+.pestanaActiva {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 52px;
+  text-decoration: none;
+  font: 500 11px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.pestanaActiva {
+  color: var(--acento);
+  font-weight: 700;
+}

@@ -56,7 +56,7 @@ export function FormularioIngreso({ modoInicial }: Props) {
         return;
       }
 
-      window.location.assign(esCrear ? '/cuenta-creada' : '/torneos');
+      window.location.assign(esCrear ? '/cuenta-creada' : '/inicio');
     } catch {
       setEstado({
         paso: 'error',

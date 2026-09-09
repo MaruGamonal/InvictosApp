@@ -7,6 +7,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
 import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
+import { NavInferior } from '@/components/NavInferior';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
@@ -178,6 +179,8 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           )}
         </section>
       </main>
+
+      <NavInferior activo="torneos" />
     </div>
   );
 }

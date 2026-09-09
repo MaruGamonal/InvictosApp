@@ -5,6 +5,7 @@ import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
+import { NavInferior } from '@/components/NavInferior';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
@@ -198,6 +199,8 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar
         &quot;Seguir&quot; o &quot;Inscribir mi equipo&quot;.
       </p>
+
+      <NavInferior activo="torneos" />
     </div>
   );
 }

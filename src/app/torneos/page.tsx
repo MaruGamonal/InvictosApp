@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { TarjetaTorneo } from '@/components/TarjetaTorneo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { NavInferior } from '@/components/NavInferior';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
@@ -64,6 +65,7 @@ export default async function PaginaDescubrimiento({
         </div>
         <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
         <SelectorDeCiudad provincias={provincias} />
+        <NavInferior activo="torneos" />
       </div>
     );
   }
@@ -182,6 +184,8 @@ export default async function PaginaDescubrimiento({
           Ver más torneos →
         </Link>
       )}
+
+      <NavInferior activo="torneos" />
     </div>
   );
 }
