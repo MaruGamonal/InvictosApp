@@ -17,6 +17,9 @@ import { sembrarDemo } from '../../../../../scripts/sembrar-demo';
  * (`randomUUID()` en el email), así que repetir esto duplica los datos
  * de demo en vez de pisarlos.
  */
+/** Genera varios torneos con fixture y resultados — el default de Vercel se queda corto. */
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   return comoRespuestaHttp(async () => {
     verificarSecretoDeTarea(request);
