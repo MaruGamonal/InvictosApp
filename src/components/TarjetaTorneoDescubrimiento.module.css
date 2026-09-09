@@ -1,0 +1,107 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-superficie);
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.filaTitulo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nombre {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--color-texto);
+}
+
+.meta {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+.filaDatos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--fondo-sutil);
+  padding-top: 12px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.datoDerecha {
+  align-items: flex-end;
+}
+
+.etiquetaDato {
+  font-size: 12px;
+  color: var(--color-texto-terciario);
+}
+
+.valorDato {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-texto);
+}
+
+.cupo {
+  font-size: 18px;
+  color: var(--color-texto);
+}
+
+.cupoTotal {
+  color: var(--borde-neutro);
+}
+
+.filaOrganizacion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--fondo-sutil);
+  padding-top: 12px;
+}
+
+.nombreOrganizacion {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--color-texto);
+}
+
+.badgeVerificada {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--exito-fondo);
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--exito-texto);
+}
+
+.puntoVerificada {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radio-pill);
+  background: var(--exito);
+}

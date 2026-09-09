@@ -1,4 +1,88 @@
 .pagina {
+  min-height: 100vh;
+  background: var(--color-fondo);
+}
+
+/* Superficie de identidad: tokens oscuros directos, sin depender del tema (`08`, 6.1). */
+.hero {
+  background: var(--ink-900);
+  color: var(--blanco);
+  padding: 18px var(--espacio-pantalla-x) 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filaMarca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.puntoMarca {
+  width: 8px;
+  height: 8px;
+  background: var(--acento);
+  flex-shrink: 0;
+}
+
+.accionesMarca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tituloHero {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  font-size: 26px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.busqueda {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--blanco);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gris-terciario);
+}
+
+.campoBusqueda {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-texto);
+  background: transparent;
+}
+
+.campoBusqueda::placeholder {
+  color: var(--gris-claro-sobre-oscuro);
+}
+
+.contenido {
   max-width: 640px;
   margin: 0 auto;
   padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
@@ -11,24 +95,11 @@
   color: var(--color-texto-secundario);
 }
 
-.encabezado {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filaTitulo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .enlaceIngresar {
   flex: none;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--acento-oscuro);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--gris-claro-sobre-oscuro);
   text-decoration: none;
 }
 

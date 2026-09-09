@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Fragment } from 'react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { TarjetaTorneo } from '@/components/TarjetaTorneo';
+import { TarjetaTorneoDescubrimiento } from '@/components/TarjetaTorneoDescubrimiento';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { NavInferior } from '@/components/NavInferior';
@@ -10,9 +10,10 @@ import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { NOMBRE_COOKIE_CIUDAD } from './_constantes';
+import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from './_constantes';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { SelectorDeCiudad } from './SelectorDeCiudad';
+import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
@@ -22,11 +23,13 @@ export const metadata: Metadata = {
 
 const MODALIDADES = ['f5', 'f7', 'f8', 'f9', 'f11'] as const;
 const CATEGORIAS_EDAD = ['open', 'u13', 'u15', 'u17', 'u20', 'veterans_35', 'veterans_45'] as const;
+const CATEGORIAS_GENERO = ['male', 'female', 'mixed'] as const;
 
 /** Después de la 3ª tarjeta (`06`, D-63): visible sin dominar el primer vistazo al listado. */
 const INDICE_PUBLICIDAD_EN_LISTA = 2;
 
 interface SearchParams {
+  q?: string;
   modalidad?: string;
   categoriaEdad?: string;
   abiertas?: string;
@@ -51,20 +54,34 @@ export default async function PaginaDescubrimiento({
   const parametros = await searchParams;
   const cookieStore = await cookies();
   const ciudadId = cookieStore.get(NOMBRE_COOKIE_CIUDAD)?.value;
+  const categoriaGeneroCookie = cookieStore.get(NOMBRE_COOKIE_CATEGORIA_GENERO)?.value;
+  const categoriaGenero = CATEGORIAS_GENERO.includes(
+    categoriaGeneroCookie as (typeof CATEGORIAS_GENERO)[number],
+  )
+    ? (categoriaGeneroCookie as (typeof CATEGORIAS_GENERO)[number])
+    : undefined;
 
   const provincias = await listarCiudadesCacheado();
 
   if (!ciudadId) {
     return (
       <div className={styles.pagina}>
-        <div className={styles.filaTitulo}>
-          <h1 className="fuente-display">Descubrí torneos</h1>
-          <Link href="/ingresar" className={styles.enlaceIngresar}>
-            Ingresar
-          </Link>
+        <header className={styles.hero}>
+          <div className={styles.filaMarca}>
+            <div className={styles.marca}>
+              <span className={styles.puntoMarca} aria-hidden />
+              Invicta
+            </div>
+            <Link href="/ingresar" className={styles.enlaceIngresar}>
+              Ingresar
+            </Link>
+          </div>
+          <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
+        </header>
+        <div className={styles.contenido}>
+          <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
+          <SelectorDeCiudad provincias={provincias} />
         </div>
-        <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
-        <SelectorDeCiudad provincias={provincias} />
         <NavInferior activo="torneos" />
       </div>
     );
@@ -76,6 +93,7 @@ export default async function PaginaDescubrimiento({
 
   const resultado = await buscarTorneosCacheado({
     ciudadId,
+    texto: parametros.q?.trim() || undefined,
     modalidad: MODALIDADES.includes(parametros.modalidad as (typeof MODALIDADES)[number])
       ? (parametros.modalidad as (typeof MODALIDADES)[number])
       : undefined,
@@ -84,106 +102,150 @@ export default async function PaginaDescubrimiento({
     )
       ? (parametros.categoriaEdad as (typeof CATEGORIAS_EDAD)[number])
       : undefined,
+    categoriaGenero,
     soloInscripcionesAbiertas: parametros.abiertas === '1',
     cursor: parametros.cursor || undefined,
   });
 
   return (
     <div className={styles.pagina}>
-      <header className={styles.encabezado}>
-        <div className={styles.filaTitulo}>
-          <h1 className="fuente-display">Torneos en {ciudadActual?.nombre ?? 'tu ciudad'}</h1>
-          <Link href="/ingresar" className={styles.enlaceIngresar}>
-            Ingresar
-          </Link>
+      <header className={styles.hero}>
+        <div className={styles.filaMarca}>
+          <div className={styles.marca}>
+            <span className={styles.puntoMarca} aria-hidden />
+            Invicta
+          </div>
+          <div className={styles.accionesMarca}>
+            <SelectorDeCategoriaGenero categoriaActual={categoriaGenero} />
+            <Link href="/ingresar" className={styles.enlaceIngresar}>
+              Ingresar
+            </Link>
+          </div>
         </div>
-        <details className={styles.cambiarCiudad}>
-          <summary>Cambiar ciudad</summary>
-          <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />
-        </details>
+        <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
+        <form method="get" className={styles.busqueda}>
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            aria-hidden
+          >
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4 4" />
+          </svg>
+          <input
+            type="search"
+            name="q"
+            placeholder="Nombre del torneo"
+            defaultValue={parametros.q ?? ''}
+            className={styles.campoBusqueda}
+          />
+        </form>
       </header>
 
-      <form method="get" className={styles.filtros}>
-        <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
-          <option value="">Cualquier modalidad</option>
-          {MODALIDADES.map((modalidad) => (
-            <option key={modalidad} value={modalidad}>
-              {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
-            </option>
-          ))}
-        </select>
-        <select name="categoriaEdad" defaultValue={parametros.categoriaEdad ?? ''}>
-          <option value="">Cualquier categoría</option>
-          {CATEGORIAS_EDAD.map((categoria) => (
-            <option key={categoria} value={categoria}>
-              {obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta}
-            </option>
-          ))}
-        </select>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            name="abiertas"
-            value="1"
-            defaultChecked={parametros.abiertas === '1'}
-          />
-          Solo inscripciones abiertas
-        </label>
-        <button type="submit" className={styles.botonFiltrar}>
-          Filtrar
-        </button>
-      </form>
+      <div className={styles.contenido}>
+        <details className={styles.cambiarCiudad}>
+          <summary>{ciudadActual?.nombre ?? 'Cambiar ciudad'}</summary>
+          <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />
+        </details>
 
-      {resultado.torneos.length === 0 ? (
-        <>
-          <RegistrarEvento
-            evento={EVENTOS_ANALITICA.ciudadSinTorneos}
-            propiedades={{
-              ciudadId,
-              filtrado: Boolean(
-                parametros.modalidad || parametros.categoriaEdad || parametros.abiertas,
-              ),
+        <form method="get" className={styles.filtros}>
+          {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
+          <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
+            <option value="">Cualquier modalidad</option>
+            {MODALIDADES.map((modalidad) => (
+              <option key={modalidad} value={modalidad}>
+                {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
+              </option>
+            ))}
+          </select>
+          <select name="categoriaEdad" defaultValue={parametros.categoriaEdad ?? ''}>
+            <option value="">Cualquier categoría</option>
+            {CATEGORIAS_EDAD.map((categoria) => (
+              <option key={categoria} value={categoria}>
+                {obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta}
+              </option>
+            ))}
+          </select>
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              name="abiertas"
+              value="1"
+              defaultChecked={parametros.abiertas === '1'}
+            />
+            Solo inscripciones abiertas
+          </label>
+          <button type="submit" className={styles.botonFiltrar}>
+            Filtrar
+          </button>
+        </form>
+
+        {resultado.torneos.length === 0 ? (
+          <>
+            <RegistrarEvento
+              evento={EVENTOS_ANALITICA.ciudadSinTorneos}
+              propiedades={{
+                ciudadId,
+                filtrado: Boolean(
+                  parametros.q ||
+                  parametros.modalidad ||
+                  parametros.categoriaEdad ||
+                  parametros.abiertas,
+                ),
+              }}
+            />
+            <EstadoVacio
+              mensaje={
+                resultado.sugerenciaProvincia
+                  ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
+                  : 'No encontramos torneos con esos filtros.'
+              }
+            />
+          </>
+        ) : (
+          <div className={styles.lista}>
+            {resultado.torneos.map((torneo, indice) => (
+              <Fragment key={torneo.id}>
+                <Link href={`/torneo/${torneo.id}`} className={styles.tarjetaEnlace}>
+                  <TarjetaTorneoDescubrimiento
+                    nombre={torneo.nombre}
+                    imagenUrl={torneo.imagenUrl}
+                    ciudad={ciudadActual?.nombre ?? ''}
+                    modalidad={torneo.modalidad}
+                    categoriaGenero={torneo.categoriaGenero}
+                    categoriaEdad={torneo.categoriaEdad}
+                    estado={torneo.estado}
+                    fechaInicioEstimada={torneo.fechaInicioEstimada}
+                    cupoEquipos={torneo.cupoEquipos}
+                    inscriptosAprobados={torneo.inscriptosAprobados}
+                    organizacionNombre={torneo.organizacionNombre}
+                    organizacionVerificada={torneo.organizacionVerificada}
+                  />
+                </Link>
+                {/* Publicidad (T24, `06` D-63): dentro del listado, en su propio contenedor (D-75) para que nunca se confunda con una tarjeta. */}
+                {indice === INDICE_PUBLICIDAD_EN_LISTA && <ContenedorPublicidad />}
+              </Fragment>
+            ))}
+          </div>
+        )}
+
+        {resultado.cursorSiguiente && (
+          <Link
+            href={{
+              pathname: '/torneos',
+              query: { ...parametros, cursor: resultado.cursorSiguiente },
             }}
-          />
-          <EstadoVacio
-            mensaje={
-              resultado.sugerenciaProvincia
-                ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
-                : 'No encontramos torneos con esos filtros.'
-            }
-          />
-        </>
-      ) : (
-        <div className={styles.lista}>
-          {resultado.torneos.map((torneo, indice) => (
-            <Fragment key={torneo.id}>
-              <Link href={`/torneo/${torneo.id}`} className={styles.tarjetaEnlace}>
-                <TarjetaTorneo
-                  nombre={torneo.nombre}
-                  imagenUrl={torneo.imagenUrl}
-                  ciudad={ciudadActual?.nombre ?? ''}
-                  modalidad={torneo.modalidad}
-                  estado={torneo.estado}
-                />
-              </Link>
-              {/* Publicidad (T24, `06` D-63): dentro del listado, en su propio contenedor (D-75) para que nunca se confunda con una tarjeta. */}
-              {indice === INDICE_PUBLICIDAD_EN_LISTA && <ContenedorPublicidad />}
-            </Fragment>
-          ))}
-        </div>
-      )}
-
-      {resultado.cursorSiguiente && (
-        <Link
-          href={{
-            pathname: '/torneos',
-            query: { ...parametros, cursor: resultado.cursorSiguiente },
-          }}
-          className={styles.verMas}
-        >
-          Ver más torneos →
-        </Link>
-      )}
+            className={styles.verMas}
+          >
+            Ver más torneos →
+          </Link>
+        )}
+      </div>
 
       <NavInferior activo="torneos" />
     </div>

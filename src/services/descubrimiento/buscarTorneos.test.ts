@@ -12,10 +12,14 @@ function filaTorneo(id: string, over: Partial<Record<string, unknown>> = {}) {
     id,
     nombre: `Torneo ${id}`,
     organizacion_logo_url: null,
+    organizacion_nombre: 'Organización de prueba',
     modalidad: 'f5',
+    categoria_genero: 'mixed',
     categoria_edad: 'open',
     estado: 'registration_open',
     fecha_inicio_estimada: null,
+    cupo_equipos: 16,
+    inscriptos_aprobados: '3',
     organizacion_verificada: false,
     ...over,
   };
@@ -137,6 +141,28 @@ describe('buscarTorneos', () => {
     const busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
     expect(busqueda!.texto).toContain('t.modalidad = $4');
     expect(busqueda!.valores).toContain('f7');
+  });
+
+  it('filtra por categoría de género cuando se indica, incluyendo siempre los mixtos', async () => {
+    const consultas = mockearDb({ torneos: [] });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    await buscarTorneos({ ciudadId: CIUDAD, categoriaGenero: 'female' }, VISITANTE);
+
+    const busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
+    expect(busqueda!.texto).toContain('t.categoria_genero = ANY($4)');
+    expect(busqueda!.valores).toContainEqual(['female', 'mixed']);
+  });
+
+  it('filtra por texto libre en el nombre cuando se indica', async () => {
+    const consultas = mockearDb({ torneos: [] });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    await buscarTorneos({ ciudadId: CIUDAD, texto: 'Copa' }, VISITANTE);
+
+    const busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
+    expect(busqueda!.texto).toContain('t.nombre ILIKE $4');
+    expect(busqueda!.valores).toContain('%Copa%');
   });
 
   it('una ciudad sin torneos trae la sugerencia de provincia con su cantidad', async () => {

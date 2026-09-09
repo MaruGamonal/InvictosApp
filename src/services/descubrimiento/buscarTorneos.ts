@@ -40,10 +40,14 @@ const ESTADOS_DESCUBRIBLES = [
 ];
 const TAMANO_PAGINA_DEFECTO = 20;
 
+const CATEGORIAS_GENERO = ['male', 'female', 'mixed'] as const;
+
 const esquemaEntrada = z.object({
   ciudadId: z.string().uuid(),
+  texto: z.string().trim().min(1).optional(),
   modalidad: z.enum(MODALIDADES).optional(),
   categoriaEdad: z.enum(CATEGORIAS_EDAD).optional(),
+  categoriaGenero: z.enum(CATEGORIAS_GENERO).optional(),
   soloInscripcionesAbiertas: z.boolean().optional(),
   fechaInicioDesde: z.string().datetime().optional(),
   cursor: z.string().optional(),
@@ -56,9 +60,13 @@ export interface TorneoBuscado {
   nombre: string;
   imagenUrl: string | null;
   modalidad: string;
+  categoriaGenero: string;
   categoriaEdad: string;
   estado: string;
   fechaInicioEstimada: string | null;
+  cupoEquipos: number;
+  inscriptosAprobados: number;
+  organizacionNombre: string;
   organizacionVerificada: boolean;
 }
 
@@ -74,9 +82,13 @@ interface FilaTorneo {
   nombre: string;
   organizacion_logo_url: string | null;
   modalidad: string;
+  categoria_genero: string;
   categoria_edad: string;
   estado: string;
   fecha_inicio_estimada: Date | null;
+  cupo_equipos: number;
+  inscriptos_aprobados: string;
+  organizacion_nombre: string;
   organizacion_verificada: boolean;
 }
 
@@ -104,10 +116,28 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
     valores.push(datos.fechaInicioDesde);
     condiciones.push(`t.fecha_inicio_estimada >= $${valores.length}`);
   }
+  if (datos.categoriaGenero) {
+    // Preferencia de categoría (`06`, D-90, mismo criterio que la ciudad):
+    // un torneo mixto le sirve a cualquier preferencia, nunca se filtra afuera.
+    valores.push(
+      datos.categoriaGenero === 'mixed'
+        ? [datos.categoriaGenero]
+        : [datos.categoriaGenero, 'mixed'],
+    );
+    condiciones.push(`t.categoria_genero = ANY($${valores.length})`);
+  }
+  if (datos.texto) {
+    valores.push(`%${datos.texto}%`);
+    condiciones.push(`t.nombre ILIKE $${valores.length}`);
+  }
 
   const { rows } = await pool.query<FilaTorneo>(
-    `SELECT t.id, t.nombre, o.logo_url AS organizacion_logo_url, t.modalidad, t.categoria_edad,
-            t.estado, t.fecha_inicio_estimada, (o.nivel_verificacion != 'unverified') AS organizacion_verificada
+    `SELECT t.id, t.nombre, o.logo_url AS organizacion_logo_url, o.nombre AS organizacion_nombre,
+            t.modalidad, t.categoria_genero, t.categoria_edad,
+            t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
+            (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved')
+              AS inscriptos_aprobados,
+            (o.nivel_verificacion != 'unverified') AS organizacion_verificada
      FROM torneo t
      JOIN organizacion o ON o.id = t.organizacion_id
      WHERE ${condiciones.join(' AND ')}
@@ -157,9 +187,13 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
       nombre: fila.nombre,
       imagenUrl: fila.organizacion_logo_url,
       modalidad: fila.modalidad,
+      categoriaGenero: fila.categoria_genero,
       categoriaEdad: fila.categoria_edad,
       estado: fila.estado,
       fechaInicioEstimada: fila.fecha_inicio_estimada?.toISOString() ?? null,
+      cupoEquipos: fila.cupo_equipos,
+      inscriptosAprobados: Number(fila.inscriptos_aprobados),
+      organizacionNombre: fila.organizacion_nombre,
       organizacionVerificada: fila.organizacion_verificada,
     })),
     cursorSiguiente,
