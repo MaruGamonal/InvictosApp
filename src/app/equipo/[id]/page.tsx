@@ -7,6 +7,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
 import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
+import { EnlaceGestionarEquipo } from '@/components/EnlaceGestionarEquipo';
 import { NavInferior } from '@/components/NavInferior';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
@@ -97,14 +98,11 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           Seguir es al toque. Sumarte al plantel necesita que el capitán lo confirme.
         </p>
         {/*
-          Visible para cualquiera, igual que el resto de accionesHero: la
-          página no sabe quién la mira (D-04b). El permiso real —Capitán
-          o Delegado— se resuelve recién adentro de /gestionar, que sí
-          puede leer la sesión.
+          A diferencia de accionesHero (siempre visibles, D-04b), este
+          enlace solo tiene sentido para quien tiene vínculo con el
+          equipo — se resuelve del lado del cliente, con la sesión real.
         */}
-        <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceGestionar}>
-          Gestionar equipo
-        </Link>
+        <EnlaceGestionarEquipo equipoId={id} />
       </header>
 
       <main className={styles.contenido}>

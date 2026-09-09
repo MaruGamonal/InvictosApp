@@ -1,0 +1,8 @@
+.enlace {
+  display: block;
+  text-align: center;
+  margin-top: 14px;
+  font: 600 13px/1 var(--fuente-texto);
+  color: var(--gris-claro-sobre-oscuro);
+  text-decoration: underline;
+}
