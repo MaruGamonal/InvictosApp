@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { CampoPassword } from '@/components/CampoPassword';
 import styles from '../ingresar/pagina.module.css';
 
 type Estado = { paso: 'formulario' } | { paso: 'enviando' } | { paso: 'error'; mensaje: string };
@@ -49,14 +50,14 @@ export function FormularioNuevaPassword() {
 
       <div className={styles.campo}>
         <label htmlFor="password">Contraseña nueva</label>
-        <input
+        <CampoPassword
           id="password"
-          type="password"
           required
           minLength={8}
           placeholder="••••••••"
           value={password}
-          onChange={(evento) => setPassword(evento.target.value)}
+          onChange={setPassword}
+          autoComplete="new-password"
         />
         <span className={styles.ayuda}>Al menos 8 caracteres.</span>
       </div>

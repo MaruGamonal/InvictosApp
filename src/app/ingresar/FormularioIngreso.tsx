@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { CampoPassword } from '@/components/CampoPassword';
 import styles from './pagina.module.css';
 
 /**
@@ -106,14 +107,14 @@ export function FormularioIngreso({ modoInicial }: Props) {
             </Link>
           )}
         </div>
-        <input
+        <CampoPassword
           id="password"
-          type="password"
           required
           minLength={esCrear ? 8 : undefined}
           placeholder="••••••••"
           value={password}
-          onChange={(evento) => setPassword(evento.target.value)}
+          onChange={setPassword}
+          autoComplete={esCrear ? 'new-password' : 'current-password'}
         />
         {esCrear && <span className={styles.ayuda}>Al menos 8 caracteres.</span>}
       </div>
