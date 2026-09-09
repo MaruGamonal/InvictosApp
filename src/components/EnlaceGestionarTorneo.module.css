@@ -1,0 +1,7 @@
+.enlace {
+  align-self: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--acento-oscuro);
+  text-decoration: underline;
+}

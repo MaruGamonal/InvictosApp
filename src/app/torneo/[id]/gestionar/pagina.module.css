@@ -1,0 +1,292 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px var(--espacio-pantalla-x) 48px;
+  background: var(--color-fondo);
+  gap: 24px;
+}
+
+.titulo {
+  font-size: 26px;
+  margin: 0;
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seccionPeligro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--error-borde);
+  background: var(--error-fondo);
+  border-radius: var(--radio-tarjeta);
+  padding: 16px;
+}
+
+.tituloSeccion {
+  font: 600 11px/1 var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+  margin: 0;
+}
+
+.subtitulo {
+  font: 600 12px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.textoPeligro {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error-texto);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filaIntegrante {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filaIntegranteCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nombreIntegrante {
+  font: 700 15px/1.2 var(--fuente-texto);
+}
+
+.rolIntegrante {
+  font: 600 11px/1 var(--fuente-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-secundario);
+  background: var(--fondo-sutil);
+  padding: 4px 9px;
+  border-radius: var(--radio-pill);
+  flex: none;
+}
+
+.filaAccion {
+  display: flex;
+  gap: 8px;
+}
+
+.filaAccion select {
+  flex: 1;
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+}
+
+.filaAccion button {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filaAccion button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.filaPendiente {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.botonSecundarioChico,
+.botonPeligroChico {
+  background: none;
+  border: 1.5px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font: 700 12px/1 var(--fuente-texto);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botonPeligroChico {
+  border-color: var(--error-borde);
+  color: var(--error-texto);
+}
+
+.botonPeligro {
+  background: var(--error-texto);
+  color: var(--blanco);
+  border: none;
+  border-radius: var(--radio-boton);
+  padding: 13px 18px;
+  font: 700 14px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.botonPeligro:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.formularioChico {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formularioChico input[type='text'],
+.formularioChico input[type='number'],
+.formularioChico select,
+.formularioChico textarea {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 11px 12px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  width: 100%;
+}
+
+.formularioChico textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.formularioChico label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-600);
+}
+
+.filaCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-direction: row !important;
+}
+
+.filaAcciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pillEstado {
+  align-self: flex-start;
+  font: 700 12px/1 var(--fuente-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  border-radius: var(--radio-pill);
+  background: var(--fondo-sutil);
+  color: var(--color-texto-secundario);
+}
+
+.filaPartido {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.nombresPartido {
+  font-weight: 700;
+}
+
+.filaGoles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filaGoles input {
+  width: 56px;
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 8px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  text-align: center;
+}
+
+.formularioChico button[type='submit'] {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  border: none;
+  border-radius: var(--radio-boton);
+  padding: 12px;
+  font: 700 14px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.formularioChico button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.chipsRoles {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chipRol {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-texto);
+  background: var(--fondo-sutil);
+  padding: 6px 10px;
+  border-radius: var(--radio-pill);
+}
+
+.errorChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error-texto);
+}
+
+.avisoChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--advertencia-texto);
+}

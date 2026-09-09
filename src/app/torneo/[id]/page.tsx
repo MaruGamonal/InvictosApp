@@ -5,6 +5,7 @@ import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
 import { BotonInscribirEquipo } from '@/components/BotonInscribirEquipo';
+import { EnlaceGestionarTorneo } from '@/components/EnlaceGestionarTorneo';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { NavInferior } from '@/components/NavInferior';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
@@ -196,6 +197,8 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
       {/* Publicidad (T24, `06` D-63): una de las tres superficies habilitadas. */}
       <ContenedorPublicidad />
+
+      <EnlaceGestionarTorneo torneoId={id} />
 
       <p className={styles.aviso}>
         Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar
