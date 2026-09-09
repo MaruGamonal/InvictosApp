@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
+import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import styles from '../../ingresar/pagina.module.css';
 
 interface Props {
@@ -139,25 +140,13 @@ export function FormularioCrearTorneo({ provincias }: Props) {
 
       <div className={styles.campo}>
         <label htmlFor="ciudadId">Ciudad</label>
-        <select
+        <BuscadorCiudad
           id="ciudadId"
-          required
+          provincias={provincias}
           value={ciudadId}
-          onChange={(evento) => setCiudadId(evento.target.value)}
-        >
-          <option value="" disabled>
-            Elegí una ciudad
-          </option>
-          {provincias.map((provincia) => (
-            <optgroup key={provincia.id} label={provincia.nombre}>
-              {provincia.ciudades.map((ciudad) => (
-                <option key={ciudad.id} value={ciudad.id}>
-                  {ciudad.nombre}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+          onChange={setCiudadId}
+          required
+        />
       </div>
 
       <div className={styles.campo}>
