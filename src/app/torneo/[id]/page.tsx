@@ -4,12 +4,13 @@ import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
+import { BotonInscribirEquipo } from '@/components/BotonInscribirEquipo';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { NavInferior } from '@/components/NavInferior';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerFichaOFallar } from './_datos';
+import { obtenerFichaOFallar, obtenerReglamentosCacheados } from './_datos';
 import styles from './pagina.module.css';
 
 /**
@@ -19,11 +20,10 @@ import styles from './pagina.module.css';
  * abiertas destaca la inscripción; en curso, la próxima fecha y la
  * tabla; finalizado, el campeón. Sin ningún pedido de registro — las
  * acciones que lo necesitan (seguir, inscribirse) quedan **visibles**
- * para cualquiera (`06`, D-04b); Seguir ya está cableado a
- * `POST /api/seguir` (manda a `/ingresar` si no hay sesión, D-04b: se
- * pide recién al usarla). "Inscribir a mi equipo" sigue inerte —
- * necesita elegir cuál de los equipos propios inscribir, un flujo más
- * grande que este botón todavía no arma.
+ * para cualquiera (`06`, D-04b); ambas piden cuenta recién al tocarlas
+ * (manda a `/ingresar` sin sesión). `BotonInscribirEquipo` resuelve, ya
+ * con la sesión real, a cuál de los equipos propios (Capitana/Delegada)
+ * inscribir y si hace falta aceptar el reglamento vigente.
  */
 
 export async function generateMetadata({
@@ -61,6 +61,10 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
   const ficha = await obtenerFichaOFallar(id);
   const urlDelSitio = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
+  const reglamentos =
+    ficha.estado === 'registration_open' ? await obtenerReglamentosCacheados(id) : null;
+  const reglamentoVigente = reglamentos?.find((r) => r.estado === 'current') ?? null;
+
   return (
     <div className={styles.pagina}>
       <RegistrarEvento
@@ -70,16 +74,14 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
       {/*
         D-04b: visible sin sesión, el registro se pide recién al accionar.
-        Seguir ya pide cuenta al tocar (redirige a /ingresar sin sesión).
-        "Inscribir a mi equipo" sigue inerte — falta el flujo de elegir
-        equipo. Compartir es funcional: no necesita cuenta ni confirmación.
+        Seguir e Inscribir a mi equipo piden cuenta al tocar (redirigen a
+        /ingresar sin sesión). Compartir es funcional: no necesita cuenta
+        ni confirmación.
       */}
       <div className={styles.accionesHero}>
         <BotonSeguir tipoSeguido="tournament" entidadId={id} />
         {ficha.estado === 'registration_open' && (
-          <button type="button" className={styles.pillPrimaria}>
-            Inscribir a mi equipo
-          </button>
+          <BotonInscribirEquipo torneoId={id} reglamentoVigente={reglamentoVigente} />
         )}
         <CompartirBoton titulo={ficha.nombre} url={`${urlDelSitio}/torneo/${id}`} />
       </div>

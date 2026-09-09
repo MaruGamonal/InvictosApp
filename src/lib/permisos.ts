@@ -57,6 +57,25 @@ export async function obtenerRolesEnEquipo(
   return rows.map((r) => r.rol_equipo);
 }
 
+/**
+ * Ids de los equipos donde la persona es Capitana o Delegada — los
+ * únicos roles que pueden actuar administrativamente sobre un equipo
+ * (`verificarPermisoEquipo`). Alimenta selectores de "a cuál de mis
+ * equipos" (p. ej. inscribir a un torneo) sin que cada uno reimplemente
+ * el mismo criterio de rol.
+ */
+export async function listarEquiposGestionablesPorPerfil(
+  usuarioPerfilId: string,
+): Promise<string[]> {
+  const pool = obtenerPool();
+  const { rows } = await pool.query<{ equipo_id: string }>(
+    `SELECT DISTINCT equipo_id FROM integrante_equipo
+     WHERE perfil_id = $1 AND estado_vinculo = 'active' AND rol_equipo IN ('captain', 'delegate')`,
+    [usuarioPerfilId],
+  );
+  return rows.map((r) => r.equipo_id);
+}
+
 /** Rol de una persona en una organización (`owner`, `admin`, o `null` si no es miembro). */
 export async function obtenerRolEnOrganizacion(
   usuarioId: string,
