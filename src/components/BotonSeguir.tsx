@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './BotonSeguir.module.css';
 
@@ -11,10 +11,13 @@ export interface BotonSeguirProps {
 
 /**
  * Seguir/dejar de seguir (UC-42/UC-43) — "la acción de conversión de
- * menor compromiso del producto" (`02`, UC-42). No arranca marcado
- * "siguiendo": la ficha es pública y cacheada por evento (T21), la
- * misma para cualquier visitante, así que no puede saber de antemano
- * si quien la mira ya sigue esto — el estado nace acá, al tocar.
+ * menor compromiso del producto" (`02`, UC-42). La ficha es pública y
+ * cacheada por evento (T21), la misma para cualquier visitante, así
+ * que el HTML no puede nacer marcado "siguiendo" — pero apenas se
+ * monta en el cliente, con la sesión real, pregunta a
+ * `GET /api/seguir` si la persona que mira ya lo sigue y se corrige
+ * sola. Sin esto, volver a una ficha que ya seguías mostraba "Seguir"
+ * de nuevo — reportado en vivo.
  *
  * Sin sesión, `POST /api/seguir` responde `NO_AUTENTICADO` (401): D-04b
  * dice que la acción es visible para cualquiera pero la cuenta se pide
@@ -26,6 +29,21 @@ export interface BotonSeguirProps {
 export function BotonSeguir({ tipoSeguido, entidadId }: BotonSeguirProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<'inicial' | 'enviando' | 'siguiendo'>('inicial');
+
+  useEffect(() => {
+    let cancelado = false;
+    fetch(`/api/seguir?tipoSeguido=${tipoSeguido}&entidadId=${entidadId}`)
+      .then((respuesta) => (respuesta.ok ? respuesta.json() : null))
+      .then((cuerpo) => {
+        if (!cancelado && cuerpo?.data?.siguiendo) setEstado('siguiendo');
+      })
+      .catch(() => {
+        // Si falla el chequeo, se queda en "inicial" — nunca peor que antes.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [tipoSeguido, entidadId]);
 
   async function alTocar() {
     if (estado === 'enviando') return;

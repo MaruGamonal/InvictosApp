@@ -1,0 +1,58 @@
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-gap-seccion);
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.busqueda {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+}
+
+.filtros select {
+  padding: 8px 10px;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+}
+
+.botonFiltrar {
+  background: var(--ink-900);
+  color: var(--blanco);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radio-boton);
+  cursor: pointer;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-gap-lista);
+}
+
+.verMas {
+  align-self: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--acento-oscuro);
+  text-decoration: none;
+}
