@@ -8,6 +8,7 @@ import { CompartirBoton } from '@/components/CompartirBoton';
 import { BotonSeguir } from '@/components/BotonSeguir';
 import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
 import { EnlaceGestionarEquipo } from '@/components/EnlaceGestionarEquipo';
+import { FilaPartido } from '@/components/FilaPartido';
 import { NavInferior } from '@/components/NavInferior';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
@@ -15,7 +16,19 @@ import { CONTEXTO_PUBLICO } from '@/lib/contexto';
 import { cachearLecturaDeEquipo } from '@/lib/cache';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerEquipoPublico, type EquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
+import { ListaPlantelPublico } from './ListaPlantelPublico';
 import styles from './pagina.module.css';
+
+function formatearFecha(iso: string | null): string | undefined {
+  if (!iso) return undefined;
+  return new Date(iso).toLocaleDateString('es-AR', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 /**
  * UC-14/UC-37 — Perfil público del equipo (`10`, sección 5). Cabecera
@@ -27,15 +40,15 @@ import styles from './pagina.module.css';
 
 async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | null> {
   try {
-    // 'equipo-publico-v2': la caché de datos de Next es persistente entre
-    // deploys (no expira por versión de código) y `rolEquipo` (string) se
-    // volvió `rolesEquipo` (string[]) — con la clave vieja, una entrada
-    // cacheada antes de ese cambio seguía sirviendo la forma anterior a
-    // código nuevo que ya esperaba `rolesEquipo`, y `undefined.filter(...)`
-    // tiraba abajo la página (reportado en vivo, confirmado por Sentry).
-    // Cambiar la clave fuerza una entrada nueva; si el shape vuelve a
+    // La caché de datos de Next es persistente entre deploys (no expira
+    // por versión de código): cada vez que cambia el shape de lo que
+    // devuelve `obtenerEquipoPublico`, una entrada vieja puede servirle a
+    // código nuevo un objeto con forma distinta a la esperada — pasó una
+    // vez con `rolEquipo` → `rolesEquipo` (reportado en vivo, confirmado
+    // por Sentry) y tiró abajo la página. Por eso la clave lleva versión:
+    // 'v3' sumó `proximoPartido`/`ultimoResultado`. Si el shape vuelve a
     // cambiar, esto hay que volver a bumpearlo.
-    return await cachearLecturaDeEquipo('equipo-publico-v2', equipoId, () =>
+    return await cachearLecturaDeEquipo('equipo-publico-v3', equipoId, () =>
       obtenerEquipoPublico({ equipoId }, CONTEXTO_PUBLICO),
     )();
   } catch (error) {
@@ -119,47 +132,93 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           <span className={styles.sinScore}>Sin score todavía</span>
         </section>
 
+        {equipo.proximoPartido && (
+          <section>
+            <h2 className={styles.tituloSeccion}>Próximo partido</h2>
+            <Link href={`/torneo/${equipo.proximoPartido.torneoId}`} className={styles.tarjetaPartido}>
+              <FilaPartido
+                estado="scheduled"
+                equipoLocal={
+                  equipo.proximoPartido.esLocal
+                    ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                    : {
+                        nombre: equipo.proximoPartido.rivalNombre,
+                        escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
+                      }
+                }
+                equipoVisitante={
+                  equipo.proximoPartido.esLocal
+                    ? {
+                        nombre: equipo.proximoPartido.rivalNombre,
+                        escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
+                      }
+                    : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                }
+                fechaProgramadaTexto={formatearFecha(equipo.proximoPartido.fechaHoraProgramada)}
+              />
+              <span className={styles.metaPartido}>
+                {equipo.proximoPartido.torneoNombre} · Fecha {equipo.proximoPartido.numeroFecha}
+                {equipo.proximoPartido.sedeNombre && ` · ${equipo.proximoPartido.sedeNombre}`}
+              </span>
+            </Link>
+          </section>
+        )}
+
+        {equipo.ultimoResultado && (
+          <section>
+            <h2 className={styles.tituloSeccion}>Último resultado</h2>
+            <Link href={`/torneo/${equipo.ultimoResultado.torneoId}`} className={styles.tarjetaPartido}>
+              <FilaPartido
+                estado={equipo.ultimoResultado.estado}
+                equipoLocal={
+                  equipo.ultimoResultado.esLocal
+                    ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                    : {
+                        nombre: equipo.ultimoResultado.rivalNombre,
+                        escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
+                      }
+                }
+                equipoVisitante={
+                  equipo.ultimoResultado.esLocal
+                    ? {
+                        nombre: equipo.ultimoResultado.rivalNombre,
+                        escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
+                      }
+                    : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                }
+                golesLocal={
+                  equipo.ultimoResultado.esLocal
+                    ? equipo.ultimoResultado.golesPropios
+                    : equipo.ultimoResultado.golesRival
+                }
+                golesVisitante={
+                  equipo.ultimoResultado.esLocal
+                    ? equipo.ultimoResultado.golesRival
+                    : equipo.ultimoResultado.golesPropios
+                }
+              />
+              <span className={styles.metaPartido}>{equipo.ultimoResultado.torneoNombre}</span>
+            </Link>
+          </section>
+        )}
+
         <section>
           <h2 className={styles.tituloSeccion}>Plantel</h2>
           {equipo.plantel.length === 0 ? (
             <EstadoVacio mensaje="Este equipo todavía no cargó su plantel." />
           ) : (
-            <ul className={styles.listaIntegrantes}>
-              {equipo.plantel.map((integrante) => (
-                <li key={integrante.perfilId} className={styles.integrante}>
-                  <Link
-                    href={`/jugador/${integrante.perfilId}`}
-                    className={styles.enlaceIntegrante}
-                  >
-                    {integrante.nombreVisible}
-                  </Link>
-                  <span className={styles.rolIntegrante}>
-                    {integrante.rolesEquipo
-                      .filter((rol) => rol !== 'coach')
-                      .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
-                      .join(' · ')}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <ListaPlantelPublico equipoId={id} integrantes={equipo.plantel} mostrarRoles />
           )}
         </section>
 
         {equipo.cuerpoTecnico.length > 0 && (
           <section>
             <h2 className={styles.tituloSeccion}>Cuerpo técnico</h2>
-            <ul className={styles.listaIntegrantes}>
-              {equipo.cuerpoTecnico.map((integrante) => (
-                <li key={integrante.perfilId} className={styles.integrante}>
-                  <Link
-                    href={`/jugador/${integrante.perfilId}`}
-                    className={styles.enlaceIntegrante}
-                  >
-                    {integrante.nombreVisible}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <ListaPlantelPublico
+              equipoId={id}
+              integrantes={equipo.cuerpoTecnico}
+              mostrarRoles={false}
+            />
           </section>
         )}
 

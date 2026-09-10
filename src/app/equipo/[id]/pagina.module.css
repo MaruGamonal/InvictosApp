@@ -98,6 +98,24 @@
   margin-bottom: 10px;
 }
 
+.tarjetaPartido {
+  display: block;
+  background: var(--color-superficie);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  padding: 12px 16px 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.metaPartido {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+  text-align: center;
+}
+
 .listaIntegrantes {
   display: flex;
   flex-direction: column;

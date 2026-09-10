@@ -14,9 +14,9 @@ export type ObtenerMiRolEnEquipoInput = z.infer<typeof esquemaEntrada>;
  */
 export const obtenerMiRolEnEquipo: Servicio<
   ObtenerMiRolEnEquipoInput,
-  { roles: RolEquipo[] }
+  { roles: RolEquipo[]; perfilId: string | null }
 > = async (input, contexto) => {
-  if (!contexto.usuarioId) return { roles: [] };
+  if (!contexto.usuarioId) return { roles: [], perfilId: null };
   const datos = validarEntrada(esquemaEntrada, input);
 
   const pool = obtenerPool();
@@ -25,8 +25,8 @@ export const obtenerMiRolEnEquipo: Servicio<
     [contexto.usuarioId],
   );
   const perfilId = rows[0]?.id;
-  if (!perfilId) return { roles: [] };
+  if (!perfilId) return { roles: [], perfilId: null };
 
   const roles = await obtenerRolesEnEquipo(perfilId, datos.equipoId);
-  return { roles };
+  return { roles, perfilId };
 };

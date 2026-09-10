@@ -53,6 +53,27 @@ export interface DesempenioTorneo {
   ajustePuntos: number;
 }
 
+export interface RivalDePartido {
+  torneoId: string;
+  torneoNombre: string;
+  rivalId: string;
+  rivalNombre: string;
+  rivalEscudoUrl: string | null;
+  esLocal: boolean;
+  fechaHoraProgramada: string | null;
+}
+
+export interface ProximoPartidoEquipo extends RivalDePartido {
+  numeroFecha: number;
+  sedeNombre: string | null;
+}
+
+export interface UltimoResultadoEquipo extends RivalDePartido {
+  estado: 'played' | 'walkover';
+  golesPropios: number;
+  golesRival: number;
+}
+
 export interface EquipoPublico {
   id: string;
   nombre: string;
@@ -68,6 +89,8 @@ export interface EquipoPublico {
   acumulado: Omit<DesempenioTorneo, 'torneoId' | 'torneoNombre' | 'torneoEstado'>;
   /** Nunca un número en el MVP: no hay cálculo de score todavía (`06`, S-04). */
   scoreEstado: 'sin_calcular';
+  proximoPartido: ProximoPartidoEquipo | null;
+  ultimoResultado: UltimoResultadoEquipo | null;
 }
 
 interface FilaIntegrante {
@@ -210,6 +233,115 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     },
   );
 
+  const { rows: proximoRows } = await pool.query<{
+    torneo_id: string;
+    torneo_nombre: string;
+    numero_fecha: number;
+    equipo_local_id: string;
+    equipo_local_nombre: string;
+    equipo_local_escudo_url: string | null;
+    equipo_visitante_id: string;
+    equipo_visitante_nombre: string;
+    equipo_visitante_escudo_url: string | null;
+    fecha_hora_programada: Date | null;
+    sede_nombre: string | null;
+  }>(
+    `SELECT p.torneo_id, t.nombre AS torneo_nombre, p.numero_fecha,
+            p.equipo_local_id, el.nombre AS equipo_local_nombre, el.escudo_url AS equipo_local_escudo_url,
+            p.equipo_visitante_id, ev.nombre AS equipo_visitante_nombre, ev.escudo_url AS equipo_visitante_escudo_url,
+            p.fecha_hora_programada, s.nombre AS sede_nombre
+     FROM partido p
+     JOIN torneo t ON t.id = p.torneo_id
+     JOIN equipo el ON el.id = p.equipo_local_id
+     JOIN equipo ev ON ev.id = p.equipo_visitante_id
+     LEFT JOIN sede s ON s.id = p.sede_id
+     WHERE (p.equipo_local_id = $1 OR p.equipo_visitante_id = $1) AND p.estado = 'scheduled'
+     ORDER BY p.fecha_hora_programada ASC NULLS LAST
+     LIMIT 1`,
+    [datos.equipoId],
+  );
+  const filaProximo = proximoRows[0];
+  const proximoPartido: ProximoPartidoEquipo | null = filaProximo
+    ? {
+        torneoId: filaProximo.torneo_id,
+        torneoNombre: filaProximo.torneo_nombre,
+        numeroFecha: filaProximo.numero_fecha,
+        esLocal: filaProximo.equipo_local_id === datos.equipoId,
+        rivalId:
+          filaProximo.equipo_local_id === datos.equipoId
+            ? filaProximo.equipo_visitante_id
+            : filaProximo.equipo_local_id,
+        rivalNombre:
+          filaProximo.equipo_local_id === datos.equipoId
+            ? filaProximo.equipo_visitante_nombre
+            : filaProximo.equipo_local_nombre,
+        rivalEscudoUrl:
+          filaProximo.equipo_local_id === datos.equipoId
+            ? filaProximo.equipo_visitante_escudo_url
+            : filaProximo.equipo_local_escudo_url,
+        fechaHoraProgramada: filaProximo.fecha_hora_programada?.toISOString() ?? null,
+        sedeNombre: filaProximo.sede_nombre,
+      }
+    : null;
+
+  const { rows: ultimoRows } = await pool.query<{
+    torneo_id: string;
+    torneo_nombre: string;
+    equipo_local_id: string;
+    equipo_local_nombre: string;
+    equipo_local_escudo_url: string | null;
+    equipo_visitante_id: string;
+    equipo_visitante_nombre: string;
+    equipo_visitante_escudo_url: string | null;
+    fecha_hora_programada: Date | null;
+    estado: 'played' | 'walkover';
+    goles_local: number;
+    goles_visitante: number;
+  }>(
+    `SELECT p.torneo_id, t.nombre AS torneo_nombre,
+            p.equipo_local_id, el.nombre AS equipo_local_nombre, el.escudo_url AS equipo_local_escudo_url,
+            p.equipo_visitante_id, ev.nombre AS equipo_visitante_nombre, ev.escudo_url AS equipo_visitante_escudo_url,
+            p.fecha_hora_programada, p.estado, p.goles_local, p.goles_visitante
+     FROM partido p
+     JOIN torneo t ON t.id = p.torneo_id
+     JOIN equipo el ON el.id = p.equipo_local_id
+     JOIN equipo ev ON ev.id = p.equipo_visitante_id
+     WHERE (p.equipo_local_id = $1 OR p.equipo_visitante_id = $1) AND p.estado IN ('played', 'walkover')
+     ORDER BY p.fecha_hora_programada DESC NULLS LAST
+     LIMIT 1`,
+    [datos.equipoId],
+  );
+  const filaUltimo = ultimoRows[0];
+  const ultimoResultado: UltimoResultadoEquipo | null = filaUltimo
+    ? {
+        torneoId: filaUltimo.torneo_id,
+        torneoNombre: filaUltimo.torneo_nombre,
+        estado: filaUltimo.estado,
+        esLocal: filaUltimo.equipo_local_id === datos.equipoId,
+        rivalId:
+          filaUltimo.equipo_local_id === datos.equipoId
+            ? filaUltimo.equipo_visitante_id
+            : filaUltimo.equipo_local_id,
+        rivalNombre:
+          filaUltimo.equipo_local_id === datos.equipoId
+            ? filaUltimo.equipo_visitante_nombre
+            : filaUltimo.equipo_local_nombre,
+        rivalEscudoUrl:
+          filaUltimo.equipo_local_id === datos.equipoId
+            ? filaUltimo.equipo_visitante_escudo_url
+            : filaUltimo.equipo_local_escudo_url,
+        fechaHoraProgramada: filaUltimo.fecha_hora_programada?.toISOString() ?? null,
+        golesPropios:
+          filaUltimo.equipo_local_id === datos.equipoId
+            ? Number(filaUltimo.goles_local)
+            : Number(filaUltimo.goles_visitante),
+        golesRival:
+          filaUltimo.equipo_local_id === datos.equipoId
+            ? Number(filaUltimo.goles_visitante)
+            : Number(filaUltimo.goles_local),
+      }
+    : null;
+
   return {
     id: equipo.id,
     nombre: equipo.nombre,
@@ -224,5 +356,7 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     historial,
     acumulado,
     scoreEstado: 'sin_calcular',
+    proximoPartido,
+    ultimoResultado,
   };
 };

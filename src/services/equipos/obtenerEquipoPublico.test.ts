@@ -24,6 +24,8 @@ function mockearDb(opciones: {
   equipo?: Record<string, unknown> | null;
   integrantes?: ReturnType<typeof filaIntegrante>[];
   historial?: Record<string, unknown>[];
+  proximo?: Record<string, unknown>[];
+  ultimo?: Record<string, unknown>[];
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -51,6 +53,12 @@ function mockearDb(opciones: {
         }
         if (t.startsWith('SELECT i.torneo_id')) {
           return { rows: opciones.historial ?? [] };
+        }
+        if (t.includes("p.estado = 'scheduled'")) {
+          return { rows: opciones.proximo ?? [] };
+        }
+        if (t.includes("p.estado IN ('played', 'walkover')")) {
+          return { rows: opciones.ultimo ?? [] };
         }
         return { rows: [] };
       },
@@ -199,6 +207,82 @@ describe('obtenerEquipoPublico', () => {
       golesContra: 0,
       puntos: 0,
       ajustePuntos: 0,
+    });
+  });
+
+  it('sin próximo partido ni resultados, ambos null', async () => {
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    mockearDb({});
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.proximoPartido).toBeNull();
+    expect(equipo.ultimoResultado).toBeNull();
+  });
+
+  it('con próximo partido de local, arma rival y fecha desde el punto de vista del equipo', async () => {
+    mockearDb({
+      proximo: [
+        {
+          torneo_id: 't1',
+          torneo_nombre: 'Copa Demo',
+          numero_fecha: 3,
+          equipo_local_id: EQUIPO,
+          equipo_local_nombre: 'Equipo Demo',
+          equipo_local_escudo_url: null,
+          equipo_visitante_id: 'rival-1',
+          equipo_visitante_nombre: 'Rival FC',
+          equipo_visitante_escudo_url: 'https://cdn.example.com/rival.png',
+          fecha_hora_programada: new Date('2026-05-01T18:00:00Z'),
+          sede_nombre: 'Cancha 1',
+        },
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.proximoPartido).toEqual({
+      torneoId: 't1',
+      torneoNombre: 'Copa Demo',
+      numeroFecha: 3,
+      esLocal: true,
+      rivalId: 'rival-1',
+      rivalNombre: 'Rival FC',
+      rivalEscudoUrl: 'https://cdn.example.com/rival.png',
+      fechaHoraProgramada: '2026-05-01T18:00:00.000Z',
+      sedeNombre: 'Cancha 1',
+    });
+  });
+
+  it('con último resultado de visitante, arma los goles desde el punto de vista del equipo', async () => {
+    mockearDb({
+      ultimo: [
+        {
+          torneo_id: 't1',
+          torneo_nombre: 'Copa Demo',
+          equipo_local_id: 'rival-1',
+          equipo_local_nombre: 'Rival FC',
+          equipo_local_escudo_url: null,
+          equipo_visitante_id: EQUIPO,
+          equipo_visitante_nombre: 'Equipo Demo',
+          equipo_visitante_escudo_url: null,
+          fecha_hora_programada: new Date('2026-04-01T18:00:00Z'),
+          estado: 'played',
+          goles_local: 1,
+          goles_visitante: 3,
+        },
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.ultimoResultado).toEqual({
+      torneoId: 't1',
+      torneoNombre: 'Copa Demo',
+      estado: 'played',
+      esLocal: false,
+      rivalId: 'rival-1',
+      rivalNombre: 'Rival FC',
+      rivalEscudoUrl: null,
+      fechaHoraProgramada: '2026-04-01T18:00:00.000Z',
+      golesPropios: 3,
+      golesRival: 1,
     });
   });
 
