@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { BuscadorCiudad, type ProvinciaConCiudades } from '@/components/BuscadorCiudad';
+import { Escudo } from '@/components/Escudo';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
   categoriaGenero: string;
   modalidadHabitual: string | null;
   ciudadId: string;
+  escudoUrl: string | null;
   provincias: ProvinciaConCiudades[];
 }
 
@@ -36,6 +38,7 @@ export function FormularioEditarEquipo({
   categoriaGenero: categoriaGeneroInicial,
   modalidadHabitual: modalidadInicial,
   ciudadId: ciudadIdInicial,
+  escudoUrl: escudoUrlInicial,
   provincias,
 }: Props) {
   const router = useRouter();
@@ -46,6 +49,40 @@ export function FormularioEditarEquipo({
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
+
+  const inputEscudoRef = useRef<HTMLInputElement>(null);
+  const [escudoUrl, setEscudoUrl] = useState(escudoUrlInicial);
+  const [subiendoEscudo, setSubiendoEscudo] = useState(false);
+  const [errorEscudo, setErrorEscudo] = useState<string | null>(null);
+
+  async function subirEscudo(evento: ChangeEvent<HTMLInputElement>) {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+
+    setSubiendoEscudo(true);
+    setErrorEscudo(null);
+    try {
+      const datosFormulario = new FormData();
+      datosFormulario.append('equipoId', equipoId);
+      datosFormulario.append('archivo', archivo);
+      const respuesta = await fetch('/api/equipos/escudo', {
+        method: 'POST',
+        body: datosFormulario,
+      });
+      const cuerpo = await respuesta.json();
+      if (!respuesta.ok || !cuerpo.ok) {
+        setErrorEscudo(cuerpo?.error?.mensaje ?? 'No se pudo subir el escudo. Probá de nuevo.');
+        return;
+      }
+      setEscudoUrl(cuerpo.data.escudoUrl);
+      router.refresh();
+    } catch {
+      setErrorEscudo('No pudimos conectar. Probá de nuevo.');
+    } finally {
+      setSubiendoEscudo(false);
+    }
+  }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -83,6 +120,36 @@ export function FormularioEditarEquipo({
     <form className={styles.formularioChico} onSubmit={enviar}>
       {error && <p className={styles.errorChico}>{error}</p>}
       {guardado && !error && <p className={styles.avisoChico}>Guardado.</p>}
+
+      <div className={styles.filaEscudo}>
+        <button
+          type="button"
+          className={styles.botonEscudo}
+          onClick={() => inputEscudoRef.current?.click()}
+          disabled={subiendoEscudo}
+          aria-label="Cambiar escudo del equipo"
+        >
+          <Escudo src={escudoUrl} nombre={nombre} tamano={64} />
+        </button>
+        <input
+          ref={inputEscudoRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={subirEscudo}
+        />
+        <div>
+          <button
+            type="button"
+            className={styles.enlaceEscudo}
+            onClick={() => inputEscudoRef.current?.click()}
+            disabled={subiendoEscudo}
+          >
+            {subiendoEscudo ? 'Subiendo…' : 'Cambiar escudo'}
+          </button>
+          {errorEscudo && <p className={styles.errorChico}>{errorEscudo}</p>}
+        </div>
+      </div>
 
       <input
         type="text"

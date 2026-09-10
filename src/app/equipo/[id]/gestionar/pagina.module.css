@@ -219,3 +219,36 @@
   font-size: 13px;
   color: var(--advertencia-texto);
 }
+
+.filaEscudo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.botonEscudo {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.botonEscudo:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.enlaceEscudo {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--acento);
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.enlaceEscudo:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

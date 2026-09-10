@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import type { MiPerfil } from '@/services/identidad/obtenerMiPerfil';
 import { BuscadorCiudad, type ProvinciaConCiudades } from '@/components/BuscadorCiudad';
+import { Escudo } from '@/components/Escudo';
 import styles from '../../ingresar/pagina.module.css';
 import propios from './FormularioEditarPerfil.module.css';
 
@@ -29,6 +30,38 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
+
+  const inputFotoRef = useRef<HTMLInputElement>(null);
+  const [fotoUrl, setFotoUrl] = useState(perfil.fotoUrl);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [errorFoto, setErrorFoto] = useState<string | null>(null);
+
+  async function subirFoto(evento: ChangeEvent<HTMLInputElement>) {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+
+    setSubiendoFoto(true);
+    setErrorFoto(null);
+    try {
+      const datosFormulario = new FormData();
+      datosFormulario.append('archivo', archivo);
+      const respuesta = await fetch('/api/mi-perfil/foto', {
+        method: 'POST',
+        body: datosFormulario,
+      });
+      const cuerpo = await respuesta.json();
+      if (!respuesta.ok || !cuerpo.ok) {
+        setErrorFoto(cuerpo?.error?.mensaje ?? 'No se pudo subir la foto. Probá de nuevo.');
+        return;
+      }
+      setFotoUrl(cuerpo.data.fotoUrl);
+    } catch {
+      setErrorFoto('No pudimos conectar. Probá de nuevo.');
+    } finally {
+      setSubiendoFoto(false);
+    }
+  }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -73,6 +106,36 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
 
       {error && <p className={styles.error}>{error}</p>}
       {guardado && !error && <p className={styles.ayuda}>Guardado.</p>}
+
+      <div className={propios.filaFoto}>
+        <button
+          type="button"
+          className={propios.botonFoto}
+          onClick={() => inputFotoRef.current?.click()}
+          disabled={subiendoFoto}
+          aria-label="Cambiar foto de perfil"
+        >
+          <Escudo src={fotoUrl} nombre={nombreVisible} tamano={64} />
+        </button>
+        <input
+          ref={inputFotoRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={subirFoto}
+        />
+        <div>
+          <button
+            type="button"
+            className={propios.enlaceFoto}
+            onClick={() => inputFotoRef.current?.click()}
+            disabled={subiendoFoto}
+          >
+            {subiendoFoto ? 'Subiendo…' : 'Cambiar foto'}
+          </button>
+          {errorFoto && <p className={styles.error}>{errorFoto}</p>}
+        </div>
+      </div>
 
       <div className={styles.campo}>
         <label htmlFor="nombreVisible">Nombre visible</label>

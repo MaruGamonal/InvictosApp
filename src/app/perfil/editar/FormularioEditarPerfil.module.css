@@ -55,3 +55,36 @@
   color: var(--color-texto-secundario);
   line-height: 1.4;
 }
+
+.filaFoto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.botonFoto {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.botonFoto:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.enlaceFoto {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--acento);
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.enlaceFoto:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

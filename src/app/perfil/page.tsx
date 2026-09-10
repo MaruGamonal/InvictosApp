@@ -6,6 +6,7 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { NavInferior } from '@/components/NavInferior';
+import { Escudo } from '@/components/Escudo';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { BotonCerrarSesion } from './BotonCerrarSesion';
 import styles from './pagina.module.css';
@@ -28,9 +29,7 @@ export default async function PaginaPerfil() {
   return (
     <div className={styles.pagina}>
       <div className={styles.encabezado}>
-        <div className={styles.avatar} aria-hidden>
-          {perfil.nombreVisible.trim().charAt(0).toUpperCase() || '?'}
-        </div>
+        <Escudo src={perfil.fotoUrl} nombre={perfil.nombreVisible} tamano={64} />
         <h1 className={`fuente-display ${styles.nombre}`}>{perfil.nombreVisible}</h1>
         {user?.email && <p className={styles.email}>{user.email}</p>}
       </div>

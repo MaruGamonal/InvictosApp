@@ -68,6 +68,7 @@ export default async function PaginaGestionarEquipo({
             categoriaGenero={equipo.categoriaGenero}
             modalidadHabitual={equipo.modalidadHabitual}
             ciudadId={equipo.ciudad?.id ?? ''}
+            escudoUrl={equipo.escudoUrl}
             provincias={provincias}
           />
         </section>
