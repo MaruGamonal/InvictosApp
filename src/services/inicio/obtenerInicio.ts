@@ -32,6 +32,7 @@ export interface MiEquipo {
   id: string;
   nombre: string;
   categoriaGenero: string;
+  escudoUrl: string | null;
   /** Una persona puede tener más de un rol activo en el mismo equipo (p. ej. jugadora y delegada). */
   rolesEquipo: string[];
 }
@@ -41,6 +42,8 @@ export interface MiTorneo {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /** Logo de la organización que lo organiza — el torneo en sí no tiene escudo propio. */
+  imagenUrl: string | null;
   miEquipoId: string;
   miEquipoNombre: string;
   posicionActual: number | null;
@@ -50,6 +53,7 @@ export interface EquipoSeguido {
   id: string;
   nombre: string;
   categoriaGenero: string;
+  escudoUrl: string | null;
 }
 
 export interface TorneoSeguido {
@@ -57,6 +61,7 @@ export interface TorneoSeguido {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  imagenUrl: string | null;
 }
 
 export interface TorneoAdministrado {
@@ -64,6 +69,7 @@ export interface TorneoAdministrado {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  imagenUrl: string | null;
   estado: string;
   fechaInicioEstimada: string | null;
   inscriptos: number;
@@ -107,9 +113,10 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
     id: string;
     nombre: string;
     categoria_genero: string;
+    escudo_url: string | null;
     rol_equipo: string;
   }>(
-    `SELECT e.id, e.nombre, e.categoria_genero, ie.rol_equipo
+    `SELECT e.id, e.nombre, e.categoria_genero, e.escudo_url, ie.rol_equipo
      FROM integrante_equipo ie
      JOIN equipo e ON e.id = ie.equipo_id
      WHERE ie.perfil_id = $1 AND ie.estado_vinculo = 'active' AND e.estado = 'active'
@@ -129,6 +136,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       id: fila.id,
       nombre: fila.nombre,
       categoriaGenero: fila.categoria_genero,
+      escudoUrl: fila.escudo_url,
       rolesEquipo: [fila.rol_equipo],
     });
   }
@@ -198,14 +206,17 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      organizacion_logo_url: string | null;
       equipo_id: string;
       equipo_nombre: string;
       posicion_actual: number | null;
     }>(
       `SELECT t.id AS torneo_id, t.nombre, t.categoria_genero, t.modalidad,
+              o.logo_url AS organizacion_logo_url,
               i.equipo_id, e.nombre AS equipo_nombre, pos.posicion_actual
        FROM inscripcion i
        JOIN torneo t ON t.id = i.torneo_id
+       JOIN organizacion o ON o.id = t.organizacion_id
        JOIN equipo e ON e.id = i.equipo_id
        LEFT JOIN posicion pos ON pos.grupo_id = i.grupo_id AND pos.equipo_id = i.equipo_id
        WHERE i.equipo_id = ANY($1) AND i.estado = 'approved'
@@ -219,8 +230,9 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       id: string;
       nombre: string;
       categoria_genero: string;
+      escudo_url: string | null;
     }>(
-      `SELECT e.id, e.nombre, e.categoria_genero
+      `SELECT e.id, e.nombre, e.categoria_genero, e.escudo_url
        FROM seguimiento sg
        JOIN equipo e ON e.id = sg.entidad_seguida_id
        WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team'
@@ -234,10 +246,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      organizacion_logo_url: string | null;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
+       JOIN organizacion o ON o.id = t.organizacion_id
        WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'tournament'
        ORDER BY sg.fecha_alta DESC
        LIMIT 5`,
@@ -261,6 +275,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        imagenUrl: fila.organizacion_logo_url,
         miEquipoId: fila.equipo_id,
         miEquipoNombre: fila.equipo_nombre,
         posicionActual: fila.posicion_actual,
@@ -270,11 +285,13 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        imagenUrl: fila.organizacion_logo_url,
       })),
       equiposSeguidos: equiposSeguidosRows.map((fila) => ({
         id: fila.id,
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
+        escudoUrl: fila.escudo_url,
       })),
       resultadosPorConfirmar: Number(pendientesRows[0]?.cantidad ?? 0),
     };
@@ -287,14 +304,17 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      organizacion_logo_url: string | null;
       estado: string;
       fecha_inicio_estimada: Date | null;
       cupo_equipos: number;
       inscriptos: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url,
+              t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
               (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved') AS inscriptos
        FROM torneo t
+       JOIN organizacion o ON o.id = t.organizacion_id
        WHERE t.organizacion_id = ANY($1) AND t.estado != 'cancelled'
        ORDER BY (t.estado IN ('registration_open', 'in_progress')) DESC, t.fecha_inicio_estimada ASC NULLS LAST
        LIMIT 5`,
@@ -305,8 +325,9 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       id: string;
       nombre: string;
       categoria_genero: string;
+      escudo_url: string | null;
     }>(
-      `SELECT e.id, e.nombre, e.categoria_genero
+      `SELECT e.id, e.nombre, e.categoria_genero, e.escudo_url
        FROM seguimiento sg
        JOIN equipo e ON e.id = sg.entidad_seguida_id
        WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team'
@@ -320,10 +341,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      organizacion_logo_url: string | null;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
+       JOIN organizacion o ON o.id = t.organizacion_id
        WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'tournament'
        ORDER BY sg.fecha_alta DESC
        LIMIT 5`,
@@ -351,6 +374,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        imagenUrl: fila.organizacion_logo_url,
         estado: fila.estado,
         fechaInicioEstimada: fila.fecha_inicio_estimada?.toISOString() ?? null,
         inscriptos: Number(fila.inscriptos),
@@ -360,12 +384,14 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         id: fila.id,
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
+        escudoUrl: fila.escudo_url,
       })),
       torneosSeguidos: torneosSeguidosOrgRows.map((fila) => ({
         id: fila.id,
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        imagenUrl: fila.organizacion_logo_url,
       })),
       inscripcionesPendientes: Number(inscripcionesPendRows[0]?.cantidad ?? 0),
       resultadosSinCargar: Number(resultadosSinCargarRows[0]?.cantidad ?? 0),

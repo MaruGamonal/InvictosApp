@@ -11,12 +11,29 @@ beforeEach(() => vi.resetModules());
 
 interface Opciones {
   perfil?: { id: string; nombre_visible: string } | null;
-  equipos?: Array<{ id: string; nombre: string; categoria_genero: string; rol_equipo: string }>;
+  equipos?: Array<{
+    id: string;
+    nombre: string;
+    categoria_genero: string;
+    rol_equipo: string;
+    escudo_url?: string | null;
+  }>;
   organizaciones?: Array<{ organizacion_id: string }>;
   partido?: Record<string, unknown> | null;
   torneosParticipo?: Array<Record<string, unknown>>;
-  equiposSeguidos?: Array<{ id: string; nombre: string; categoria_genero: string }>;
-  torneosSeguidos?: Array<{ id: string; nombre: string; categoria_genero: string; modalidad: string }>;
+  equiposSeguidos?: Array<{
+    id: string;
+    nombre: string;
+    categoria_genero: string;
+    escudo_url?: string | null;
+  }>;
+  torneosSeguidos?: Array<{
+    id: string;
+    nombre: string;
+    categoria_genero: string;
+    modalidad: string;
+    organizacion_logo_url?: string | null;
+  }>;
   resultadosPorConfirmar?: number;
   torneosAdministrados?: Array<Record<string, unknown>>;
   inscripcionesPendientes?: number;
@@ -221,6 +238,48 @@ describe('obtenerInicio', () => {
     expect(resultado.jugador?.equipos).toEqual([
       { id: 'eq-1', nombre: 'Los Pibes', categoriaGenero: 'male', rolesEquipo: ['player', 'delegate'] },
     ]);
+  });
+
+  it('trae el escudo del equipo y el logo de la organización del torneo (reportado en vivo: Inicio no mostraba las imágenes)', async () => {
+    mockearDb({
+      equipos: [
+        {
+          id: 'eq-1',
+          nombre: 'Los Pibes',
+          categoria_genero: 'male',
+          rol_equipo: 'captain',
+          escudo_url: 'https://cdn.example.com/eq-1.png',
+        },
+      ],
+      organizaciones: [],
+      torneosSeguidos: [
+        {
+          id: 'tor-seguido',
+          nombre: 'Copa Amigos',
+          categoria_genero: 'mixed',
+          modalidad: 'f7',
+          organizacion_logo_url: 'https://cdn.example.com/org-1.png',
+        },
+      ],
+      equiposSeguidos: [
+        {
+          id: 'eq-seguido',
+          nombre: 'Deportivo Sur',
+          categoria_genero: 'male',
+          escudo_url: 'https://cdn.example.com/eq-seguido.png',
+        },
+      ],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+
+    expect(resultado.jugador?.equipos[0]?.escudoUrl).toBe('https://cdn.example.com/eq-1.png');
+    expect(resultado.jugador?.torneosSeguidos[0]?.imagenUrl).toBe(
+      'https://cdn.example.com/org-1.png',
+    );
+    expect(resultado.jugador?.equiposSeguidos[0]?.escudoUrl).toBe(
+      'https://cdn.example.com/eq-seguido.png',
+    );
   });
 
   it('sin perfil deportivo, NO_ENCONTRADO', async () => {

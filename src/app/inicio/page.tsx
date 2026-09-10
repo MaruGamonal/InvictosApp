@@ -184,6 +184,7 @@ export default async function PaginaInicio({
                       id={equipo.id}
                       nombre={equipo.nombre}
                       categoriaGenero={equipo.categoriaGenero}
+                      escudoUrl={equipo.escudoUrl}
                       etiquetaDerecha={equipo.rolesEquipo
                         .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
                         .join(' · ')}
@@ -204,6 +205,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      imagenUrl={torneo.imagenUrl}
                       miEquipoNombre={torneo.miEquipoNombre}
                       posicionActual={torneo.posicionActual}
                     />
@@ -223,6 +225,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      imagenUrl={torneo.imagenUrl}
                       etiquetaDerecha="Siguiendo"
                     />
                   ))}
@@ -240,6 +243,7 @@ export default async function PaginaInicio({
                       id={equipo.id}
                       nombre={equipo.nombre}
                       categoriaGenero={equipo.categoriaGenero}
+                      escudoUrl={equipo.escudoUrl}
                       etiquetaDerecha="Siguiendo"
                     />
                   ))}
@@ -291,6 +295,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      imagenUrl={torneo.imagenUrl}
                       estado={torneo.estado}
                       inscriptos={torneo.inscriptos}
                       cupoEquipos={torneo.cupoEquipos}
@@ -313,6 +318,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      imagenUrl={torneo.imagenUrl}
                       etiquetaDerecha="Siguiendo"
                     />
                   ))}
@@ -330,6 +336,7 @@ export default async function PaginaInicio({
                       id={equipo.id}
                       nombre={equipo.nombre}
                       categoriaGenero={equipo.categoriaGenero}
+                      escudoUrl={equipo.escudoUrl}
                       etiquetaDerecha="Siguiendo"
                     />
                   ))}
