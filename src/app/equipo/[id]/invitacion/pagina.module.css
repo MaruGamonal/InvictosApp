@@ -1,0 +1,67 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 48px var(--espacio-pantalla-x) 24px;
+  background: var(--color-fondo);
+  gap: 16px;
+}
+
+.titulo {
+  font-size: 24px;
+  margin: 0;
+}
+
+.texto {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-texto-secundario);
+  margin: 0 0 12px;
+}
+
+.botones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.botonPrincipal {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  border: none;
+  border-radius: var(--radio-boton);
+  padding: 14px;
+  font: 700 15px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.botonPrincipal:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.botonSecundario {
+  background: none;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  padding: 14px;
+  font: 600 15px/1 var(--fuente-texto);
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.botonSecundario:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.errorChico {
+  font-size: 13px;
+  color: var(--error-texto);
+  margin: 0;
+}

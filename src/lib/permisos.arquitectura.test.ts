@@ -31,6 +31,7 @@ const EXCEPCIONES = new Set<string>([
   'equipos/crearEquipo.ts', // T19 — crea el vínculo de capitán al crear el equipo
   'equipos/invitarIntegrante.ts', // T19 — gestiona el plantel: crea/reactiva vínculos invited o active
   'equipos/responderInvitacion.ts', // T19 — resuelve el vínculo invited propio (aceptar/rechazar)
+  'equipos/obtenerMiInvitacionPendiente.ts', // Pantalla de "Responder invitación" — lee la invitación invited propia para mostrarla antes de resolverla; no decide un permiso
   'equipos/cancelarInvitacion.ts', // T19 — cancela el vínculo invited que el equipo propuso
   'equipos/cambiarRolIntegrante.ts', // T19 — designa/quita roles y transfiere la capitanía sobre el vínculo mismo
   'equipos/quitarIntegrante.ts', // T19 — da de baja el vínculo (propio o de otro integrante)
