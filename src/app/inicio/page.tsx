@@ -246,6 +246,13 @@ export default async function PaginaInicio({
                 </div>
               </section>
             )}
+
+            {!inicio.esOrganizador && (
+              <Link href="/torneo/crear" className={styles.tarjetaAccionSecundaria}>
+                <span>¿Vas a organizar un torneo?</span>
+                <span className={styles.tarjetaAccionEnlace}>Empezar ›</span>
+              </Link>
+            )}
           </>
         )}
 
