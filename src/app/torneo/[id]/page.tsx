@@ -88,23 +88,41 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
       </div>
 
       {ficha.direccion && (
-        <p className={styles.direccion}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        <>
+          <p className={styles.direccion}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            {ficha.direccion}
+          </p>
+          <div className={styles.mapa}>
+            <iframe
+              title={`Ubicación de ${ficha.nombre}`}
+              src={`https://www.google.com/maps?q=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}&output=embed`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+          <a
+            className={styles.enlaceMapa}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}`}
+            target="_blank"
+            rel="noreferrer"
           >
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          {ficha.direccion}
-        </p>
+            Abrir en Google Maps
+          </a>
+        </>
       )}
 
       {ficha.descripcion && <p className={styles.descripcion}>{ficha.descripcion}</p>}

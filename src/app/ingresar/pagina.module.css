@@ -47,7 +47,8 @@
 }
 
 .campo input,
-.campo select {
+.campo select,
+.campo textarea {
   border: 1px solid var(--borde-neutro);
   border-radius: 6px;
   padding: 13px 14px;
@@ -60,8 +61,13 @@
   color: var(--color-texto);
 }
 
+.campo textarea {
+  resize: vertical;
+}
+
 .campo input:focus,
-.campo select:focus {
+.campo select:focus,
+.campo textarea:focus {
   border: 2px solid var(--acento);
   padding: 12px 13px;
 }

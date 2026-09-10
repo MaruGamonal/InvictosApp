@@ -43,6 +43,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [formato, setFormato] = useState('');
   const [ciudadId, setCiudadId] = useState('');
   const [direccion, setDireccion] = useState('');
+  const [descripcion, setDescripcion] = useState('');
   const [cupoEquipos, setCupoEquipos] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           formato,
           ciudadId,
           direccion: direccion || undefined,
+          descripcion: descripcion || undefined,
           cupoEquipos: Number(cupoEquipos),
         }),
       });
@@ -157,6 +159,17 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           placeholder="La sede física — distinta de la ciudad"
           value={direccion}
           onChange={(evento) => setDireccion(evento.target.value)}
+        />
+      </div>
+
+      <div className={styles.campo}>
+        <label htmlFor="descripcion">Descripción (opcional)</label>
+        <textarea
+          id="descripcion"
+          rows={4}
+          placeholder="Contales de qué se trata el torneo: horarios, costo, cómo anotarse…"
+          value={descripcion}
+          onChange={(evento) => setDescripcion(evento.target.value)}
         />
       </div>
 
