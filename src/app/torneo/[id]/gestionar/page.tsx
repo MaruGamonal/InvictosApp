@@ -15,6 +15,7 @@ import { PanelInscripciones } from './PanelInscripciones';
 import { PanelFixture } from './PanelFixture';
 import { PanelResultados } from './PanelResultados';
 import { PanelColaboradores } from './PanelColaboradores';
+import { PanelCancelarTorneo } from './PanelCancelarTorneo';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar torneo') };
@@ -148,6 +149,19 @@ export default async function PaginaGestionarTorneo({
         <section className={styles.seccion}>
           <h2 className={styles.tituloSeccion}>Cargar resultados</h2>
           <PanelResultados partidos={partidosSinJugar} />
+        </section>
+      )}
+
+      {['registration_open', 'registration_closed', 'in_progress', 'suspended'].includes(
+        gestion.estado,
+      ) && (
+        <section className={styles.seccionPeligro}>
+          <h2 className={styles.tituloSeccion}>Interrumpir el torneo</h2>
+          <p className={styles.textoPeligro}>
+            Cancelar es definitivo — a diferencia de &quot;Suspender&quot;, más arriba, que se
+            puede retomar.
+          </p>
+          <PanelCancelarTorneo torneoId={id} />
         </section>
       )}
     </div>
