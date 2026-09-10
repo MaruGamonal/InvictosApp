@@ -33,4 +33,11 @@
   border-radius: var(--radio-tarjeta);
   box-shadow: var(--sombra-tarjeta);
   overflow-x: auto;
+  /* Fijar overflow-x fuerza overflow-y a "auto" también (aunque acá
+     nunca se pida scroll vertical) — sin este margen, el tooltip
+     flotante del nombre de equipo de la última fila queda recortado:
+     su posición es absoluta y excede la altura del contenido en
+     flujo, así que sin espacio propio haría falta scrollear para
+     verlo. */
+  padding-bottom: 32px;
 }

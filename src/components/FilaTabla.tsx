@@ -19,7 +19,7 @@ export function EncabezadoTabla() {
   return (
     <div className={`${styles.fila} ${styles.encabezado}`}>
       <span>#</span>
-      <span>Equipo</span>
+      <span className={styles.srOnly}>Equipo</span>
       <span className={styles.numero}>PJ</span>
       <span className={styles.numero}>G</span>
       <span className={styles.numero}>E</span>
@@ -51,8 +51,12 @@ export function FilaTabla({
     <div className={`${styles.fila} ${clasifica ? styles.clasifica : ''}`}>
       <span className={styles.posicion}>{posicion}</span>
       <span className={styles.equipo}>
-        <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={22} />
-        <span className={styles.nombreEquipo}>{equipo.nombre}</span>
+        <button type="button" className={styles.botonEquipo}>
+          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={22} />
+          <span className={styles.tooltipNombre} aria-hidden="true">
+            {equipo.nombre}
+          </span>
+        </button>
       </span>
       <span className={styles.numero}>{partidosJugados}</span>
       <span className={styles.numero}>{ganados}</span>
