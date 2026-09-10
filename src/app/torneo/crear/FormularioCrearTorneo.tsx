@@ -49,6 +49,8 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [coordenadas, setCoordenadas] = useState<{ lat: number; lng: number } | null>(null);
   const [descripcion, setDescripcion] = useState('');
   const [cupoEquipos, setCupoEquipos] = useState('');
+  const [costoInscripcion, setCostoInscripcion] = useState('');
+  const [costoPlanilla, setCostoPlanilla] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,6 +73,8 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           latitud: coordenadas?.lat,
           longitud: coordenadas?.lng,
           descripcion: descripcion || undefined,
+          costoInscripcion: costoInscripcion ? Number(costoInscripcion) : undefined,
+          costoPlanilla: costoPlanilla ? Number(costoPlanilla) : undefined,
           cupoEquipos: Number(cupoEquipos),
         }),
       });
@@ -216,6 +220,39 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           onChange={(evento) => setCupoEquipos(evento.target.value)}
         />
       </div>
+
+      <fieldset className={styles.costos}>
+        <legend>Costos (opcional)</legend>
+        <div className={styles.filaCostos}>
+          <div className={styles.campo}>
+            <label htmlFor="costoInscripcion">Inscripción</label>
+            <input
+              id="costoInscripcion"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder="$0"
+              value={costoInscripcion}
+              onChange={(evento) => setCostoInscripcion(evento.target.value)}
+            />
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="costoPlanilla">Planilla / fecha</label>
+            <input
+              id="costoPlanilla"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder="$0"
+              value={costoPlanilla}
+              onChange={(evento) => setCostoPlanilla(evento.target.value)}
+            />
+          </div>
+        </div>
+        <span className={styles.ayuda}>
+          Se muestran en la ficha pública. Sin cargar, el torneo aparece como sin costo.
+        </span>
+      </fieldset>
 
       <button type="submit" className={styles.boton} disabled={enviando}>
         {enviando ? 'Creando…' : 'Crear torneo'}

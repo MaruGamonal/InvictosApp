@@ -34,6 +34,8 @@ export interface FichaTorneo {
   direccion: string | null;
   latitud: number | null;
   longitud: number | null;
+  costoInscripcion: number | null;
+  costoPlanilla: number | null;
   estado: string;
   visibilidad: string;
   formato: string;
@@ -67,6 +69,8 @@ interface FilaTorneo {
   direccion: string | null;
   latitud: number | null;
   longitud: number | null;
+  costo_inscripcion: string | null;
+  costo_planilla: string | null;
   estado: string;
   visibilidad: string;
   formato: string;
@@ -213,6 +217,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
   const { rows } = await pool.query<FilaTorneo>(
     `SELECT t.id, t.nombre, t.descripcion, t.modalidad, t.categoria_genero, t.categoria_edad,
             c.id AS ciudad_id, c.nombre AS ciudad_nombre, t.direccion, t.latitud, t.longitud,
+            t.costo_inscripcion, t.costo_planilla,
             t.estado, t.visibilidad, t.formato, t.cupo_equipos,
             t.fecha_inicio_estimada, t.fecha_fin_estimada,
             o.id AS organizacion_id, o.nombre AS organizacion_nombre,
@@ -257,6 +262,8 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     direccion: torneo.direccion,
     latitud: torneo.latitud,
     longitud: torneo.longitud,
+    costoInscripcion: torneo.costo_inscripcion != null ? Number(torneo.costo_inscripcion) : null,
+    costoPlanilla: torneo.costo_planilla != null ? Number(torneo.costo_planilla) : null,
     estado: torneo.estado,
     visibilidad: torneo.visibilidad,
     formato: torneo.formato,

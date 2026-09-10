@@ -14,7 +14,18 @@ beforeEach(() => vi.resetModules());
 function mockearDb(opciones: {
   organizacionId?: string;
   rolOrganizacion?: 'owner' | 'admin';
-  torneo?: { id: string; nombre: string; estado: string; formato: string };
+  torneo?: {
+    id: string;
+    nombre: string;
+    estado: string;
+    formato: string;
+    descripcion?: string | null;
+    direccion?: string | null;
+    costo_inscripcion?: string | null;
+    costo_planilla?: string | null;
+    cupo_equipos?: number;
+    fecha_inicio_estimada?: Date | null;
+  };
   fases?: Array<{
     id: string;
     nombre: string;
@@ -54,7 +65,7 @@ function mockearDb(opciones: {
         if (texto.includes('SELECT rol FROM miembro_organizacion')) {
           return { rows: opciones.rolOrganizacion ? [{ rol: opciones.rolOrganizacion }] : [] };
         }
-        if (texto.includes('SELECT id, nombre, estado, formato FROM torneo')) {
+        if (texto.includes('SELECT id, nombre, descripcion, direccion')) {
           return { rows: opciones.torneo ? [opciones.torneo] : [] };
         }
         if (texto.includes('FROM fase f LEFT JOIN grupo')) {
@@ -154,5 +165,34 @@ describe('obtenerGestionTorneo', () => {
         version: 1,
       },
     ]);
+  });
+
+  it('trae descripción, dirección, costos y cupo para prellenar el formulario de modificar', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      torneo: {
+        id: TORNEO,
+        nombre: 'Copa Otoño',
+        estado: 'registration_open',
+        formato: 'league',
+        descripcion: 'La copa de siempre',
+        direccion: 'Cancha 3',
+        costo_inscripcion: '5000',
+        costo_planilla: '1500',
+        cupo_equipos: 16,
+        fecha_inicio_estimada: new Date('2026-04-12T00:00:00Z'),
+      },
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+
+    expect(resultado.descripcion).toBe('La copa de siempre');
+    expect(resultado.direccion).toBe('Cancha 3');
+    expect(resultado.costoInscripcion).toBe(5000);
+    expect(resultado.costoPlanilla).toBe(1500);
+    expect(resultado.cupoEquipos).toBe(16);
+    expect(resultado.fechaInicioEstimada).toBe('2026-04-12T00:00:00.000Z');
   });
 });

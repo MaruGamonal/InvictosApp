@@ -51,6 +51,12 @@ export interface PartidoGestion {
 export interface GestionTorneoResultado {
   id: string;
   nombre: string;
+  descripcion: string | null;
+  direccion: string | null;
+  costoInscripcion: number | null;
+  costoPlanilla: number | null;
+  cupoEquipos: number;
+  fechaInicioEstimada: string | null;
   estado: string;
   formato: 'league' | 'knockout' | 'groups_knockout';
   fases: FaseGestion[];
@@ -69,9 +75,20 @@ export const obtenerGestionTorneo: Servicio<
   const { rows: torneoRows } = await pool.query<{
     id: string;
     nombre: string;
+    descripcion: string | null;
+    direccion: string | null;
+    costo_inscripcion: string | null;
+    costo_planilla: string | null;
+    cupo_equipos: number;
+    fecha_inicio_estimada: Date | null;
     estado: string;
     formato: 'league' | 'knockout' | 'groups_knockout';
-  }>('SELECT id, nombre, estado, formato FROM torneo WHERE id = $1', [datos.torneoId]);
+  }>(
+    `SELECT id, nombre, descripcion, direccion, costo_inscripcion, costo_planilla,
+            cupo_equipos, fecha_inicio_estimada, estado, formato
+     FROM torneo WHERE id = $1`,
+    [datos.torneoId],
+  );
   const torneo = torneoRows[0];
   if (!torneo) throw crearError('NO_ENCONTRADO');
 
@@ -132,6 +149,12 @@ export const obtenerGestionTorneo: Servicio<
   return {
     id: torneo.id,
     nombre: torneo.nombre,
+    descripcion: torneo.descripcion,
+    direccion: torneo.direccion,
+    costoInscripcion: torneo.costo_inscripcion != null ? Number(torneo.costo_inscripcion) : null,
+    costoPlanilla: torneo.costo_planilla != null ? Number(torneo.costo_planilla) : null,
+    cupoEquipos: torneo.cupo_equipos,
+    fechaInicioEstimada: torneo.fecha_inicio_estimada?.toISOString() ?? null,
     estado: torneo.estado,
     formato: torneo.formato,
     fases: fases.map((fila) => ({

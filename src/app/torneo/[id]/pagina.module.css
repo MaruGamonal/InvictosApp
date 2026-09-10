@@ -119,6 +119,21 @@
   line-height: 1.5;
 }
 
+.costos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.costo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto);
+  background: var(--fondo-sutil);
+  padding: 6px 10px;
+  border-radius: var(--radio-pill);
+}
+
 .datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

@@ -30,6 +30,8 @@ function filaTorneoBase(over: Partial<Record<string, unknown>> = {}) {
     direccion: null,
     latitud: null,
     longitud: null,
+    costo_inscripcion: null,
+    costo_planilla: null,
     estado: 'registration_open',
     visibilidad: 'public',
     formato: 'league',
@@ -139,6 +141,24 @@ describe('obtenerFichaTorneo', () => {
     const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
     expect(ficha.latitud).toBe(-32.9468);
     expect(ficha.longitud).toBe(-60.6393);
+  });
+
+  it('trae el costo de inscripción y de planilla, ya como número', async () => {
+    mockearDb({
+      torneo: filaTorneoBase({ costo_inscripcion: '5000', costo_planilla: '1500' }),
+    });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.costoInscripcion).toBe(5000);
+    expect(ficha.costoPlanilla).toBe(1500);
+  });
+
+  it('sin costos cargados, la ficha no los inventa: null', async () => {
+    mockearDb({});
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.costoInscripcion).toBeNull();
+    expect(ficha.costoPlanilla).toBeNull();
   });
 
   it('un torneo sin reglamento no marca tieneReglamento', async () => {

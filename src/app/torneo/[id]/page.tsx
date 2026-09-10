@@ -48,6 +48,12 @@ export async function generateMetadata({
   };
 }
 
+const FORMATO_MONEDA = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  maximumFractionDigits: 0,
+});
+
 function formatearFecha(iso: string | null): string | null {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString('es-AR', {
@@ -134,6 +140,21 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
       )}
 
       {ficha.descripcion && <p className={styles.descripcion}>{ficha.descripcion}</p>}
+
+      {(ficha.costoInscripcion != null || ficha.costoPlanilla != null) && (
+        <div className={styles.costos}>
+          {ficha.costoInscripcion != null && (
+            <span className={styles.costo}>
+              Inscripción: {FORMATO_MONEDA.format(ficha.costoInscripcion)}
+            </span>
+          )}
+          {ficha.costoPlanilla != null && (
+            <span className={styles.costo}>
+              Planilla/fecha: {FORMATO_MONEDA.format(ficha.costoPlanilla)}
+            </span>
+          )}
+        </div>
+      )}
 
       {ficha.estado === 'registration_open' && (
         <section className={styles.destacado}>
