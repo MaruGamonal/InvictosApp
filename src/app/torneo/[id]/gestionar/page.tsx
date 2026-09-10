@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerGestionTorneo } from '@/services/torneos/obtenerGestionTorneo';
 import { listarReglamentos } from '@/services/torneos/listarReglamentos';
+import { listarColaboradoresTorneo } from '@/services/organizadores/listarColaboradoresTorneo';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
@@ -13,6 +14,7 @@ import { FormularioReglamentoOrganizador } from './FormularioReglamentoOrganizad
 import { PanelInscripciones } from './PanelInscripciones';
 import { PanelFixture } from './PanelFixture';
 import { PanelResultados } from './PanelResultados';
+import { PanelColaboradores } from './PanelColaboradores';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar torneo') };
@@ -55,6 +57,7 @@ export default async function PaginaGestionarTorneo({
 
   const reglamentos = await listarReglamentos({ torneoId: id }, contexto);
   const reglamentoVigente = reglamentos.find((r) => r.estado === 'current') ?? null;
+  const colaboradores = await listarColaboradoresTorneo({ torneoId: id }, contexto);
 
   const inscripcionesPorResolver = gestion.inscripciones.filter((i) =>
     ['pending', 'waitlisted'].includes(i.estado),
@@ -125,6 +128,11 @@ export default async function PaginaGestionarTorneo({
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Inscripciones</h2>
         <PanelInscripciones torneoId={id} inscripciones={inscripcionesPorResolver} />
+      </section>
+
+      <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Colaboradores de este torneo</h2>
+        <PanelColaboradores torneoId={id} colaboradores={colaboradores} />
       </section>
 
       {gestion.estado !== 'draft' &&
