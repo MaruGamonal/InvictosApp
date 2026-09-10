@@ -60,9 +60,6 @@ export default async function PaginaGestionarTorneo({
   const reglamentoVigente = reglamentos.find((r) => r.estado === 'current') ?? null;
   const colaboradores = await listarColaboradoresTorneo({ torneoId: id }, contexto);
 
-  const inscripcionesPorResolver = gestion.inscripciones.filter((i) =>
-    ['pending', 'waitlisted'].includes(i.estado),
-  );
   const partidosSinJugar = gestion.partidos.filter((p) => p.estado !== 'played');
   const equipoNombres = Object.fromEntries(
     gestion.inscripciones.map((i) => [i.equipoId, i.nombreEquipo]),
@@ -128,7 +125,11 @@ export default async function PaginaGestionarTorneo({
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Inscripciones</h2>
-        <PanelInscripciones torneoId={id} inscripciones={inscripcionesPorResolver} />
+        <PanelInscripciones
+          torneoId={id}
+          inscripciones={gestion.inscripciones}
+          cupoEquipos={gestion.cupoEquipos}
+        />
       </section>
 
       <section className={styles.seccion}>

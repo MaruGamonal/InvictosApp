@@ -73,6 +73,14 @@ describe('BotonInscribirEquipo', () => {
     await waitFor(() =>
       expect(getByText('¡Inscripto! Ya sos parte de los equipos confirmados.')).toBeTruthy(),
     );
+    expect(getByText('Lista de buena fe').closest('a')).toHaveProperty(
+      'href',
+      expect.stringContaining('/torneo/t-1/equipo/eq-1/lista-buena-fe'),
+    );
+    expect(getByText('Dar de baja del torneo').closest('a')).toHaveProperty(
+      'href',
+      expect.stringContaining('/torneo/t-1/equipo/eq-1/baja'),
+    );
   });
 
   it('con una inscripción rechazada (no vigente), vuelve a mostrar el botón', async () => {

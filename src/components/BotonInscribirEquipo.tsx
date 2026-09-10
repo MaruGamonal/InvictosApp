@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './BotonInscribirEquipo.module.css';
 
 export interface ReglamentoVigenteProps {
@@ -31,6 +32,7 @@ type Paso =
       tipo: 'enviado';
       estado: 'pending' | 'waitlisted' | 'approved';
       advertenciaCategoria: boolean;
+      equipoId: string;
     }
   | { tipo: 'error'; equipos: EquipoGestionable[]; equipoId: string; mensaje: string };
 
@@ -69,14 +71,18 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
       .then((respuesta) => (respuesta.ok ? respuesta.json() : null))
       .then((cuerpo) => {
         if (cancelado) return;
-        const inscripciones: Array<{ estado: string; advertenciaCategoria: boolean }> =
-          cuerpo?.data ?? [];
+        const inscripciones: Array<{
+          estado: string;
+          advertenciaCategoria: boolean;
+          equipoId: string;
+        }> = cuerpo?.data ?? [];
         const vigente = inscripciones.find((i) => esEstadoVigente(i.estado));
         if (vigente && esEstadoVigente(vigente.estado)) {
           setPaso({
             tipo: 'enviado',
             estado: vigente.estado,
             advertenciaCategoria: vigente.advertenciaCategoria,
+            equipoId: vigente.equipoId,
           });
         }
       })
@@ -138,6 +144,7 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
         tipo: 'enviado',
         estado: cuerpo.data.estado,
         advertenciaCategoria: cuerpo.data.advertenciaCategoria,
+        equipoId,
       });
     } catch {
       setPaso({
@@ -179,6 +186,16 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
             La categoría de tu equipo no coincide con la de este torneo — el organizador lo va a ver
             así al resolver la solicitud.
           </p>
+        )}
+        {paso.estado === 'approved' && (
+          <div className={styles.enlacesInscripcion}>
+            <Link href={`/torneo/${torneoId}/equipo/${paso.equipoId}/lista-buena-fe`}>
+              Lista de buena fe
+            </Link>
+            <Link href={`/torneo/${torneoId}/equipo/${paso.equipoId}/baja`}>
+              Dar de baja del torneo
+            </Link>
+          </div>
         )}
       </div>
     );

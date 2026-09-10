@@ -122,3 +122,15 @@
   padding: 10px 12px;
   font-size: 13px;
 }
+
+.enlacesInscripcion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.enlacesInscripcion a {
+  color: var(--acento);
+  font: 700 13px/1 var(--fuente-texto);
+  text-decoration: none;
+}

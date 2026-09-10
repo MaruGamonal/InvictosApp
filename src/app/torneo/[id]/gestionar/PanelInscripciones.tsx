@@ -16,6 +16,7 @@ export interface InscripcionGestion {
 export interface PanelInscripcionesProps {
   torneoId: string;
   inscripciones: InscripcionGestion[];
+  cupoEquipos: number;
 }
 
 const MOTIVOS = [
@@ -26,8 +27,10 @@ const MOTIVOS = [
   { valor: 'other', etiqueta: 'Otro' },
 ];
 
+const ESTADOS_PENDIENTES = new Set(['pending', 'waitlisted']);
+
 /** UC-25 — Aprobar o rechazar cada inscripción pendiente o en lista de espera. */
-export function PanelInscripciones({ torneoId, inscripciones }: PanelInscripcionesProps) {
+export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: PanelInscripcionesProps) {
   const router = useRouter();
   const [rechazando, setRechazando] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('withdrew');
@@ -62,71 +65,91 @@ export function PanelInscripciones({ torneoId, inscripciones }: PanelInscripcion
     }
   }
 
-  if (inscripciones.length === 0) {
-    return <EstadoVacio mensaje="No hay inscripciones pendientes de resolver." />;
-  }
+  const aprobadas = inscripciones.filter((i) => i.estado === 'approved').length;
+  const pendientes = inscripciones.filter((i) => ESTADOS_PENDIENTES.has(i.estado));
+  const resueltas = inscripciones.filter((i) => !ESTADOS_PENDIENTES.has(i.estado));
 
   return (
     <div className={styles.lista}>
+      <p className={styles.contadorCupo}>
+        {aprobadas} / {cupoEquipos} cupos ocupados
+      </p>
       {error && <p className={styles.errorChico}>{error}</p>}
-      {inscripciones.map((inscripcion) => (
-        <div key={inscripcion.equipoId} className={styles.filaIntegrante}>
-          <div className={styles.filaIntegranteCabecera}>
-            <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
-            <Badge campo="inscripcion.estado" valor={inscripcion.estado} />
-          </div>
-          {inscripcion.advertenciaCategoria && (
-            <p className={styles.avisoChico}>
-              La categoría del equipo no coincide con la del torneo.
-            </p>
-          )}
 
-          {rechazando === inscripcion.equipoId ? (
-            <div className={styles.filaAccion}>
-              <select value={motivo} onChange={(evento) => setMotivo(evento.target.value)}>
-                {MOTIVOS.map((opcion) => (
-                  <option key={opcion.valor} value={opcion.valor}>
-                    {opcion.etiqueta}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => resolver(inscripcion.equipoId, 'rejected')}
-                disabled={enviando !== null}
-              >
-                Confirmar rechazo
-              </button>
-              <button
-                type="button"
-                className={styles.botonSecundarioChico}
-                onClick={() => setRechazando(null)}
-                disabled={enviando !== null}
-              >
-                Cancelar
-              </button>
+      {pendientes.length === 0 ? (
+        <EstadoVacio mensaje="No hay inscripciones pendientes de resolver." />
+      ) : (
+        pendientes.map((inscripcion) => (
+          <div key={inscripcion.equipoId} className={styles.filaIntegrante}>
+            <div className={styles.filaIntegranteCabecera}>
+              <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+              <Badge campo="inscripcion.estado" valor={inscripcion.estado} />
             </div>
-          ) : (
-            <div className={styles.filaAccion}>
-              <button
-                type="button"
-                onClick={() => resolver(inscripcion.equipoId, 'approved')}
-                disabled={enviando !== null}
-              >
-                {enviando === inscripcion.equipoId ? 'Enviando…' : 'Aprobar'}
-              </button>
-              <button
-                type="button"
-                className={styles.botonPeligroChico}
-                onClick={() => setRechazando(inscripcion.equipoId)}
-                disabled={enviando !== null}
-              >
-                Rechazar
-              </button>
+            {inscripcion.advertenciaCategoria && (
+              <p className={styles.avisoChico}>
+                La categoría del equipo no coincide con la del torneo.
+              </p>
+            )}
+
+            {rechazando === inscripcion.equipoId ? (
+              <div className={styles.filaAccion}>
+                <select value={motivo} onChange={(evento) => setMotivo(evento.target.value)}>
+                  {MOTIVOS.map((opcion) => (
+                    <option key={opcion.valor} value={opcion.valor}>
+                      {opcion.etiqueta}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => resolver(inscripcion.equipoId, 'rejected')}
+                  disabled={enviando !== null}
+                >
+                  Confirmar rechazo
+                </button>
+                <button
+                  type="button"
+                  className={styles.botonSecundarioChico}
+                  onClick={() => setRechazando(null)}
+                  disabled={enviando !== null}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <div className={styles.filaAccion}>
+                <button
+                  type="button"
+                  onClick={() => resolver(inscripcion.equipoId, 'approved')}
+                  disabled={enviando !== null}
+                >
+                  {enviando === inscripcion.equipoId ? 'Enviando…' : 'Aprobar'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.botonPeligroChico}
+                  onClick={() => setRechazando(inscripcion.equipoId)}
+                  disabled={enviando !== null}
+                >
+                  Rechazar
+                </button>
+              </div>
+            )}
+          </div>
+        ))
+      )}
+
+      {resueltas.length > 0 && (
+        <div className={styles.lista}>
+          <span className={styles.subtitulo}>Ya resueltas</span>
+          {resueltas.map((inscripcion) => (
+            <div key={inscripcion.equipoId} className={styles.filaIntegranteCabecera}>
+              <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+              <Badge campo="inscripcion.estado" valor={inscripcion.estado} />
             </div>
-          )}
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

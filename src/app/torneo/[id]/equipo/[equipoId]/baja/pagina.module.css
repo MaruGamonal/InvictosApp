@@ -1,0 +1,107 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px var(--espacio-pantalla-x) 32px;
+  background: var(--color-fondo);
+  gap: 14px;
+}
+
+.enlaceVolver {
+  align-self: flex-start;
+  color: var(--color-texto-secundario);
+  font: 600 13px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+.titulo {
+  font-size: 24px;
+  margin: 0;
+}
+
+.texto {
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 14px;
+}
+
+.avisoCerrada {
+  background: var(--fondo-sutil);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--color-texto-secundario);
+  margin: 0;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avisoInfo {
+  margin: 0;
+  background: var(--informacion-fondo);
+  color: var(--informacion-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.subtitulo {
+  font: 600 12px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.chipsMotivo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chipMotivo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-texto);
+  background: var(--fondo-sutil);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-pill);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.formulario input[type='text'] {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+}
+
+.botonPeligro {
+  background: none;
+  border: 1.5px solid var(--error-borde);
+  color: var(--error-texto);
+  border-radius: var(--radio-boton);
+  padding: 14px;
+  font: 700 15px/1 var(--fuente-texto);
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.botonPeligro:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.errorChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error-texto);
+}

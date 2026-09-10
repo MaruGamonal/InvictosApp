@@ -48,6 +48,7 @@ const EXCEPCIONES = new Set<string>([
   'inscripciones/resolverInscripcion.ts', // T12 — resuelve destinatarios (capitán/delegados del equipo) para notificar; no decide un permiso
   'inscripciones/solicitarInscripcion.ts', // T20 — sigue automáticamente al torneo desde cada integrante activo del plantel; no decide un permiso
   'inscripciones/confirmarPlantel.ts', // T20 — valida que cada integrante de la lista de buena fe pertenezca al plantel; no decide un permiso
+  'inscripciones/obtenerListaDeBuenaFe.ts', // Pantalla de "Lista de buena fe" — lista el plantel activo del equipo para armar los checkboxes; no decide un permiso
   'fixture/programarPartido.ts', // T14 — resuelve destinatarios (capitán/delegados de los dos equipos) para notificar; no decide un permiso
   'competencia/cargarResultado.ts', // T15 — resuelve destinatarios (capitán/delegados de los dos equipos) para notificar; no decide un permiso
   'equipos/obtenerEquipoPublico.ts', // T23 — lista el plantel y el cuerpo técnico del equipo; es la participación pública, no una decisión de permiso
