@@ -30,7 +30,10 @@ describe('completarRegistro', () => {
     const { client, consultas } = crearClienteFalso(null);
     vi.doMock('@/db/cliente', () => ({ obtenerPool: () => ({ connect: async () => client }) }));
     const ejecutarAccionPendiente = vi.fn();
-    vi.doMock('@/lib/accionesPendientes', () => ({ ejecutarAccionPendiente }));
+    vi.doMock('@/lib/accionesPendientes', () => ({
+      ejecutarAccionPendiente,
+      registrarAccionPendiente: vi.fn(),
+    }));
 
     const { completarRegistro } = await import('./completarRegistro');
     const resultado = await completarRegistro(
@@ -68,7 +71,10 @@ describe('completarRegistro', () => {
     });
     vi.doMock('@/db/cliente', () => ({ obtenerPool: () => ({ connect: async () => client }) }));
     const ejecutarAccionPendiente = vi.fn();
-    vi.doMock('@/lib/accionesPendientes', () => ({ ejecutarAccionPendiente }));
+    vi.doMock('@/lib/accionesPendientes', () => ({
+      ejecutarAccionPendiente,
+      registrarAccionPendiente: vi.fn(),
+    }));
 
     const { completarRegistro } = await import('./completarRegistro');
     const resultado = await completarRegistro(
@@ -98,7 +104,10 @@ describe('completarRegistro', () => {
     const { client } = crearClienteFalso(null);
     vi.doMock('@/db/cliente', () => ({ obtenerPool: () => ({ connect: async () => client }) }));
     const ejecutarAccionPendiente = vi.fn();
-    vi.doMock('@/lib/accionesPendientes', () => ({ ejecutarAccionPendiente }));
+    vi.doMock('@/lib/accionesPendientes', () => ({
+      ejecutarAccionPendiente,
+      registrarAccionPendiente: vi.fn(),
+    }));
 
     const { completarRegistro } = await import('./completarRegistro');
     await completarRegistro(
@@ -129,7 +138,10 @@ describe('completarRegistro', () => {
       return { rows: [] };
     });
     vi.doMock('@/db/cliente', () => ({ obtenerPool: () => ({ connect: async () => client }) }));
-    vi.doMock('@/lib/accionesPendientes', () => ({ ejecutarAccionPendiente: vi.fn() }));
+    vi.doMock('@/lib/accionesPendientes', () => ({
+      ejecutarAccionPendiente: vi.fn(),
+      registrarAccionPendiente: vi.fn(),
+    }));
 
     const { completarRegistro } = await import('./completarRegistro');
     await expect(

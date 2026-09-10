@@ -21,10 +21,12 @@ export interface BotonSeguirProps {
  *
  * Sin sesión, `POST /api/seguir` responde `NO_AUTENTICADO` (401): D-04b
  * dice que la acción es visible para cualquiera pero la cuenta se pide
- * recién al usarla, así que ahí es donde manda a `/ingresar`. Todavía
- * no reengancha la acción después del login (`accionesPendientes.ts`
- * ya tiene el mecanismo, pero ningún ejecutor está registrado
- * — queda para cuando se construya ese enganche).
+ * recién al usarla, así que ahí es donde manda a `/ingresar` — con el
+ * torneo/equipo codificado en la URL, para que `/ingresar` reenganche
+ * la acción al terminar (registrarse la sigue al toque vía
+ * `accionesPendientes.ts`/`registrarEjecutorSeguir.ts`; ingresar la
+ * repite del lado del cliente, ya con sesión) sin volver a tocar
+ * "Seguir".
  */
 export function BotonSeguir({ tipoSeguido, entidadId }: BotonSeguirProps) {
   const router = useRouter();
@@ -58,7 +60,9 @@ export function BotonSeguir({ tipoSeguido, entidadId }: BotonSeguirProps) {
       });
 
       if (respuesta.status === 401) {
-        router.push('/ingresar');
+        router.push(
+          `/ingresar?accion=seguir&tipoSeguido=${tipoSeguido}&entidadId=${entidadId}`,
+        );
         return;
       }
       if (!respuesta.ok) {

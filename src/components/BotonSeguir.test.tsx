@@ -48,14 +48,16 @@ describe('BotonSeguir', () => {
     expect(fetchMock).toHaveBeenLastCalledWith('/api/dejar-de-seguir', expect.anything());
   });
 
-  it('sin sesión (401), manda a /ingresar en vez de cambiar de estado', async () => {
+  it('sin sesión (401), manda a /ingresar con el torneo/equipo codificado para reengancharlo', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByRole } = render(<BotonSeguir tipoSeguido="tournament" entidadId="t-1" />);
     fireEvent.click(getByRole('button', { name: 'Seguir' }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/ingresar'));
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith('/ingresar?accion=seguir&tipoSeguido=tournament&entidadId=t-1'),
+    );
     expect(getByRole('button', { name: 'Seguir' })).toBeTruthy();
   });
 });

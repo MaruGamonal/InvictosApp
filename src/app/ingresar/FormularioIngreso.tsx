@@ -19,11 +19,23 @@ import styles from './pagina.module.css';
  */
 type Estado = { paso: 'formulario' } | { paso: 'enviando' } | { paso: 'error'; mensaje: string };
 
-interface Props {
-  modoInicial: 'ingresar' | 'crear';
+interface SeguirPendiente {
+  tipoSeguido: 'tournament' | 'team';
+  entidadId: string;
 }
 
-export function FormularioIngreso({ modoInicial }: Props) {
+interface Props {
+  modoInicial: 'ingresar' | 'crear';
+  seguirPendiente?: SeguirPendiente | null;
+}
+
+function conSeguirPendiente(href: string, seguirPendiente?: SeguirPendiente | null): string {
+  if (!seguirPendiente) return href;
+  const separador = href.includes('?') ? '&' : '?';
+  return `${href}${separador}accion=seguir&tipoSeguido=${seguirPendiente.tipoSeguido}&entidadId=${seguirPendiente.entidadId}`;
+}
+
+export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
   const [estado, setEstado] = useState<Estado>({ paso: 'formulario' });
   const esCrear = modoInicial === 'crear';
   const [identificadorAcceso, setIdentificadorAcceso] = useState('');
@@ -40,7 +52,14 @@ export function FormularioIngreso({ modoInicial }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           esCrear
-            ? { identificadorAcceso, nombreVisible, password }
+            ? {
+                identificadorAcceso,
+                nombreVisible,
+                password,
+                accionPendiente: seguirPendiente
+                  ? { tipo: 'seguir', datos: seguirPendiente }
+                  : undefined,
+              }
             : { identificadorAcceso, password },
         ),
       });
@@ -51,6 +70,23 @@ export function FormularioIngreso({ modoInicial }: Props) {
           paso: 'error',
           mensaje: cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.',
         });
+        return;
+      }
+
+      if (seguirPendiente) {
+        // Crear cuenta ya la deja siguiendo (accionPendiente, arriba); acá
+        // se repite para ingresar (sesión ya existente, sin ese enganche) —
+        // es idempotente, así que no hace nada de más en el otro caso.
+        await fetch('/api/seguir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(seguirPendiente),
+        }).catch(() => {});
+        window.location.assign(
+          seguirPendiente.tipoSeguido === 'tournament'
+            ? `/torneo/${seguirPendiente.entidadId}`
+            : `/equipo/${seguirPendiente.entidadId}`,
+        );
         return;
       }
 
@@ -126,11 +162,15 @@ export function FormularioIngreso({ modoInicial }: Props) {
       <div className={styles.textoCentrado}>
         {esCrear ? (
           <>
-            ¿Ya tenés cuenta? <Link href="/ingresar">Ingresá</Link>
+            ¿Ya tenés cuenta?{' '}
+            <Link href={conSeguirPendiente('/ingresar', seguirPendiente)}>Ingresá</Link>
           </>
         ) : (
           <>
-            ¿No tenés cuenta? <Link href="/ingresar?modo=crear">Creala en un momento</Link>
+            ¿No tenés cuenta?{' '}
+            <Link href={conSeguirPendiente('/ingresar?modo=crear', seguirPendiente)}>
+              Creala en un momento
+            </Link>
           </>
         )}
       </div>

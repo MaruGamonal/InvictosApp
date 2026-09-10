@@ -4,6 +4,9 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
 import { ejecutarAccionPendiente } from '@/lib/accionesPendientes';
+// Efecto de importación: registra el ejecutor de "seguir" antes de que
+// `ejecutarAccionPendiente` lo necesite más abajo.
+import '@/services/notificaciones/registrarEjecutorSeguir';
 
 /**
  * Segunda mitad de UC-01: se invoca desde `src/app/auth/callback` cuando
