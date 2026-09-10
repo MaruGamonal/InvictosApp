@@ -15,9 +15,11 @@ export interface TarjetaTorneoResumenProps {
   estado?: string;
   inscriptos?: number;
   cupoEquipos?: number;
+  /** Texto libre a la derecha (p. ej. "Siguiendo") — se ignora si hay `posicionActual`. */
+  etiquetaDerecha?: string;
 }
 
-/** Fila de torneo compacta — Inicio ("Mis torneos", "Mis torneos" del organizador). */
+/** Fila de torneo compacta — Inicio ("Mis torneos", "Torneos que sigo", "Mis torneos" del organizador). */
 export function TarjetaTorneoResumen({
   torneoId,
   nombre,
@@ -28,6 +30,7 @@ export function TarjetaTorneoResumen({
   estado,
   inscriptos,
   cupoEquipos,
+  etiquetaDerecha,
 }: TarjetaTorneoResumenProps) {
   return (
     <Link href={`/torneo/${torneoId}`} className={styles.tarjeta}>
@@ -45,11 +48,13 @@ export function TarjetaTorneoResumen({
           </span>
         )}
       </div>
-      {typeof posicionActual === 'number' && (
+      {typeof posicionActual === 'number' ? (
         <div className={styles.posicion}>
           <span className={styles.posicionNumero}>{posicionActual}°</span>
           <span className={styles.posicionEtiqueta}>en la tabla</span>
         </div>
+      ) : (
+        etiquetaDerecha && <span className={styles.etiquetaDerecha}>{etiquetaDerecha}</span>
       )}
     </Link>
   );

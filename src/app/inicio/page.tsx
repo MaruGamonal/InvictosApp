@@ -184,9 +184,9 @@ export default async function PaginaInicio({
                       id={equipo.id}
                       nombre={equipo.nombre}
                       categoriaGenero={equipo.categoriaGenero}
-                      etiquetaDerecha={
-                        obtenerEtiqueta('integranteEquipo.rolEquipo', equipo.rolEquipo).etiqueta
-                      }
+                      etiquetaDerecha={equipo.rolesEquipo
+                        .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
+                        .join(' · ')}
                     />
                   ))}
                 </div>
@@ -206,6 +206,24 @@ export default async function PaginaInicio({
                       modalidad={torneo.modalidad}
                       miEquipoNombre={torneo.miEquipoNombre}
                       posicionActual={torneo.posicionActual}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {inicio.jugador.torneosSeguidos.length > 0 && (
+              <section className={styles.seccion}>
+                <h2 className={styles.tituloSeccion}>Torneos que sigo</h2>
+                <div className={styles.lista}>
+                  {inicio.jugador.torneosSeguidos.map((torneo) => (
+                    <TarjetaTorneoResumen
+                      key={torneo.id}
+                      torneoId={torneo.id}
+                      nombre={torneo.nombre}
+                      categoriaGenero={torneo.categoriaGenero}
+                      modalidad={torneo.modalidad}
+                      etiquetaDerecha="Siguiendo"
                     />
                   ))}
                 </div>
@@ -276,6 +294,24 @@ export default async function PaginaInicio({
                 <p className={styles.textoVacio}>Todavía no organizaste ningún torneo.</p>
               )}
             </section>
+
+            {inicio.organizador.torneosSeguidos.length > 0 && (
+              <section className={styles.seccion}>
+                <h2 className={styles.tituloSeccion}>Torneos que sigo</h2>
+                <div className={styles.lista}>
+                  {inicio.organizador.torneosSeguidos.map((torneo) => (
+                    <TarjetaTorneoResumen
+                      key={torneo.id}
+                      torneoId={torneo.id}
+                      nombre={torneo.nombre}
+                      categoriaGenero={torneo.categoriaGenero}
+                      modalidad={torneo.modalidad}
+                      etiquetaDerecha="Siguiendo"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {inicio.organizador.equiposSeguidos.length > 0 && (
               <section className={styles.seccion}>
