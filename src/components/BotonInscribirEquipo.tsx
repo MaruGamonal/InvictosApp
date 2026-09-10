@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './BotonInscribirEquipo.module.css';
 
@@ -40,15 +40,51 @@ const MENSAJE_POR_ESTADO: Record<'pending' | 'waitlisted' | 'approved', string> 
   approved: '¡Inscripto! Ya sos parte de los equipos confirmados.',
 };
 
+const ESTADOS_VIGENTES = new Set(['pending', 'waitlisted', 'approved']);
+
+function esEstadoVigente(
+  estado: string,
+): estado is 'pending' | 'waitlisted' | 'approved' {
+  return ESTADOS_VIGENTES.has(estado);
+}
+
 /**
  * UC-24 — Inscribir a uno de mis equipos en este torneo. La ficha es
  * pública y cacheada por evento (D-04b): sin sesión, el primer click
  * manda a /ingresar en vez de mostrar el panel — recién ahí se sabe
- * quién es capitana o delegada de qué.
+ * quién es capitana o delegada de qué. Por la misma razón, tampoco puede
+ * nacer sabiendo si ya mandé la solicitud: al montar, se fija si alguno
+ * de mis equipos ya tiene una inscripción vigente en este torneo — si la
+ * tiene, muestra ese estado directamente en vez de volver a ofrecer
+ * "Inscribir a mi equipo" (reportado en vivo: volver a la ficha después
+ * de inscribirse lo seguía ofreciendo como si nada).
  */
 export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscribirEquipoProps) {
   const router = useRouter();
   const [paso, setPaso] = useState<Paso>({ tipo: 'inicial' });
+
+  useEffect(() => {
+    let cancelado = false;
+    fetch(`/api/torneos/mi-inscripcion?torneoId=${torneoId}`)
+      .then((respuesta) => (respuesta.ok ? respuesta.json() : null))
+      .then((cuerpo) => {
+        if (cancelado) return;
+        const inscripciones: Array<{ estado: string; advertenciaCategoria: boolean }> =
+          cuerpo?.data ?? [];
+        const vigente = inscripciones.find((i) => esEstadoVigente(i.estado));
+        if (vigente && esEstadoVigente(vigente.estado)) {
+          setPaso({
+            tipo: 'enviado',
+            estado: vigente.estado,
+            advertenciaCategoria: vigente.advertenciaCategoria,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [torneoId]);
 
   async function empezar() {
     setPaso({ tipo: 'cargando' });
