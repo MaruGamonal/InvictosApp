@@ -1,0 +1,70 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px var(--espacio-pantalla-x) 24px;
+  background: var(--color-fondo);
+  gap: 20px;
+}
+
+.titulo {
+  font-size: 26px;
+  margin: 0;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notificacion,
+.notificacionLeida {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  cursor: pointer;
+  font-family: var(--fuente-texto);
+}
+
+.notificacion {
+  border-left: 3px solid var(--acento);
+}
+
+.notificacionLeida {
+  opacity: 0.6;
+}
+
+.notificacionTexto {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-texto);
+}
+
+.notificacionMeta {
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+}
+
+.botonSecundario {
+  align-self: center;
+  background: none;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  padding: 10px 18px;
+  font: 600 13px/1 var(--fuente-texto);
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.botonSecundario:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

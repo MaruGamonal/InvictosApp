@@ -20,6 +20,21 @@
   gap: 12px;
 }
 
+.filaUsuarioTexto {
+  flex: 1;
+}
+
+.enlaceNotificaciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: inherit;
+  flex: none;
+}
+
 .avatar {
   width: 42px;
   height: 42px;
