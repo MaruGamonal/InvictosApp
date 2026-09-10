@@ -130,6 +130,19 @@ describe('actualizarTorneo', () => {
     expect(notificarCambio).not.toHaveBeenCalled();
   });
 
+  it('cambiar el costo de inscripción/planilla o las coordenadas no notifica', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'registration_open' });
+    const notificarCambio = mockearNotificarCambio();
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, costoInscripcion: 5000, costoPlanilla: 1500, latitud: -32.9, longitud: -60.6 },
+      contextoCon('usuario-1'),
+    );
+
+    expect(notificarCambio).not.toHaveBeenCalled();
+  });
+
   it('en un torneo todavía en draft, cambiar la fecha no notifica', async () => {
     mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'draft' });
     const notificarCambio = mockearNotificarCambio();

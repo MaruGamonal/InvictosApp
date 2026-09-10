@@ -35,6 +35,8 @@ const esquemaEntrada = z.object({
     .enum(['open', 'u13', 'u15', 'u17', 'u20', 'veterans_35', 'veterans_45'])
     .optional(),
   direccion: z.string().trim().optional(),
+  latitud: z.number().min(-90).max(90).optional(),
+  longitud: z.number().min(-180).max(180).optional(),
   costoInscripcion: z.number().nonnegative().optional(),
   costoPlanilla: z.number().nonnegative().optional(),
   cupoEquipos: z.number().int().positive().optional(),
@@ -61,6 +63,8 @@ const CAMPOS: Array<[keyof ActualizarTorneoInput, string]> = [
   ['descripcion', 'descripcion'],
   ['categoriaEdad', 'categoria_edad'],
   ['direccion', 'direccion'],
+  ['latitud', 'latitud'],
+  ['longitud', 'longitud'],
   ['costoInscripcion', 'costo_inscripcion'],
   ['costoPlanilla', 'costo_planilla'],
   ['cupoEquipos', 'cupo_equipos'],

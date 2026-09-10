@@ -7,6 +7,7 @@ import { esErrorDeAplicacion } from '@/lib/errores';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { AccionesEstadoTorneo } from './AccionesEstadoTorneo';
+import { FormularioEditarTorneo } from './FormularioEditarTorneo';
 import { FormularioDefinirFormato } from './FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from './FormularioReglamentoOrganizador';
 import { PanelInscripciones } from './PanelInscripciones';
@@ -69,6 +70,20 @@ export default async function PaginaGestionarTorneo({
       <span className={styles.pillEstado}>
         {obtenerEtiqueta('torneo.estado', gestion.estado).etiqueta}
       </span>
+
+      <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Datos del torneo</h2>
+        <FormularioEditarTorneo
+          torneoId={id}
+          nombre={gestion.nombre}
+          descripcion={gestion.descripcion}
+          direccion={gestion.direccion}
+          costoInscripcion={gestion.costoInscripcion}
+          costoPlanilla={gestion.costoPlanilla}
+          cupoEquipos={gestion.cupoEquipos}
+          fechaInicioEstimada={gestion.fechaInicioEstimada}
+        />
+      </section>
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Estado</h2>

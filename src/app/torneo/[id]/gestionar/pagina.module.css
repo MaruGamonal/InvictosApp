@@ -290,3 +290,21 @@
   font-size: 13px;
   color: var(--advertencia-texto);
 }
+
+.avisoNotifica {
+  margin-top: -4px;
+  font-size: 12px;
+  color: var(--acento-oscuro);
+}
+
+.avisoSinNotificar {
+  margin-top: -4px;
+  font-size: 12px;
+  color: var(--color-texto-terciario);
+}
+
+.filaCostos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
