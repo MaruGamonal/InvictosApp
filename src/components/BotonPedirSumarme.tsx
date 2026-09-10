@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './BotonSeguir.module.css';
 
@@ -13,16 +13,40 @@ export interface BotonPedirSumarmeProps {
  * que te inviten. Pide rol `player` siempre (D-85); el capitán la
  * resuelve desde la gestión del equipo, que no es parte de esta
  * pantalla pública.
+ *
+ * La ficha es pública y cacheada por evento (D-04b): nace visible para
+ * cualquiera, con la sesión real recién se sabe si quien mira ya tiene
+ * algún vínculo con el equipo — reportado en vivo: quien ya es parte
+ * del plantel (jugadora, delegada, capitana) seguía viendo el botón.
+ * Se consulta `GET /api/equipos/mi-rol` al montarse y, si ya hay algún
+ * rol, el botón desaparece — `solicitarIngreso` igual lo rechazaría,
+ * pero no hace falta ofrecerlo para que lo descubra recién al tocarlo.
  */
 type Estado =
   | { paso: 'inicial' }
   | { paso: 'enviando' }
   | { paso: 'enviado' }
+  | { paso: 'ya-soy-miembro' }
   | { paso: 'error'; mensaje: string };
 
 export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<Estado>({ paso: 'inicial' });
+
+  useEffect(() => {
+    let cancelado = false;
+    fetch(`/api/equipos/mi-rol?equipoId=${equipoId}`)
+      .then((respuesta) => (respuesta.ok ? respuesta.json() : null))
+      .then((cuerpo) => {
+        if (!cancelado && (cuerpo?.data?.roles?.length ?? 0) > 0) {
+          setEstado({ paso: 'ya-soy-miembro' });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [equipoId]);
 
   async function alTocar() {
     if (estado.paso !== 'inicial' && estado.paso !== 'error') return;
@@ -52,6 +76,8 @@ export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
       setEstado({ paso: 'error', mensaje: 'No pudimos conectar. Probá de nuevo.' });
     }
   }
+
+  if (estado.paso === 'ya-soy-miembro') return null;
 
   return (
     <div className={styles.envoltorio}>

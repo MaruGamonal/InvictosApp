@@ -44,6 +44,20 @@ describe('BotonPedirSumarme', () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith('/ingresar'));
   });
 
+  it('si ya tengo un rol en el equipo, el botón ni se muestra', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, data: { roles: ['player'] } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { queryByRole } = render(<BotonPedirSumarme equipoId="e-1" />);
+
+    await waitFor(() => expect(queryByRole('button')).toBeNull());
+    expect(fetchMock).toHaveBeenCalledWith('/api/equipos/mi-rol?equipoId=e-1');
+  });
+
   it('si ya sos parte del equipo, muestra el mensaje del servidor en vez de fallar en silencio', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
