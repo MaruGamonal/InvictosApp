@@ -109,14 +109,22 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
           <div className={styles.mapa}>
             <iframe
               title={`Ubicación de ${ficha.nombre}`}
-              src={`https://www.google.com/maps?q=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}&output=embed`}
+              src={
+                ficha.latitud != null && ficha.longitud != null
+                  ? `https://www.google.com/maps?q=${ficha.latitud},${ficha.longitud}&output=embed`
+                  : `https://www.google.com/maps?q=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}&output=embed`
+              }
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
           <a
             className={styles.enlaceMapa}
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}`}
+            href={
+              ficha.latitud != null && ficha.longitud != null
+                ? `https://www.google.com/maps/search/?api=1&query=${ficha.latitud},${ficha.longitud}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${ficha.direccion}, ${ficha.ciudad.nombre}, Argentina`)}`
+            }
             target="_blank"
             rel="noreferrer"
           >

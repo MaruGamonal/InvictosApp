@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
+import { BuscadorDireccionTorneo } from '@/components/BuscadorDireccionTorneo';
 import styles from '../../ingresar/pagina.module.css';
 
 interface Props {
@@ -45,6 +46,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [formato, setFormato] = useState('');
   const [ciudadId, setCiudadId] = useState('');
   const [direccion, setDireccion] = useState('');
+  const [coordenadas, setCoordenadas] = useState<{ lat: number; lng: number } | null>(null);
   const [descripcion, setDescripcion] = useState('');
   const [cupoEquipos, setCupoEquipos] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -66,6 +68,8 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           formato,
           ciudadId,
           direccion: direccion || undefined,
+          latitud: coordenadas?.lat,
+          longitud: coordenadas?.lng,
           descripcion: descripcion || undefined,
           cupoEquipos: Number(cupoEquipos),
         }),
@@ -155,13 +159,19 @@ export function FormularioCrearTorneo({ provincias }: Props) {
 
       <div className={styles.campo}>
         <label htmlFor="direccion">Dirección (opcional)</label>
-        <input
+        <BuscadorDireccionTorneo
           id="direccion"
-          type="text"
-          placeholder="La sede física — distinta de la ciudad"
           value={direccion}
-          onChange={(evento) => setDireccion(evento.target.value)}
+          onChange={(ubicacion) => {
+            setDireccion(ubicacion.direccion);
+            setCoordenadas(
+              ubicacion.latitud != null && ubicacion.longitud != null
+                ? { lat: ubicacion.latitud, lng: ubicacion.longitud }
+                : null,
+            );
+          }}
         />
+        <span className={styles.ayuda}>Elegila de la lista para que el mapa la ubique bien.</span>
       </div>
 
       <div className={styles.campo}>

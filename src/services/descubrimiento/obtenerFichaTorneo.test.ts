@@ -28,6 +28,8 @@ function filaTorneoBase(over: Partial<Record<string, unknown>> = {}) {
     ciudad_id: CIUDAD,
     ciudad_nombre: 'Rosario',
     direccion: null,
+    latitud: null,
+    longitud: null,
     estado: 'registration_open',
     visibilidad: 'public',
     formato: 'league',
@@ -123,6 +125,20 @@ describe('obtenerFichaTorneo', () => {
     const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
     expect(ficha.direccion).toBeNull();
     expect(ficha.equiposInscriptos).toEqual([]);
+  });
+
+  it('trae las coordenadas que Google Places resolvió al cargar la dirección', async () => {
+    mockearDb({
+      torneo: filaTorneoBase({
+        direccion: 'Cancha 3, Parque Sarmiento',
+        latitud: -32.9468,
+        longitud: -60.6393,
+      }),
+    });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.latitud).toBe(-32.9468);
+    expect(ficha.longitud).toBe(-60.6393);
   });
 
   it('un torneo sin reglamento no marca tieneReglamento', async () => {
