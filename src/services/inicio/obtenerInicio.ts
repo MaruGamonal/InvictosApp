@@ -32,7 +32,8 @@ export interface MiEquipo {
   id: string;
   nombre: string;
   categoriaGenero: string;
-  rolEquipo: string;
+  /** Una persona puede tener más de un rol activo en el mismo equipo (p. ej. jugadora y delegada). */
+  rolesEquipo: string[];
 }
 
 export interface MiTorneo {
@@ -49,6 +50,13 @@ export interface EquipoSeguido {
   id: string;
   nombre: string;
   categoriaGenero: string;
+}
+
+export interface TorneoSeguido {
+  id: string;
+  nombre: string;
+  categoriaGenero: string;
+  modalidad: string;
 }
 
 export interface TorneoAdministrado {
@@ -72,11 +80,13 @@ export interface InicioResultado {
     equipos: MiEquipo[];
     torneos: MiTorneo[];
     equiposSeguidos: EquipoSeguido[];
+    torneosSeguidos: TorneoSeguido[];
     resultadosPorConfirmar: number;
   } | null;
   organizador: {
     torneosAdministrados: TorneoAdministrado[];
     equiposSeguidos: EquipoSeguido[];
+    torneosSeguidos: TorneoSeguido[];
     inscripcionesPendientes: number;
     resultadosSinCargar: number;
   } | null;
@@ -106,7 +116,23 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
      ORDER BY e.nombre`,
     [perfil.id],
   );
-  const misEquiposIds = equiposRows.map((fila) => fila.id);
+  // Un rol activo por fila (`06`, D-23): agrupa antes de listar, para no
+  // mostrar el mismo equipo dos veces si es jugadora y delegada a la vez.
+  const misEquipos = new Map<string, MiEquipo>();
+  for (const fila of equiposRows) {
+    const existente = misEquipos.get(fila.id);
+    if (existente) {
+      existente.rolesEquipo.push(fila.rol_equipo);
+      continue;
+    }
+    misEquipos.set(fila.id, {
+      id: fila.id,
+      nombre: fila.nombre,
+      categoriaGenero: fila.categoria_genero,
+      rolesEquipo: [fila.rol_equipo],
+    });
+  }
+  const misEquiposIds = [...misEquipos.keys()];
   const esJugador = misEquiposIds.length > 0;
 
   const { rows: organizacionesRows } = await pool.query<{ organizacion_id: string }>(
@@ -203,6 +229,21 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       [contexto.usuarioId],
     );
 
+    const { rows: torneosSeguidosRows } = await pool.query<{
+      id: string;
+      nombre: string;
+      categoria_genero: string;
+      modalidad: string;
+    }>(
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad
+       FROM seguimiento sg
+       JOIN torneo t ON t.id = sg.entidad_seguida_id
+       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'tournament'
+       ORDER BY sg.fecha_alta DESC
+       LIMIT 5`,
+      [contexto.usuarioId],
+    );
+
     const { rows: pendientesRows } = await pool.query<{ cantidad: string }>(
       `SELECT count(*) AS cantidad
        FROM partido p
@@ -214,12 +255,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
 
     bloqueJugador = {
       proximoPartido,
-      equipos: equiposRows.map((fila) => ({
-        id: fila.id,
-        nombre: fila.nombre,
-        categoriaGenero: fila.categoria_genero,
-        rolEquipo: fila.rol_equipo,
-      })),
+      equipos: [...misEquipos.values()],
       torneos: torneosRows.map((fila) => ({
         torneoId: fila.torneo_id,
         nombre: fila.nombre,
@@ -228,6 +264,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         miEquipoId: fila.equipo_id,
         miEquipoNombre: fila.equipo_nombre,
         posicionActual: fila.posicion_actual,
+      })),
+      torneosSeguidos: torneosSeguidosRows.map((fila) => ({
+        id: fila.id,
+        nombre: fila.nombre,
+        categoriaGenero: fila.categoria_genero,
+        modalidad: fila.modalidad,
       })),
       equiposSeguidos: equiposSeguidosRows.map((fila) => ({
         id: fila.id,
@@ -273,6 +315,21 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       [contexto.usuarioId],
     );
 
+    const { rows: torneosSeguidosOrgRows } = await pool.query<{
+      id: string;
+      nombre: string;
+      categoria_genero: string;
+      modalidad: string;
+    }>(
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad
+       FROM seguimiento sg
+       JOIN torneo t ON t.id = sg.entidad_seguida_id
+       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'tournament'
+       ORDER BY sg.fecha_alta DESC
+       LIMIT 5`,
+      [contexto.usuarioId],
+    );
+
     const { rows: inscripcionesPendRows } = await pool.query<{ cantidad: string }>(
       `SELECT count(*) AS cantidad FROM inscripcion i
        JOIN torneo t ON t.id = i.torneo_id
@@ -303,6 +360,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         id: fila.id,
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
+      })),
+      torneosSeguidos: torneosSeguidosOrgRows.map((fila) => ({
+        id: fila.id,
+        nombre: fila.nombre,
+        categoriaGenero: fila.categoria_genero,
+        modalidad: fila.modalidad,
       })),
       inscripcionesPendientes: Number(inscripcionesPendRows[0]?.cantidad ?? 0),
       resultadosSinCargar: Number(resultadosSinCargarRows[0]?.cantidad ?? 0),

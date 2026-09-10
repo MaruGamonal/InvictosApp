@@ -82,7 +82,7 @@ export default async function PaginaGestionarEquipo({
               equipoId={id}
               perfilId={integrante.perfilId}
               nombreVisible={integrante.nombreVisible}
-              rolEquipo={integrante.rolEquipo}
+              rolesEquipo={integrante.rolesEquipo}
               esUnoMismo={integrante.perfilId === perfil.id}
               esCapitanViewer={esCapitan}
             />

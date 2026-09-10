@@ -9,7 +9,7 @@ interface Props {
   equipoId: string;
   perfilId: string;
   nombreVisible: string;
-  rolEquipo: 'captain' | 'delegate' | 'player' | 'coach';
+  rolesEquipo: Array<'captain' | 'delegate' | 'player' | 'coach'>;
   esUnoMismo: boolean;
   esCapitanViewer: boolean;
 }
@@ -28,7 +28,7 @@ export function FilaIntegranteGestion({
   equipoId,
   perfilId,
   nombreVisible,
-  rolEquipo,
+  rolesEquipo,
   esUnoMismo,
   esCapitanViewer,
 }: Props) {
@@ -105,7 +105,9 @@ export function FilaIntegranteGestion({
           {esUnoMismo && ' (vos)'}
         </span>
         <span className={styles.rolIntegrante}>
-          {obtenerEtiqueta('integranteEquipo.rolEquipo', rolEquipo).etiqueta}
+          {rolesEquipo
+            .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
+            .join(' · ')}
         </span>
       </div>
 

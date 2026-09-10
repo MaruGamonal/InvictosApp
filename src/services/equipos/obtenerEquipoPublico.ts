@@ -29,7 +29,14 @@ export interface IntegranteEquipoPublico {
   nombreVisible: string;
   fotoUrl: string | null;
   posicion: string | null;
-  rolEquipo: 'captain' | 'delegate' | 'player' | 'coach';
+  /**
+   * Una persona puede tener más de un vínculo activo en el mismo equipo
+   * (p. ej. jugadora y delegada a la vez — `cambiarRolIntegrante.ts`,
+   * "quitar delegate no toca sus otros vínculos"): son roles, no
+   * personas, así que se agrupan acá en vez de listar a la misma
+   * persona una vez por cada uno.
+   */
+  rolesEquipo: Array<'captain' | 'delegate' | 'player' | 'coach'>;
 }
 
 export interface DesempenioTorneo {
@@ -72,15 +79,25 @@ interface FilaIntegrante {
   rol_equipo: 'captain' | 'delegate' | 'player' | 'coach';
 }
 
-function aIntegrantePublico(fila: FilaIntegrante): IntegranteEquipoPublico {
-  const mostrarCompleto = fila.visibilidad === 'public';
-  return {
-    perfilId: fila.perfil_id,
-    nombreVisible: fila.nombre_visible,
-    fotoUrl: mostrarCompleto ? fila.foto_url : null,
-    posicion: mostrarCompleto ? fila.posicion : null,
-    rolEquipo: fila.rol_equipo,
-  };
+/** Una fila por (perfil, rol) — agrupa por persona antes de mostrarla. */
+function agruparPorPersona(filas: FilaIntegrante[]): IntegranteEquipoPublico[] {
+  const porPerfil = new Map<string, IntegranteEquipoPublico>();
+  for (const fila of filas) {
+    const mostrarCompleto = fila.visibilidad === 'public';
+    const existente = porPerfil.get(fila.perfil_id);
+    if (existente) {
+      existente.rolesEquipo.push(fila.rol_equipo);
+      continue;
+    }
+    porPerfil.set(fila.perfil_id, {
+      perfilId: fila.perfil_id,
+      nombreVisible: fila.nombre_visible,
+      fotoUrl: mostrarCompleto ? fila.foto_url : null,
+      posicion: mostrarCompleto ? fila.posicion : null,
+      rolesEquipo: [fila.rol_equipo],
+    });
+  }
+  return [...porPerfil.values()];
 }
 
 export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPublico> = async (
@@ -118,8 +135,11 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
      ORDER BY pd.nombre_visible ASC`,
     [datos.equipoId],
   );
-  const plantel = integrantes.filter((i) => i.rol_equipo !== 'coach').map(aIntegrantePublico);
-  const cuerpoTecnico = integrantes.filter((i) => i.rol_equipo === 'coach').map(aIntegrantePublico);
+  const personas = agruparPorPersona(integrantes);
+  // Alguien puede ser jugador y DT a la vez: aparece en las dos listas
+  // (son secciones distintas, no la misma), pero una sola vez en cada una.
+  const plantel = personas.filter((p) => p.rolesEquipo.some((r) => r !== 'coach'));
+  const cuerpoTecnico = personas.filter((p) => p.rolesEquipo.includes('coach'));
 
   const { rows: historialFilas } = await pool.query<{
     torneo_id: string;

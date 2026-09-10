@@ -126,7 +126,10 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
                     {integrante.nombreVisible}
                   </Link>
                   <span className={styles.rolIntegrante}>
-                    {obtenerEtiqueta('integranteEquipo.rolEquipo', integrante.rolEquipo).etiqueta}
+                    {integrante.rolesEquipo
+                      .filter((rol) => rol !== 'coach')
+                      .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
+                      .join(' · ')}
                   </span>
                 </li>
               ))}

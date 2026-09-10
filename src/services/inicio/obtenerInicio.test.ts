@@ -14,8 +14,9 @@ interface Opciones {
   equipos?: Array<{ id: string; nombre: string; categoria_genero: string; rol_equipo: string }>;
   organizaciones?: Array<{ organizacion_id: string }>;
   partido?: Record<string, unknown> | null;
-  torneosSeguidos?: Array<Record<string, unknown>>;
+  torneosParticipo?: Array<Record<string, unknown>>;
   equiposSeguidos?: Array<{ id: string; nombre: string; categoria_genero: string }>;
+  torneosSeguidos?: Array<{ id: string; nombre: string; categoria_genero: string; modalidad: string }>;
   resultadosPorConfirmar?: number;
   torneosAdministrados?: Array<Record<string, unknown>>;
   inscripcionesPendientes?: number;
@@ -46,10 +47,13 @@ function mockearDb(opciones: Opciones) {
           return { rows: opciones.partido ? [opciones.partido] : [] };
         }
         if (texto.includes('posicion_actual')) {
-          return { rows: opciones.torneosSeguidos ?? [] };
+          return { rows: opciones.torneosParticipo ?? [] };
         }
-        if (texto.includes('FROM seguimiento')) {
+        if (texto.includes('FROM seguimiento') && texto.includes("tipo_seguido = 'team'")) {
           return { rows: opciones.equiposSeguidos ?? [] };
+        }
+        if (texto.includes('FROM seguimiento') && texto.includes("tipo_seguido = 'tournament'")) {
+          return { rows: opciones.torneosSeguidos ?? [] };
         }
         if (texto.includes("estado_resultado = 'loaded'")) {
           return { rows: [{ cantidad: String(opciones.resultadosPorConfirmar ?? 0) }] };
@@ -167,6 +171,56 @@ describe('obtenerInicio', () => {
     ]);
     expect(resultado.organizador?.inscripcionesPendientes).toBe(2);
     expect(resultado.organizador?.resultadosSinCargar).toBe(3);
+  });
+
+  it('jugador: trae los torneos que sigue, separados de los que juega', async () => {
+    mockearDb({
+      equipos: [
+        { id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'captain' },
+      ],
+      organizaciones: [],
+      torneosSeguidos: [
+        { id: 'tor-seguido', nombre: 'Copa Amigos', categoria_genero: 'mixed', modalidad: 'f7' },
+      ],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+
+    expect(resultado.jugador?.torneosSeguidos).toEqual([
+      { id: 'tor-seguido', nombre: 'Copa Amigos', categoriaGenero: 'mixed', modalidad: 'f7' },
+    ]);
+  });
+
+  it('organizador: también trae los torneos que sigue', async () => {
+    mockearDb({
+      equipos: [],
+      organizaciones: [{ organizacion_id: 'org-1' }],
+      torneosSeguidos: [
+        { id: 'tor-seguido', nombre: 'Copa Amigos', categoria_genero: 'mixed', modalidad: 'f7' },
+      ],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+
+    expect(resultado.organizador?.torneosSeguidos).toEqual([
+      { id: 'tor-seguido', nombre: 'Copa Amigos', categoriaGenero: 'mixed', modalidad: 'f7' },
+    ]);
+  });
+
+  it('con dos roles activos en el mismo equipo, aparece una sola vez con los dos roles', async () => {
+    mockearDb({
+      equipos: [
+        { id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'player' },
+        { id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'delegate' },
+      ],
+      organizaciones: [],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+
+    expect(resultado.jugador?.equipos).toEqual([
+      { id: 'eq-1', nombre: 'Los Pibes', categoriaGenero: 'male', rolesEquipo: ['player', 'delegate'] },
+    ]);
   });
 
   it('sin perfil deportivo, NO_ENCONTRADO', async () => {

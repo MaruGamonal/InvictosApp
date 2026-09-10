@@ -89,7 +89,7 @@ describe('obtenerEquipoPublico', () => {
         nombreVisible: 'Jugador Uno',
         fotoUrl: 'https://cdn.example.com/foto.png',
         posicion: 'forward',
-        rolEquipo: 'player',
+        rolesEquipo: ['player'],
       },
     ]);
     expect(equipo.historial).toEqual([
@@ -147,8 +147,40 @@ describe('obtenerEquipoPublico', () => {
       nombreVisible: 'Jugador Uno',
       fotoUrl: null,
       posicion: null,
-      rolEquipo: 'player',
+      rolesEquipo: ['player'],
     });
+  });
+
+  it('una persona con dos roles activos en el mismo equipo aparece una sola vez, con los dos roles', async () => {
+    mockearDb({
+      integrantes: [
+        filaIntegrante({ perfil_id: 'perfil-1', rol_equipo: 'player' }),
+        filaIntegrante({ perfil_id: 'perfil-1', rol_equipo: 'delegate' }),
+        filaIntegrante({ perfil_id: 'perfil-2', rol_equipo: 'captain' }),
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+
+    expect(equipo.plantel).toHaveLength(2);
+    const conDosRoles = equipo.plantel.find((p) => p.perfilId === 'perfil-1');
+    expect(conDosRoles?.rolesEquipo).toEqual(['player', 'delegate']);
+  });
+
+  it('una persona jugadora y DT a la vez aparece en plantel y en cuerpo técnico, una sola vez en cada uno', async () => {
+    mockearDb({
+      integrantes: [
+        filaIntegrante({ perfil_id: 'perfil-1', rol_equipo: 'player' }),
+        filaIntegrante({ perfil_id: 'perfil-1', rol_equipo: 'coach' }),
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+
+    expect(equipo.plantel.map((p) => p.perfilId)).toEqual(['perfil-1']);
+    expect(equipo.cuerpoTecnico.map((p) => p.perfilId)).toEqual(['perfil-1']);
   });
 
   it('un equipo sin historial todavía devuelve listas vacías y acumulado en cero', async () => {
