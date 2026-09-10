@@ -34,7 +34,9 @@ const FORMATOS = [
  * wizard de varias pantallas del prototipo (nombre → formato →
  * reglamento → publicar): el torneo nace en `draft` con los defaults
  * del amateur (`06`) y el resto de esos pasos (reglamento, publicar) se
- * hacen después, desde la ficha del torneo.
+ * hacen después, desde la gestión del torneo — ahí redirige al crearlo,
+ * nunca a la ficha pública: un torneo `draft` todavía no es visible ahí
+ * para nadie, ni para quien lo acaba de crear (`CONTEXTO_PUBLICO`, D-04b).
  */
 export function FormularioCrearTorneo({ provincias }: Props) {
   const [nombre, setNombre] = useState('');
@@ -76,7 +78,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
         return;
       }
 
-      window.location.assign(`/torneo/${cuerpo.data.id}`);
+      window.location.assign(`/torneo/${cuerpo.data.id}/gestionar`);
     } catch {
       setError('No pudimos conectar. Revisá tu conexión e intentá de nuevo.');
       setEnviando(false);
