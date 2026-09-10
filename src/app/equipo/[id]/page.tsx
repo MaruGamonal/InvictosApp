@@ -27,7 +27,15 @@ import styles from './pagina.module.css';
 
 async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | null> {
   try {
-    return await cachearLecturaDeEquipo('equipo-publico', equipoId, () =>
+    // 'equipo-publico-v2': la caché de datos de Next es persistente entre
+    // deploys (no expira por versión de código) y `rolEquipo` (string) se
+    // volvió `rolesEquipo` (string[]) — con la clave vieja, una entrada
+    // cacheada antes de ese cambio seguía sirviendo la forma anterior a
+    // código nuevo que ya esperaba `rolesEquipo`, y `undefined.filter(...)`
+    // tiraba abajo la página (reportado en vivo, confirmado por Sentry).
+    // Cambiar la clave fuerza una entrada nueva; si el shape vuelve a
+    // cambiar, esto hay que volver a bumpearlo.
+    return await cachearLecturaDeEquipo('equipo-publico-v2', equipoId, () =>
       obtenerEquipoPublico({ equipoId }, CONTEXTO_PUBLICO),
     )();
   } catch (error) {
