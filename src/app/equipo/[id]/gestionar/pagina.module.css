@@ -76,29 +76,41 @@
   font: 700 15px/1.2 var(--fuente-texto);
 }
 
-.rolIntegrante {
-  font: 600 11px/1 var(--fuente-texto);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.filaBadgesRol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badgeConAccion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.botonQuitarBadge {
+  background: none;
+  border: none;
   color: var(--color-texto-secundario);
-  background: var(--fondo-sutil);
-  padding: 4px 9px;
-  border-radius: var(--radio-pill);
-  flex: none;
+  font: 700 14px/1 var(--fuente-texto);
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.botonQuitarBadge:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.filaBotonesRol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .filaAccion {
   display: flex;
   gap: 8px;
-}
-
-.filaAccion select {
-  flex: 1;
-  border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-family: var(--fuente-texto);
-  font-size: 13px;
 }
 
 .filaAccion button {
@@ -218,6 +230,13 @@
   margin: 0;
   font-size: 13px;
   color: var(--advertencia-texto);
+}
+
+.textoAyuda {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-texto-secundario);
 }
 
 .filaEscudo {

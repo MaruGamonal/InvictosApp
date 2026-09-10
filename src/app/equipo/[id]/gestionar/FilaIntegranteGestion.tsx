@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { Badge } from '@/components/Badge';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -14,16 +14,21 @@ interface Props {
   esCapitanViewer: boolean;
 }
 
-const ACCIONES = [
-  { valor: 'captain:asignar', etiqueta: 'Hacer capitán' },
-  { valor: 'delegate:asignar', etiqueta: 'Hacer delegado' },
-  { valor: 'delegate:quitar', etiqueta: 'Quitar como delegado' },
-  { valor: 'coach:asignar', etiqueta: 'Hacer DT' },
-  { valor: 'coach:quitar', etiqueta: 'Quitar como DT' },
-  { valor: 'fuera', etiqueta: 'Quitar del plantel' },
+const ROLES_DESIGNABLES: Array<{
+  rol: 'captain' | 'delegate' | 'coach';
+  etiqueta: string;
+  confirmar?: string;
+}> = [
+  {
+    rol: 'captain',
+    etiqueta: 'Hacer capitán',
+    confirmar: '¿Transferir la capitanía a esta persona? Vos dejás de ser capitán.',
+  },
+  { rol: 'delegate', etiqueta: 'Hacer delegado' },
+  { rol: 'coach', etiqueta: 'Hacer DT' },
 ];
 
-/** Fila de plantel en la gestión del equipo: acciones de Capitán sobre otros, o "Dejar equipo" sobre uno mismo. */
+/** Fila de plantel en la gestión del equipo: badges de rol con quitar en línea, o "Dejar equipo" sobre uno mismo. */
 export function FilaIntegranteGestion({
   equipoId,
   perfilId,
@@ -33,49 +38,61 @@ export function FilaIntegranteGestion({
   esCapitanViewer,
 }: Props) {
   const router = useRouter();
-  const [accion, setAccion] = useState('');
-  const [enviando, setEnviando] = useState(false);
+  const [enviando, setEnviando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function aplicar() {
-    if (!accion || enviando) return;
-    setEnviando(true);
+  async function llamar(clave: string, url: string, body: object) {
+    setEnviando(clave);
     setError(null);
-
     try {
-      const respuesta =
-        accion === 'fuera'
-          ? await fetch('/api/equipos/quitar-integrante', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ equipoId, perfilId }),
-            })
-          : await fetch('/api/equipos/cambiar-rol', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                equipoId,
-                perfilId,
-                rol: accion.split(':')[0],
-                accion: accion.split(':')[1],
-              }),
-            });
+      const respuesta = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
         setError(cuerpo?.error?.mensaje ?? 'No se pudo aplicar. Probá de nuevo.');
-        setEnviando(false);
+        setEnviando(null);
         return;
       }
       router.refresh();
     } catch {
       setError('No pudimos conectar. Probá de nuevo.');
-      setEnviando(false);
+      setEnviando(null);
     }
+  }
+
+  function designar(rol: 'captain' | 'delegate' | 'coach', confirmar?: string) {
+    if (enviando) return;
+    if (confirmar && !window.confirm(confirmar)) return;
+    llamar(`${rol}:asignar`, '/api/equipos/cambiar-rol', {
+      equipoId,
+      perfilId,
+      rol,
+      accion: 'asignar',
+    });
+  }
+
+  function quitarRol(rol: 'delegate' | 'coach') {
+    if (enviando) return;
+    llamar(`${rol}:quitar`, '/api/equipos/cambiar-rol', {
+      equipoId,
+      perfilId,
+      rol,
+      accion: 'quitar',
+    });
+  }
+
+  function quitarDelPlantel() {
+    if (enviando) return;
+    if (!window.confirm(`¿Quitar a ${nombreVisible} del plantel?`)) return;
+    llamar('fuera', '/api/equipos/quitar-integrante', { equipoId, perfilId });
   }
 
   async function dejarEquipo() {
     if (enviando) return;
-    setEnviando(true);
+    setEnviando('fuera');
     setError(null);
 
     try {
@@ -87,15 +104,17 @@ export function FilaIntegranteGestion({
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
         setError(cuerpo?.error?.mensaje ?? 'No se pudo dejar el equipo.');
-        setEnviando(false);
+        setEnviando(null);
         return;
       }
       router.push(`/equipo/${equipoId}`);
     } catch {
       setError('No pudimos conectar. Probá de nuevo.');
-      setEnviando(false);
+      setEnviando(null);
     }
   }
+
+  const rolesFaltantes = ROLES_DESIGNABLES.filter((opcion) => !rolesEquipo.includes(opcion.rol));
 
   return (
     <div className={styles.filaIntegrante}>
@@ -104,11 +123,25 @@ export function FilaIntegranteGestion({
           {nombreVisible}
           {esUnoMismo && ' (vos)'}
         </span>
-        <span className={styles.rolIntegrante}>
-          {rolesEquipo
-            .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
-            .join(' · ')}
-        </span>
+      </div>
+
+      <div className={styles.filaBadgesRol}>
+        {rolesEquipo.map((rol) => (
+          <span key={rol} className={styles.badgeConAccion}>
+            <Badge campo="integranteEquipo.rolEquipo" valor={rol} />
+            {esCapitanViewer && !esUnoMismo && (rol === 'delegate' || rol === 'coach') && (
+              <button
+                type="button"
+                className={styles.botonQuitarBadge}
+                title={`Quitar como ${rol === 'delegate' ? 'delegado' : 'DT'}`}
+                onClick={() => quitarRol(rol)}
+                disabled={enviando !== null}
+              >
+                ×
+              </button>
+            )}
+          </span>
+        ))}
       </div>
 
       {error && <p className={styles.errorChico}>{error}</p>}
@@ -118,23 +151,31 @@ export function FilaIntegranteGestion({
           type="button"
           className={styles.botonPeligroChico}
           onClick={dejarEquipo}
-          disabled={enviando}
+          disabled={enviando !== null}
         >
-          {enviando ? 'Saliendo…' : 'Dejar equipo'}
+          {enviando === 'fuera' ? 'Saliendo…' : 'Dejar equipo'}
         </button>
       ) : (
         esCapitanViewer && (
-          <div className={styles.filaAccion}>
-            <select value={accion} onChange={(evento) => setAccion(evento.target.value)}>
-              <option value="">Elegir acción…</option>
-              {ACCIONES.map((opcion) => (
-                <option key={opcion.valor} value={opcion.valor}>
-                  {opcion.etiqueta}
-                </option>
-              ))}
-            </select>
-            <button type="button" onClick={aplicar} disabled={!accion || enviando}>
-              {enviando ? 'Aplicando…' : 'Aplicar'}
+          <div className={styles.filaBotonesRol}>
+            {rolesFaltantes.map((opcion) => (
+              <button
+                key={opcion.rol}
+                type="button"
+                className={styles.botonSecundarioChico}
+                onClick={() => designar(opcion.rol, opcion.confirmar)}
+                disabled={enviando !== null}
+              >
+                {enviando === `${opcion.rol}:asignar` ? 'Aplicando…' : opcion.etiqueta}
+              </button>
+            ))}
+            <button
+              type="button"
+              className={styles.botonPeligroChico}
+              onClick={quitarDelPlantel}
+              disabled={enviando !== null}
+            >
+              {enviando === 'fuera' ? 'Quitando…' : 'Quitar del plantel'}
             </button>
           </div>
         )

@@ -72,6 +72,11 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
 
   return (
     <form className={styles.formularioChico} onSubmit={enviar}>
+      <p className={styles.textoAyuda}>
+        Buscá a la persona en la plataforma o escribí su nombre directamente — si nadie coincide,
+        le creamos un perfil para que lo reclame cuando entre.
+      </p>
+
       {error && <p className={styles.errorChico}>{error}</p>}
       {aviso && <p className={styles.avisoChico}>{aviso}</p>}
 
