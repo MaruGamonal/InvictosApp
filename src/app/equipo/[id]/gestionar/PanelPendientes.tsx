@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import type {
   InvitacionPendiente,
@@ -86,43 +87,12 @@ export function PanelPendientes({
       )}
 
       {solicitudesPendientes.length > 0 && (
-        <div className={styles.lista}>
-          <span className={styles.subtitulo}>Pedidos para sumarse</span>
-          {solicitudesPendientes.map((solicitud) => (
-            <div key={solicitud.perfilId} className={styles.filaPendiente}>
-              <span>{solicitud.nombreVisible}</span>
-              <div className={styles.filaAccion}>
-                <button
-                  type="button"
-                  disabled={enviandoId === solicitud.perfilId}
-                  onClick={() =>
-                    llamar(solicitud.perfilId, '/api/equipos/resolver-solicitud', {
-                      equipoId,
-                      perfilId: solicitud.perfilId,
-                      aceptar: true,
-                    })
-                  }
-                >
-                  Aprobar
-                </button>
-                <button
-                  type="button"
-                  className={styles.botonSecundarioChico}
-                  disabled={enviandoId === solicitud.perfilId}
-                  onClick={() =>
-                    llamar(solicitud.perfilId, '/api/equipos/resolver-solicitud', {
-                      equipoId,
-                      perfilId: solicitud.perfilId,
-                      aceptar: false,
-                    })
-                  }
-                >
-                  Rechazar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <Link
+          href={`/equipo/${equipoId}/gestionar/solicitudes`}
+          className={styles.enlaceSolicitudes}
+        >
+          Ver solicitudes de ingreso ({solicitudesPendientes.length})
+        </Link>
       )}
     </section>
   );

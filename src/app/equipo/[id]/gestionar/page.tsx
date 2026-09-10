@@ -109,11 +109,20 @@ export default async function PaginaGestionarEquipo({
       {esCapitan && (
         <section className={styles.seccionPeligro}>
           <h2 className={styles.tituloSeccion}>Archivar equipo</h2>
-          <p className={styles.textoPeligro}>
-            Baja lógica — no se puede deshacer desde acá. Bloqueado mientras el equipo compite en un
-            torneo en curso.
-          </p>
-          <BotonArchivarEquipo equipoId={id} />
+          {gestion?.torneoEnCursoQueBloqueaArchivado ? (
+            <p className={styles.avisoBloqueo}>
+              No se puede: el equipo está jugando {gestion.torneoEnCursoQueBloqueaArchivado.nombre},
+              un torneo en curso. Primero hay que resolverlo como una baja de ese torneo.
+            </p>
+          ) : (
+            <>
+              <p className={styles.textoPeligro}>
+                Nunca se borra un equipo — es baja lógica. Ningún partido ni tabla que lo referencie
+                queda apuntando al vacío.
+              </p>
+              <BotonArchivarEquipo equipoId={id} />
+            </>
+          )}
         </section>
       )}
     </div>

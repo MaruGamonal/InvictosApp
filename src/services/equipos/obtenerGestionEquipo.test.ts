@@ -14,6 +14,7 @@ function mockearDb(opciones: {
   rolesEnEquipo?: string[];
   invitaciones?: Array<{ perfil_id: string; nombre_visible: string; rol_equipo: string }>;
   solicitudes?: Array<{ perfil_id: string; nombre_visible: string }>;
+  torneosEnCurso?: Array<{ id: string; nombre: string }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -29,6 +30,9 @@ function mockearDb(opciones: {
         }
         if (texto.includes("estado_vinculo = 'requested'")) {
           return { rows: opciones.solicitudes ?? [] };
+        }
+        if (texto.includes("t.estado = 'in_progress'")) {
+          return { rows: opciones.torneosEnCurso ?? [] };
         }
         return { rows: [] };
       },
@@ -59,6 +63,23 @@ describe('obtenerGestionEquipo', () => {
       { perfilId: 'p-2', nombreVisible: 'Beto', rol: 'coach' },
     ]);
     expect(resultado.solicitudesPendientes).toEqual([{ perfilId: 'p-3', nombreVisible: 'Caro' }]);
+    expect(resultado.torneoEnCursoQueBloqueaArchivado).toBeNull();
+  });
+
+  it('jugando un torneo en curso, informa cuál bloquea el archivado', async () => {
+    mockearDb({
+      perfilId: '21111111-1111-1111-1111-111111111111',
+      rolesEnEquipo: ['captain'],
+      torneosEnCurso: [{ id: 't-1', nombre: 'Copa Otoño F5' }],
+    });
+    const { obtenerGestionEquipo } = await import('./obtenerGestionEquipo');
+
+    const resultado = await obtenerGestionEquipo(
+      { equipoId: '11111111-1111-1111-1111-111111111111' },
+      contextoCon('usuario-1'),
+    );
+
+    expect(resultado.torneoEnCursoQueBloqueaArchivado).toEqual({ id: 't-1', nombre: 'Copa Otoño F5' });
   });
 
   it('sin ser capitán ni delegado, SIN_PERMISO', async () => {

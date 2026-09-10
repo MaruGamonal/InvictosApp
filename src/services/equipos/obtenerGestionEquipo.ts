@@ -29,6 +29,13 @@ export interface SolicitudPendiente {
 export interface GestionEquipoResultado {
   invitacionesPendientes: InvitacionPendiente[];
   solicitudesPendientes: SolicitudPendiente[];
+  /**
+   * Si el equipo está jugando un torneo en curso, `archivarEquipo` (T15)
+   * lo bloquea (`06`, D-68) — esto es esa misma condición, resuelta acá
+   * para poder mostrarla de entrada en vez de recién como error al
+   * tocar "Archivar equipo".
+   */
+  torneoEnCursoQueBloqueaArchivado: { id: string; nombre: string } | null;
 }
 
 export const obtenerGestionEquipo: Servicio<
@@ -68,6 +75,15 @@ export const obtenerGestionEquipo: Servicio<
     [datos.equipoId],
   );
 
+  const { rows: torneosEnCurso } = await pool.query<{ id: string; nombre: string }>(
+    `SELECT t.id, t.nombre
+     FROM inscripcion i
+     JOIN torneo t ON t.id = i.torneo_id
+     WHERE i.equipo_id = $1 AND i.estado = 'approved' AND t.estado = 'in_progress'
+     LIMIT 1`,
+    [datos.equipoId],
+  );
+
   return {
     invitacionesPendientes: invitaciones.map((fila) => ({
       perfilId: fila.perfil_id,
@@ -78,5 +94,6 @@ export const obtenerGestionEquipo: Servicio<
       perfilId: fila.perfil_id,
       nombreVisible: fila.nombre_visible,
     })),
+    torneoEnCursoQueBloqueaArchivado: torneosEnCurso[0] ?? null,
   };
 };
