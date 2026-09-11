@@ -30,6 +30,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   const [ciudadId, setCiudadId] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formularioValido = nombre.trim() !== '' && categoriaGenero !== '';
 
   const inputEscudoRef = useRef<HTMLInputElement>(null);
   const [archivoEscudo, setArchivoEscudo] = useState<File | null>(null);
@@ -89,7 +90,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
       <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
-      <p className={styles.texto}>Quedás como Capitán. Después sumás jugadores desde el plantel.</p>
+      <p className={styles.texto}>Podés inscribirlo con el plantel vacío y sumar gente después.</p>
 
       {error && <p className={styles.error}>{error}</p>}
 
@@ -117,7 +118,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
             className={styles.enlaceEscudo}
             onClick={() => inputEscudoRef.current?.click()}
           >
-            {archivoEscudo ? 'Cambiar escudo' : 'Elegir escudo'}
+            {archivoEscudo ? 'Cambiar escudo' : 'Subir escudo'}
           </button>
         </div>
       </div>
@@ -128,29 +129,33 @@ export function FormularioCrearEquipo({ provincias }: Props) {
           id="nombre"
           type="text"
           required
-          placeholder="Los Pibes del Fondo"
+          placeholder="Ej: Los Pibes del Fondo"
           value={nombre}
           onChange={(evento) => setNombre(evento.target.value)}
         />
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor="categoriaGenero">Categoría</label>
-        <select
-          id="categoriaGenero"
-          required
-          value={categoriaGenero}
-          onChange={(evento) => setCategoriaGenero(evento.target.value)}
-        >
-          <option value="" disabled>
-            Elegí una categoría
-          </option>
+        <label htmlFor="categoriaGenero">Categoría de género · obligatoria</label>
+        <div id="categoriaGenero" className={styles.segmentado} role="radiogroup">
           {CATEGORIAS_GENERO.map((opcion) => (
-            <option key={opcion.valor} value={opcion.valor}>
+            <button
+              key={opcion.valor}
+              type="button"
+              role="radio"
+              aria-checked={categoriaGenero === opcion.valor}
+              className={`${styles.segmentoBoton} ${
+                categoriaGenero === opcion.valor ? styles.segmentoBotonActivo : ''
+              }`}
+              onClick={() => setCategoriaGenero(opcion.valor)}
+            >
               {opcion.etiqueta}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
+        <p className={styles.ayudaAdvertencia}>
+          Sin esto no se puede calcular tu ranking ni avisar una inscripción cruzada.
+        </p>
       </div>
 
       <div className={styles.campo}>
@@ -163,7 +168,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
         />
       </div>
 
-      <button type="submit" className={styles.boton} disabled={enviando}>
+      <button type="submit" className={styles.boton} disabled={enviando || !formularioValido}>
         {enviando ? 'Creando…' : 'Crear equipo'}
       </button>
     </form>

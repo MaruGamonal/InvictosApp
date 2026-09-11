@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
@@ -9,8 +10,8 @@ import { listarCiudadesCacheado } from '@/app/torneos/_datos';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FilaIntegranteGestion } from './FilaIntegranteGestion';
+import { FilaInvitacionPendiente } from './FilaInvitacionPendiente';
 import { PanelPendientes } from './PanelPendientes';
-import { FormularioInvitarIntegrante } from './FormularioInvitarIntegrante';
 import { FormularioEditarEquipo } from './FormularioEditarEquipo';
 import { BotonArchivarEquipo } from './BotonArchivarEquipo';
 import styles from './pagina.module.css';
@@ -83,45 +84,47 @@ export default async function PaginaGestionarEquipo({
               equipoId={id}
               perfilId={integrante.perfilId}
               nombreVisible={integrante.nombreVisible}
+              fotoUrl={integrante.fotoUrl}
               rolesEquipo={integrante.rolesEquipo}
               esUnoMismo={integrante.perfilId === perfil.id}
               esCapitanViewer={esCapitan}
             />
           ))}
+          {gestion?.invitacionesPendientes.map((invitacion) => (
+            <FilaInvitacionPendiente
+              key={`${invitacion.perfilId}:${invitacion.rol}`}
+              equipoId={id}
+              perfilId={invitacion.perfilId}
+              nombreVisible={invitacion.nombreVisible}
+              fotoUrl={invitacion.fotoUrl}
+              rol={invitacion.rol}
+            />
+          ))}
         </div>
+
+        {puedeGestionar && (
+          <Link href={`/equipo/${id}/gestionar/invitar`} className={styles.enlaceInvitar}>
+            + Invitar integrante
+          </Link>
+        )}
+
+        <p className={styles.avisoInfo}>
+          El Capitán no puede irse sin designar reemplazo. Cualquier otro se da de baja al
+          instante — nadie tiene que confirmarlo.
+        </p>
+
+        {gestion && <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />}
       </section>
 
-      {puedeGestionar && gestion && (
-        <>
-          <PanelPendientes
-            equipoId={id}
-            invitacionesPendientes={gestion.invitacionesPendientes}
-            solicitudesPendientes={gestion.solicitudesPendientes}
-          />
-
-          <section className={styles.seccion}>
-            <h2 className={styles.tituloSeccion}>Invitar integrante</h2>
-            <FormularioInvitarIntegrante equipoId={id} />
-          </section>
-        </>
-      )}
-
       {esCapitan && (
-        <section className={styles.seccionPeligro}>
-          <h2 className={styles.tituloSeccion}>Archivar equipo</h2>
+        <section className={styles.seccion}>
           {gestion?.torneoEnCursoQueBloqueaArchivado ? (
             <p className={styles.avisoBloqueo}>
               No se puede: el equipo está jugando {gestion.torneoEnCursoQueBloqueaArchivado.nombre},
               un torneo en curso. Primero hay que resolverlo como una baja de ese torneo.
             </p>
           ) : (
-            <>
-              <p className={styles.textoPeligro}>
-                Nunca se borra un equipo — es baja lógica. Ningún partido ni tabla que lo referencie
-                queda apuntando al vacío.
-              </p>
-              <BotonArchivarEquipo equipoId={id} />
-            </>
+            <BotonArchivarEquipo equipoId={id} />
           )}
         </section>
       )}

@@ -18,6 +18,7 @@ export type ObtenerGestionEquipoInput = z.infer<typeof esquemaEntrada>;
 export interface InvitacionPendiente {
   perfilId: string;
   nombreVisible: string;
+  fotoUrl: string | null;
   rol: 'player' | 'delegate' | 'coach';
 }
 
@@ -56,9 +57,10 @@ export const obtenerGestionEquipo: Servicio<
   const { rows: invitaciones } = await pool.query<{
     perfil_id: string;
     nombre_visible: string;
+    foto_url: string | null;
     rol_equipo: 'player' | 'delegate' | 'coach';
   }>(
-    `SELECT ie.perfil_id, pd.nombre_visible, ie.rol_equipo
+    `SELECT ie.perfil_id, pd.nombre_visible, pd.foto_url, ie.rol_equipo
      FROM integrante_equipo ie
      JOIN perfil_deportivo pd ON pd.id = ie.perfil_id
      WHERE ie.equipo_id = $1 AND ie.estado_vinculo = 'invited'
@@ -88,6 +90,7 @@ export const obtenerGestionEquipo: Servicio<
     invitacionesPendientes: invitaciones.map((fila) => ({
       perfilId: fila.perfil_id,
       nombreVisible: fila.nombre_visible,
+      fotoUrl: fila.foto_url ?? null,
       rol: fila.rol_equipo,
     })),
     solicitudesPendientes: solicitudes.map((fila) => ({

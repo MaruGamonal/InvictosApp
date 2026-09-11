@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/Badge';
+import { Escudo } from '@/components/Escudo';
 import styles from './pagina.module.css';
 
 interface Props {
   equipoId: string;
   perfilId: string;
   nombreVisible: string;
+  fotoUrl: string | null;
   rolesEquipo: Array<'captain' | 'delegate' | 'player' | 'coach'>;
   esUnoMismo: boolean;
   esCapitanViewer: boolean;
@@ -33,6 +35,7 @@ export function FilaIntegranteGestion({
   equipoId,
   perfilId,
   nombreVisible,
+  fotoUrl,
   rolesEquipo,
   esUnoMismo,
   esCapitanViewer,
@@ -40,6 +43,8 @@ export function FilaIntegranteGestion({
   const router = useRouter();
   const [enviando, setEnviando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [masOpciones, setMasOpciones] = useState(false);
+  const esCapitan = rolesEquipo.includes('captain');
 
   async function llamar(clave: string, url: string, body: object) {
     setEnviando(clave);
@@ -115,70 +120,86 @@ export function FilaIntegranteGestion({
   }
 
   const rolesFaltantes = ROLES_DESIGNABLES.filter((opcion) => !rolesEquipo.includes(opcion.rol));
+  const puedeQuitarRapido = esUnoMismo ? !esCapitan : esCapitanViewer && !esCapitan;
 
   return (
     <div className={styles.filaIntegrante}>
       <div className={styles.filaIntegranteCabecera}>
-        <span className={styles.nombreIntegrante}>
-          {nombreVisible}
-          {esUnoMismo && ' (vos)'}
-        </span>
-      </div>
-
-      <div className={styles.filaBadgesRol}>
-        {rolesEquipo.map((rol) => (
-          <span key={rol} className={styles.badgeConAccion}>
-            <Badge campo="integranteEquipo.rolEquipo" valor={rol} />
-            {esCapitanViewer && !esUnoMismo && (rol === 'delegate' || rol === 'coach') && (
-              <button
-                type="button"
-                className={styles.botonQuitarBadge}
-                title={`Quitar como ${rol === 'delegate' ? 'delegado' : 'DT'}`}
-                onClick={() => quitarRol(rol)}
-                disabled={enviando !== null}
-              >
-                ×
-              </button>
-            )}
+        <Escudo src={fotoUrl} nombre={nombreVisible} tamano={40} />
+        <div className={styles.filaIntegranteInfo}>
+          <span className={styles.nombreIntegrante}>
+            {nombreVisible}
+            {esUnoMismo && ' (vos)'}
           </span>
-        ))}
+          <div className={styles.filaBadgesRol}>
+            {rolesEquipo.map((rol) => (
+              <Badge key={rol} campo="integranteEquipo.rolEquipo" valor={rol} />
+            ))}
+          </div>
+        </div>
+        {puedeQuitarRapido && (
+          <button
+            type="button"
+            className={styles.botonQuitarFila}
+            title={esUnoMismo ? 'Dejar el equipo' : `Quitar a ${nombreVisible} del plantel`}
+            onClick={esUnoMismo ? dejarEquipo : quitarDelPlantel}
+            disabled={enviando !== null}
+          >
+            ×
+          </button>
+        )}
       </div>
 
       {error && <p className={styles.errorChico}>{error}</p>}
 
-      {esUnoMismo ? (
-        <button
-          type="button"
-          className={styles.botonPeligroChico}
-          onClick={dejarEquipo}
-          disabled={enviando !== null}
-        >
-          {enviando === 'fuera' ? 'Saliendo…' : 'Dejar equipo'}
-        </button>
-      ) : (
-        esCapitanViewer && (
-          <div className={styles.filaBotonesRol}>
-            {rolesFaltantes.map((opcion) => (
-              <button
-                key={opcion.rol}
-                type="button"
-                className={styles.botonSecundarioChico}
-                onClick={() => designar(opcion.rol, opcion.confirmar)}
-                disabled={enviando !== null}
-              >
-                {enviando === `${opcion.rol}:asignar` ? 'Aplicando…' : opcion.etiqueta}
-              </button>
-            ))}
-            <button
-              type="button"
-              className={styles.botonPeligroChico}
-              onClick={quitarDelPlantel}
-              disabled={enviando !== null}
-            >
-              {enviando === 'fuera' ? 'Quitando…' : 'Quitar del plantel'}
-            </button>
-          </div>
-        )
+      {!esUnoMismo && esCapitanViewer && (
+        <>
+          <button
+            type="button"
+            className={styles.enlaceChico}
+            onClick={() => setMasOpciones((valor) => !valor)}
+          >
+            {masOpciones ? 'Ocultar opciones' : 'Más opciones'}
+          </button>
+          {masOpciones && (
+            <div className={styles.filaBotonesRol}>
+              {rolesFaltantes.map((opcion) => (
+                <button
+                  key={opcion.rol}
+                  type="button"
+                  className={styles.botonSecundarioChico}
+                  onClick={() => designar(opcion.rol, opcion.confirmar)}
+                  disabled={enviando !== null}
+                >
+                  {enviando === `${opcion.rol}:asignar` ? 'Aplicando…' : opcion.etiqueta}
+                </button>
+              ))}
+              {rolesEquipo
+                .filter((rol) => rol === 'delegate' || rol === 'coach')
+                .map((rol) => (
+                  <button
+                    key={rol}
+                    type="button"
+                    className={styles.botonSecundarioChico}
+                    onClick={() => quitarRol(rol)}
+                    disabled={enviando !== null}
+                  >
+                    Quitar como {rol === 'delegate' ? 'delegado' : 'DT'}
+                  </button>
+                ))}
+              {esCapitan && (
+                <button
+                  type="button"
+                  className={styles.botonPeligroChico}
+                  onClick={quitarDelPlantel}
+                  disabled={enviando !== null}
+                >
+                  {enviando === 'fuera' ? 'Quitando…' : 'Quitar del plantel'}
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

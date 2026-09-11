@@ -12,7 +12,12 @@ beforeEach(() => vi.resetModules());
 function mockearDb(opciones: {
   perfilId?: string | null;
   rolesEnEquipo?: string[];
-  invitaciones?: Array<{ perfil_id: string; nombre_visible: string; rol_equipo: string }>;
+  invitaciones?: Array<{
+    perfil_id: string;
+    nombre_visible: string;
+    foto_url?: string | null;
+    rol_equipo: string;
+  }>;
   solicitudes?: Array<{ perfil_id: string; nombre_visible: string }>;
   torneosEnCurso?: Array<{ id: string; nombre: string }>;
 }) {
@@ -59,8 +64,8 @@ describe('obtenerGestionEquipo', () => {
     );
 
     expect(resultado.invitacionesPendientes).toEqual([
-      { perfilId: 'p-1', nombreVisible: 'Ana', rol: 'player' },
-      { perfilId: 'p-2', nombreVisible: 'Beto', rol: 'coach' },
+      { perfilId: 'p-1', nombreVisible: 'Ana', fotoUrl: null, rol: 'player' },
+      { perfilId: 'p-2', nombreVisible: 'Beto', fotoUrl: null, rol: 'coach' },
     ]);
     expect(resultado.solicitudesPendientes).toEqual([{ perfilId: 'p-3', nombreVisible: 'Caro' }]);
     expect(resultado.torneoEnCursoQueBloqueaArchivado).toBeNull();

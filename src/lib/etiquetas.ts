@@ -76,10 +76,10 @@ const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
     unspecified: { etiqueta: 'Sin especificar', color: 'neutro' },
   },
   'integranteEquipo.rolEquipo': {
-    captain: { etiqueta: 'Capitán', color: 'neutro' },
-    delegate: { etiqueta: 'Delegado', color: 'neutro' },
+    captain: { etiqueta: 'Capitán', color: 'informacion' },
+    delegate: { etiqueta: 'Delegado', color: 'exito' },
     player: { etiqueta: 'Jugador', color: 'neutro' },
-    coach: { etiqueta: 'DT / Cuerpo técnico', color: 'neutro' },
+    coach: { etiqueta: 'DT / Cuerpo técnico', color: 'advertencia' },
   },
   'integranteEquipo.estadoVinculo': {
     invited: { etiqueta: 'Invitación pendiente', color: 'advertencia' },

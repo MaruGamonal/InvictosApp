@@ -42,8 +42,8 @@ export function BotonArchivarEquipo({ equipoId }: Props) {
   return (
     <div>
       {error && <p className={styles.errorChico}>{error}</p>}
-      <button type="button" className={styles.botonPeligro} onClick={archivar} disabled={enviando}>
-        {enviando ? 'Archivando…' : 'Archivar equipo'}
+      <button type="button" className={styles.enlacePeligro} onClick={archivar} disabled={enviando}>
+        {enviando ? 'Archivando…' : 'Archivar este equipo'}
       </button>
     </div>
   );

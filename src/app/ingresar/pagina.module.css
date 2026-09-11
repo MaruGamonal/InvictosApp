@@ -165,6 +165,35 @@
   cursor: default;
 }
 
+.segmentado {
+  display: flex;
+  gap: 8px;
+}
+
+.segmentoBoton {
+  flex: 1;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-pill);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font: 600 14px/1 var(--fuente-texto);
+  padding: 13px 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.segmentoBotonActivo {
+  background: var(--ink-900);
+  border-color: var(--ink-900);
+  color: var(--blanco);
+}
+
+.ayudaAdvertencia {
+  margin: 0;
+  font-size: 12px;
+  color: var(--advertencia-texto);
+}
+
 .filaEtiqueta {
   display: flex;
   align-items: baseline;

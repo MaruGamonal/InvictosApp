@@ -1,0 +1,115 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px var(--espacio-pantalla-x) 32px;
+  background: var(--color-fondo);
+  gap: 16px;
+}
+
+.enlaceVolver {
+  align-self: flex-start;
+  color: var(--color-texto-secundario);
+  font: 600 13px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+.titulo {
+  font-size: 24px;
+  margin: 0;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-600);
+}
+
+.campo input {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 13px 14px;
+  font-family: var(--fuente-texto);
+  font-size: 15px;
+  min-height: 48px;
+  outline: none;
+  width: 100%;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+
+.campo input:focus {
+  border: 2px solid var(--acento);
+  padding: 12px 13px;
+}
+
+.segmentado {
+  display: flex;
+  gap: 8px;
+}
+
+.segmentoBoton {
+  flex: 1;
+  border: 1px solid var(--borde-neutro);
+  border-radius: var(--radio-pill);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font: 600 14px/1 var(--fuente-texto);
+  padding: 13px 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.segmentoBotonActivo {
+  background: var(--ink-900);
+  border-color: var(--ink-900);
+  color: var(--blanco);
+}
+
+.ayuda {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-texto-terciario);
+}
+
+.avisoChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--advertencia-texto);
+}
+
+.errorChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error-texto);
+}
+
+.boton {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radio-boton);
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

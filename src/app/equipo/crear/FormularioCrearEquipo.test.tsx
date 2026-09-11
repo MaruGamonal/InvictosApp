@@ -11,12 +11,20 @@ afterEach(() => {
   assign.mockClear();
 });
 
-function completarCampos(getByLabelText: (texto: RegExp | string) => HTMLElement) {
+function completarCampos(
+  getByLabelText: (texto: RegExp | string) => HTMLElement,
+  getByRole: (rol: string, opciones: { name: string }) => HTMLElement,
+) {
   fireEvent.change(getByLabelText('Nombre del equipo'), { target: { value: 'Defemi' } });
-  fireEvent.change(getByLabelText('Categoría'), { target: { value: 'mixed' } });
+  fireEvent.click(getByRole('radio', { name: 'Mixto' }));
 }
 
 describe('FormularioCrearEquipo', () => {
+  it('sin nombre ni categoría, "Crear equipo" queda deshabilitado', () => {
+    const { getByRole } = render(<FormularioCrearEquipo provincias={[]} />);
+    expect(getByRole('button', { name: 'Crear equipo' })).toBeDisabled();
+  });
+
   it('sin escudo elegido, crea el equipo y no llama a la ruta de escudo', async () => {
     vi.stubGlobal('location', { assign });
     const fetchMock = vi
@@ -25,7 +33,7 @@ describe('FormularioCrearEquipo', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByLabelText, getByRole } = render(<FormularioCrearEquipo provincias={[]} />);
-    completarCampos(getByLabelText);
+    completarCampos(getByLabelText, getByRole);
     fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
 
     await waitFor(() => expect(assign).toHaveBeenCalledWith('/equipo/eq-nuevo'));
@@ -48,7 +56,7 @@ describe('FormularioCrearEquipo', () => {
     const { getByLabelText, getByRole, container } = render(
       <FormularioCrearEquipo provincias={[]} />,
     );
-    completarCampos(getByLabelText);
+    completarCampos(getByLabelText, getByRole);
 
     const archivo = new File(['x'], 'escudo.png', { type: 'image/png' });
     const inputArchivo = container.querySelector('input[type="file"]') as HTMLInputElement;
@@ -77,7 +85,7 @@ describe('FormularioCrearEquipo', () => {
     const { getByLabelText, getByRole, getByText } = render(
       <FormularioCrearEquipo provincias={[]} />,
     );
-    completarCampos(getByLabelText);
+    completarCampos(getByLabelText, getByRole);
     fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
 
     await waitFor(() => expect(getByText('Nombre inválido.')).toBeTruthy());

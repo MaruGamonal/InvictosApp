@@ -18,54 +18,76 @@ afterEach(() => {
 });
 
 describe('FilaIntegranteGestion', () => {
-  it('sobre uno mismo, solo muestra "Dejar equipo"', () => {
-    const { getByText, queryByText } = render(
+  it('sobre uno mismo (no capitán), muestra la × para dejar el equipo', () => {
+    const { getByTitle, queryByText } = render(
       <FilaIntegranteGestion
         equipoId="eq-1"
         perfilId="perfil-1"
         nombreVisible="Ana"
+        fotoUrl={null}
         rolesEquipo={['player']}
         esUnoMismo
         esCapitanViewer={false}
       />,
     );
-    expect(getByText('Dejar equipo')).toBeTruthy();
+    expect(getByTitle('Dejar el equipo')).toBeTruthy();
     expect(queryByText('Quitar del plantel')).toBeNull();
   });
 
+  it('sobre uno mismo siendo capitán, no muestra × (no puede irse sin reemplazo)', () => {
+    const { queryByTitle } = render(
+      <FilaIntegranteGestion
+        equipoId="eq-1"
+        perfilId="perfil-1"
+        nombreVisible="Ana"
+        fotoUrl={null}
+        rolesEquipo={['captain']}
+        esUnoMismo
+        esCapitanViewer
+      />,
+    );
+    expect(queryByTitle('Dejar el equipo')).toBeNull();
+  });
+
   it('sin ser capitán, sobre otro integrante no muestra acciones de gestión', () => {
-    const { queryByText } = render(
+    const { queryByText, queryByTitle } = render(
       <FilaIntegranteGestion
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player']}
         esUnoMismo={false}
         esCapitanViewer={false}
       />,
     );
-    expect(queryByText('Quitar del plantel')).toBeNull();
-    expect(queryByText('Hacer delegado')).toBeNull();
+    expect(queryByTitle('Quitar a Bruno del plantel')).toBeNull();
+    expect(queryByText('Más opciones')).toBeNull();
   });
 
-  it('el capitán ve badges con × para quitar delegado/DT, y chips para roles faltantes', () => {
-    const { getByText, queryByTitle } = render(
+  it('el capitán ve la × rápida y, en "Más opciones", los roles designables', () => {
+    const { getByText, getByTitle, queryByText } = render(
       <FilaIntegranteGestion
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player', 'delegate']}
         esUnoMismo={false}
         esCapitanViewer
       />,
     );
-    expect(queryByTitle('Quitar como delegado')).toBeTruthy();
+    expect(getByTitle('Quitar a Bruno del plantel')).toBeTruthy();
+    expect(queryByText('Hacer capitán')).toBeNull();
+
+    fireEvent.click(getByText('Más opciones'));
     expect(getByText('Hacer capitán')).toBeTruthy();
     expect(getByText('Hacer DT')).toBeTruthy();
-    expect(getByText('Quitar del plantel')).toBeTruthy();
+    expect(getByText('Quitar como delegado')).toBeTruthy();
+    expect(queryByText('Quitar del plantel')).toBeNull();
   });
 
-  it('al tocar "Hacer delegado", llama a cambiar-rol con accion asignar', async () => {
+  it('en "Más opciones", "Hacer delegado" llama a cambiar-rol con accion asignar', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -74,11 +96,13 @@ describe('FilaIntegranteGestion', () => {
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player']}
         esUnoMismo={false}
         esCapitanViewer
       />,
     );
+    fireEvent.click(getByText('Más opciones'));
     fireEvent.click(getByText('Hacer delegado'));
 
     await waitFor(() =>
@@ -98,21 +122,23 @@ describe('FilaIntegranteGestion', () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled());
   });
 
-  it('al tocar la × de un badge de delegado, llama a cambiar-rol con accion quitar', async () => {
+  it('en "Más opciones", "Quitar como delegado" llama a cambiar-rol con accion quitar', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByTitle } = render(
+    const { getByText } = render(
       <FilaIntegranteGestion
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player', 'delegate']}
         esUnoMismo={false}
         esCapitanViewer
       />,
     );
-    fireEvent.click(getByTitle('Quitar como delegado'));
+    fireEvent.click(getByText('Más opciones'));
+    fireEvent.click(getByText('Quitar como delegado'));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -130,22 +156,23 @@ describe('FilaIntegranteGestion', () => {
     );
   });
 
-  it('"Quitar del plantel" pide confirmación antes de llamar a la API', async () => {
+  it('la × sobre otro integrante pide confirmación antes de llamar a la API', async () => {
     vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByText } = render(
+    const { getByTitle } = render(
       <FilaIntegranteGestion
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player']}
         esUnoMismo={false}
         esCapitanViewer
       />,
     );
-    fireEvent.click(getByText('Quitar del plantel'));
+    fireEvent.click(getByTitle('Quitar a Bruno del plantel'));
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -159,11 +186,13 @@ describe('FilaIntegranteGestion', () => {
         equipoId="eq-1"
         perfilId="perfil-2"
         nombreVisible="Bruno"
+        fotoUrl={null}
         rolesEquipo={['player']}
         esUnoMismo={false}
         esCapitanViewer
       />,
     );
+    fireEvent.click(getByText('Más opciones'));
     fireEvent.click(getByText('Hacer capitán'));
 
     await waitFor(() =>
