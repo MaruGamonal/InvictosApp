@@ -16,8 +16,8 @@ const APP_DIR = join(__dirname);
 
 const RUTAS_HABILITADAS = new Set([
   'torneos/page.tsx',
-  'torneo/[id]/page.tsx',
-  'torneo/[id]/fixture/page.tsx',
+  'torneo/[id]/(publico)/page.tsx',
+  'torneo/[id]/(publico)/fixture/page.tsx',
 ]);
 
 /** `/catalogo` es la galería interna de componentes (T6), no una superficie del producto: exhibe todos, este incluido. */

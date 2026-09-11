@@ -4,7 +4,7 @@ import { FilaPartido, type EstadoPartido } from '@/components/FilaPartido';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerFichaOFallar, obtenerFixtureCacheado } from '../_datos';
+import { obtenerFichaOFallar, obtenerFixtureCacheado } from '../../_datos';
 import styles from './pagina.module.css';
 
 /** UC-23 — Fixture y resultados (`10`, sección 5): agrupado por fecha, con la fecha vigente destacada. */

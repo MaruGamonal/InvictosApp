@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../_datos';
+import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../../_datos';
 import styles from './pagina.module.css';
 
 /**

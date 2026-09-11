@@ -11,7 +11,7 @@ import { NavInferior } from '@/components/NavInferior';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerFichaOFallar, obtenerReglamentosCacheados } from './_datos';
+import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../_datos';
 import styles from './pagina.module.css';
 
 /**

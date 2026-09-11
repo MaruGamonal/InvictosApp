@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
-import { obtenerFichaOFallar } from './_datos';
+import { obtenerFichaOFallar } from '../_datos';
 import styles from './layout.module.css';
 
 /**

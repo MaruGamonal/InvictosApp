@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { EncabezadoTabla, FilaTabla } from '@/components/FilaTabla';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerFichaOFallar, obtenerTablaCacheada } from '../_datos';
+import { obtenerFichaOFallar, obtenerTablaCacheada } from '../../_datos';
 import styles from './pagina.module.css';
 
 /**
