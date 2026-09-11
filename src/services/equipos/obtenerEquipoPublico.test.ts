@@ -78,6 +78,8 @@ describe('obtenerEquipoPublico', () => {
           torneo_id: 't1',
           torneo_nombre: 'Copa Demo',
           torneo_estado: 'finished',
+          torneo_modalidad: 'f5',
+          torneo_categoria_genero: 'male',
           partidos_jugados: '5',
           ganados: '3',
           empatados: '1',
@@ -86,6 +88,7 @@ describe('obtenerEquipoPublico', () => {
           goles_contra: '5',
           puntos: '10',
           ajuste_puntos: '0',
+          posicion_actual: 2,
         },
       ],
     });
@@ -109,6 +112,8 @@ describe('obtenerEquipoPublico', () => {
         torneoId: 't1',
         torneoNombre: 'Copa Demo',
         torneoEstado: 'finished',
+        torneoModalidad: 'f5',
+        torneoCategoriaGenero: 'male',
         partidosJugados: 5,
         ganados: 3,
         empatados: 1,
@@ -117,6 +122,7 @@ describe('obtenerEquipoPublico', () => {
         golesContra: 5,
         puntos: 10,
         ajustePuntos: 0,
+        posicion: 2,
       },
     ]);
     expect(equipo.acumulado).toEqual({

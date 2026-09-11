@@ -44,6 +44,8 @@ export interface DesempenioTorneo {
   torneoId: string;
   torneoNombre: string;
   torneoEstado: string;
+  torneoModalidad: string;
+  torneoCategoriaGenero: string;
   partidosJugados: number;
   ganados: number;
   empatados: number;
@@ -52,6 +54,12 @@ export interface DesempenioTorneo {
   golesContra: number;
   puntos: number;
   ajustePuntos: number;
+  /**
+   * Posición actual en su grupo (`posicion.posicion_actual`, materializada
+   * por `_recalcularPosicion.ts`) — `null` cuando el torneo no usa fase de
+   * liga (p. ej. eliminación directa pura, que nunca escribe esa tabla).
+   */
+  posicion: number | null;
 }
 
 export interface RivalDePartido {
@@ -108,7 +116,10 @@ export interface EquipoPublico {
   plantel: IntegranteEquipoPublico[];
   cuerpoTecnico: IntegranteEquipoPublico[];
   historial: DesempenioTorneo[];
-  acumulado: Omit<DesempenioTorneo, 'torneoId' | 'torneoNombre' | 'torneoEstado'>;
+  acumulado: Omit<
+    DesempenioTorneo,
+    'torneoId' | 'torneoNombre' | 'torneoEstado' | 'torneoModalidad' | 'torneoCategoriaGenero' | 'posicion'
+  >;
   /**
    * `null` cuando todavía no hay suficiente actividad para un score
    * (`score_equipo.estado` en `insufficient_activity`, `stale`, o sin
@@ -195,6 +206,8 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     torneo_id: string;
     torneo_nombre: string;
     torneo_estado: string;
+    torneo_modalidad: string;
+    torneo_categoria_genero: string;
     partidos_jugados: string;
     ganados: string;
     empatados: string;
@@ -203,8 +216,10 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     goles_contra: string;
     puntos: string;
     ajuste_puntos: string;
+    posicion_actual: number | null;
   }>(
     `SELECT i.torneo_id, t.nombre AS torneo_nombre, t.estado AS torneo_estado,
+            t.modalidad AS torneo_modalidad, t.categoria_genero AS torneo_categoria_genero,
             coalesce(sum(p.partidos_jugados), 0) AS partidos_jugados,
             coalesce(sum(p.ganados), 0) AS ganados,
             coalesce(sum(p.empatados), 0) AS empatados,
@@ -212,13 +227,14 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
             coalesce(sum(p.goles_favor), 0) AS goles_favor,
             coalesce(sum(p.goles_contra), 0) AS goles_contra,
             coalesce(sum(p.puntos), 0) AS puntos,
-            coalesce(sum(p.ajuste_puntos), 0) AS ajuste_puntos
+            coalesce(sum(p.ajuste_puntos), 0) AS ajuste_puntos,
+            max(p.posicion_actual) AS posicion_actual
      FROM inscripcion i
      JOIN torneo t ON t.id = i.torneo_id
      LEFT JOIN posicion p ON p.equipo_id = i.equipo_id
        AND p.grupo_id IN (SELECT g.id FROM grupo g JOIN fase f ON f.id = g.fase_id WHERE f.torneo_id = i.torneo_id)
      WHERE i.equipo_id = $1 AND i.estado = 'approved'
-     GROUP BY i.torneo_id, t.nombre, t.estado, t.fecha_inicio_estimada
+     GROUP BY i.torneo_id, t.nombre, t.estado, t.modalidad, t.categoria_genero, t.fecha_inicio_estimada
      ORDER BY t.fecha_inicio_estimada DESC NULLS LAST`,
     [datos.equipoId],
   );
@@ -227,6 +243,8 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     torneoId: fila.torneo_id,
     torneoNombre: fila.torneo_nombre,
     torneoEstado: fila.torneo_estado,
+    torneoModalidad: fila.torneo_modalidad,
+    torneoCategoriaGenero: fila.torneo_categoria_genero,
     partidosJugados: Number(fila.partidos_jugados),
     ganados: Number(fila.ganados),
     empatados: Number(fila.empatados),
@@ -235,6 +253,7 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     golesContra: Number(fila.goles_contra),
     puntos: Number(fila.puntos),
     ajustePuntos: Number(fila.ajuste_puntos),
+    posicion: fila.posicion_actual !== null ? Number(fila.posicion_actual) : null,
   }));
 
   const acumulado = historial.reduce(

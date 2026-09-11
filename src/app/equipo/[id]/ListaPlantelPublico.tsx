@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { Badge } from '@/components/Badge';
+import { Escudo } from '@/components/Escudo';
 import type { IntegranteEquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
 import styles from './pagina.module.css';
 
@@ -40,16 +41,20 @@ export function ListaPlantelPublico({ equipoId, integrantes, mostrarRoles }: Pro
       {integrantes.map((integrante) => (
         <li key={integrante.perfilId} className={styles.integrante}>
           <Link href={`/jugador/${integrante.perfilId}`} className={styles.enlaceIntegrante}>
-            {integrante.nombreVisible}
-            {integrante.perfilId === miPerfilId && ' (vos)'}
+            <Escudo src={integrante.fotoUrl} nombre={integrante.nombreVisible} tamano={36} />
+            <span>
+              {integrante.nombreVisible}
+              {integrante.perfilId === miPerfilId && ' (vos)'}
+            </span>
           </Link>
           {mostrarRoles && (
-            <span className={styles.rolIntegrante}>
+            <div className={styles.filaBadgesRolPublico}>
               {integrante.rolesEquipo
                 .filter((rol) => rol !== 'coach')
-                .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
-                .join(' · ')}
-            </span>
+                .map((rol) => (
+                  <Badge key={rol} campo="integranteEquipo.rolEquipo" valor={rol} />
+                ))}
+            </div>
           )}
         </li>
       ))}

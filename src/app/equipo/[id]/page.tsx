@@ -47,9 +47,11 @@ async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | 
     // vez con `rolEquipo` → `rolesEquipo` (reportado en vivo, confirmado
     // por Sentry) y tiró abajo la página. Por eso la clave lleva versión:
     // 'v3' sumó `proximoPartido`/`ultimoResultado`; 'v4' reemplazó
-    // `scoreEstado` fijo por `score` real. Si el shape vuelve a cambiar,
-    // esto hay que volver a bumpearlo.
-    return await cachearLecturaDeEquipo('equipo-publico-v4', equipoId, () =>
+    // `scoreEstado` fijo por `score` real; 'v5' sumó `torneoModalidad`/
+    // `torneoCategoriaGenero`/`posicion` a cada fila de `historial`
+    // (sección "Torneos en juego"). Si el shape vuelve a cambiar, esto
+    // hay que volver a bumpearlo.
+    return await cachearLecturaDeEquipo('equipo-publico-v5', equipoId, () =>
       obtenerEquipoPublico({ equipoId }, CONTEXTO_PUBLICO),
     )();
   } catch (error) {
@@ -93,12 +95,12 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{equipo.nombre}</h1>
             <div className={styles.meta}>
-              {equipo.ciudad && <span>{equipo.ciudad.nombre}</span>}
-              <span>
+              <span className={styles.pillMeta}>
                 {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
+                {equipo.ciudad && ` · ${equipo.ciudad.nombre}`}
               </span>
               {equipo.modalidadHabitual && (
-                <span>
+                <span className={styles.pillMeta}>
                   {obtenerEtiqueta('torneo.modalidad', equipo.modalidadHabitual).etiqueta}
                 </span>
               )}
@@ -131,46 +133,13 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
         <section className={styles.seccionScore}>
           <span className={styles.etiquetaScore}>Score deportivo</span>
           {equipo.score ? (
-            <>
-              <div className={styles.filaScorePrincipal}>
-                <span className={styles.valorScore}>{equipo.score.valor}</span>
-                <span className={styles.subtituloScore}>
-                  Sobre {equipo.score.partidosComputados} partidos confirmados · últimos{' '}
-                  {equipo.score.desglose.ventanaMeses} meses
-                </span>
-              </div>
-              <div className={styles.listaDesglose}>
-                <div className={styles.filaDesglose}>
-                  <span>Partidos ganados / empatados / perdidos</span>
-                  <span>
-                    {equipo.score.desglose.partidosGanados}G · {equipo.score.desglose.partidosEmpatados}
-                    E · {equipo.score.desglose.partidosPerdidos}P
-                  </span>
-                </div>
-                <div className={styles.filaDesglose}>
-                  <span>Diferencia de gol</span>
-                  <span>Pesa acotada, no lineal</span>
-                </div>
-                <div className={styles.filaDesglose}>
-                  <span>Torneos disputados</span>
-                  <span>
-                    {equipo.score.desglose.torneosDisputados} en {equipo.score.desglose.ventanaMeses} meses
-                  </span>
-                </div>
-                <div className={styles.filaDesglose}>
-                  <span>Posición final por torneo</span>
-                  <span>Se acredita al finalizar cada uno</span>
-                </div>
-                <div className={styles.filaDesglose}>
-                  <span>Antigüedad de los resultados</span>
-                  <span>Decaimiento lineal sobre {equipo.score.desglose.ventanaMeses} meses</span>
-                </div>
-              </div>
-              <p className={styles.avisoScore}>
-                Puede bajar sin haber perdido: los resultados de hace más tiempo pesan menos. Los
-                seguidores no cuentan para nada de esto.
-              </p>
-            </>
+            <div className={styles.filaScorePrincipal}>
+              <span className={styles.valorScore}>{equipo.score.valor}</span>
+              <span className={styles.subtituloScore}>
+                Sobre {equipo.score.partidosComputados} partidos confirmados en los últimos{' '}
+                {equipo.score.desglose.ventanaMeses} meses.
+              </span>
+            </div>
           ) : (
             <span className={styles.sinScore}>Sin score todavía</span>
           )}
@@ -179,73 +148,128 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           </Link>
         </section>
 
-        {equipo.proximoPartido && (
-          <section>
-            <h2 className={styles.tituloSeccion}>Próximo partido</h2>
-            <Link href={`/torneo/${equipo.proximoPartido.torneoId}`} className={styles.tarjetaPartido}>
-              <FilaPartido
-                estado="scheduled"
-                equipoLocal={
-                  equipo.proximoPartido.esLocal
-                    ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
-                    : {
-                        nombre: equipo.proximoPartido.rivalNombre,
-                        escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
-                      }
-                }
-                equipoVisitante={
-                  equipo.proximoPartido.esLocal
-                    ? {
-                        nombre: equipo.proximoPartido.rivalNombre,
-                        escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
-                      }
-                    : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
-                }
-                fechaProgramadaTexto={formatearFecha(equipo.proximoPartido.fechaHoraProgramada)}
-              />
-              <span className={styles.metaPartido}>
-                {equipo.proximoPartido.torneoNombre} · Fecha {equipo.proximoPartido.numeroFecha}
-                {equipo.proximoPartido.sedeNombre && ` · ${equipo.proximoPartido.sedeNombre}`}
-              </span>
-            </Link>
-          </section>
+        {(equipo.proximoPartido || equipo.ultimoResultado) && (
+          <div className={styles.filaResumen}>
+            {equipo.proximoPartido && (
+              <section>
+                <h2 className={styles.tituloSeccion}>Próximo partido</h2>
+                <Link
+                  href={`/torneo/${equipo.proximoPartido.torneoId}`}
+                  className={styles.tarjetaPartido}
+                >
+                  <FilaPartido
+                    estado="scheduled"
+                    equipoLocal={
+                      equipo.proximoPartido.esLocal
+                        ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                        : {
+                            nombre: equipo.proximoPartido.rivalNombre,
+                            escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
+                          }
+                    }
+                    equipoVisitante={
+                      equipo.proximoPartido.esLocal
+                        ? {
+                            nombre: equipo.proximoPartido.rivalNombre,
+                            escudoUrl: equipo.proximoPartido.rivalEscudoUrl,
+                          }
+                        : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                    }
+                    fechaProgramadaTexto={formatearFecha(equipo.proximoPartido.fechaHoraProgramada)}
+                  />
+                  <span className={styles.metaPartido}>
+                    {equipo.proximoPartido.torneoNombre} · Fecha {equipo.proximoPartido.numeroFecha}
+                    {equipo.proximoPartido.sedeNombre && ` · ${equipo.proximoPartido.sedeNombre}`}
+                  </span>
+                </Link>
+              </section>
+            )}
+
+            {equipo.ultimoResultado && (
+              <section>
+                <h2 className={styles.tituloSeccion}>Último resultado</h2>
+                <Link
+                  href={`/torneo/${equipo.ultimoResultado.torneoId}`}
+                  className={styles.tarjetaPartido}
+                >
+                  <FilaPartido
+                    estado={equipo.ultimoResultado.estado}
+                    equipoLocal={
+                      equipo.ultimoResultado.esLocal
+                        ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                        : {
+                            nombre: equipo.ultimoResultado.rivalNombre,
+                            escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
+                          }
+                    }
+                    equipoVisitante={
+                      equipo.ultimoResultado.esLocal
+                        ? {
+                            nombre: equipo.ultimoResultado.rivalNombre,
+                            escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
+                          }
+                        : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
+                    }
+                    golesLocal={
+                      equipo.ultimoResultado.esLocal
+                        ? equipo.ultimoResultado.golesPropios
+                        : equipo.ultimoResultado.golesRival
+                    }
+                    golesVisitante={
+                      equipo.ultimoResultado.esLocal
+                        ? equipo.ultimoResultado.golesRival
+                        : equipo.ultimoResultado.golesPropios
+                    }
+                  />
+                  {(() => {
+                    const { golesPropios, golesRival } = equipo.ultimoResultado;
+                    const resultado =
+                      golesPropios > golesRival
+                        ? { texto: 'Ganado', clase: styles.badgeResultadoGanado }
+                        : golesPropios < golesRival
+                          ? { texto: 'Perdido', clase: styles.badgeResultadoPerdido }
+                          : { texto: 'Empatado', clase: styles.badgeResultadoEmpatado };
+                    return (
+                      <span className={`${styles.badgeResultado} ${resultado.clase}`}>
+                        {resultado.texto}
+                      </span>
+                    );
+                  })()}
+                  <span className={styles.metaPartido}>{equipo.ultimoResultado.torneoNombre}</span>
+                </Link>
+              </section>
+            )}
+          </div>
         )}
 
-        {equipo.ultimoResultado && (
+        {equipo.historial.some((t) => t.torneoEstado === 'in_progress') && (
           <section>
-            <h2 className={styles.tituloSeccion}>Último resultado</h2>
-            <Link href={`/torneo/${equipo.ultimoResultado.torneoId}`} className={styles.tarjetaPartido}>
-              <FilaPartido
-                estado={equipo.ultimoResultado.estado}
-                equipoLocal={
-                  equipo.ultimoResultado.esLocal
-                    ? { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
-                    : {
-                        nombre: equipo.ultimoResultado.rivalNombre,
-                        escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
-                      }
-                }
-                equipoVisitante={
-                  equipo.ultimoResultado.esLocal
-                    ? {
-                        nombre: equipo.ultimoResultado.rivalNombre,
-                        escudoUrl: equipo.ultimoResultado.rivalEscudoUrl,
-                      }
-                    : { nombre: equipo.nombre, escudoUrl: equipo.escudoUrl }
-                }
-                golesLocal={
-                  equipo.ultimoResultado.esLocal
-                    ? equipo.ultimoResultado.golesPropios
-                    : equipo.ultimoResultado.golesRival
-                }
-                golesVisitante={
-                  equipo.ultimoResultado.esLocal
-                    ? equipo.ultimoResultado.golesRival
-                    : equipo.ultimoResultado.golesPropios
-                }
-              />
-              <span className={styles.metaPartido}>{equipo.ultimoResultado.torneoNombre}</span>
-            </Link>
+            <h2 className={styles.tituloSeccion}>Torneos en juego</h2>
+            <div className={styles.listaTorneosEnJuego}>
+              {equipo.historial
+                .filter((t) => t.torneoEstado === 'in_progress')
+                .map((torneo) => (
+                  <Link
+                    key={torneo.torneoId}
+                    href={`/torneo/${torneo.torneoId}`}
+                    className={styles.filaTorneoEnJuego}
+                  >
+                    <div>
+                      <div className={styles.filaTorneoEnJuegoNombre}>{torneo.torneoNombre}</div>
+                      <div className={styles.filaTorneoEnJuegoSubtitulo}>
+                        {obtenerEtiqueta('torneo.modalidad', torneo.torneoModalidad).etiqueta} ·{' '}
+                        {
+                          obtenerEtiqueta('torneo.categoriaGenero', torneo.torneoCategoriaGenero)
+                            .etiqueta
+                        }
+                      </div>
+                    </div>
+                    {torneo.posicion !== null && (
+                      <span className={styles.filaTorneoEnJuegoPosicion}>{torneo.posicion}°</span>
+                    )}
+                  </Link>
+                ))}
+            </div>
           </section>
         )}
 
