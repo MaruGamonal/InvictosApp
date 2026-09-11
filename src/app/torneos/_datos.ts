@@ -17,7 +17,17 @@ const REVALIDACION_CORTA_SEGUNDOS = 30;
 export async function buscarTorneosCacheado(input: BuscarTorneosInput) {
   return unstable_cache(
     () => buscarTorneos(input, CONTEXTO_PUBLICO),
-    ['buscar-torneos', JSON.stringify(input)],
+    // 'v2': la caché de datos de Next no se invalida por deploy, solo por
+    // este `revalidate` corto — pero mientras una entrada sigue vigente
+    // (hasta 30s), puede servirle a código nuevo un objeto con la forma
+    // vieja. Pasó en producción: `buscarTorneos` sumó `categoriaGenero`
+    // y otros campos (descubrimiento de visitante), y una entrada
+    // cacheada justo antes de ese deploy tiró abajo `/torneos` con
+    // "No hay etiqueta registrada para torneo.categoriaGenero = undefined"
+    // hasta que venció sola (reportado en vivo vía Sentry). Mismo patrón
+    // que `equipo-publico-v4` en `equipo/[id]/page.tsx`: si el shape de
+    // `TorneoBuscado` vuelve a cambiar, hay que volver a bumpear esto.
+    ['buscar-torneos-v2', JSON.stringify(input)],
     { revalidate: REVALIDACION_CORTA_SEGUNDOS },
   )();
 }
