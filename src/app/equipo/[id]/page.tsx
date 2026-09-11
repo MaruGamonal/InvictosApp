@@ -46,9 +46,10 @@ async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | 
     // código nuevo un objeto con forma distinta a la esperada — pasó una
     // vez con `rolEquipo` → `rolesEquipo` (reportado en vivo, confirmado
     // por Sentry) y tiró abajo la página. Por eso la clave lleva versión:
-    // 'v3' sumó `proximoPartido`/`ultimoResultado`. Si el shape vuelve a
-    // cambiar, esto hay que volver a bumpearlo.
-    return await cachearLecturaDeEquipo('equipo-publico-v3', equipoId, () =>
+    // 'v3' sumó `proximoPartido`/`ultimoResultado`; 'v4' reemplazó
+    // `scoreEstado` fijo por `score` real. Si el shape vuelve a cambiar,
+    // esto hay que volver a bumpearlo.
+    return await cachearLecturaDeEquipo('equipo-publico-v4', equipoId, () =>
       obtenerEquipoPublico({ equipoId }, CONTEXTO_PUBLICO),
     )();
   } catch (error) {
@@ -128,8 +129,54 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
 
       <main className={styles.contenido}>
         <section className={styles.seccionScore}>
-          <span className={styles.etiquetaScore}>Score</span>
-          <span className={styles.sinScore}>Sin score todavía</span>
+          <span className={styles.etiquetaScore}>Score deportivo</span>
+          {equipo.score ? (
+            <>
+              <div className={styles.filaScorePrincipal}>
+                <span className={styles.valorScore}>{equipo.score.valor}</span>
+                <span className={styles.subtituloScore}>
+                  Sobre {equipo.score.partidosComputados} partidos confirmados · últimos{' '}
+                  {equipo.score.desglose.ventanaMeses} meses
+                </span>
+              </div>
+              <div className={styles.listaDesglose}>
+                <div className={styles.filaDesglose}>
+                  <span>Partidos ganados / empatados / perdidos</span>
+                  <span>
+                    {equipo.score.desglose.partidosGanados}G · {equipo.score.desglose.partidosEmpatados}
+                    E · {equipo.score.desglose.partidosPerdidos}P
+                  </span>
+                </div>
+                <div className={styles.filaDesglose}>
+                  <span>Diferencia de gol</span>
+                  <span>Pesa acotada, no lineal</span>
+                </div>
+                <div className={styles.filaDesglose}>
+                  <span>Torneos disputados</span>
+                  <span>
+                    {equipo.score.desglose.torneosDisputados} en {equipo.score.desglose.ventanaMeses} meses
+                  </span>
+                </div>
+                <div className={styles.filaDesglose}>
+                  <span>Posición final por torneo</span>
+                  <span>Se acredita al finalizar cada uno</span>
+                </div>
+                <div className={styles.filaDesglose}>
+                  <span>Antigüedad de los resultados</span>
+                  <span>Decaimiento lineal sobre {equipo.score.desglose.ventanaMeses} meses</span>
+                </div>
+              </div>
+              <p className={styles.avisoScore}>
+                Puede bajar sin haber perdido: los resultados de hace más tiempo pesan menos. Los
+                seguidores no cuentan para nada de esto.
+              </p>
+            </>
+          ) : (
+            <span className={styles.sinScore}>Sin score todavía</span>
+          )}
+          <Link href={`/equipo/${id}/ranking`} className={styles.enlaceRanking}>
+            Ver ranking →
+          </Link>
         </section>
 
         {equipo.proximoPartido && (

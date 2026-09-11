@@ -12,8 +12,9 @@ import { validarEntrada } from '@/lib/validacion';
  * score después es el orden que esa decisión fija.
  *
  * **El score se muestra como "sin score todavía", nunca como cero**
- * (`08`, DIS-08; `06`, S-04): en el MVP no hay ningún cálculo, así que
- * la única respuesta honesta es un estado, no un número.
+ * (`08`, DIS-08; `06`, S-04) para un equipo sin actividad reciente
+ * suficiente — `score_equipo.estado` distingue eso de un score real
+ * (`recalcularScore.ts`, T26).
  *
  * Cada integrante respeta su propia visibilidad (T18): un perfil
  * `restricted` en este plantel muestra su nombre, nunca su foto,
@@ -74,6 +75,27 @@ export interface UltimoResultadoEquipo extends RivalDePartido {
   golesRival: number;
 }
 
+export interface DesgloseScore {
+  ventanaMeses: number;
+  partidosGanados: number;
+  partidosEmpatados: number;
+  partidosPerdidos: number;
+  promedioPuntos: number;
+  componenteResultados: number;
+  promedioDiferenciaGol: number;
+  componenteDiferenciaGol: number;
+  torneosDisputados: number;
+  componenteTorneos: number;
+  bonusPosicionPromedio: number;
+  componentePosicion: number;
+}
+
+export interface ScoreEquipo {
+  valor: number;
+  partidosComputados: number;
+  desglose: DesgloseScore;
+}
+
 export interface EquipoPublico {
   id: string;
   nombre: string;
@@ -87,8 +109,13 @@ export interface EquipoPublico {
   cuerpoTecnico: IntegranteEquipoPublico[];
   historial: DesempenioTorneo[];
   acumulado: Omit<DesempenioTorneo, 'torneoId' | 'torneoNombre' | 'torneoEstado'>;
-  /** Nunca un número en el MVP: no hay cálculo de score todavía (`06`, S-04). */
-  scoreEstado: 'sin_calcular';
+  /**
+   * `null` cuando todavía no hay suficiente actividad para un score
+   * (`score_equipo.estado` en `insufficient_activity`, `stale`, o sin
+   * fila todavía) — nunca un cero (`08`, DIS-08; `06`, S-04): la única
+   * respuesta honesta ahí es un estado, no un número.
+   */
+  score: ScoreEquipo | null;
   proximoPartido: ProximoPartidoEquipo | null;
   ultimoResultado: UltimoResultadoEquipo | null;
 }
@@ -233,6 +260,26 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     },
   );
 
+  const { rows: scoreRows } = await pool.query<{
+    valor: string | null;
+    partidos_computados: number;
+    estado: 'insufficient_activity' | 'active' | 'stale';
+    desglose_componentes: DesgloseScore | null;
+  }>(
+    `SELECT valor, partidos_computados, estado, desglose_componentes
+     FROM score_equipo WHERE equipo_id = $1`,
+    [datos.equipoId],
+  );
+  const filaScore = scoreRows[0];
+  const score: ScoreEquipo | null =
+    filaScore && filaScore.estado === 'active' && filaScore.valor !== null && filaScore.desglose_componentes
+      ? {
+          valor: Number(filaScore.valor),
+          partidosComputados: filaScore.partidos_computados,
+          desglose: filaScore.desglose_componentes,
+        }
+      : null;
+
   const { rows: proximoRows } = await pool.query<{
     torneo_id: string;
     torneo_nombre: string;
@@ -355,7 +402,7 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     cuerpoTecnico,
     historial,
     acumulado,
-    scoreEstado: 'sin_calcular',
+    score,
     proximoPartido,
     ultimoResultado,
   };

@@ -1,0 +1,97 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px var(--espacio-pantalla-x) 32px;
+  background: var(--color-fondo);
+  gap: 14px;
+}
+
+.enlaceVolver {
+  align-self: flex-start;
+  color: var(--color-texto-secundario);
+  font: 600 13px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+.titulo {
+  font-size: 24px;
+  margin: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: var(--fondo-sutil);
+  border-radius: var(--radio-pill);
+  padding: 6px 12px;
+  font: 700 12px/1 var(--fuente-texto);
+  color: var(--color-texto);
+}
+
+.texto {
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fila,
+.filaPropia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 10px 14px;
+}
+
+.filaPropia {
+  border-color: var(--acento);
+  border-width: 2px;
+}
+
+.posicion {
+  font: 700 14px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+  width: 18px;
+  flex: none;
+}
+
+.nombreEquipo {
+  flex: 1;
+  font: 700 14px/1.2 var(--fuente-texto);
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.valor {
+  font: 700 16px/1 var(--fuente-texto);
+  color: var(--color-texto);
+}
+
+.textoAyuda {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-texto-terciario);
+  background: var(--fondo-sutil);
+  border-radius: 8px;
+  padding: 10px 12px;
+}

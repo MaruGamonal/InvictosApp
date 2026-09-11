@@ -26,6 +26,7 @@ function mockearDb(opciones: {
   historial?: Record<string, unknown>[];
   proximo?: Record<string, unknown>[];
   ultimo?: Record<string, unknown>[];
+  score?: Record<string, unknown>[];
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -59,6 +60,9 @@ function mockearDb(opciones: {
         }
         if (t.includes("p.estado IN ('played', 'walkover')")) {
           return { rows: opciones.ultimo ?? [] };
+        }
+        if (t.startsWith('SELECT valor, partidos_computados')) {
+          return { rows: opciones.score ?? [] };
         }
         return { rows: [] };
       },
@@ -125,7 +129,50 @@ describe('obtenerEquipoPublico', () => {
       puntos: 10,
       ajustePuntos: 0,
     });
-    expect(equipo.scoreEstado).toBe('sin_calcular');
+    expect(equipo.score).toBeNull();
+  });
+
+  it('sin fila en score_equipo todavía, score null', async () => {
+    mockearDb({});
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.score).toBeNull();
+  });
+
+  it('con estado insufficient_activity o stale, score null aunque haya una fila', async () => {
+    mockearDb({
+      score: [
+        { valor: null, partidos_computados: 0, estado: 'insufficient_activity', desglose_componentes: null },
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.score).toBeNull();
+  });
+
+  it('con estado active, devuelve el valor y el desglose', async () => {
+    const desglose = {
+      ventanaMeses: 24,
+      partidosGanados: 17,
+      partidosEmpatados: 4,
+      partidosPerdidos: 7,
+      promedioPuntos: 1.96,
+      componenteResultados: 32.7,
+      promedioDiferenciaGol: 0.8,
+      componenteDiferenciaGol: 12.5,
+      torneosDisputados: 5,
+      componenteTorneos: 12.5,
+      bonusPosicionPromedio: 0.6,
+      componentePosicion: 9,
+    };
+    mockearDb({
+      score: [
+        { valor: '78', partidos_computados: 28, estado: 'active', desglose_componentes: desglose },
+      ],
+    });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.score).toEqual({ valor: 78, partidosComputados: 28, desglose });
   });
 
   it('separa plantel y cuerpo técnico por rol_equipo', async () => {
