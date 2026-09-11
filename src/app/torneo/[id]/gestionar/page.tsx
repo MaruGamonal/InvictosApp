@@ -13,6 +13,7 @@ import { FormularioDefinirFormato } from './FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from './FormularioReglamentoOrganizador';
 import { PanelInscripciones } from './PanelInscripciones';
 import { PanelFixture } from './PanelFixture';
+import { PanelProgramarPartidos } from './PanelProgramarPartidos';
 import { PanelResultados } from './PanelResultados';
 import { PanelColaboradores } from './PanelColaboradores';
 import { PanelCancelarTorneo } from './PanelCancelarTorneo';
@@ -145,6 +146,13 @@ export default async function PaginaGestionarTorneo({
             <PanelFixture fases={gestion.fases} equipoNombres={equipoNombres} />
           </section>
         )}
+
+      {gestion.partidos.length > 0 && (
+        <section className={styles.seccion}>
+          <h2 className={styles.tituloSeccion}>Programar partidos</h2>
+          <PanelProgramarPartidos partidos={gestion.partidos} ciudadId={gestion.ciudadId} />
+        </section>
+      )}
 
       {gestion.estado === 'in_progress' && (
         <section className={styles.seccion}>

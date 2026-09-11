@@ -21,6 +21,7 @@ function mockearDb(opciones: {
     formato: string;
     descripcion?: string | null;
     direccion?: string | null;
+    ciudad_id?: string;
     costo_inscripcion?: string | null;
     costo_planilla?: string | null;
     cupo_equipos?: number;
@@ -52,6 +53,8 @@ function mockearDb(opciones: {
     goles_visitante: number | null;
     estado: string;
     version: number;
+    fecha_hora_programada?: Date | null;
+    sede_nombre?: string | null;
   }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
@@ -104,7 +107,13 @@ describe('obtenerGestionTorneo', () => {
     mockearDb({
       organizacionId: 'org-1',
       rolOrganizacion: 'owner',
-      torneo: { id: TORNEO, nombre: 'Copa Otoño', estado: 'registration_open', formato: 'league' },
+      torneo: {
+        id: TORNEO,
+        nombre: 'Copa Otoño',
+        estado: 'registration_open',
+        formato: 'league',
+        ciudad_id: 'ciudad-1',
+      },
       fases: [
         { id: 'fase-1', nombre: 'Fase única', tipo_fase: 'league', orden: 1, cantidad_grupos: '1' },
       ],
@@ -130,6 +139,8 @@ describe('obtenerGestionTorneo', () => {
           goles_visitante: null,
           estado: 'unscheduled',
           version: 1,
+          fecha_hora_programada: null,
+          sede_nombre: null,
         },
       ],
     });
@@ -138,6 +149,7 @@ describe('obtenerGestionTorneo', () => {
     const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
 
     expect(resultado.nombre).toBe('Copa Otoño');
+    expect(resultado.ciudadId).toBe('ciudad-1');
     expect(resultado.fases).toEqual([
       { id: 'fase-1', nombre: 'Fase única', tipoFase: 'league', orden: 1, cantidadGrupos: 1 },
     ]);
@@ -163,6 +175,8 @@ describe('obtenerGestionTorneo', () => {
         golesVisitante: null,
         estado: 'unscheduled',
         version: 1,
+        fechaHoraProgramada: null,
+        sedeNombre: null,
       },
     ]);
   });

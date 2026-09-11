@@ -96,11 +96,15 @@
 
 .filaAccion {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.filaAccion select {
+.filaAccion select,
+.filaAccion input[type='text'],
+.filaAccion input[type='datetime-local'] {
   flex: 1;
+  min-width: 140px;
   border: 1px solid var(--borde-neutro);
   border-radius: 6px;
   padding: 8px 10px;

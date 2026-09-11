@@ -46,6 +46,8 @@ export interface PartidoGestion {
   golesVisitante: number | null;
   estado: string;
   version: number;
+  fechaHoraProgramada: string | null;
+  sedeNombre: string | null;
 }
 
 export interface GestionTorneoResultado {
@@ -53,6 +55,7 @@ export interface GestionTorneoResultado {
   nombre: string;
   descripcion: string | null;
   direccion: string | null;
+  ciudadId: string;
   costoInscripcion: number | null;
   costoPlanilla: number | null;
   cupoEquipos: number;
@@ -77,6 +80,7 @@ export const obtenerGestionTorneo: Servicio<
     nombre: string;
     descripcion: string | null;
     direccion: string | null;
+    ciudad_id: string;
     costo_inscripcion: string | null;
     costo_planilla: string | null;
     cupo_equipos: number;
@@ -84,7 +88,7 @@ export const obtenerGestionTorneo: Servicio<
     estado: string;
     formato: 'league' | 'knockout' | 'groups_knockout';
   }>(
-    `SELECT id, nombre, descripcion, direccion, costo_inscripcion, costo_planilla,
+    `SELECT id, nombre, descripcion, direccion, ciudad_id, costo_inscripcion, costo_planilla,
             cupo_equipos, fecha_inicio_estimada, estado, formato
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
@@ -133,14 +137,18 @@ export const obtenerGestionTorneo: Servicio<
     goles_visitante: number | null;
     estado: string;
     version: number;
+    fecha_hora_programada: Date | null;
+    sede_nombre: string | null;
   }>(
     `SELECT p.id, p.fase_id, p.numero_fecha,
             el.id AS equipo_local_id, el.nombre AS equipo_local_nombre,
             ev.id AS equipo_visitante_id, ev.nombre AS equipo_visitante_nombre,
-            p.goles_local, p.goles_visitante, p.estado, p.version
+            p.goles_local, p.goles_visitante, p.estado, p.version,
+            p.fecha_hora_programada, s.nombre AS sede_nombre
      FROM partido p
      JOIN equipo el ON el.id = p.equipo_local_id
      JOIN equipo ev ON ev.id = p.equipo_visitante_id
+     LEFT JOIN sede s ON s.id = p.sede_id
      WHERE p.torneo_id = $1
      ORDER BY p.numero_fecha ASC`,
     [datos.torneoId],
@@ -151,6 +159,7 @@ export const obtenerGestionTorneo: Servicio<
     nombre: torneo.nombre,
     descripcion: torneo.descripcion,
     direccion: torneo.direccion,
+    ciudadId: torneo.ciudad_id,
     costoInscripcion: torneo.costo_inscripcion != null ? Number(torneo.costo_inscripcion) : null,
     costoPlanilla: torneo.costo_planilla != null ? Number(torneo.costo_planilla) : null,
     cupoEquipos: torneo.cupo_equipos,
@@ -182,6 +191,8 @@ export const obtenerGestionTorneo: Servicio<
       golesLocal: fila.goles_local,
       golesVisitante: fila.goles_visitante,
       estado: fila.estado,
+      fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
+      sedeNombre: fila.sede_nombre,
       version: fila.version,
     })),
   };
