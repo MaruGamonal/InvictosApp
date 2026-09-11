@@ -123,6 +123,48 @@
   color: var(--color-texto-terciario);
 }
 
+.textoOpcional {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.botonAdjuntar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: none;
+  border: 1.5px dashed var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  padding: 14px;
+  font: 700 14px/1 var(--fuente-texto);
+  color: var(--acento);
+  cursor: pointer;
+}
+
+.botonAdjuntar:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.enlaceOmitir {
+  background: none;
+  border: none;
+  padding: 8px;
+  color: var(--acento);
+  font: 700 14px/1 var(--fuente-texto);
+  cursor: pointer;
+  text-align: center;
+}
+
+.enlaceOmitir:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .filaEtiqueta {
   display: flex;
   align-items: baseline;

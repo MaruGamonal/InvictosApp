@@ -31,13 +31,13 @@ const FORMATOS = [
 ];
 
 /**
- * UC-16 — cliente de `POST /api/torneos`. Un solo formulario en vez del
- * wizard de varias pantallas del prototipo (nombre → formato →
- * reglamento → publicar): el torneo nace en `draft` con los defaults
- * del amateur (`06`) y el resto de esos pasos (reglamento, publicar) se
- * hacen después, desde la gestión del torneo — ahí redirige al crearlo,
- * nunca a la ficha pública: un torneo `draft` todavía no es visible ahí
- * para nadie, ni para quien lo acaba de crear (`CONTEXTO_PUBLICO`, D-04b).
+ * UC-16 — cliente de `POST /api/torneos`. Colapsa nombre/modalidad/
+ * categoría/formato/costos en un solo formulario en vez del primer
+ * tramo del wizard del prototipo — pero reglamento y publicar sí
+ * siguen siendo pasos propios después de crear (`/crear/reglamento` →
+ * `/crear/publicar`), tal como el prototipo los muestra. El formato en
+ * sí (fases/grupos) queda para la gestión, porque necesita las
+ * inscripciones aprobadas que un torneo recién creado todavía no tiene.
  */
 export function FormularioCrearTorneo({ provincias }: Props) {
   const [nombre, setNombre] = useState('');
@@ -86,7 +86,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
         return;
       }
 
-      window.location.assign(`/torneo/${cuerpo.data.id}/gestionar`);
+      window.location.assign(`/torneo/${cuerpo.data.id}/crear/reglamento`);
     } catch {
       setError('No pudimos conectar. Revisá tu conexión e intentá de nuevo.');
       setEnviando(false);

@@ -54,3 +54,33 @@ describe('subirImagenPublica', () => {
     );
   });
 });
+
+describe('subirDocumentoPublico', () => {
+  it('rechaza un tipo de archivo que no sea PDF', async () => {
+    vi.doMock('./supabase/admin', () => ({ obtenerClienteAdmin: () => ({}) }));
+    const { subirDocumentoPublico } = await import('./almacenamiento');
+
+    await expect(
+      subirDocumentoPublico('torneos/t-1', archivoFalso('image/png', 10)),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('sube un PDF y devuelve la URL pública', async () => {
+    const upload = vi.fn().mockResolvedValue({ error: null });
+    const getPublicUrl = vi
+      .fn()
+      .mockReturnValue({ data: { publicUrl: 'https://cdn/media/torneos/t-1/1.pdf' } });
+    vi.doMock('./supabase/admin', () => ({
+      obtenerClienteAdmin: () => ({ storage: { from: () => ({ upload, getPublicUrl }) } }),
+    }));
+    const { subirDocumentoPublico } = await import('./almacenamiento');
+
+    const url = await subirDocumentoPublico('torneos/t-1', archivoFalso('application/pdf', 10));
+    expect(url).toBe('https://cdn/media/torneos/t-1/1.pdf');
+    expect(upload).toHaveBeenCalledWith(
+      expect.stringMatching(/^torneos\/t-1\/\d+\.pdf$/),
+      expect.anything(),
+      { contentType: 'application/pdf', upsert: false },
+    );
+  });
+});

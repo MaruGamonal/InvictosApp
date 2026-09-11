@@ -1,0 +1,31 @@
+.breadcrumb {
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.avisoExito {
+  margin: 0;
+  background: var(--exito-fondo);
+  color: var(--exito-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.avisoInfo {
+  margin: 0;
+  background: var(--informacion-fondo);
+  color: var(--informacion-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.errorChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error-texto);
+}
