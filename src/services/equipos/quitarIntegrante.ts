@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo, verificarPuedeDejarEquipo } from '@/lib/permisos';
+import { invalidarCacheEquipo } from '@/lib/cache';
 
 /**
  * UC-13 — Quitar a alguien del plantel permanente, o darse de baja uno
@@ -60,6 +61,7 @@ export const quitarIntegrante: Servicio<QuitarIntegranteInput, QuitarIntegranteR
     [datos.equipoId, datos.perfilId],
   );
   if (!rowCount) throw crearError('NO_ENCONTRADO');
+  invalidarCacheEquipo(datos.equipoId);
 
   const { rows: habilitadoRows } = await pool.query(
     `SELECT 1 FROM integrante_habilitado ih

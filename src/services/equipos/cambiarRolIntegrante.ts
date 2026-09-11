@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo } from '@/lib/permisos';
+import { invalidarCacheEquipo } from '@/lib/cache';
 
 /**
  * UC-13 — Designar o quitar un rol interno del plantel. Exclusivo del
@@ -99,6 +100,7 @@ export const cambiarRolIntegrante: Servicio<CambiarRolIntegranteInput, { ok: tru
       );
 
       await cliente.query('COMMIT');
+      invalidarCacheEquipo(datos.equipoId);
       return { ok: true };
     } catch (error) {
       await cliente.query('ROLLBACK');
@@ -125,6 +127,7 @@ export const cambiarRolIntegrante: Servicio<CambiarRolIntegranteInput, { ok: tru
        DO UPDATE SET estado_vinculo = 'active', fecha_incorporacion = now(), fecha_baja = NULL`,
       [datos.equipoId, datos.perfilId, datos.rol],
     );
+    invalidarCacheEquipo(datos.equipoId);
     return { ok: true };
   }
 
@@ -134,5 +137,6 @@ export const cambiarRolIntegrante: Servicio<CambiarRolIntegranteInput, { ok: tru
      WHERE equipo_id = $1 AND perfil_id = $2 AND rol_equipo = $3 AND estado_vinculo = 'active'`,
     [datos.equipoId, datos.perfilId, datos.rol],
   );
+  invalidarCacheEquipo(datos.equipoId);
   return { ok: true };
 };

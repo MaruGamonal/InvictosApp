@@ -3,6 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
+import { invalidarCacheEquipo } from '@/lib/cache';
 import { seguirEquipoAutomaticamente } from './_vinculo';
 
 /**
@@ -54,6 +55,7 @@ export const responderInvitacion: Servicio<
     }
 
     await cliente.query('COMMIT');
+    if (datos.aceptar) invalidarCacheEquipo(datos.equipoId);
     return { rolesResueltos: rowCount };
   } catch (error) {
     await cliente.query('ROLLBACK');

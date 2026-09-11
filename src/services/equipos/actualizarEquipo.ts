@@ -4,8 +4,18 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo } from '@/lib/permisos';
+import { invalidarCacheEquipo } from '@/lib/cache';
 
-/** UC-10 — Actualizar los datos de identidad del equipo. Capitán o Delegado. */
+/**
+ * UC-10 — Actualizar los datos de identidad del equipo. Capitán o Delegado.
+ *
+ * Todo lo que este servicio toca (nombre, escudo, colores, ciudad,
+ * modalidad, categoría) se muestra en la ficha pública del equipo, que
+ * está cacheada por evento (T23) — sin invalidar acá, un escudo nuevo
+ * quedaba guardado en la base pero la ficha seguía mostrando el viejo
+ * indefinidamente, porque esta caché no vence por tiempo (reportado en
+ * vivo).
+ */
 
 const esquemaEntrada = z.object({
   equipoId: z.string().uuid(),
@@ -65,6 +75,8 @@ export const actualizarEquipo: Servicio<ActualizarEquipoInput, { id: string }> =
     valores,
   );
   if (rowCount === 0) throw crearError('NO_ENCONTRADO');
+
+  invalidarCacheEquipo(datos.equipoId);
 
   return { id: datos.equipoId };
 };

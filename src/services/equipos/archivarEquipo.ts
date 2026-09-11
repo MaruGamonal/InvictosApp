@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo } from '@/lib/permisos';
+import { invalidarCacheEquipo } from '@/lib/cache';
 
 /**
  * UC-15 — Archivar un equipo: baja lógica, exclusiva del Capitán.
@@ -44,6 +45,7 @@ export const archivarEquipo: Servicio<ArchivarEquipoInput, { id: string }> = asy
     [datos.equipoId],
   );
   if (rowCount === 0) throw crearError('NO_ENCONTRADO');
+  invalidarCacheEquipo(datos.equipoId);
 
   return { id: datos.equipoId };
 };

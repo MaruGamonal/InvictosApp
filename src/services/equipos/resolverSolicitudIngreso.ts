@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoEquipo } from '@/lib/permisos';
+import { invalidarCacheEquipo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
 import { seguirEquipoAutomaticamente } from './_vinculo';
 
@@ -62,6 +63,7 @@ export const resolverSolicitudIngreso: Servicio<
     }
 
     await cliente.query('COMMIT');
+    if (datos.aceptar) invalidarCacheEquipo(datos.equipoId);
 
     if (usuarioIdSolicitante) {
       await notificar(
