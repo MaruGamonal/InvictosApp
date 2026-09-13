@@ -1,6 +1,6 @@
 .boton {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   flex: none;
   border: 1.5px solid var(--ink-600);
   border-radius: var(--radio-pill);
@@ -9,10 +9,14 @@
   justify-content: center;
   cursor: pointer;
   background: transparent;
-  color: var(--identidad-texto);
+  /* Hereda el color del texto que lo rodea (igual que BotonSeguir):
+     este botón vive tanto en heroes oscuros (perfil de equipo) como en
+     el cuerpo claro de la ficha pública del torneo — un color fijo lo
+     dejaba invisible (blanco sobre blanco) en el segundo caso. */
+  color: inherit;
   padding: 0;
 }
 
 .boton:hover {
-  background: var(--ink-800);
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }

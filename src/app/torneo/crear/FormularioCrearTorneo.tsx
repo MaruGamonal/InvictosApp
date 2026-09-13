@@ -88,7 +88,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
 
       window.location.assign(`/torneo/${cuerpo.data.id}/crear/reglamento`);
     } catch {
-      setError('No pudimos conectar. Revisá tu conexión e intentá de nuevo.');
+      setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
     }
   }

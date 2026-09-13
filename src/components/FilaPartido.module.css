@@ -22,6 +22,7 @@
 }
 
 .nombreEquipo {
+  min-width: 0;
   font-family: var(--fuente-texto);
   font-weight: 600;
   font-size: 14px;
@@ -45,6 +46,8 @@
   font-weight: 700;
   font-size: 22px;
   color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .fechaProgramada {

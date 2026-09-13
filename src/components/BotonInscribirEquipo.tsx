@@ -151,7 +151,7 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
         tipo: 'error',
         equipos,
         equipoId,
-        mensaje: 'No pudimos conectar. Revisá tu conexión e intentá de nuevo.',
+        mensaje: 'No pudimos conectar. Probá de nuevo.',
       });
     }
   }
@@ -172,7 +172,10 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
   if (paso.tipo === 'sin-equipos') {
     return (
       <p className={styles.mensajeSinEquipos}>
-        Para inscribir un equipo tenés que ser Capitana o Delegada de alguno.
+        Para inscribir un equipo tenés que ser Capitán o Delegado de alguno.{' '}
+        <Link href="/equipo/crear" className={styles.enlaceCrearEquipo}>
+          Creá tu equipo
+        </Link>
       </p>
     );
   }

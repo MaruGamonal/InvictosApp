@@ -14,7 +14,7 @@
 .icono {
   width: 60px;
   height: 60px;
-  border-radius: 999px;
+  border-radius: var(--radio-pill);
   background: rgba(0, 168, 204, 0.15);
   color: var(--acento);
   display: flex;
@@ -46,7 +46,7 @@
 .puntoActivo {
   width: 26px;
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radio-pill);
   background: var(--ink-700);
 }
 

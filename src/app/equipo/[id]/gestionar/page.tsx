@@ -120,8 +120,9 @@ export default async function PaginaGestionarEquipo({
         <section className={styles.seccion}>
           {gestion?.torneoEnCursoQueBloqueaArchivado ? (
             <p className={styles.avisoBloqueo}>
-              No se puede: el equipo está jugando {gestion.torneoEnCursoQueBloqueaArchivado.nombre},
-              un torneo en curso. Primero hay que resolverlo como una baja de ese torneo.
+              No podés archivar el equipo: está jugando{' '}
+              {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, un torneo en curso. Primero
+              tenés que dar de baja al equipo de ese torneo.
             </p>
           ) : (
             <BotonArchivarEquipo equipoId={id} />

@@ -18,8 +18,8 @@ export interface PanelColaboradoresProps {
 /**
  * UC-52 — Colaboradores de este torneo puntual: solo pueden cargar
  * resultados, programar partidos y registrar no disputados en este
- * torneo — nada más (`06`, D-32). El vínculo es con el torneo, no con
- * la organización: sacar a alguien de acá no lo saca de otros torneos
+ * torneo — nada más (`06`, D-32). Es una asignación por torneo, no por
+ * organización: quitar a alguien de acá no lo saca de otros torneos
  * donde también colabore.
  */
 export function PanelColaboradores({ torneoId, colaboradores }: PanelColaboradoresProps) {
@@ -75,7 +75,7 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo sacar al colaborador.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos quitar al colaborador.');
         return;
       }
       router.refresh();
@@ -102,7 +102,7 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
               onClick={() => quitar(colaborador.usuarioId)}
               disabled={quitando !== null}
             >
-              {quitando === colaborador.usuarioId ? 'Sacando…' : 'Quitar'}
+              {quitando === colaborador.usuarioId ? 'Quitando…' : 'Quitar'}
             </button>
           </div>
         ))
@@ -113,6 +113,7 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
           type="email"
           required
           placeholder="Email de la persona"
+          aria-label="Email de la persona"
           value={email}
           onChange={(evento) => setEmail(evento.target.value)}
         />
@@ -121,6 +122,7 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
             type="text"
             required
             placeholder="Nombre completo"
+            aria-label="Nombre completo"
             value={nombreCompleto}
             onChange={(evento) => setNombreCompleto(evento.target.value)}
           />
@@ -131,7 +133,8 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
       </form>
 
       <p className={styles.avisoChico}>
-        El vínculo es con este torneo, no con la organización. Sacarlo de acá no lo saca de otros
+        Va a poder cargar resultados, programar partidos y marcar partidos no disputados en este
+        torneo — nada más. Es una asignación por torneo: quitarlo de acá no lo saca de otros
         torneos donde también colabore.
       </p>
     </div>

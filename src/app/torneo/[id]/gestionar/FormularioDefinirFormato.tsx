@@ -98,7 +98,7 @@ export function FormularioDefinirFormato({
       )}
 
       <button type="submit" disabled={enviando}>
-        {enviando ? 'Guardando…' : 'Confirmar formato'}
+        {enviando ? 'Confirmando…' : 'Confirmar formato'}
       </button>
     </form>
   );

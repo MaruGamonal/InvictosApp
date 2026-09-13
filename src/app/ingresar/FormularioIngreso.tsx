@@ -68,7 +68,11 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
       if (!respuesta.ok || !cuerpo.ok) {
         setEstado({
           paso: 'error',
-          mensaje: cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.',
+          mensaje:
+            cuerpo?.error?.mensaje ??
+            (esCrear
+              ? 'No pudimos crear la cuenta. Probá de nuevo.'
+              : 'No pudimos completar el ingreso. Revisá el correo y la contraseña.'),
         });
         return;
       }
@@ -94,7 +98,7 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
     } catch {
       setEstado({
         paso: 'error',
-        mensaje: 'No pudimos conectar. Revisá tu conexión e intentá de nuevo.',
+        mensaje: 'No pudimos conectar. Probá de nuevo.',
       });
     }
   }

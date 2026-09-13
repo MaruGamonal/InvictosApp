@@ -38,7 +38,7 @@ export function FormularioRecuperacion() {
     } catch {
       setEstado({
         paso: 'error',
-        mensaje: 'No pudimos conectar. Revisá tu conexión e intentá de nuevo.',
+        mensaje: 'No pudimos conectar. Probá de nuevo.',
       });
     }
   }

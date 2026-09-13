@@ -3,10 +3,10 @@
   background: var(--color-fondo);
 }
 
-/* Superficie de identidad: tokens oscuros directos, sin depender del tema (`08`, 6.1). */
+/* Superficie de identidad (`08`, 6.1): siempre oscura, en cualquier tema. */
 .hero {
-  background: var(--ink-900);
-  color: var(--blanco);
+  background: var(--identidad-fondo);
+  color: var(--identidad-texto);
   padding: 28px var(--espacio-pantalla-x) 22px;
 }
 
@@ -28,7 +28,7 @@
 .nombre {
   font-size: 26px;
   line-height: 1.15;
-  color: var(--blanco);
+  color: var(--identidad-texto);
   overflow-wrap: break-word;
 }
 
@@ -38,7 +38,7 @@
   gap: 8px;
   align-items: center;
   font-size: 14px;
-  color: var(--gris-claro-sobre-oscuro);
+  color: var(--identidad-texto-secundario);
 }
 
 .contenido {
@@ -115,5 +115,5 @@
   color: var(--exito-texto);
   background: var(--exito-fondo);
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radio-pill);
 }

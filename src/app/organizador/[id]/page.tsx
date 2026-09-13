@@ -84,12 +84,7 @@ export default async function PaginaPerfilOrganizador({
             <h1 className={`${styles.nombre} fuente-display`}>{perfil.nombre}</h1>
             <div className={styles.meta}>
               {perfil.ciudad && <span>{perfil.ciudad.nombre}</span>}
-              <span>
-                {
-                  obtenerEtiqueta('organizacion.nivelVerificacion', perfil.nivelVerificacion)
-                    .etiqueta
-                }
-              </span>
+              <Badge campo="organizacion.nivelVerificacion" valor={perfil.nivelVerificacion} />
             </div>
           </div>
         </div>

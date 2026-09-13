@@ -82,7 +82,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
 
       window.location.assign(`/equipo/${equipoId}`);
     } catch {
-      setError('No pudimos conectar. Revisá tu conexión e intentá de nuevo.');
+      setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
     }
   }

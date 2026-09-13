@@ -36,7 +36,7 @@
 
 .costos {
   border: 1px solid var(--borde-neutro);
-  border-radius: 10px;
+  border-radius: var(--radio-tarjeta);
   padding: 14px;
   margin: 0;
   display: flex;
@@ -241,7 +241,7 @@
   background: var(--error-fondo);
   border: 1px solid var(--error-borde);
   color: var(--error-texto);
-  border-radius: 8px;
+  border-radius: var(--radio-boton);
   padding: 12px 14px;
   font-size: 14px;
 }

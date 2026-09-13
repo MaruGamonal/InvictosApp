@@ -88,7 +88,7 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
       }
       setGuardado(true);
     } catch {
-      setError('No pudimos conectar. Revisá tu conexión e intentá de nuevo.');
+      setError('No pudimos conectar. Probá de nuevo.');
     } finally {
       setEnviando(false);
     }

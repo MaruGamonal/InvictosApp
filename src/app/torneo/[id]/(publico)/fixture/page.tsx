@@ -43,7 +43,9 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
   const fixture = await obtenerFixtureCacheado(id);
 
   if (!fixture || fixture.partidos.length === 0) {
-    return <EstadoVacio mensaje="Todavía no hay fixture generado para este torneo." />;
+    return (
+      <EstadoVacio mensaje="Todavía no hay fixture generado para este torneo. Seguilo desde la ficha y te avisamos cuando esté." />
+    );
   }
 
   // `numero_fecha` vuelve a empezar en cada fase (`groups_knockout`: la

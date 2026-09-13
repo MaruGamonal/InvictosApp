@@ -101,7 +101,7 @@ export function PanelResultados({ partidos }: PanelResultadosProps) {
                 onClick={() => cargar(partido)}
                 disabled={enviando !== null || valores.local === '' || valores.visitante === ''}
               >
-                {enviando === partido.id ? 'Guardando…' : 'Cargar'}
+                {enviando === partido.id ? 'Cargando…' : 'Cargar'}
               </button>
             </div>
           </div>

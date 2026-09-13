@@ -34,7 +34,7 @@
   line-height: 1.5;
   color: var(--color-texto-terciario);
   background: var(--fondo-sutil);
-  border-radius: 8px;
+  border-radius: var(--radio-boton);
   padding: 10px 12px;
 }
 

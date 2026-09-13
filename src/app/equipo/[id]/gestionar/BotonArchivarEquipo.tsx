@@ -14,7 +14,11 @@ export function BotonArchivarEquipo({ equipoId }: Props) {
 
   async function archivar() {
     if (enviando) return;
-    if (!window.confirm('¿Archivar este equipo? Es una baja lógica, no se deshace desde acá.')) {
+    if (
+      !window.confirm(
+        '¿Archivar este equipo? Deja de aparecer en búsquedas e inscripciones nuevas, pero no se borra — no podés deshacerlo vos mismo después.',
+      )
+    ) {
       return;
     }
     setEnviando(true);

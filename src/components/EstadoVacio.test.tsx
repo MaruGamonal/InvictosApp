@@ -22,4 +22,16 @@ describe('EstadoVacio', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver los de la provincia' }));
     expect(onAccion).toHaveBeenCalledOnce();
   });
+
+  it('con hrefAccion, la acción es un link — para usar desde páginas de servidor', () => {
+    render(
+      <EstadoVacio
+        mensaje="Todavía no hay fixture generado para este torneo."
+        textoAccion="Volver a la ficha"
+        hrefAccion="/torneo/t-1"
+      />,
+    );
+    const enlace = screen.getByRole('link', { name: 'Volver a la ficha' });
+    expect(enlace).toHaveAttribute('href', '/torneo/t-1');
+  });
 });

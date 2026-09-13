@@ -34,7 +34,9 @@ export default async function PaginaTabla({ params }: { params: Promise<{ id: st
   const tabla = await obtenerTablaCacheada(id);
 
   if (!tabla || tabla.every((grupo) => grupo.filas.length === 0)) {
-    return <EstadoVacio mensaje="Todavía no hay tabla de posiciones para este torneo." />;
+    return (
+      <EstadoVacio mensaje="Todavía no hay tabla de posiciones para este torneo. Seguilo desde la ficha y te avisamos cuando arranque." />
+    );
   }
 
   return (
@@ -59,7 +61,8 @@ export default async function PaginaTabla({ params }: { params: Promise<{ id: st
                 empatados={fila.empatados}
                 perdidos={fila.perdidos}
                 diferenciaGol={fila.diferenciaGol}
-                puntos={fila.puntos + fila.ajustePuntos}
+                puntos={fila.puntos}
+                ajustePuntos={fila.ajustePuntos}
               />
             ))}
           </div>

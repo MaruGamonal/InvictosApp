@@ -96,6 +96,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nombreEquipoProximo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vsProximo {
+  flex-shrink: 0;
+  color: var(--color-texto-secundario);
+  font-weight: 400;
 }
 
 .fechaProxima {

@@ -33,6 +33,10 @@
 .botonEquipo {
   position: relative;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   background: none;
   border: none;
   padding: 0;
@@ -48,12 +52,13 @@
      horizontal (`08`, 11.10) — no hay cómo scrollear hacia la
      izquierda del origen, así que centrar recortaría el tooltip ahí. */
   left: 0;
+  max-width: min(70vw, 260px);
   background: var(--ink-900);
   color: var(--blanco);
   font: 600 12px/1.3 var(--fuente-texto);
   padding: 4px 8px;
   border-radius: 6px;
-  white-space: nowrap;
+  white-space: normal;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease;
@@ -82,6 +87,11 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--color-texto-secundario);
+}
+
+.ajusteNegativo {
+  color: var(--error-texto);
+  font-weight: 700;
 }
 
 .puntos {

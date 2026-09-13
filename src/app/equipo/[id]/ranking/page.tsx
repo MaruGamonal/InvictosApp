@@ -33,7 +33,7 @@ export default async function PaginaRanking({ params }: { params: Promise<{ id: 
       <Link href={`/equipo/${id}`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
-      <h1 className={`fuente-display ${styles.titulo}`}>Rankings</h1>
+      <h1 className={`fuente-display ${styles.titulo}`}>Ranking</h1>
 
       {!ranking.disponible ? (
         <EstadoVacio mensaje="Este equipo todavía no tiene ciudad y modalidad definidas — hacen falta las dos para armar un ranking." />

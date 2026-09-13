@@ -35,6 +35,8 @@
   font-weight: 700;
   font-size: clamp(48px, 10vw, 64px);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .separador {
@@ -42,6 +44,8 @@
   font-weight: 700;
   font-size: clamp(32px, 6vw, 44px);
   color: var(--identidad-texto-secundario);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .enVivo {

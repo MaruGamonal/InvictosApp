@@ -6,7 +6,7 @@
 
 .chip {
   border: 1px solid var(--borde-neutro);
-  border-radius: 999px;
+  border-radius: var(--radio-pill);
   padding: 9px 16px;
   font-family: var(--fuente-texto);
   font-size: 13px;

@@ -119,7 +119,7 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>
         <p className={styles.avisoHero}>
-          Seguir es al toque. Sumarte al plantel necesita que el capitán lo confirme.
+          Seguir es al toque. Sumarte al plantel necesita que alguien del equipo lo confirme.
         </p>
         {/*
           A diferencia de accionesHero (siempre visibles, D-04b), este

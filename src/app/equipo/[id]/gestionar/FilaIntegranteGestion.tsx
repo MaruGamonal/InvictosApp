@@ -97,6 +97,7 @@ export function FilaIntegranteGestion({
 
   async function dejarEquipo() {
     if (enviando) return;
+    if (!window.confirm('¿Dejar el equipo? Vas a perder tu lugar en el plantel.')) return;
     setEnviando('fuera');
     setError(null);
 
@@ -142,6 +143,7 @@ export function FilaIntegranteGestion({
             type="button"
             className={styles.botonQuitarFila}
             title={esUnoMismo ? 'Dejar el equipo' : `Quitar a ${nombreVisible} del plantel`}
+            aria-label={esUnoMismo ? 'Dejar el equipo' : `Quitar a ${nombreVisible} del plantel`}
             onClick={esUnoMismo ? dejarEquipo : quitarDelPlantel}
             disabled={enviando !== null}
           >

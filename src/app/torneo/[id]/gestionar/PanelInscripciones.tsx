@@ -123,7 +123,7 @@ export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: Pan
                   onClick={() => resolver(inscripcion.equipoId, 'approved')}
                   disabled={enviando !== null}
                 >
-                  {enviando === inscripcion.equipoId ? 'Enviando…' : 'Aprobar'}
+                  {enviando === inscripcion.equipoId ? 'Aprobando…' : 'Aprobar'}
                 </button>
                 <button
                   type="button"

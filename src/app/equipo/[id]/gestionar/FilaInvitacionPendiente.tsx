@@ -57,6 +57,7 @@ export function FilaInvitacionPendiente({ equipoId, perfilId, nombreVisible, fot
           type="button"
           className={styles.botonQuitarFila}
           title={`Cancelar la invitación a ${nombreVisible}`}
+          aria-label={`Cancelar la invitación a ${nombreVisible}`}
           onClick={cancelar}
           disabled={enviando}
         >

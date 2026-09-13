@@ -32,7 +32,6 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
 
   async function confirmar() {
     if (enviando) return;
-    if (!window.confirm('¿Dar de baja a tu equipo de este torneo? No se puede deshacer.')) return;
     setEnviando(true);
     setError(null);
 
@@ -62,12 +61,11 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
 
   return (
     <div className={styles.formulario}>
-      {torneoEnCurso && (
-        <p className={styles.avisoInfo}>
-          El torneo está en curso: los partidos ya jugados se mantienen, y los pendientes se dan por
-          ganados a sus rivales.
-        </p>
-      )}
+      <p className={styles.avisoInfo}>
+        {torneoEnCurso
+          ? 'El torneo está en curso: los partidos ya jugados se mantienen, y los pendientes se dan por ganados a sus rivales. No se puede deshacer.'
+          : 'Tu equipo sale del torneo. No se puede deshacer.'}
+      </p>
 
       {error && <p className={styles.errorChico}>{error}</p>}
 

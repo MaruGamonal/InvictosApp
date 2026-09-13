@@ -151,7 +151,9 @@ export function FormularioEditarEquipo({
         </div>
       </div>
 
+      <label htmlFor="nombreEquipo">Nombre del equipo</label>
       <input
+        id="nombreEquipo"
         type="text"
         required
         placeholder="Nombre del equipo"
@@ -159,7 +161,9 @@ export function FormularioEditarEquipo({
         onChange={(evento) => setNombre(evento.target.value)}
       />
 
+      <label htmlFor="categoriaGeneroEquipo">Categoría de género</label>
       <select
+        id="categoriaGeneroEquipo"
         value={categoriaGenero}
         onChange={(evento) => setCategoriaGenero(evento.target.value)}
       >
@@ -170,7 +174,9 @@ export function FormularioEditarEquipo({
         ))}
       </select>
 
+      <label htmlFor="modalidadHabitualEquipo">Modalidad habitual</label>
       <select
+        id="modalidadHabitualEquipo"
         value={modalidadHabitual}
         onChange={(evento) => setModalidadHabitual(evento.target.value)}
       >
@@ -181,7 +187,13 @@ export function FormularioEditarEquipo({
         ))}
       </select>
 
-      <BuscadorCiudad provincias={provincias} value={ciudadId} onChange={setCiudadId} />
+      <label htmlFor="ciudadEquipo">Ciudad</label>
+      <BuscadorCiudad
+        id="ciudadEquipo"
+        provincias={provincias}
+        value={ciudadId}
+        onChange={setCiudadId}
+      />
 
       <button type="submit" disabled={enviando}>
         {enviando ? 'Guardando…' : 'Guardar datos del equipo'}

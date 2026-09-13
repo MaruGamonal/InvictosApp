@@ -203,7 +203,7 @@ export default async function PaginaDescubrimiento({
               mensaje={
                 resultado.sugerenciaProvincia
                   ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
-                  : 'No encontramos torneos con esos filtros.'
+                  : 'No encontramos torneos con esos filtros — probá sacar alguno.'
               }
             />
           </>

@@ -22,13 +22,14 @@ const FORMATO_FECHA = new Intl.DateTimeFormat('es-AR', {
 
 /**
  * Pantalla de Inicio (paquete de diseño, `Invictos - Inicio.dc.html`).
- * Simplificaciones deliberadas frente al prototipo: el encabezado
- * siempre dice "Hola, {nombre}" sin el título contextual que cambia
- * según el modo (nombre del equipo / de la organización, dato que
- * `obtenerInicio` no trae todavía), y "Cargar resultados" /
- * "Resolver inscripciones" quedan como aviso sin botón — esa gestión de
- * organizador no tiene pantalla propia todavía (la tienen "Crear equipo"
- * y "Crear torneo", que sí se construyeron en esta misma pasada).
+ * Simplificación deliberada frente al prototipo: el encabezado siempre
+ * dice "Hola, {nombre}" sin el título contextual que cambia según el
+ * modo (nombre del equipo / de la organización, dato que
+ * `obtenerInicio` no trae todavía). Los avisos de "Cargar resultados" /
+ * "Resolver inscripciones" no enlazan directo al torneo puntual porque
+ * `obtenerInicio` solo trae el conteo agregado, no el torneoId de cada
+ * pendiente — señalan la sección "Mis torneos" de más abajo en su
+ * lugar.
  */
 export default async function PaginaInicio({
   searchParams,
@@ -282,7 +283,7 @@ export default async function PaginaInicio({
                 {inicio.organizador.inscripcionesPendientes === 1
                   ? '1 inscripción pendiente de resolver.'
                   : `${inicio.organizador.inscripcionesPendientes} inscripciones pendientes de resolver.`}{' '}
-                La gestión de inscripciones todavía no tiene pantalla propia — llega pronto.
+                Entrá al torneo, abajo, para aprobarla o rechazarla.
               </div>
             )}
             {inicio.organizador.resultadosSinCargar > 0 && (
@@ -290,7 +291,7 @@ export default async function PaginaInicio({
                 {inicio.organizador.resultadosSinCargar === 1
                   ? '1 resultado sin cargar.'
                   : `${inicio.organizador.resultadosSinCargar} resultados sin cargar.`}{' '}
-                Cargar resultados todavía no tiene pantalla propia — llega pronto.
+                Entrá al torneo, abajo, para cargarlo.
               </div>
             )}
 

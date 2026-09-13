@@ -106,6 +106,13 @@ export default function PaginaCatalogo() {
             equipoLocal={{ nombre: 'Deportivo Rivadavia' }}
             equipoVisitante={{ nombre: 'Estudiantes' }}
           />
+          <FilaPartido
+            estado="played"
+            equipoLocal={{ nombre: 'Club Atlético Los Pibes del Barrio Norte' }}
+            equipoVisitante={{ nombre: 'Asociación Deportiva y Cultural San Martín' }}
+            golesLocal={12}
+            golesVisitante={3}
+          />
         </div>
       </section>
 
@@ -133,6 +140,17 @@ export default function PaginaCatalogo() {
             perdidos={5}
             diferenciaGol={-8}
             puntos={9}
+          />
+          <FilaTabla
+            posicion={3}
+            equipo={{ nombre: 'Club Atlético Los Pibes del Barrio Norte' }}
+            partidosJugados={10}
+            ganados={3}
+            empatados={2}
+            perdidos={5}
+            diferenciaGol={-2}
+            puntos={11}
+            ajustePuntos={-3}
           />
         </div>
       </section>

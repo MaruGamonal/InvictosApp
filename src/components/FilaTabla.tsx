@@ -10,6 +10,12 @@ export interface FilaTablaProps {
   perdidos: number;
   diferenciaGol: number;
   puntos: number;
+  /**
+   * Quita o bonificación de puntos, en columna propia — nunca sumada a
+   * `puntos` (`06`, D-35b): así se ve cuánto ganó en la cancha y cuánto
+   * le ajustaron, por separado.
+   */
+  ajustePuntos?: number;
   /** Si esta fila clasifica a la fase siguiente — borde izquierdo de color (Design System, sección 07). */
   clasifica?: boolean;
 }
@@ -25,7 +31,7 @@ export function EncabezadoTabla() {
       <span className={styles.numero}>E</span>
       <span className={styles.numero}>P</span>
       <span className={styles.numero}>DG</span>
-      <span className={styles.numero} />
+      <span className={styles.numero}>Aj.</span>
       <span className={styles.puntos}>Pts</span>
     </div>
   );
@@ -45,6 +51,7 @@ export function FilaTabla({
   perdidos,
   diferenciaGol,
   puntos,
+  ajustePuntos = 0,
   clasifica,
 }: FilaTablaProps) {
   return (
@@ -65,7 +72,9 @@ export function FilaTabla({
       <span className={styles.numero}>
         {diferenciaGol > 0 ? `+${diferenciaGol}` : diferenciaGol}
       </span>
-      <span />
+      <span className={`${styles.numero} ${ajustePuntos < 0 ? styles.ajusteNegativo : ''}`}>
+        {ajustePuntos === 0 ? '—' : ajustePuntos > 0 ? `+${ajustePuntos}` : ajustePuntos}
+      </span>
       <span className={styles.puntos}>{puntos}</span>
     </div>
   );

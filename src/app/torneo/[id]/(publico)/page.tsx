@@ -23,7 +23,7 @@ import styles from './pagina.module.css';
  * acciones que lo necesitan (seguir, inscribirse) quedan **visibles**
  * para cualquiera (`06`, D-04b); ambas piden cuenta recién al tocarlas
  * (manda a `/ingresar` sin sesión). `BotonInscribirEquipo` resuelve, ya
- * con la sesión real, a cuál de los equipos propios (Capitana/Delegada)
+ * con la sesión real, a cuál de los equipos propios (Capitán/Delegado)
  * inscribir y si hace falta aceptar el reglamento vigente.
  */
 
@@ -175,16 +175,20 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
                 nombre={ficha.proximoPartido.equipoLocal.nombre}
                 tamano={28}
               />
-              {ficha.proximoPartido.equipoLocal.nombre}
+              <span className={styles.nombreEquipoProximo}>
+                {ficha.proximoPartido.equipoLocal.nombre}
+              </span>
             </span>
-            <span>vs</span>
+            <span className={styles.vsProximo}>vs</span>
             <span className={styles.equipoProximo}>
               <Escudo
                 src={ficha.proximoPartido.equipoVisitante.escudoUrl}
                 nombre={ficha.proximoPartido.equipoVisitante.nombre}
                 tamano={28}
               />
-              {ficha.proximoPartido.equipoVisitante.nombre}
+              <span className={styles.nombreEquipoProximo}>
+                {ficha.proximoPartido.equipoVisitante.nombre}
+              </span>
             </span>
           </div>
           {formatearFecha(ficha.proximoPartido.fechaHoraProgramada) && (
@@ -249,7 +253,7 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
       <p className={styles.aviso}>
         Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar
-        &quot;Seguir&quot; o &quot;Inscribir mi equipo&quot;.
+        &quot;Seguir&quot; o &quot;Inscribir a mi equipo&quot;.
       </p>
 
       <NavInferior activo="torneos" />

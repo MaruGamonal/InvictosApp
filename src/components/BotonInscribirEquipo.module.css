@@ -1,4 +1,8 @@
 .pillPrimaria {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: var(--acento);
   color: var(--acento-texto-sobre);
   font-family: var(--fuente-texto);
@@ -19,6 +23,12 @@
   font-size: 13px;
   color: var(--color-texto-secundario);
   margin: 0;
+}
+
+.enlaceCrearEquipo {
+  color: var(--acento-oscuro);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .panel {
@@ -46,7 +56,7 @@
   background: var(--error-fondo);
   border: 1px solid var(--error-borde);
   color: var(--error-texto);
-  border-radius: 8px;
+  border-radius: var(--radio-boton);
   padding: 10px 12px;
   font-size: 13px;
 }
@@ -81,7 +91,7 @@
   flex-direction: column;
   gap: 8px;
   background: var(--fondo-sutil);
-  border-radius: 8px;
+  border-radius: var(--radio-boton);
   padding: 12px;
 }
 
@@ -118,7 +128,7 @@
   margin: 0;
   background: var(--advertencia-fondo);
   color: var(--advertencia-texto);
-  border-radius: 8px;
+  border-radius: var(--radio-boton);
   padding: 10px 12px;
   font-size: 13px;
 }

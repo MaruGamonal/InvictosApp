@@ -32,8 +32,7 @@ describe('PanelDarDeBaja', () => {
     expect(queryByText(/los pendientes se dan por ganados/)).toBeNull();
   });
 
-  it('confirma, envía el motivo elegido y navega a la ficha del torneo', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+  it('al confirmar, envía el motivo elegido y navega a la ficha del torneo', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -60,16 +59,11 @@ describe('PanelDarDeBaja', () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith('/torneo/t-1'));
   });
 
-  it('sin confirmar el diálogo, no llama a la API', () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    const fetchMock = vi.fn();
-    vi.stubGlobal('fetch', fetchMock);
-
+  it('siempre muestra que la baja no se puede deshacer', () => {
     const { getByText } = render(
       <PanelDarDeBaja torneoId="t-1" equipoId="eq-1" torneoEnCurso={false} />,
     );
-    fireEvent.click(getByText('Confirmar baja del torneo'));
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(getByText(/No se puede deshacer/)).toBeTruthy();
   });
 
   it('con motivo "Otro", el botón queda deshabilitado hasta describir qué pasó', () => {

@@ -48,6 +48,8 @@
   font-size: 22px;
   line-height: 1;
   color: var(--acento);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .posicionEtiqueta {

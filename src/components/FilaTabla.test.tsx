@@ -45,6 +45,40 @@ describe('FilaTabla', () => {
     expect(tooltip).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it('el ajuste de puntos va en su propia columna, nunca sumado a Pts (`06`, D-35b)', () => {
+    const { getByText } = render(
+      <FilaTabla
+        posicion={3}
+        equipo={{ nombre: 'Equipo B' }}
+        partidosJugados={10}
+        ganados={3}
+        empatados={2}
+        perdidos={5}
+        diferenciaGol={-2}
+        puntos={11}
+        ajustePuntos={-3}
+      />,
+    );
+    expect(getByText('11')).toBeInTheDocument();
+    expect(getByText('-3')).toBeInTheDocument();
+  });
+
+  it('sin ajuste de puntos, la columna muestra un guion en vez de 0', () => {
+    const { getByText } = render(
+      <FilaTabla
+        posicion={1}
+        equipo={{ nombre: 'Equipo A' }}
+        partidosJugados={10}
+        ganados={8}
+        empatados={1}
+        perdidos={1}
+        diferenciaGol={15}
+        puntos={25}
+      />,
+    );
+    expect(getByText('—')).toBeInTheDocument();
+  });
+
   it('usa cifras tabulares en las columnas numéricas para que se alineen (`08`, sección 7)', () => {
     const { container } = render(
       <FilaTabla
