@@ -151,6 +151,7 @@ export default function PaginaCatalogo() {
             diferenciaGol={-2}
             puntos={11}
             ajustePuntos={-3}
+            ganadosPorPresentacion={1}
           />
         </div>
       </section>

@@ -58,6 +58,7 @@ export default async function PaginaTabla({ params }: { params: Promise<{ id: st
                 equipo={{ nombre: fila.equipoNombre, escudoUrl: fila.equipoEscudoUrl }}
                 partidosJugados={fila.partidosJugados}
                 ganados={fila.ganados}
+                ganadosPorPresentacion={fila.ganadosPorPresentacion}
                 empatados={fila.empatados}
                 perdidos={fila.perdidos}
                 diferenciaGol={fila.diferenciaGol}

@@ -79,6 +79,37 @@ describe('FilaTabla', () => {
     expect(getByText('—')).toBeInTheDocument();
   });
 
+  it('marca con asterisco los triunfos por presentación (`06`, D-33b)', () => {
+    const { getByTitle, queryByTitle, rerender } = render(
+      <FilaTabla
+        posicion={1}
+        equipo={{ nombre: 'Equipo A' }}
+        partidosJugados={10}
+        ganados={8}
+        empatados={1}
+        perdidos={1}
+        diferenciaGol={15}
+        puntos={25}
+      />,
+    );
+    expect(queryByTitle(/presentación/)).not.toBeInTheDocument();
+
+    rerender(
+      <FilaTabla
+        posicion={1}
+        equipo={{ nombre: 'Equipo A' }}
+        partidosJugados={10}
+        ganados={8}
+        empatados={1}
+        perdidos={1}
+        diferenciaGol={15}
+        puntos={25}
+        ganadosPorPresentacion={2}
+      />,
+    );
+    expect(getByTitle('2 de esos triunfos son por presentación')).toHaveTextContent('*');
+  });
+
   it('usa cifras tabulares en las columnas numéricas para que se alineen (`08`, sección 7)', () => {
     const { container } = render(
       <FilaTabla

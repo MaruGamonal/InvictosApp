@@ -41,6 +41,12 @@ export interface FilaTabla {
   ajustePuntos: number;
   partidosJugados: number;
   ganados: number;
+  /**
+   * Cuántos de `ganados` son por presentación (`06`, D-33b: se distingue
+   * de un triunfo en la cancha, en fixture y en tabla) — subconjunto de
+   * `ganados`, no se suma aparte.
+   */
+  ganadosPorPresentacion: number;
   empatados: number;
   perdidos: number;
   golesFavor: number;
@@ -65,6 +71,7 @@ interface FilaPosicionCruda {
   ajuste_puntos: number;
   partidos_jugados: number;
   ganados: number;
+  ganados_por_presentacion: string;
   empatados: number;
   perdidos: number;
   goles_favor: number;
@@ -81,6 +88,7 @@ function aFila(fila: FilaPosicionCruda): FilaTabla {
     ajustePuntos: fila.ajuste_puntos,
     partidosJugados: fila.partidos_jugados,
     ganados: fila.ganados,
+    ganadosPorPresentacion: Number(fila.ganados_por_presentacion ?? 0),
     empatados: fila.empatados,
     perdidos: fila.perdidos,
     golesFavor: fila.goles_favor,
@@ -175,7 +183,12 @@ async function construirTablaDeGrupo(
   const { rows } = await pool.query<FilaPosicionCruda>(
     `SELECT p.equipo_id, e.nombre AS equipo_nombre, e.escudo_url AS equipo_escudo_url,
             p.puntos, p.ajuste_puntos, p.partidos_jugados, p.ganados, p.empatados, p.perdidos,
-            p.goles_favor, p.goles_contra, p.diferencia_gol
+            p.goles_favor, p.goles_contra, p.diferencia_gol,
+            (SELECT count(*) FROM partido pw
+             WHERE pw.grupo_id = p.grupo_id AND pw.estado = 'walkover'
+               AND ((pw.equipo_local_id = p.equipo_id AND pw.goles_local > pw.goles_visitante)
+                 OR (pw.equipo_visitante_id = p.equipo_id AND pw.goles_visitante > pw.goles_local))
+            ) AS ganados_por_presentacion
      FROM posicion p
      JOIN equipo e ON e.id = p.equipo_id
      WHERE p.grupo_id = $1

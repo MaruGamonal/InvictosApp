@@ -24,6 +24,7 @@ function filaPosicion(equipoId: string, over: Partial<Record<string, unknown>> =
     goles_favor: 2,
     goles_contra: 1,
     diferencia_gol: 1,
+    ganados_por_presentacion: '0',
     ...over,
   };
 }
@@ -109,6 +110,25 @@ describe('obtenerTabla', () => {
         ],
       },
     ]);
+  });
+
+  it('mapea ganados_por_presentacion (recuento de walkovers ganados, `06`, D-33b)', async () => {
+    mockearDb({
+      grupoUnico: { id: GRUPO_A, nombre: 'Zona A', torneo_id: TORNEO },
+      posicionPorGrupo: {
+        [GRUPO_A]: [filaPosicion(EQUIPO_X, { ganados: 3, ganados_por_presentacion: '1' })],
+      },
+    });
+    const { obtenerTabla } = await import('./obtenerTabla');
+
+    const [tabla] = await obtenerTabla(
+      { grupoId: GRUPO_A },
+      { usuarioId: null, permisos: {}, esSistema: false },
+    );
+
+    expect(tabla!.filas[0]).toEqual(
+      expect.objectContaining({ equipoId: EQUIPO_X, ganados: 3, ganadosPorPresentacion: 1 }),
+    );
   });
 
   it('con faseId devuelve una tabla por cada grupo de la fase', async () => {

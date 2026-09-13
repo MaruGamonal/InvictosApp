@@ -16,6 +16,11 @@ export interface FilaTablaProps {
    * le ajustaron, por separado.
    */
   ajustePuntos?: number;
+  /**
+   * Cuántos de `ganados` son por presentación (`06`, D-33b) — subconjunto
+   * de `ganados`, se marca con un asterisco al lado del número.
+   */
+  ganadosPorPresentacion?: number;
   /** Si esta fila clasifica a la fase siguiente — borde izquierdo de color (Design System, sección 07). */
   clasifica?: boolean;
 }
@@ -52,6 +57,7 @@ export function FilaTabla({
   diferenciaGol,
   puntos,
   ajustePuntos = 0,
+  ganadosPorPresentacion = 0,
   clasifica,
 }: FilaTablaProps) {
   return (
@@ -66,7 +72,21 @@ export function FilaTabla({
         </button>
       </span>
       <span className={styles.numero}>{partidosJugados}</span>
-      <span className={styles.numero}>{ganados}</span>
+      <span className={styles.numero}>
+        {ganados}
+        {ganadosPorPresentacion > 0 && (
+          <sup
+            className={styles.marcaPresentacion}
+            title={
+              ganadosPorPresentacion === ganados
+                ? 'Todos los triunfos son por presentación'
+                : `${ganadosPorPresentacion} de esos triunfos son por presentación`
+            }
+          >
+            *
+          </sup>
+        )}
+      </span>
       <span className={styles.numero}>{empatados}</span>
       <span className={styles.numero}>{perdidos}</span>
       <span className={styles.numero}>

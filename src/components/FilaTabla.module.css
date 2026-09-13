@@ -89,6 +89,13 @@
   color: var(--color-texto-secundario);
 }
 
+.marcaPresentacion {
+  color: var(--advertencia-texto);
+  font-weight: 700;
+  margin-left: 1px;
+  cursor: help;
+}
+
 .ajusteNegativo {
   color: var(--error-texto);
   font-weight: 700;
