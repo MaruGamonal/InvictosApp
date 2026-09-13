@@ -65,7 +65,7 @@ export function FormularioRecuperacion() {
         Escribí el correo de tu cuenta y te mandamos un link para elegir una contraseña nueva.
       </p>
 
-      {estado.paso === 'error' && <p className={styles.error}>{estado.mensaje}</p>}
+      {estado.paso === 'error' && <p className={styles.error} role="alert">{estado.mensaje}</p>}
 
       <div className={styles.campo}>
         <label htmlFor="identificadorAcceso">Correo</label>

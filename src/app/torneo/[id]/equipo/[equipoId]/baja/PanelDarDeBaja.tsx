@@ -89,6 +89,7 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
           type="text"
           required
           placeholder="Contá qué pasó"
+          aria-label="Contá qué pasó"
           value={motivoDetalle}
           onChange={(evento) => setMotivoDetalle(evento.target.value)}
         />

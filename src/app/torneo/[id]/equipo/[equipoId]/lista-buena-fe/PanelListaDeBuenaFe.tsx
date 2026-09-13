@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Escudo } from '@/components/Escudo';
-import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { Badge } from '@/components/Badge';
 import type { IntegranteListaDeBuenaFe } from '@/services/inscripciones/obtenerListaDeBuenaFe';
 import styles from './pagina.module.css';
 
@@ -153,9 +153,9 @@ export function PanelListaDeBuenaFe({
                   <span className={styles.avisoBloqueado}>Ya habilitado en otro equipo</span>
                 ) : (
                   <span className={styles.rolIntegrante}>
-                    {integrante.rolesEquipo
-                      .map((rol) => obtenerEtiqueta('integranteEquipo.rolEquipo', rol).etiqueta)
-                      .join(' · ')}
+                    {integrante.rolesEquipo.map((rol) => (
+                      <Badge key={rol} campo="integranteEquipo.rolEquipo" valor={rol} />
+                    ))}
                   </span>
                 )}
               </div>

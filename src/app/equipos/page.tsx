@@ -60,10 +60,15 @@ export default async function PaginaBuscarEquipos({
           type="search"
           name="q"
           placeholder="Buscar por nombre…"
+          aria-label="Buscar equipo por nombre"
           defaultValue={parametros.q ?? ''}
           className={styles.busqueda}
         />
-        <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
+        <select
+          name="modalidad"
+          aria-label="Filtrar por modalidad"
+          defaultValue={parametros.modalidad ?? ''}
+        >
           <option value="">Cualquier modalidad</option>
           {MODALIDADES.map((modalidad) => (
             <option key={modalidad} value={modalidad}>
@@ -71,7 +76,11 @@ export default async function PaginaBuscarEquipos({
             </option>
           ))}
         </select>
-        <select name="categoriaGenero" defaultValue={parametros.categoriaGenero ?? ''}>
+        <select
+          name="categoriaGenero"
+          aria-label="Filtrar por categoría"
+          defaultValue={parametros.categoriaGenero ?? ''}
+        >
           <option value="">Cualquier categoría</option>
           {CATEGORIAS_GENERO.map((categoria) => (
             <option key={categoria} value={categoria}>

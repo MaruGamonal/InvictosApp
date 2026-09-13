@@ -114,6 +114,7 @@ export function PanelProgramarPartidos({ partidos, ciudadId }: PanelProgramarPar
             <div className={styles.filaAccion}>
               <input
                 type="datetime-local"
+                aria-label="Fecha y hora del partido"
                 value={fechaHora}
                 onChange={(evento) => setFechaHora(evento.target.value)}
                 disabled={enviando}
@@ -121,6 +122,7 @@ export function PanelProgramarPartidos({ partidos, ciudadId }: PanelProgramarPar
               <input
                 type="text"
                 placeholder="Sede (opcional)"
+                aria-label="Sede (opcional)"
                 value={sedeNombre}
                 onChange={(evento) => setSedeNombre(evento.target.value)}
                 disabled={enviando}
@@ -128,6 +130,7 @@ export function PanelProgramarPartidos({ partidos, ciudadId }: PanelProgramarPar
               <input
                 type="text"
                 placeholder="Dirección"
+                aria-label="Dirección de la sede"
                 value={sedeDireccion}
                 onChange={(evento) => setSedeDireccion(evento.target.value)}
                 disabled={enviando}

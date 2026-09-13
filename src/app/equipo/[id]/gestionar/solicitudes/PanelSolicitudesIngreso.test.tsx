@@ -33,11 +33,11 @@ describe('PanelSolicitudesIngreso', () => {
         }),
       ),
     );
-    await waitFor(() => expect(getByText('ACEPTADA — YA ESTÁ EN EL PLANTEL')).toBeTruthy());
+    await waitFor(() => expect(getByText('Aceptada · ya está en el plantel')).toBeTruthy());
     expect(getByText('Damián Ortiz')).toBeTruthy();
   });
 
-  it('al rechazar, llama a la API con aceptar false y muestra "RECHAZADA"', async () => {
+  it('al rechazar, llama a la API con aceptar false y muestra "Rechazada"', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -54,7 +54,7 @@ describe('PanelSolicitudesIngreso', () => {
         }),
       ),
     );
-    await waitFor(() => expect(getByText('RECHAZADA')).toBeTruthy());
+    await waitFor(() => expect(getByText('Rechazada')).toBeTruthy());
   });
 
   it('si la API falla, muestra el error y la fila sigue accionable', async () => {

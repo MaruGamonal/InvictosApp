@@ -48,6 +48,8 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--color-texto-secundario);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .textoPeligro {
@@ -256,6 +258,8 @@
   font-family: var(--fuente-texto);
   font-size: 14px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .formularioChico button[type='submit'] {

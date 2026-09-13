@@ -64,7 +64,7 @@ export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
                   resultado === 'active' ? styles.resultadoAceptada : styles.resultadoRechazada
                 }
               >
-                {resultado === 'active' ? 'ACEPTADA — YA ESTÁ EN EL PLANTEL' : 'RECHAZADA'}
+                {resultado === 'active' ? 'Aceptada · ya está en el plantel' : 'Rechazada'}
               </span>
             ) : (
               <div className={styles.filaAccion}>

@@ -170,7 +170,7 @@ export function AccionesEstadoTorneo({
               onClick={() => avanzar('registration_open')}
               disabled={enviando !== null}
             >
-              Inscripciones abiertas
+              Abrir inscripciones
             </button>
             <button
               type="button"
@@ -178,7 +178,7 @@ export function AccionesEstadoTorneo({
               onClick={() => avanzar('registration_closed')}
               disabled={enviando !== null}
             >
-              Inscripciones cerradas
+              Cerrar inscripciones
             </button>
             <button
               type="button"
@@ -186,7 +186,7 @@ export function AccionesEstadoTorneo({
               onClick={() => avanzar('in_progress')}
               disabled={enviando !== null || !tienePartidos}
             >
-              En curso
+              Iniciar torneo
             </button>
           </div>
         </>

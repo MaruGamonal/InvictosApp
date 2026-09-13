@@ -99,13 +99,21 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
       <div className={styles.filaEtiqueta}>
         <h1 className={`fuente-display ${styles.titulo}`}>Mi perfil</h1>
         <Link href={`/jugador/${perfil.id}`} className={styles.enlaceChico}>
-          Ver como lo ven
+          Ver cómo te ven los demás
         </Link>
       </div>
       <p className={styles.texto}>Todo acá es opcional — nada de esto te bloquea nada.</p>
 
-      {error && <p className={styles.error}>{error}</p>}
-      {guardado && !error && <p className={styles.ayuda}>Guardado.</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+      {guardado && !error && (
+        <p className={styles.ayuda} role="status">
+          Guardado.
+        </p>
+      )}
 
       <div className={propios.filaFoto}>
         <button
@@ -133,7 +141,11 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
           >
             {subiendoFoto ? 'Subiendo…' : 'Cambiar foto'}
           </button>
-          {errorFoto && <p className={styles.error}>{errorFoto}</p>}
+          {errorFoto && (
+            <p className={styles.error} role="alert">
+              {errorFoto}
+            </p>
+          )}
         </div>
       </div>
 
