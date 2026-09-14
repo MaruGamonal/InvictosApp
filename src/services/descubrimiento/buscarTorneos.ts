@@ -3,6 +3,11 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
 import { paginar } from '@/lib/paginacion';
+import {
+  VALORES_DURACION_TORNEO,
+  calcularDuracionTorneo,
+  type DuracionTorneo,
+} from '@/lib/duracionTorneo';
 
 /**
  * UC-22 — Buscar y filtrar torneos: **el activo del producto** (`06`,
@@ -50,6 +55,7 @@ const esquemaEntrada = z.object({
   categoriaGenero: z.enum(CATEGORIAS_GENERO).optional(),
   soloInscripcionesAbiertas: z.boolean().optional(),
   fechaInicioDesde: z.string().datetime().optional(),
+  duracion: z.enum(VALORES_DURACION_TORNEO).optional(),
   cursor: z.string().optional(),
   tamanoPagina: z.number().int().positive().max(50).optional(),
 });
@@ -64,6 +70,8 @@ export interface TorneoBuscado {
   categoriaEdad: string;
   estado: string;
   fechaInicioEstimada: string | null;
+  /** `06`, D-99/D-102 — derivada de fecha_inicio/fecha_fin, `null` si falta alguna. */
+  duracion: DuracionTorneo | null;
   cupoEquipos: number;
   inscriptosAprobados: number;
   organizacionNombre: string;
@@ -86,6 +94,7 @@ interface FilaTorneo {
   categoria_edad: string;
   estado: string;
   fecha_inicio_estimada: Date | null;
+  fecha_fin_estimada: Date | null;
   cupo_equipos: number;
   inscriptos_aprobados: string;
   organizacion_nombre: string;
@@ -130,11 +139,23 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
     valores.push(`%${datos.texto}%`);
     condiciones.push(`t.nombre ILIKE $${valores.length}`);
   }
+  if (datos.duracion) {
+    // D-102: se deriva de las mismas dos columnas de fecha, sin índice
+    // ni columna nueva (`10`, sección sobre buscarTorneos).
+    const ventana = 't.fecha_inicio_estimada IS NOT NULL AND t.fecha_fin_estimada IS NOT NULL AND (t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date)';
+    if (datos.duracion === 'single_day') {
+      condiciones.push(`${ventana} = 0`);
+    } else if (datos.duracion === 'weekend') {
+      condiciones.push(`${ventana} BETWEEN 1 AND 2`);
+    } else {
+      condiciones.push(`${ventana} >= 3`);
+    }
+  }
 
   const { rows } = await pool.query<FilaTorneo>(
     `SELECT t.id, t.nombre, o.logo_url AS organizacion_logo_url, o.nombre AS organizacion_nombre,
             t.modalidad, t.categoria_genero, t.categoria_edad,
-            t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
+            t.estado, t.fecha_inicio_estimada, t.fecha_fin_estimada, t.cupo_equipos,
             (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved')
               AS inscriptos_aprobados,
             (o.nivel_verificacion != 'unverified') AS organizacion_verificada
@@ -191,6 +212,7 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
       categoriaEdad: fila.categoria_edad,
       estado: fila.estado,
       fechaInicioEstimada: fila.fecha_inicio_estimada?.toISOString() ?? null,
+      duracion: calcularDuracionTorneo(fila.fecha_inicio_estimada, fila.fecha_fin_estimada),
       cupoEquipos: fila.cupo_equipos,
       inscriptosAprobados: Number(fila.inscriptos_aprobados),
       organizacionNombre: fila.organizacion_nombre,

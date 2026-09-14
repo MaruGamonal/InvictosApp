@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 beforeEach(() => vi.resetModules());
 
 function mockearDb(candidatos: string[]) {
+  const consultas: string[] = [];
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
+        consultas.push(texto.trim());
         if (texto.trim().startsWith('SELECT p.id')) {
           return { rows: candidatos.map((id) => ({ id })) };
         }
@@ -13,6 +15,7 @@ function mockearDb(candidatos: string[]) {
       },
     }),
   }));
+  return consultas;
 }
 
 describe('confirmarResultadosVencidos', () => {
@@ -63,5 +66,19 @@ describe('confirmarResultadosVencidos', () => {
     expect(resumen.procesados).toBe(3);
     expect(resumen.cambiados).toBe(2);
     expect(resumen.fallidos).toEqual([{ partidoId: 'p2', error: 'RESULTADO_NO_CONFIRMABLE' }]);
+  });
+
+  it('también confirma sin esperar 72 horas si el torneo relámpago ya terminó (`06`, D-100)', async () => {
+    const consultas = mockearDb([]);
+    const { confirmarResultadosVencidos } = await import('./confirmarResultadosVencidos');
+
+    await confirmarResultadosVencidos();
+
+    const consulta = consultas.find((c) => c.startsWith('SELECT p.id'));
+    expect(consulta).toContain("t.estado = 'finished'");
+    expect(consulta).toContain(
+      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) <= 2",
+    );
+    expect(consulta).toContain("p.fecha_carga_resultado < now() - interval '72 hours'");
   });
 });

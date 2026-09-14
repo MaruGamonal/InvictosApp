@@ -10,6 +10,7 @@ import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { VALORES_DURACION_TORNEO, etiquetaDuracionTorneo } from '@/lib/duracionTorneo';
 import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from './_constantes';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { SelectorDeCiudad } from './SelectorDeCiudad';
@@ -33,6 +34,7 @@ interface SearchParams {
   modalidad?: string;
   categoriaEdad?: string;
   abiertas?: string;
+  duracion?: string;
   cursor?: string;
 }
 
@@ -91,6 +93,12 @@ export default async function PaginaDescubrimiento({
     .flatMap((provincia) => provincia.ciudades.map((ciudad) => ({ ...ciudad, provincia })))
     .find((ciudad) => ciudad.id === ciudadId);
 
+  const duracion = VALORES_DURACION_TORNEO.includes(
+    parametros.duracion as (typeof VALORES_DURACION_TORNEO)[number],
+  )
+    ? (parametros.duracion as (typeof VALORES_DURACION_TORNEO)[number])
+    : undefined;
+
   const resultado = await buscarTorneosCacheado({
     ciudadId,
     texto: parametros.q?.trim() || undefined,
@@ -104,6 +112,7 @@ export default async function PaginaDescubrimiento({
       : undefined,
     categoriaGenero,
     soloInscripcionesAbiertas: parametros.abiertas === '1',
+    duracion,
     cursor: parametros.cursor || undefined,
   });
 
@@ -153,8 +162,39 @@ export default async function PaginaDescubrimiento({
           <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />
         </details>
 
+        <form method="get" className={styles.filtrosDuracion} aria-label="Filtrar por duración">
+          {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
+          {parametros.modalidad && (
+            <input type="hidden" name="modalidad" value={parametros.modalidad} />
+          )}
+          {parametros.categoriaEdad && (
+            <input type="hidden" name="categoriaEdad" value={parametros.categoriaEdad} />
+          )}
+          {parametros.abiertas && <input type="hidden" name="abiertas" value={parametros.abiertas} />}
+          <button
+            type="submit"
+            name="duracion"
+            value=""
+            className={!duracion ? `${styles.chipDuracion} ${styles.chipDuracionActivo}` : styles.chipDuracion}
+          >
+            Cualquier duración
+          </button>
+          {VALORES_DURACION_TORNEO.map((valor) => (
+            <button
+              key={valor}
+              type="submit"
+              name="duracion"
+              value={valor}
+              className={duracion === valor ? `${styles.chipDuracion} ${styles.chipDuracionActivo}` : styles.chipDuracion}
+            >
+              {etiquetaDuracionTorneo(valor)}
+            </button>
+          ))}
+        </form>
+
         <form method="get" className={styles.filtros}>
           {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
+          {duracion && <input type="hidden" name="duracion" value={duracion} />}
           <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
             <option value="">Cualquier modalidad</option>
             {MODALIDADES.map((modalidad) => (

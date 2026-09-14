@@ -18,6 +18,7 @@ function filaTorneo(id: string, over: Partial<Record<string, unknown>> = {}) {
     categoria_edad: 'open',
     estado: 'registration_open',
     fecha_inicio_estimada: null,
+    fecha_fin_estimada: null,
     cupo_equipos: 16,
     inscriptos_aprobados: '3',
     organizacion_verificada: false,
@@ -163,6 +164,50 @@ describe('buscarTorneos', () => {
     const busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
     expect(busqueda!.texto).toContain('t.nombre ILIKE $4');
     expect(busqueda!.valores).toContain('%Copa%');
+  });
+
+  it('filtra por duración cuando se indica (`06`, D-102)', async () => {
+    const consultas = mockearDb({ torneos: [] });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    await buscarTorneos({ ciudadId: CIUDAD, duracion: 'single_day' }, VISITANTE);
+    let busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
+    expect(busqueda!.texto).toContain(
+      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) = 0",
+    );
+
+    await buscarTorneos({ ciudadId: CIUDAD, duracion: 'weekend' }, VISITANTE);
+    busqueda = consultas.filter((c) => c.texto.startsWith('SELECT t.id, t.nombre')).pop();
+    expect(busqueda!.texto).toContain(
+      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) BETWEEN 1 AND 2",
+    );
+
+    await buscarTorneos({ ciudadId: CIUDAD, duracion: 'extended' }, VISITANTE);
+    busqueda = consultas.filter((c) => c.texto.startsWith('SELECT t.id, t.nombre')).pop();
+    expect(busqueda!.texto).toContain(
+      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) >= 3",
+    );
+  });
+
+  it('deriva la duración de cada torneo a partir de sus dos fechas (`06`, D-99)', async () => {
+    mockearDb({
+      torneos: [
+        filaTorneo('t1', {
+          fecha_inicio_estimada: new Date('2026-09-06T00:00:00Z'),
+          fecha_fin_estimada: new Date('2026-09-06T23:00:00Z'),
+        }),
+        filaTorneo('t2', {
+          fecha_inicio_estimada: new Date('2026-09-06T00:00:00Z'),
+          fecha_fin_estimada: null,
+        }),
+      ],
+    });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    const resultado = await buscarTorneos({ ciudadId: CIUDAD }, VISITANTE);
+
+    expect(resultado.torneos.find((t) => t.id === 't1')!.duracion).toBe('single_day');
+    expect(resultado.torneos.find((t) => t.id === 't2')!.duracion).toBeNull();
   });
 
   it('una ciudad sin torneos trae la sugerencia de provincia con su cantidad', async () => {

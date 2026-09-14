@@ -59,6 +59,32 @@ async function obtenerEquiposAprobados(pool: ReturnType<typeof obtenerPool>, tor
   return rows.map((r) => r.equipo_id);
 }
 
+/**
+ * D-101 (`06`, 4.16) — cerrar una fase para generar la siguiente exige
+ * que sus resultados estén `confirmed`, nunca `loaded` ni `disputed`:
+ * en un torneo extendido esto se cumple solo porque las 72 horas de
+ * D-60 ya vencieron entre fecha y fecha, pero en un relámpago la fase
+ * siguiente se arma minutos después — sin este chequeo se puede cruzar
+ * mal a dos equipos delante de todo el mundo, sobre una tabla que
+ * todavía puede moverse. `cancelled` no entra: nunca va a tener un
+ * resultado que confirmar.
+ */
+async function verificarFaseConResultadosConfirmados(
+  pool: ReturnType<typeof obtenerPool>,
+  faseId: string,
+): Promise<void> {
+  const { rows: sinConfirmar } = await pool.query<{ id: string }>(
+    `SELECT id FROM partido
+     WHERE fase_id = $1 AND estado IN ('played', 'walkover') AND estado_resultado != 'confirmed'`,
+    [faseId],
+  );
+  if (sinConfirmar.length > 0) {
+    throw crearError('FASE_CON_RESULTADOS_SIN_CONFIRMAR', {
+      partidosIds: sinConfirmar.map((p) => p.id),
+    });
+  }
+}
+
 function determinarGanador(partido: {
   equipo_local_id: string;
   equipo_visitante_id: string;
@@ -146,14 +172,16 @@ export const generarFixture: Servicio<GenerarFixtureInput, FixturePropuesto> = a
 
   // tipo_fase === 'knockout'
   const { rows: existentes } = await pool.query<{
+    id: string;
     numero_fecha: number;
     equipo_local_id: string;
     equipo_visitante_id: string;
     goles_local: number | null;
     goles_visitante: number | null;
     estado: string;
+    estado_resultado: string;
   }>(
-    'SELECT numero_fecha, equipo_local_id, equipo_visitante_id, goles_local, goles_visitante, estado FROM partido WHERE fase_id = $1 ORDER BY numero_fecha ASC',
+    'SELECT id, numero_fecha, equipo_local_id, equipo_visitante_id, goles_local, goles_visitante, estado, estado_resultado FROM partido WHERE fase_id = $1 ORDER BY numero_fecha ASC',
     [datos.faseId],
   );
 
@@ -178,6 +206,8 @@ export const generarFixture: Servicio<GenerarFixtureInput, FixturePropuesto> = a
           { campo: 'faseId', problema: 'La fase de grupos todavía no terminó.' },
         ]);
       }
+
+      await verificarFaseConResultadosConfirmados(pool, faseAnterior.id);
 
       const { rows: gruposAnteriores } = await pool.query<{ id: string }>(
         'SELECT id FROM grupo WHERE fase_id = $1 ORDER BY nombre ASC',
@@ -214,6 +244,12 @@ export const generarFixture: Servicio<GenerarFixtureInput, FixturePropuesto> = a
     throw crearError('DATOS_INVALIDOS', [
       { campo: 'faseId', problema: 'La eliminatoria ya tiene un campeón definido.' },
     ]);
+  }
+  const sinConfirmarRonda = partidosUltimaRonda.filter((p) => p.estado_resultado !== 'confirmed');
+  if (sinConfirmarRonda.length > 0) {
+    throw crearError('FASE_CON_RESULTADOS_SIN_CONFIRMAR', {
+      partidosIds: sinConfirmarRonda.map((p) => p.id),
+    });
   }
 
   const ganadores = partidosUltimaRonda.map(determinarGanador);

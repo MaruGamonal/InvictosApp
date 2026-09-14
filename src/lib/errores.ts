@@ -131,6 +131,11 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'Este resultado no está en condiciones de confirmarse todavía.',
   },
+  FASE_CON_RESULTADOS_SIN_CONFIRMAR: {
+    httpStatus: 409,
+    mensaje:
+      'Hay resultados de esta fase todavía sin confirmar. Confirmalos antes de generar la siguiente.',
+  },
 } as const;
 
 export type CodigoError = keyof typeof CODIGOS_ERROR;

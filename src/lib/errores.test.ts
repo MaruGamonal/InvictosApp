@@ -18,7 +18,11 @@ describe('CODIGOS_ERROR', () => {
     // Más CORREO_YA_REGISTRADO: el registro inmediato (revisión del
     // paquete de diseño, `FLOWS.md` Flujo 1) crea la cuenta al toque con
     // el Admin API, que sí informa si el correo ya existe.
-    expect(codigos).toHaveLength(29);
+    // Más FASE_CON_RESULTADOS_SIN_CONFIRMAR (revisión 16, `06` D-101):
+    // cerrar una fase para generar la siguiente exige resultados
+    // confirmed, regla que un torneo relámpago hace visible pero que
+    // siempre fue correcta.
+    expect(codigos).toHaveLength(30);
   });
 
   it.each(codigos)(

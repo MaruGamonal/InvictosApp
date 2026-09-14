@@ -60,6 +60,7 @@ export interface GestionTorneoResultado {
   costoPlanilla: number | null;
   cupoEquipos: number;
   fechaInicioEstimada: string | null;
+  fechaFinEstimada: string | null;
   estado: string;
   formato: 'league' | 'knockout' | 'groups_knockout';
   fases: FaseGestion[];
@@ -85,11 +86,12 @@ export const obtenerGestionTorneo: Servicio<
     costo_planilla: string | null;
     cupo_equipos: number;
     fecha_inicio_estimada: Date | null;
+    fecha_fin_estimada: Date | null;
     estado: string;
     formato: 'league' | 'knockout' | 'groups_knockout';
   }>(
     `SELECT id, nombre, descripcion, direccion, ciudad_id, costo_inscripcion, costo_planilla,
-            cupo_equipos, fecha_inicio_estimada, estado, formato
+            cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
@@ -164,6 +166,7 @@ export const obtenerGestionTorneo: Servicio<
     costoPlanilla: torneo.costo_planilla != null ? Number(torneo.costo_planilla) : null,
     cupoEquipos: torneo.cupo_equipos,
     fechaInicioEstimada: torneo.fecha_inicio_estimada?.toISOString() ?? null,
+    fechaFinEstimada: torneo.fecha_fin_estimada?.toISOString() ?? null,
     estado: torneo.estado,
     formato: torneo.formato,
     fases: fases.map((fila) => ({

@@ -14,6 +14,7 @@ interface Props {
   costoPlanilla: number | null;
   cupoEquipos: number;
   fechaInicioEstimada: string | null;
+  fechaFinEstimada: string | null;
 }
 
 /**
@@ -32,6 +33,7 @@ export function FormularioEditarTorneo({
   costoPlanilla: costoPlanillaInicial,
   cupoEquipos: cupoEquiposInicial,
   fechaInicioEstimada: fechaInicioInicial,
+  fechaFinEstimada: fechaFinInicial,
 }: Props) {
   const router = useRouter();
   const [nombre, setNombre] = useState(nombreInicial);
@@ -47,6 +49,9 @@ export function FormularioEditarTorneo({
   const [cupoEquipos, setCupoEquipos] = useState(String(cupoEquiposInicial));
   const [fechaInicioEstimada, setFechaInicioEstimada] = useState(
     fechaInicioInicial ? fechaInicioInicial.slice(0, 10) : '',
+  );
+  const [fechaFinEstimada, setFechaFinEstimada] = useState(
+    fechaFinInicial ? fechaFinInicial.slice(0, 10) : '',
   );
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +80,7 @@ export function FormularioEditarTorneo({
           fechaInicioEstimada: fechaInicioEstimada
             ? new Date(fechaInicioEstimada).toISOString()
             : undefined,
+          fechaFinEstimada: fechaFinEstimada ? new Date(fechaFinEstimada).toISOString() : undefined,
         }),
       });
       const cuerpo = await respuesta.json();
@@ -116,6 +122,19 @@ export function FormularioEditarTorneo({
         />
       </label>
       <span className={styles.avisoNotifica}>Este cambio notifica a inscriptos y seguidores.</span>
+
+      <label>
+        Fecha de fin
+        <input
+          type="date"
+          value={fechaFinEstimada}
+          onChange={(evento) => setFechaFinEstimada(evento.target.value)}
+        />
+      </label>
+      <span className={styles.avisoSinNotificar}>
+        Este cambio no notifica. Con las dos fechas cargadas, un torneo de hasta 3 días se trata
+        como relámpago: los plazos de confirmación se cierran cuando termina, no a las 72 horas.
+      </span>
 
       <label>
         Dirección

@@ -84,6 +84,7 @@ export default async function PaginaGestionarTorneo({
           costoPlanilla={gestion.costoPlanilla}
           cupoEquipos={gestion.cupoEquipos}
           fechaInicioEstimada={gestion.fechaInicioEstimada}
+          fechaFinEstimada={gestion.fechaFinEstimada}
         />
       </section>
 

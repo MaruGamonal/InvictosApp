@@ -30,15 +30,19 @@ function mockearDb(opciones: {
   aprobados?: string[];
   partidosJugados?: number;
   partidosExistentes?: Array<{
+    id?: string;
     numero_fecha: number;
     equipo_local_id: string;
     equipo_visitante_id: string;
     goles_local: number | null;
     goles_visitante: number | null;
     estado: string;
+    estado_resultado?: string;
   }>;
   faseAnterior?: { id: string };
   faseAnteriorSinTerminar?: boolean;
+  /** Ids de partido que `verificarFaseConResultadosConfirmados` (D-101) debe reportar como sin confirmar. */
+  resultadosSinConfirmar?: string[];
   clasificadosPorGrupo?: Record<string, string[]>;
 }) {
   vi.doMock('@/db/cliente', () => ({
@@ -79,14 +83,23 @@ function mockearDb(opciones: {
         if (texto.includes("estado = 'approved'")) {
           return { rows: (opciones.aprobados ?? equipos(8)).map((equipo_id) => ({ equipo_id })) };
         }
-        if (texto.startsWith('SELECT numero_fecha, equipo_local_id')) {
-          return { rows: opciones.partidosExistentes ?? [] };
+        if (texto.startsWith('SELECT id, numero_fecha, equipo_local_id')) {
+          return {
+            rows: (opciones.partidosExistentes ?? []).map((p, i) => ({
+              id: p.id ?? `partido-${i + 1}`,
+              estado_resultado: p.estado_resultado ?? 'confirmed',
+              ...p,
+            })),
+          };
         }
         if (texto.startsWith('SELECT id FROM fase WHERE torneo_id')) {
           return { rows: opciones.faseAnterior ? [opciones.faseAnterior] : [] };
         }
         if (texto.includes("NOT IN ('played', 'walkover', 'cancelled')")) {
           return { rows: opciones.faseAnteriorSinTerminar ? [{}] : [] };
+        }
+        if (texto.includes("estado_resultado != 'confirmed'")) {
+          return { rows: (opciones.resultadosSinConfirmar ?? []).map((id) => ({ id })) };
         }
         if (texto.startsWith('SELECT id FROM grupo WHERE fase_id')) {
           return { rows: opciones.grupos ?? [] };
@@ -231,6 +244,39 @@ describe('generarFixture — eliminación directa', () => {
     });
   });
 
+  it('no genera la ronda siguiente si algún resultado de la anterior no está confirmado (`06`, D-101)', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      fase: { tipo_fase: 'knockout' },
+      partidosExistentes: [
+        {
+          id: 'p1',
+          numero_fecha: 1,
+          equipo_local_id: 'A',
+          equipo_visitante_id: 'B',
+          goles_local: 2,
+          goles_visitante: 1,
+          estado: 'played',
+          estado_resultado: 'loaded',
+        },
+        {
+          id: 'p2',
+          numero_fecha: 1,
+          equipo_local_id: 'C',
+          equipo_visitante_id: 'D',
+          goles_local: 0,
+          goles_visitante: 3,
+          estado: 'played',
+          estado_resultado: 'confirmed',
+        },
+      ],
+    });
+    const { generarFixture } = await import('./generarFixture');
+    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject(
+      { codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR' },
+    );
+  });
+
   it('la segunda fase de grupos + eliminatoria arma las llaves con los clasificados', async () => {
     mockearDb({
       rolEnOrganizacion: 'owner',
@@ -262,5 +308,20 @@ describe('generarFixture — eliminación directa', () => {
     await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject({
       codigo: 'DATOS_INVALIDOS',
     });
+  });
+
+  it('no genera la fase eliminatoria si la fase de grupos tiene resultados sin confirmar (`06`, D-101)', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      fase: { tipo_fase: 'knockout', orden: 2, clasifican_por_grupo: 1 },
+      faseAnterior: { id: 'fase-1' },
+      grupos: [{ id: 'zona-a', nombre: 'Zona A' }],
+      clasificadosPorGrupo: { 'zona-a': ['campeon-a'] },
+      resultadosSinConfirmar: ['partido-loaded-1'],
+    });
+    const { generarFixture } = await import('./generarFixture');
+    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject(
+      { codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR' },
+    );
   });
 });
