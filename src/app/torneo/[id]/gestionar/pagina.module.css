@@ -38,6 +38,48 @@
   margin: 0;
 }
 
+.acordeon {
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.acordeon:first-child {
+  border-top: 1px solid var(--color-borde);
+}
+
+.acordeonResumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 2px;
+  cursor: pointer;
+  list-style: none;
+  font: 600 11px/1 var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+}
+
+.acordeonResumen::-webkit-details-marker {
+  display: none;
+}
+
+.acordeonIcono {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.acordeon[open] > .acordeonResumen .acordeonIcono {
+  transform: rotate(180deg);
+}
+
+.acordeonContenido {
+  padding: 0 2px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .subtitulo {
   font: 600 12px/1 var(--fuente-texto);
   color: var(--color-texto-secundario);
@@ -218,6 +260,8 @@
 
 .formularioChico input[type='text'],
 .formularioChico input[type='number'],
+.formularioChico input[type='date'],
+.formularioChico input[type='datetime-local'],
 .formularioChico select,
 .formularioChico textarea {
   border: 1px solid var(--borde-neutro);

@@ -11,6 +11,7 @@ import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganiza
 import { PanelColaboradores } from '../PanelColaboradores';
 import { PanelAdministradores } from '../PanelAdministradores';
 import { PanelCancelarTorneo } from '../PanelCancelarTorneo';
+import { SeccionAcordeon } from '../SeccionAcordeon';
 import stylesCompartidos from '../pagina.module.css';
 import styles from './pagina.module.css';
 
@@ -24,8 +25,12 @@ const ESTADOS_CON_CANCELAR = new Set([
 ]);
 
 /**
- * Datos del torneo, formato, reglamento, colaboradores, estado y —
- * separada visualmente al final — la zona destructiva (cancelar).
+ * Todo lo administrativo del torneo, como acordeones (`<details>`, sin
+ * JS): son muchas secciones que casi nunca se tocan todas juntas, así
+ * que solo "Datos del torneo" arranca abierta — el resto, a un toque.
+ * "Interrumpir el torneo" vive adentro de "Estado", no aparte: es la
+ * misma pregunta ("¿en qué estado está esto?"), solo que con la
+ * respuesta más drástica.
  */
 export default async function PaginaConfiguracion({
   params,
@@ -47,8 +52,7 @@ export default async function PaginaConfiguracion({
 
   return (
     <div className={styles.pagina}>
-      <section className={stylesCompartidos.seccion}>
-        <h2 className={stylesCompartidos.tituloSeccion}>Datos del torneo</h2>
+      <SeccionAcordeon titulo="Datos del torneo" abiertoPorDefecto>
         <FormularioEditarTorneo
           torneoId={id}
           nombre={gestion.nombre}
@@ -60,26 +64,12 @@ export default async function PaginaConfiguracion({
           fechaInicioEstimada={gestion.fechaInicioEstimada}
           fechaFinEstimada={gestion.fechaFinEstimada}
         />
-      </section>
+      </SeccionAcordeon>
 
-      <section className={stylesCompartidos.seccion}>
-        <h2 className={stylesCompartidos.tituloSeccion}>Estado</h2>
-        <AccionesEstadoTorneo
-          torneoId={id}
-          estado={gestion.estado}
-          tieneFormatoDefinido={gestion.fases.length > 0}
-          tienePartidos={gestion.partidos.length > 0}
-        />
-      </section>
-
-      {gestion.fases.length === 0 ? (
-        <section className={stylesCompartidos.seccion}>
-          <h2 className={stylesCompartidos.tituloSeccion}>Formato</h2>
+      <SeccionAcordeon titulo="Formato">
+        {gestion.fases.length === 0 ? (
           <FormularioDefinirFormato torneoId={id} formatoElegido={gestion.formato} />
-        </section>
-      ) : (
-        <section className={stylesCompartidos.seccion}>
-          <h2 className={stylesCompartidos.tituloSeccion}>Formato</h2>
+        ) : (
           <div className={stylesCompartidos.lista}>
             {gestion.fases.map((fase) => (
               <div key={fase.id} className={stylesCompartidos.filaPendiente}>
@@ -91,38 +81,44 @@ export default async function PaginaConfiguracion({
               </div>
             ))}
           </div>
-        </section>
-      )}
+        )}
+      </SeccionAcordeon>
 
-      <section className={stylesCompartidos.seccion}>
-        <h2 className={stylesCompartidos.tituloSeccion}>Reglamento</h2>
+      <SeccionAcordeon titulo="Reglamento">
         <FormularioReglamentoOrganizador torneoId={id} vigente={reglamentoVigente} />
-      </section>
+      </SeccionAcordeon>
 
-      <section className={stylesCompartidos.seccion}>
-        <h2 className={stylesCompartidos.tituloSeccion}>Colaboradores de este torneo</h2>
+      <SeccionAcordeon titulo="Colaboradores de este torneo">
         <PanelColaboradores torneoId={id} colaboradores={colaboradores} />
-      </section>
+      </SeccionAcordeon>
 
-      <section className={stylesCompartidos.seccion}>
-        <h2 className={stylesCompartidos.tituloSeccion}>Equipo de trabajo de la organización</h2>
+      <SeccionAcordeon titulo="Equipo de trabajo de la organización">
         <PanelAdministradores
           organizacionId={gestion.organizacionId}
           administradores={administradores}
           esTitular={gestion.miRolEnOrganizacion === 'owner'}
         />
-      </section>
+      </SeccionAcordeon>
 
-      {ESTADOS_CON_CANCELAR.has(gestion.estado) && (
-        <section className={stylesCompartidos.seccionPeligro}>
-          <h2 className={stylesCompartidos.tituloSeccion}>Interrumpir el torneo</h2>
-          <p className={stylesCompartidos.textoPeligro}>
-            Cancelar es definitivo — a diferencia de &quot;Suspender&quot;, más arriba, que se
-            puede retomar.
-          </p>
-          <PanelCancelarTorneo torneoId={id} />
-        </section>
-      )}
+      <SeccionAcordeon titulo="Estado">
+        <AccionesEstadoTorneo
+          torneoId={id}
+          estado={gestion.estado}
+          tieneFormatoDefinido={gestion.fases.length > 0}
+          tienePartidos={gestion.partidos.length > 0}
+        />
+
+        {ESTADOS_CON_CANCELAR.has(gestion.estado) && (
+          <div className={stylesCompartidos.seccionPeligro}>
+            <h3 className={stylesCompartidos.tituloSeccion}>Interrumpir el torneo</h3>
+            <p className={stylesCompartidos.textoPeligro}>
+              Cancelar es definitivo — a diferencia de &quot;Suspender&quot;, más arriba, que se
+              puede retomar.
+            </p>
+            <PanelCancelarTorneo torneoId={id} />
+          </div>
+        )}
+      </SeccionAcordeon>
     </div>
   );
 }
