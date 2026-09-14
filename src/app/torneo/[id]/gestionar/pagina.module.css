@@ -43,6 +43,30 @@
   color: var(--color-texto-secundario);
 }
 
+.contadorSeccion {
+  text-transform: none;
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.filaConfirmado {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--borde-sutil);
+}
+
+.filaConfirmado:last-child {
+  border-bottom: none;
+}
+
+.iconoConfirmado {
+  flex: none;
+  color: var(--exito);
+}
+
 .contadorCupo {
   margin: 0;
   font-size: 13px;

@@ -1,0 +1,76 @@
+.pagina {
+  min-height: 100vh;
+  background: var(--color-fondo);
+}
+
+/* Superficie de identidad: tokens oscuros directos (`08`, 6.1) — mismo
+   tratamiento que las demás cabeceras oscuras de la app. */
+.hero {
+  background: var(--ink-900);
+  color: var(--blanco);
+  padding: 16px var(--espacio-pantalla-x) 0;
+}
+
+.filaSuperior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.enlaceVolver {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: -6px;
+  color: inherit;
+  flex: none;
+}
+
+.titulo {
+  max-width: 640px;
+  margin: 10px auto 0;
+  font-size: 22px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+
+.pillEstado {
+  align-self: flex-start;
+  flex: none;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  max-width: 640px;
+  margin: 14px auto 0;
+  overflow-x: auto;
+}
+
+.pestana,
+.pestanaActiva {
+  padding: 10px 12px;
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  color: var(--gris-claro-sobre-oscuro);
+}
+
+.pestanaActiva {
+  color: var(--acento);
+  border-bottom-color: var(--acento);
+}
+
+.contenido {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
+}

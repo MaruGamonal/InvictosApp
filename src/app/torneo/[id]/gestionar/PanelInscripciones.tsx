@@ -65,9 +65,12 @@ export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: Pan
     }
   }
 
-  const aprobadas = inscripciones.filter((i) => i.estado === 'approved').length;
+  const confirmados = inscripciones.filter((i) => i.estado === 'approved');
+  const aprobadas = confirmados.length;
   const pendientes = inscripciones.filter((i) => ESTADOS_PENDIENTES.has(i.estado));
-  const resueltas = inscripciones.filter((i) => !ESTADOS_PENDIENTES.has(i.estado));
+  const otrosResueltos = inscripciones.filter(
+    (i) => !ESTADOS_PENDIENTES.has(i.estado) && i.estado !== 'approved',
+  );
 
   return (
     <div className={styles.lista}>
@@ -76,7 +79,8 @@ export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: Pan
       </p>
       {error && <p className={styles.errorChico}>{error}</p>}
 
-      {pendientes.length === 0 ? (
+      {pendientes.length > 0 && <span className={styles.tituloSeccion}>Solicitudes</span>}
+      {pendientes.length === 0 && confirmados.length === 0 && otrosResueltos.length === 0 ? (
         <EstadoVacio mensaje="No hay inscripciones pendientes de resolver." />
       ) : (
         pendientes.map((inscripcion) => (
@@ -139,10 +143,38 @@ export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: Pan
         ))
       )}
 
-      {resueltas.length > 0 && (
+      {confirmados.length > 0 && (
         <div className={styles.lista}>
-          <span className={styles.subtitulo}>Ya resueltas</span>
-          {resueltas.map((inscripcion) => (
+          <span className={styles.tituloSeccion}>
+            Equipos confirmados
+            <span className={styles.contadorSeccion}> · {confirmados.length}</span>
+          </span>
+          {confirmados.map((inscripcion) => (
+            <div key={inscripcion.equipoId} className={styles.filaConfirmado}>
+              <svg
+                className={styles.iconoConfirmado}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="m5 13 4 4L19 7" />
+              </svg>
+              <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {otrosResueltos.length > 0 && (
+        <div className={styles.lista}>
+          <span className={styles.tituloSeccion}>Otras solicitudes</span>
+          {otrosResueltos.map((inscripcion) => (
             <div key={inscripcion.equipoId} className={styles.filaIntegranteCabecera}>
               <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
               <Badge campo="inscripcion.estado" valor={inscripcion.estado} />

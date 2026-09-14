@@ -1,0 +1,13 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tituloSeccion {
+  font: 600 11px/1 var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+  margin: 0;
+}

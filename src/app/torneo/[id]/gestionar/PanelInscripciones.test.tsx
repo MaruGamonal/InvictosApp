@@ -31,8 +31,8 @@ describe('PanelInscripciones', () => {
     expect(getByText('2 / 16 cupos ocupados')).toBeTruthy();
   });
 
-  it('sin pendientes, muestra el estado vacío igual con inscripciones resueltas', () => {
-    const { getByText } = render(
+  it('sin pendientes pero con confirmados, no muestra el estado vacío — solo la lista de confirmados', () => {
+    const { getByText, queryByText } = render(
       <PanelInscripciones
         torneoId="t-1"
         cupoEquipos={16}
@@ -41,8 +41,15 @@ describe('PanelInscripciones', () => {
         ]}
       />,
     );
-    expect(getByText('No hay inscripciones pendientes de resolver.')).toBeTruthy();
+    expect(queryByText('No hay inscripciones pendientes de resolver.')).not.toBeInTheDocument();
     expect(getByText('La Gloria')).toBeTruthy();
+  });
+
+  it('sin ninguna inscripción, muestra el estado vacío', () => {
+    const { getByText } = render(
+      <PanelInscripciones torneoId="t-1" cupoEquipos={16} inscripciones={[]} />,
+    );
+    expect(getByText('No hay inscripciones pendientes de resolver.')).toBeTruthy();
   });
 
   it('las resueltas se muestran sin botones de acción', () => {
@@ -61,6 +68,26 @@ describe('PanelInscripciones', () => {
     // Solo un botón Aprobar/Rechazar — el de la pendiente, no el de la resuelta.
     expect(getAllByText('Aprobar')).toHaveLength(1);
     expect(getAllByText('Rechazar')).toHaveLength(1);
+  });
+
+  it('separa confirmados (con check) de otras solicitudes resueltas (con badge)', () => {
+    const { getByText, queryByText } = render(
+      <PanelInscripciones
+        torneoId="t-1"
+        cupoEquipos={16}
+        inscripciones={[
+          { equipoId: 'e-1', nombreEquipo: 'La Gloria', estado: 'approved', advertenciaCategoria: false },
+          { equipoId: 'e-2', nombreEquipo: 'Se Retiró FC', estado: 'rejected', advertenciaCategoria: false },
+        ]}
+      />,
+    );
+    expect(getByText('Equipos confirmados')).toBeTruthy();
+    expect(getByText('· 1')).toBeTruthy();
+    expect(getByText('La Gloria')).toBeTruthy();
+    expect(getByText('Otras solicitudes')).toBeTruthy();
+    expect(getByText('Se Retiró FC')).toBeTruthy();
+    expect(getByText('Rechazada')).toBeTruthy();
+    expect(queryByText('No hay inscripciones pendientes de resolver.')).not.toBeInTheDocument();
   });
 
   it('aprobar una pendiente llama a la API y refresca', async () => {
