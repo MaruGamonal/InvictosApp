@@ -14,6 +14,8 @@ const EQUIPO_A = '44444444-4444-4444-4444-444444444444';
 const EQUIPO_B = '55555555-5555-5555-5555-555555555555';
 const GRUPO = '66666666-6666-6666-6666-666666666666';
 const PERFIL_CAPITAN_A = '77777777-7777-7777-7777-777777777777';
+const PERFIL_JUGADOR = '88888888-8888-8888-8888-888888888888';
+const PERFIL_DT = '99999999-9999-9999-9999-999999999999';
 
 const notificarMock = vi.fn(async () => {});
 
@@ -37,6 +39,8 @@ function mockearDb(opciones: {
   puntosEmpate?: number;
   puntosDerrota?: number;
   updateAfectaCeroFilas?: boolean;
+  elegibles?: Array<{ perfil_id: string; equipo_id: string; rol_en_torneo: string }>;
+  eventosPrevios?: Array<{ perfil_id: string; equipo_id: string; tipo_evento: string }>;
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
   vi.doMock('@/db/cliente', () => ({
@@ -85,6 +89,9 @@ function mockearDb(opciones: {
             rows: [{ usuario_id: 'usuario-capitan-a' }, { usuario_id: 'usuario-capitan-b' }],
           };
         }
+        if (t.startsWith('SELECT perfil_id, equipo_id, rol_en_torneo FROM integrante_habilitado')) {
+          return { rows: opciones.elegibles ?? [] };
+        }
         return { rows: [] };
       },
       connect: async () => ({
@@ -94,6 +101,9 @@ function mockearDb(opciones: {
           if (t.startsWith('UPDATE partido')) {
             if (opciones.updateAfectaCeroFilas) return { rows: [] };
             return { rows: [{ version: (opciones.version ?? 1) + 1 }] };
+          }
+          if (t.startsWith('SELECT perfil_id, equipo_id, tipo_evento FROM evento_partido')) {
+            return { rows: opciones.eventosPrevios ?? [] };
           }
           return { rows: [] };
         },
@@ -349,6 +359,148 @@ describe('cargarResultado', () => {
         contextoCon('usuario-organizador'),
       ),
     ).rejects.toThrow('falla simulada de conexión');
+  });
+
+  it('T30: gol de un jugador habilitado, escribe el evento y acredita estadistica_jugador', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 1,
+        golesVisitante: 0,
+        eventos: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A, tipoEvento: 'goal' }],
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const insertEvento = consultas.find((c) => c.texto.startsWith('INSERT INTO evento_partido'));
+    expect(insertEvento?.valores).toEqual([
+      PARTIDO,
+      PERFIL_JUGADOR,
+      EQUIPO_A,
+      'goal',
+      null,
+      'usuario-organizador',
+    ]);
+    const insertEstadistica = consultas.find((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 1, 0, 0]);
+  });
+
+  it('T30: tarjeta amarilla al cuerpo técnico se acepta, pero un gol no', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_DT, equipo_id: EQUIPO_A, rol_en_torneo: 'coach' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 0,
+        golesVisitante: 0,
+        eventos: [{ perfilId: PERFIL_DT, equipoId: EQUIPO_A, tipoEvento: 'yellow_card' }],
+      },
+      contextoCon('usuario-organizador'),
+    );
+    const insertEstadistica = consultas.find((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_DT, EQUIPO_A, 0, 1, 0]);
+
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_DT, equipo_id: EQUIPO_A, rol_en_torneo: 'coach' }],
+    });
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 0,
+          golesVisitante: 0,
+          eventos: [{ perfilId: PERFIL_DT, equipoId: EQUIPO_A, tipoEvento: 'goal' }],
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('T30: gol atribuido a alguien fuera de la lista de buena fe, DATOS_INVALIDOS y no arranca la transacción', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', elegibles: [] });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 1,
+          golesVisitante: 0,
+          eventos: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A, tipoEvento: 'goal' }],
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+    expect(consultas.some((c) => c.texto === 'BEGIN')).toBe(false);
+  });
+
+  it('T30: corrección de planilla revierte el evento anterior y aplica el nuevo en la misma transacción', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      estadoPartido: 'played',
+      golesLocalPrevios: 1,
+      golesVisitantePrevios: 0,
+      version: 2,
+      elegibles: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' }],
+      eventosPrevios: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, tipo_evento: 'goal' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 2,
+        golesLocal: 1,
+        golesVisitante: 0,
+        eventos: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A, tipoEvento: 'yellow_card' }],
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    expect(consultas.some((c) => c.texto.startsWith('DELETE FROM evento_partido'))).toBe(true);
+    const insertEstadistica = consultas.find((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    // se revierte el gol anterior (-1) y se acredita la amarilla nueva (+1): un único delta neto.
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, -1, 1, 0]);
+  });
+
+  it('T30: eventos indefinido no toca la planilla existente', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      estadoPartido: 'played',
+      golesLocalPrevios: 1,
+      golesVisitantePrevios: 0,
+      version: 2,
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      { partidoId: PARTIDO, version: 2, golesLocal: 2, golesVisitante: 0 },
+      contextoCon('usuario-organizador'),
+    );
+
+    expect(consultas.some((c) => c.texto.includes('evento_partido'))).toBe(false);
+    expect(consultas.some((c) => c.texto.includes('estadistica_jugador'))).toBe(false);
   });
 
   it('partido inexistente, NO_ENCONTRADO', async () => {

@@ -27,7 +27,10 @@ export default async function PaginaResultados({ params }: { params: Promise<{ i
       {gestion.estado === 'in_progress' ? (
         <div>
           <span className={styles.tituloSeccion}>Pendientes</span>
-          <PanelResultados partidos={partidosSinJugar} />
+          <PanelResultados
+            partidos={partidosSinJugar}
+            elegiblesPorEquipo={gestion.elegiblesPorEquipo}
+          />
         </div>
       ) : (
         <p className={styles.avisoEstado}>

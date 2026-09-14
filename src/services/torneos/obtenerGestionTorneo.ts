@@ -50,6 +50,13 @@ export interface PartidoGestion {
   sedeNombre: string | null;
 }
 
+/** UC-34 — Alguien de la lista de buena fe al que se le puede acreditar un gol o una tarjeta. */
+export interface IntegranteElegible {
+  perfilId: string;
+  nombreVisible: string;
+  rolEnTorneo: 'player' | 'coach';
+}
+
 export interface GestionTorneoResultado {
   id: string;
   nombre: string;
@@ -66,6 +73,8 @@ export interface GestionTorneoResultado {
   fases: FaseGestion[];
   inscripciones: InscripcionGestion[];
   partidos: PartidoGestion[];
+  /** Habilitados de cada equipo inscripto, para atribuir goles y tarjetas al cargar un resultado (UC-34). */
+  elegiblesPorEquipo: Record<string, IntegranteElegible[]>;
 }
 
 export const obtenerGestionTorneo: Servicio<
@@ -156,6 +165,28 @@ export const obtenerGestionTorneo: Servicio<
     [datos.torneoId],
   );
 
+  const { rows: elegibles } = await pool.query<{
+    equipo_id: string;
+    perfil_id: string;
+    nombre_visible: string;
+    rol_en_torneo: 'player' | 'coach';
+  }>(
+    `SELECT ih.equipo_id, ih.perfil_id, pd.nombre_visible, ih.rol_en_torneo
+     FROM integrante_habilitado ih
+     JOIN perfil_deportivo pd ON pd.id = ih.perfil_id
+     WHERE ih.torneo_id = $1 AND ih.estado = 'eligible' AND ih.rol_en_torneo IN ('player', 'coach')
+     ORDER BY pd.nombre_visible ASC`,
+    [datos.torneoId],
+  );
+  const elegiblesPorEquipo: Record<string, IntegranteElegible[]> = {};
+  for (const fila of elegibles) {
+    (elegiblesPorEquipo[fila.equipo_id] ??= []).push({
+      perfilId: fila.perfil_id,
+      nombreVisible: fila.nombre_visible,
+      rolEnTorneo: fila.rol_en_torneo,
+    });
+  }
+
   return {
     id: torneo.id,
     nombre: torneo.nombre,
@@ -198,5 +229,6 @@ export const obtenerGestionTorneo: Servicio<
       sedeNombre: fila.sede_nombre,
       version: fila.version,
     })),
+    elegiblesPorEquipo,
   };
 };

@@ -46,6 +46,7 @@ export default async function LayoutTorneo({
         <Link href={`/torneo/${id}`}>Ficha</Link>
         <Link href={`/torneo/${id}/fixture`}>Fixture</Link>
         <Link href={`/torneo/${id}/tabla`}>Tabla</Link>
+        <Link href={`/torneo/${id}/estadisticas`}>Estadísticas</Link>
         {ficha.tieneReglamento && <Link href={`/torneo/${id}/reglamento`}>Reglamento</Link>}
       </nav>
 

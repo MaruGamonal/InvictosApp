@@ -9,6 +9,10 @@ import {
 } from '@/services/descubrimiento/obtenerFixturePublico';
 import { obtenerTablaTorneo } from '@/services/descubrimiento/obtenerTablaTorneo';
 import type { TablaDeGrupo } from '@/services/posiciones/obtenerTabla';
+import {
+  obtenerEstadisticasTorneo,
+  type EstadisticasTorneo,
+} from '@/services/descubrimiento/obtenerEstadisticasTorneo';
 import { listarReglamentos, type ReglamentoListado } from '@/services/torneos/listarReglamentos';
 
 /**
@@ -57,6 +61,16 @@ export async function obtenerTablaCacheada(torneoId: string): Promise<TablaDeGru
   return comoNoEncontradoEsNull(
     cachearLecturaDeTorneo('tabla-torneo', torneoId, () =>
       obtenerTablaTorneo({ torneoId }, CONTEXTO_PUBLICO),
+    )(),
+  );
+}
+
+export async function obtenerEstadisticasCacheadas(
+  torneoId: string,
+): Promise<EstadisticasTorneo | null> {
+  return comoNoEncontradoEsNull(
+    cachearLecturaDeTorneo('estadisticas-torneo', torneoId, () =>
+      obtenerEstadisticasTorneo({ torneoId }, CONTEXTO_PUBLICO),
     )(),
   );
 }

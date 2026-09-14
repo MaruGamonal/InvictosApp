@@ -56,6 +56,12 @@ function mockearDb(opciones: {
     fecha_hora_programada?: Date | null;
     sede_nombre?: string | null;
   }>;
+  elegibles?: Array<{
+    equipo_id: string;
+    perfil_id: string;
+    nombre_visible: string;
+    rol_en_torneo: 'player' | 'coach';
+  }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -79,6 +85,9 @@ function mockearDb(opciones: {
         }
         if (texto.includes('FROM partido p')) {
           return { rows: opciones.partidos ?? [] };
+        }
+        if (texto.includes('FROM integrante_habilitado ih')) {
+          return { rows: opciones.elegibles ?? [] };
         }
         return { rows: [] };
       },
@@ -208,5 +217,29 @@ describe('obtenerGestionTorneo', () => {
     expect(resultado.costoPlanilla).toBe(1500);
     expect(resultado.cupoEquipos).toBe(16);
     expect(resultado.fechaInicioEstimada).toBe('2026-04-12T00:00:00.000Z');
+  });
+
+  it('UC-34: agrupa los habilitados elegibles por equipo, para atribuir goles y tarjetas', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      torneo: { id: TORNEO, nombre: 'Copa Otoño', estado: 'in_progress', formato: 'league' },
+      elegibles: [
+        { equipo_id: 'equipo-1', perfil_id: 'perfil-1', nombre_visible: 'Juan', rol_en_torneo: 'player' },
+        { equipo_id: 'equipo-1', perfil_id: 'perfil-2', nombre_visible: 'DT Pedro', rol_en_torneo: 'coach' },
+        { equipo_id: 'equipo-2', perfil_id: 'perfil-3', nombre_visible: 'Ana', rol_en_torneo: 'player' },
+      ],
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+
+    expect(resultado.elegiblesPorEquipo).toEqual({
+      'equipo-1': [
+        { perfilId: 'perfil-1', nombreVisible: 'Juan', rolEnTorneo: 'player' },
+        { perfilId: 'perfil-2', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' },
+      ],
+      'equipo-2': [{ perfilId: 'perfil-3', nombreVisible: 'Ana', rolEnTorneo: 'player' }],
+    });
   });
 });

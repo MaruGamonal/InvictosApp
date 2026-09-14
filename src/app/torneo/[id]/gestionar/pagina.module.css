@@ -286,6 +286,34 @@
   font-feature-settings: 'tnum';
 }
 
+.eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listaEventos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filaEvento {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filaEvento select {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .formularioChico button[type='submit'] {
   background: var(--acento);
   color: var(--acento-texto-sobre);

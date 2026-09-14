@@ -38,17 +38,38 @@ import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosi
  *    la tabla entera (`_recalcularPosicion.ts`); si es una corrección
  *    sobre un resultado ya jugado, revierte el efecto anterior y aplica
  *    el nuevo en la misma escritura.
+ * 6. **[T30]** `eventos` es opcional (UC-34): goles y tarjetas
+ *    atribuidos a alguien de la **lista de buena fe de este torneo**
+ *    (`integrante_habilitado`, `06` D-26) — nunca del plantel permanente.
+ *    Solo se acreditan goles a `rol_en_torneo = 'player'`; las tarjetas
+ *    también al `coach`. Si `eventos` viene indefinido, no se toca nada
+ *    (corrección de marcador sin tocar la planilla); si viene (aunque sea
+ *    vacío), reemplaza por completo lo cargado antes para este partido:
+ *    revierte el acumulado anterior de `estadistica_jugador` y aplica el
+ *    nuevo, en la misma transacción — mismo criterio que el marcador.
  *
- * Fuera de alcance (`11`, T15): eventos del partido y estadísticas de
- * jugador (T30), confirmación/disputa del otro equipo (T29), partidos no
- * disputados (T16).
+ * Fuera de alcance: confirmación/disputa del otro equipo (T29), partidos
+ * no disputados (T16), sanciones automáticas por tarjetas (`06`, D-34b).
  */
+
+const TIPOS_EVENTO = ['goal', 'own_goal', 'yellow_card', 'red_card'] as const;
+type TipoEvento = (typeof TIPOS_EVENTO)[number];
+
+const esquemaEvento = z.object({
+  perfilId: z.string().uuid(),
+  equipoId: z.string().uuid(),
+  tipoEvento: z.enum(TIPOS_EVENTO),
+  minuto: z.number().int().min(0).optional(),
+});
+export type EventoResultadoInput = z.infer<typeof esquemaEvento>;
 
 const esquemaEntrada = z.object({
   partidoId: z.string().uuid(),
   version: z.number().int().positive(),
   golesLocal: z.number().int().min(0),
   golesVisitante: z.number().int().min(0),
+  /** UC-34, opcional: si viene, reemplaza por completo la planilla de este partido. */
+  eventos: z.array(esquemaEvento).optional(),
 });
 export type CargarResultadoInput = z.infer<typeof esquemaEntrada>;
 
@@ -145,6 +166,51 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
     ]);
   }
 
+  const equiposDelPartido = new Set([partido.equipo_local_id, partido.equipo_visitante_id]);
+  if (datos.eventos && datos.eventos.length > 0) {
+    const perfilIds = [...new Set(datos.eventos.map((evento) => evento.perfilId))];
+    const { rows: elegibles } = await pool.query<{
+      perfil_id: string;
+      equipo_id: string;
+      rol_en_torneo: 'player' | 'coach' | 'delegate';
+    }>(
+      `SELECT perfil_id, equipo_id, rol_en_torneo FROM integrante_habilitado
+       WHERE torneo_id = $1 AND equipo_id = ANY($2) AND perfil_id = ANY($3) AND estado = 'eligible'`,
+      [partido.torneo_id, [...equiposDelPartido], perfilIds],
+    );
+    const rolPorClave = new Map(
+      elegibles.map((fila) => [`${fila.equipo_id}:${fila.perfil_id}`, fila.rol_en_torneo]),
+    );
+
+    for (const evento of datos.eventos) {
+      if (!equiposDelPartido.has(evento.equipoId)) {
+        throw crearError('DATOS_INVALIDOS', [
+          { campo: 'eventos', problema: 'El equipo indicado no juega este partido.' },
+        ]);
+      }
+      const rol = rolPorClave.get(`${evento.equipoId}:${evento.perfilId}`);
+      if (!rol) {
+        throw crearError('DATOS_INVALIDOS', [
+          {
+            campo: 'eventos',
+            problema: 'Solo se puede acreditar un evento a alguien habilitado en la lista de buena fe de este torneo.',
+          },
+        ]);
+      }
+      const esGol = evento.tipoEvento === 'goal' || evento.tipoEvento === 'own_goal';
+      if (esGol && rol !== 'player') {
+        throw crearError('DATOS_INVALIDOS', [
+          { campo: 'eventos', problema: 'Los goles solo se acreditan a jugadores.' },
+        ]);
+      }
+      if (!esGol && rol !== 'player' && rol !== 'coach') {
+        throw crearError('DATOS_INVALIDOS', [
+          { campo: 'eventos', problema: 'Las tarjetas se acreditan a jugadores o al cuerpo técnico.' },
+        ]);
+      }
+    }
+  }
+
   const cliente = await pool.connect();
   let nuevaVersion: number;
   try {
@@ -195,6 +261,62 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
           puntosDerrota: partido.puntos_derrota,
         },
       );
+    }
+
+    if (datos.eventos !== undefined) {
+      const { rows: previos } = await cliente.query<{
+        perfil_id: string;
+        equipo_id: string;
+        tipo_evento: TipoEvento;
+      }>('SELECT perfil_id, equipo_id, tipo_evento FROM evento_partido WHERE partido_id = $1', [
+        datos.partidoId,
+      ]);
+
+      const deltas = new Map<
+        string,
+        { perfilId: string; equipoId: string; goles: number; amarillas: number; rojas: number }
+      >();
+      const aplicarDelta = (perfilId: string, equipoId: string, tipoEvento: TipoEvento, signo: 1 | -1) => {
+        const clave = `${equipoId}:${perfilId}`;
+        const acumulado = deltas.get(clave) ?? { perfilId, equipoId, goles: 0, amarillas: 0, rojas: 0 };
+        if (tipoEvento === 'goal') acumulado.goles += signo;
+        if (tipoEvento === 'yellow_card') acumulado.amarillas += signo;
+        if (tipoEvento === 'red_card') acumulado.rojas += signo;
+        deltas.set(clave, acumulado);
+      };
+      for (const previo of previos) aplicarDelta(previo.perfil_id, previo.equipo_id, previo.tipo_evento, -1);
+      for (const evento of datos.eventos) aplicarDelta(evento.perfilId, evento.equipoId, evento.tipoEvento, 1);
+
+      await cliente.query('DELETE FROM evento_partido WHERE partido_id = $1', [datos.partidoId]);
+
+      for (const evento of datos.eventos) {
+        await cliente.query(
+          `INSERT INTO evento_partido (partido_id, perfil_id, equipo_id, tipo_evento, minuto, registrado_por_usuario_id)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [
+            datos.partidoId,
+            evento.perfilId,
+            evento.equipoId,
+            evento.tipoEvento,
+            evento.minuto ?? null,
+            contexto.usuarioId,
+          ],
+        );
+      }
+
+      for (const delta of deltas.values()) {
+        if (delta.goles === 0 && delta.amarillas === 0 && delta.rojas === 0) continue;
+        await cliente.query(
+          `INSERT INTO estadistica_jugador (torneo_id, perfil_id, equipo_id, goles, tarjetas_amarillas, tarjetas_rojas)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (torneo_id, perfil_id, equipo_id) DO UPDATE SET
+             goles = estadistica_jugador.goles + excluded.goles,
+             tarjetas_amarillas = estadistica_jugador.tarjetas_amarillas + excluded.tarjetas_amarillas,
+             tarjetas_rojas = estadistica_jugador.tarjetas_rojas + excluded.tarjetas_rojas,
+             ultima_actualizacion = now()`,
+          [partido.torneo_id, delta.perfilId, delta.equipoId, delta.goles, delta.amarillas, delta.rojas],
+        );
+      }
     }
 
     await cliente.query('COMMIT');
