@@ -15,6 +15,7 @@ import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from './_constan
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { SelectorDeCiudad } from './SelectorDeCiudad';
 import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
+import { EnlaceIngresar } from './EnlaceIngresar';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
@@ -74,9 +75,7 @@ export default async function PaginaDescubrimiento({
               <span className={styles.puntoMarca} aria-hidden />
               Invicta
             </div>
-            <Link href="/ingresar" className={styles.enlaceIngresar}>
-              Ingresar
-            </Link>
+            <EnlaceIngresar />
           </div>
           <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
         </header>
@@ -126,9 +125,7 @@ export default async function PaginaDescubrimiento({
           </div>
           <div className={styles.accionesMarca}>
             <SelectorDeCategoriaGenero categoriaActual={categoriaGenero} />
-            <Link href="/ingresar" className={styles.enlaceIngresar}>
-              Ingresar
-            </Link>
+            <EnlaceIngresar />
           </div>
         </div>
         <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
