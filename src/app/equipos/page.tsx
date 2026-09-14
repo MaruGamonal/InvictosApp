@@ -53,75 +53,83 @@ export default async function PaginaBuscarEquipos({
 
   return (
     <div className={styles.pagina}>
-      <h1 className="fuente-display">Equipos</h1>
+      <header className={styles.hero}>
+        <h1 className={`fuente-display ${styles.tituloHero}`}>Equipos</h1>
+        <form method="get">
+          <div className={styles.busqueda}>
+            <input
+              type="search"
+              name="q"
+              placeholder="Buscar por nombre…"
+              aria-label="Buscar equipo por nombre"
+              defaultValue={parametros.q ?? ''}
+              className={styles.campoBusqueda}
+            />
+          </div>
+          <div className={styles.filtros}>
+            <select
+              name="modalidad"
+              aria-label="Filtrar por modalidad"
+              defaultValue={parametros.modalidad ?? ''}
+            >
+              <option value="">Cualquier modalidad</option>
+              {MODALIDADES.map((modalidad) => (
+                <option key={modalidad} value={modalidad}>
+                  {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
+                </option>
+              ))}
+            </select>
+            <select
+              name="categoriaGenero"
+              aria-label="Filtrar por categoría"
+              defaultValue={parametros.categoriaGenero ?? ''}
+            >
+              <option value="">Cualquier categoría</option>
+              {CATEGORIAS_GENERO.map((categoria) => (
+                <option key={categoria} value={categoria}>
+                  {obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className={styles.botonFiltrar}>
+              Buscar
+            </button>
+          </div>
+        </form>
+      </header>
 
-      <form method="get" className={styles.filtros}>
-        <input
-          type="search"
-          name="q"
-          placeholder="Buscar por nombre…"
-          aria-label="Buscar equipo por nombre"
-          defaultValue={parametros.q ?? ''}
-          className={styles.busqueda}
-        />
-        <select
-          name="modalidad"
-          aria-label="Filtrar por modalidad"
-          defaultValue={parametros.modalidad ?? ''}
-        >
-          <option value="">Cualquier modalidad</option>
-          {MODALIDADES.map((modalidad) => (
-            <option key={modalidad} value={modalidad}>
-              {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
-            </option>
-          ))}
-        </select>
-        <select
-          name="categoriaGenero"
-          aria-label="Filtrar por categoría"
-          defaultValue={parametros.categoriaGenero ?? ''}
-        >
-          <option value="">Cualquier categoría</option>
-          {CATEGORIAS_GENERO.map((categoria) => (
-            <option key={categoria} value={categoria}>
-              {obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta}
-            </option>
-          ))}
-        </select>
-        <button type="submit" className={styles.botonFiltrar}>
-          Buscar
-        </button>
-      </form>
+      <div className={styles.contenido}>
+        {resultado.equipos.length === 0 ? (
+          <EstadoVacio mensaje="No encontramos equipos con esos filtros." />
+        ) : (
+          <div className={styles.lista}>
+            {resultado.equipos.map((equipo) => (
+              <Fragment key={equipo.id}>
+                <TarjetaEquipoResumen
+                  id={equipo.id}
+                  nombre={equipo.nombre}
+                  categoriaGenero={equipo.categoriaGenero}
+                  escudoUrl={equipo.escudoUrl}
+                  detalle={equipo.ciudad}
+                  mostrarFlecha
+                />
+              </Fragment>
+            ))}
+          </div>
+        )}
 
-      {resultado.equipos.length === 0 ? (
-        <EstadoVacio mensaje="No encontramos equipos con esos filtros." />
-      ) : (
-        <div className={styles.lista}>
-          {resultado.equipos.map((equipo) => (
-            <Fragment key={equipo.id}>
-              <TarjetaEquipoResumen
-                id={equipo.id}
-                nombre={equipo.nombre}
-                categoriaGenero={equipo.categoriaGenero}
-                escudoUrl={equipo.escudoUrl}
-                detalle={equipo.ciudad}
-              />
-            </Fragment>
-          ))}
-        </div>
-      )}
-
-      {resultado.cursorSiguiente && (
-        <Link
-          href={{
-            pathname: '/equipos',
-            query: { ...parametros, cursor: resultado.cursorSiguiente },
-          }}
-          className={styles.verMas}
-        >
-          Ver más equipos →
-        </Link>
-      )}
+        {resultado.cursorSiguiente && (
+          <Link
+            href={{
+              pathname: '/equipos',
+              query: { ...parametros, cursor: resultado.cursorSiguiente },
+            }}
+            className={styles.verMas}
+          >
+            Ver más equipos →
+          </Link>
+        )}
+      </div>
 
       <NavInferior activo="equipos" />
     </div>

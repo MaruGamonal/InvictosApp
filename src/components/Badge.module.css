@@ -33,3 +33,30 @@
   color: var(--color-texto-secundario);
   background: var(--neutro-fondo);
 }
+
+.puntoExito,
+.puntoInformacion,
+.puntoAdvertencia,
+.puntoError,
+.puntoNeutro {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radio-pill);
+  flex: none;
+}
+
+.puntoExito {
+  background: var(--exito);
+}
+.puntoInformacion {
+  background: var(--informacion);
+}
+.puntoAdvertencia {
+  background: var(--advertencia);
+}
+.puntoError {
+  background: var(--error);
+}
+.puntoNeutro {
+  background: var(--neutro);
+}

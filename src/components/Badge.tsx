@@ -6,6 +6,8 @@ type CampoDeEtiqueta = Parameters<typeof obtenerEtiqueta>[0];
 export interface BadgeProps {
   campo: CampoDeEtiqueta;
   valor: string;
+  /** Puntito circular del color semántico antes del texto (patrón de "Verificada", `08` 11.10). */
+  conPunto?: boolean;
 }
 
 const CLASE_POR_COLOR: Record<ColorSemantico, string> = {
@@ -16,6 +18,14 @@ const CLASE_POR_COLOR: Record<ColorSemantico, string> = {
   neutro: styles.neutro!,
 };
 
+const CLASE_PUNTO_POR_COLOR: Record<ColorSemantico, string> = {
+  exito: styles.puntoExito!,
+  informacion: styles.puntoInformacion!,
+  advertencia: styles.puntoAdvertencia!,
+  error: styles.puntoError!,
+  neutro: styles.puntoNeutro!,
+};
+
 /**
  * Badge de estado (`08`, 11.10). Resuelve la etiqueta visible y el color
  * semántico desde `04` — nunca recibe un texto o un color sueltos, así
@@ -24,7 +34,12 @@ const CLASE_POR_COLOR: Record<ColorSemantico, string> = {
  * La etiqueta de texto siempre está presente: el estado se entiende sin
  * leer el color (accesibilidad, y gente con daltonismo mirando la tabla).
  */
-export function Badge({ campo, valor }: BadgeProps) {
+export function Badge({ campo, valor, conPunto }: BadgeProps) {
   const { etiqueta, color } = obtenerEtiqueta(campo, valor);
-  return <span className={`${styles.badge} ${CLASE_POR_COLOR[color]}`}>{etiqueta}</span>;
+  return (
+    <span className={`${styles.badge} ${CLASE_POR_COLOR[color]}`}>
+      {conPunto && <span className={CLASE_PUNTO_POR_COLOR[color]} aria-hidden />}
+      {etiqueta}
+    </span>
+  );
 }

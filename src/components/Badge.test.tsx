@@ -22,4 +22,12 @@ describe('Badge', () => {
   it('lanza en vez de mostrar un badge sin sentido si el valor no está en el catálogo', () => {
     expect(() => render(<Badge campo="torneo.estado" valor="no_existe" />)).toThrow();
   });
+
+  it('conPunto antepone un puntito decorativo sin duplicar el texto', () => {
+    const { container } = render(
+      <Badge campo="perfilDeportivo.visibilidad" valor="public" conPunto />,
+    );
+    expect(screen.getByText('Público')).toBeInTheDocument();
+    expect(container.querySelector('span > span[aria-hidden]')).toBeInTheDocument();
+  });
 });

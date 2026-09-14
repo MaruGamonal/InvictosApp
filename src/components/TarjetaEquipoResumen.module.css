@@ -40,3 +40,8 @@
   padding: 4px 9px;
   border-radius: var(--radio-pill);
 }
+
+.flecha {
+  flex: none;
+  color: var(--color-texto-terciario);
+}
