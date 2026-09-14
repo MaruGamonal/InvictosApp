@@ -9,9 +9,27 @@
   gap: 20px;
 }
 
+.filaTitulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .titulo {
   font-size: 26px;
   margin: 0;
+}
+
+.enlacePreferencias {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  color: var(--color-texto-secundario);
+  border-radius: 50%;
 }
 
 .lista {

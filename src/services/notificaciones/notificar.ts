@@ -3,6 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
 import { TIPOS_NOTIFICACION, esAccionable, type TipoNotificacion } from './tipos';
+import { categoriaDePreferencia } from './preferencias';
 
 /**
  * `notificar(tipo, destinatarios, origen)` (`10`, 4.9) es interno y
@@ -15,6 +16,13 @@ import { TIPOS_NOTIFICACION, esAccionable, type TipoNotificacion } from './tipos
  * llamador ya conoce (`usuarioIds`), y los seguidores de una entidad
  * (`seguidoresDe`), que esta función busca en `seguimiento`. Aplica la
  * regla de canal (`06`, D-53) y registra un `notificacion` por canal.
+ *
+ * UC-47: si `tipo` mapea a una categoría de preferencia
+ * (`preferencias.ts`), cada destinatario puede haber apagado alguno de
+ * sus canales — se filtra por usuario, nunca globalmente, porque dos
+ * personas pueden tener preferencias distintas para el mismo aviso.
+ * Los tipos sin categoría (todavía no expuestos en la pantalla de
+ * Preferencias) siguen la regla global sin consultar nada más.
  *
  * Se ejecuta fuera de la transacción del llamador a propósito: un aviso
  * es un efecto secundario del hecho de negocio, no parte de su
@@ -56,13 +64,32 @@ export const notificar: Servicio<NotificarInput, void> = async (input) => {
   }
   if (usuarioIds.size === 0) return;
 
-  const canales: Array<'in_app' | 'email'> = esAccionable(datos.tipo)
+  const canalesPorDefecto: Array<'in_app' | 'email'> = esAccionable(datos.tipo)
     ? ['in_app', 'email']
     : ['in_app'];
+
+  const categoria = categoriaDePreferencia(datos.tipo);
+  const canalesApagadosPorUsuario = new Map<string, Set<'in_app' | 'email'>>();
+  if (categoria) {
+    const { rows: apagados } = await pool.query<{ usuario_id: string; canal: 'in_app' | 'email' }>(
+      'SELECT usuario_id, canal FROM preferencia_notificacion WHERE usuario_id = ANY($1) AND categoria = $2',
+      [Array.from(usuarioIds), categoria],
+    );
+    for (const fila of apagados) {
+      if (!canalesApagadosPorUsuario.has(fila.usuario_id)) {
+        canalesApagadosPorUsuario.set(fila.usuario_id, new Set());
+      }
+      canalesApagadosPorUsuario.get(fila.usuario_id)!.add(fila.canal);
+    }
+  }
 
   const valores: unknown[] = [];
   const marcadores: string[] = [];
   for (const usuarioId of usuarioIds) {
+    const apagados = canalesApagadosPorUsuario.get(usuarioId);
+    const canales = apagados
+      ? canalesPorDefecto.filter((canal) => !apagados.has(canal))
+      : canalesPorDefecto;
     for (const canal of canales) {
       valores.push(
         usuarioId,
@@ -75,6 +102,7 @@ export const notificar: Servicio<NotificarInput, void> = async (input) => {
       marcadores.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`);
     }
   }
+  if (marcadores.length === 0) return;
 
   await pool.query(
     `INSERT INTO notificacion (usuario_id, tipo, entidad_origen_tipo, entidad_origen_id, canal)

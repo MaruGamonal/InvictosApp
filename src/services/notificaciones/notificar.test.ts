@@ -8,6 +8,8 @@ beforeEach(() => vi.resetModules());
 function mockearDb(opciones: {
   seguidoresPorEntidad?: Record<string, string[]>;
   capturarInsert?: (texto: string, valores: unknown[]) => void;
+  /** `usuarioId:canal` apagados — solo importa para tipos con categoría de preferencia. */
+  apagados?: Array<{ usuario_id: string; canal: 'in_app' | 'email' }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -16,6 +18,9 @@ function mockearDb(opciones: {
           const entidadId = valores[1] as string;
           const usuarioIds = opciones.seguidoresPorEntidad?.[entidadId] ?? [];
           return { rows: usuarioIds.map((usuario_id) => ({ usuario_id })) };
+        }
+        if (texto.includes('FROM preferencia_notificacion')) {
+          return { rows: opciones.apagados ?? [] };
         }
         if (texto.includes('INSERT INTO notificacion')) {
           opciones.capturarInsert?.(texto, valores);
@@ -127,6 +132,68 @@ describe('notificar', () => {
 
     // 1 solo destinatario (deduplicado) x 2 canales = 10 valores
     expect(inserts[0]).toHaveLength(10);
+  });
+
+  it('UC-47: un destinatario que apagó el email de esa categoría solo recibe in_app', async () => {
+    const inserts: unknown[][] = [];
+    mockearDb({
+      apagados: [{ usuario_id: '77777777-7777-7777-7777-777777777777', canal: 'email' }],
+      capturarInsert: (_t, v) => inserts.push(v),
+    });
+    const { notificar } = await import('./notificar');
+
+    await notificar(
+      {
+        tipo: 'team_invitation',
+        destinatarios: { usuarioIds: ['77777777-7777-7777-7777-777777777777'] },
+      },
+      contextoSistema,
+    );
+
+    const valores = inserts[0]!;
+    expect(valores).toHaveLength(5);
+    expect(valores).toContain('in_app');
+    expect(valores).not.toContain('email');
+  });
+
+  it('UC-47: un tipo sin categoría de preferencia (todavía no expuesto) ignora cualquier apagado y sigue la regla global', async () => {
+    const inserts: unknown[][] = [];
+    mockearDb({
+      apagados: [{ usuario_id: '77777777-7777-7777-7777-777777777777', canal: 'email' }],
+      capturarInsert: (_t, v) => inserts.push(v),
+    });
+    const { notificar } = await import('./notificar');
+
+    await notificar(
+      {
+        tipo: 'tournament_cancelled',
+        destinatarios: { usuarioIds: ['77777777-7777-7777-7777-777777777777'] },
+      },
+      contextoSistema,
+    );
+
+    const valores = inserts[0]!;
+    expect(valores).toHaveLength(10);
+    expect(valores).toContain('email');
+  });
+
+  it('UC-47: si todos los destinatarios apagaron el único canal de una informativa, no inserta nada', async () => {
+    const inserts: unknown[][] = [];
+    mockearDb({
+      apagados: [{ usuario_id: '77777777-7777-7777-7777-777777777777', canal: 'in_app' }],
+      capturarInsert: (_t, v) => inserts.push(v),
+    });
+    const { notificar } = await import('./notificar');
+
+    await notificar(
+      {
+        tipo: 'tournament_started',
+        destinatarios: { usuarioIds: ['77777777-7777-7777-7777-777777777777'] },
+      },
+      contextoSistema,
+    );
+
+    expect(inserts).toHaveLength(0);
   });
 
   it('sin destinatarios, no inserta nada', async () => {
