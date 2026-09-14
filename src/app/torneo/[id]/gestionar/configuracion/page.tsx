@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { listarReglamentos } from '@/services/torneos/listarReglamentos';
 import { listarColaboradoresTorneo } from '@/services/organizadores/listarColaboradoresTorneo';
+import { listarMiembros } from '@/services/organizadores/listarMiembros';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
 import { FormularioEditarTorneo } from '../FormularioEditarTorneo';
 import { AccionesEstadoTorneo } from '../AccionesEstadoTorneo';
 import { FormularioDefinirFormato } from '../FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganizador';
 import { PanelColaboradores } from '../PanelColaboradores';
+import { PanelAdministradores } from '../PanelAdministradores';
 import { PanelCancelarTorneo } from '../PanelCancelarTorneo';
 import stylesCompartidos from '../pagina.module.css';
 import styles from './pagina.module.css';
@@ -37,6 +39,10 @@ export default async function PaginaConfiguracion({
     listarReglamentos({ torneoId: id }, contexto),
     listarColaboradoresTorneo({ torneoId: id }, contexto),
   ]);
+  const administradores = await listarMiembros(
+    { organizacionId: gestion.organizacionId },
+    contexto,
+  );
   const reglamentoVigente = reglamentos.find((r) => r.estado === 'current') ?? null;
 
   return (
@@ -96,6 +102,15 @@ export default async function PaginaConfiguracion({
       <section className={stylesCompartidos.seccion}>
         <h2 className={stylesCompartidos.tituloSeccion}>Colaboradores de este torneo</h2>
         <PanelColaboradores torneoId={id} colaboradores={colaboradores} />
+      </section>
+
+      <section className={stylesCompartidos.seccion}>
+        <h2 className={stylesCompartidos.tituloSeccion}>Equipo de trabajo de la organización</h2>
+        <PanelAdministradores
+          organizacionId={gestion.organizacionId}
+          administradores={administradores}
+          esTitular={gestion.miRolEnOrganizacion === 'owner'}
+        />
       </section>
 
       {ESTADOS_CON_CANCELAR.has(gestion.estado) && (

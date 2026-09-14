@@ -109,6 +109,19 @@
   font: 700 15px/1.2 var(--fuente-texto);
 }
 
+.filaIntegranteInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.filaBadgesRol {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .rolIntegrante {
   font: 600 11px/1 var(--fuente-texto);
   text-transform: uppercase;

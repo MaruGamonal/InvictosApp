@@ -26,6 +26,7 @@ function mockearDb(opciones: {
     costo_planilla?: string | null;
     cupo_equipos?: number;
     fecha_inicio_estimada?: Date | null;
+    organizacion_id?: string;
   };
   fases?: Array<{
     id: string;
@@ -217,6 +218,26 @@ describe('obtenerGestionTorneo', () => {
     expect(resultado.costoPlanilla).toBe(1500);
     expect(resultado.cupoEquipos).toBe(16);
     expect(resultado.fechaInicioEstimada).toBe('2026-04-12T00:00:00.000Z');
+  });
+
+  it('UC-07: expone la organización y el rol de quien mira, para saber si puede gestionar Administradores', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'admin',
+      torneo: {
+        id: TORNEO,
+        nombre: 'Copa Otoño',
+        estado: 'in_progress',
+        formato: 'league',
+        organizacion_id: 'org-1',
+      },
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+
+    expect(resultado.organizacionId).toBe('org-1');
+    expect(resultado.miRolEnOrganizacion).toBe('admin');
   });
 
   it('UC-34: agrupa los habilitados elegibles por equipo, para atribuir goles y tarjetas', async () => {

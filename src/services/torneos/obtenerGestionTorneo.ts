@@ -3,7 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
-import { verificarPermisoTorneo } from '@/lib/permisos';
+import { obtenerRolEnOrganizacion, verificarPermisoTorneo } from '@/lib/permisos';
 
 /**
  * Pantalla de gestión del torneo (`/torneo/[id]/gestionar`): lo que
@@ -59,6 +59,9 @@ export interface IntegranteElegible {
 
 export interface GestionTorneoResultado {
   id: string;
+  organizacionId: string;
+  /** UC-07 — con qué rol de organización mira esta pantalla quien la abre; determina si puede gestionar Administradores. */
+  miRolEnOrganizacion: 'owner' | 'admin' | null;
   nombre: string;
   descripcion: string | null;
   direccion: string | null;
@@ -98,14 +101,21 @@ export const obtenerGestionTorneo: Servicio<
     fecha_fin_estimada: Date | null;
     estado: string;
     formato: 'league' | 'knockout' | 'groups_knockout';
+    organizacion_id: string;
   }>(
     `SELECT id, nombre, descripcion, direccion, ciudad_id, costo_inscripcion, costo_planilla,
-            cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato
+            cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
   const torneo = torneoRows[0];
   if (!torneo) throw crearError('NO_ENCONTRADO');
+
+  // Titular o Administrador: `verificarPermisoTorneo` de arriba ya descartó a
+  // cualquier otro caso (`06`, D-64) — salvo `esSistema`, sin usuario real.
+  const miRolEnOrganizacion = contexto.usuarioId
+    ? await obtenerRolEnOrganizacion(contexto.usuarioId, torneo.organizacion_id)
+    : null;
 
   const { rows: fases } = await pool.query<{
     id: string;
@@ -189,6 +199,8 @@ export const obtenerGestionTorneo: Servicio<
 
   return {
     id: torneo.id,
+    organizacionId: torneo.organizacion_id,
+    miRolEnOrganizacion,
     nombre: torneo.nombre,
     descripcion: torneo.descripcion,
     direccion: torneo.direccion,
