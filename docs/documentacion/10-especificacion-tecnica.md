@@ -332,9 +332,11 @@ Cada publicación crea una versión nueva con `numero_version` incremental, pasa
 
 | Servicio | UC | Quién | Entrada | Salida |
 |---|---|---|---|---|
-| `buscarTorneos` | UC-22 | Público | **`ciudad_id`**, modalidad, categoría, estado, fecha, cursor | página de torneos + total |
+| `buscarTorneos` | UC-22 | Público | **`ciudad_id`**, modalidad, categoría, estado, fecha, **duración**, cursor | página de torneos + total |
 
 **[Definido] Solo devuelve torneos `public`.** Los `unlisted` son accesibles por identificador directo, nunca por búsqueda (`06`, D-21b). Es la única defensa del descubrimiento contra el contenido de baja calidad, junto con la verificación.
+
+**[Definido — `06`, D-102] El filtro de duración se calcula, no se guarda.** `single_day`, `weekend` o `extended` según la ventana entre `fecha_inicio_estimada` y `fecha_fin_estimada` (`04`, 5.4). Se resuelve con una condición sobre esas dos columnas del índice de descubrimiento (3.3) — **sin columna nueva ni bandera**.
 
 **[Definido — `06`, D-90] `ciudad_id` no es opcional: es el contexto de la consulta.** El llamador la resuelve desde el perfil de la persona, o la pide (`08`, 11.3). **Nunca se infiere por IP ni por el último uso.**
 
@@ -426,6 +428,8 @@ Es el más invocado y del que dependen tabla, estadísticas y score. Dentro de *
 
 **[Definido — `06`, D-95] Que nazca `confirmed` no cierra la objeción.** Un resultado cargado por el organizador o por un colaborador **computa desde el primer momento**, pero el capitán de cualquiera de los dos equipos puede objetarlo con `disputarResultado` (UC-32) **durante las mismas 72 horas desde `fecha_carga_resultado`**. Objetarlo lo lleva a `disputed`, que deja de alimentar el score y marca la tabla como provisoria. **Es el mismo plazo de D-60, con otro significado:** ahí es hasta cuándo se puede confirmar, acá hasta cuándo se puede objetar. **No se implementa como dos relojes distintos** — es el mismo campo y el mismo cálculo.
 
+**[Definido — `06`, D-101] `generarFixture` sobre una fase posterior exige la anterior confirmada.** Si algún partido de la fase que se cierra sigue en `loaded` o en `disputed`, la operación falla con `FASE_CON_RESULTADOS_SIN_CONFIRMAR` y devuelve cuáles. Es lo que impide armar un cruce de eliminatoria sobre una tabla que todavía puede moverse (7.1). En un torneo extendido nunca se dispara —las 72 horas ya vencieron—; en un relámpago es la validación central de la jornada.
+
 **[Definido] Corregir un resultado ya cargado está permitido y queda registrado.** Se revierte el efecto anterior sobre la tabla y se aplica el nuevo, en la misma transacción. **Nunca se corrige en silencio**: en este dominio, lo que se corrige sin dejar rastro termina siendo una discusión (`05`, principio 6).
 
 **`cargarEventos` — quién puede recibir qué (`06`, D-26)**
@@ -489,6 +493,7 @@ Solo se acreditan eventos a **integrantes habilitados en ese torneo por ese equi
 ### 6.1 Confirmación de resultados vencidos
 
 - **Cada hora.** Busca partidos en `loaded` con `fecha_carga_resultado` anterior a **72 horas** y **sin disputa abierta**, y los pasa a `confirmed` (`06`, D-60).
+- **[Definido — `06`, D-100] En un torneo relámpago el plazo es otro.** Si la ventana entre `fecha_inicio_estimada` y `fecha_fin_estimada` del torneo es de **3 días o menos** (`04`, 5.4), el plazo **no es de 72 horas: vence cuando el torneo pasa a `finished`**. La misma tarea lo resuelve — al finalizar un torneo relámpago, confirma todos sus `loaded` sin disputa — y **la ventana de objeción de D-95 se cierra en el mismo momento**. No hay dos relojes: hay un plazo cuyo vencimiento depende de la duración del torneo.
 - Al confirmarse, el resultado **pasa a alimentar el score**.
 - **Marca cómo quedó firme**: por vencimiento, no por confirmación de alguien. Es información distinta ante un reclamo (`05`, sección 5).
 
@@ -574,6 +579,7 @@ Módulo central de constantes; ningún servicio inventa códigos sueltos.
 | `JUGADOR_YA_HABILITADO_EN_EL_TORNEO` | 409 | Mismo jugador en dos equipos del mismo torneo (D-17b) |
 | `INSCRIPCIONES_ABIERTAS` | 409 | Generar fixture antes de cerrarlas (UC-29) |
 | `FIXTURE_CON_PARTIDOS_JUGADOS` | 409 | Regenerar sobre partidos disputados |
+| `FASE_CON_RESULTADOS_SIN_CONFIRMAR` | 409 | Cerrar una fase con resultados en `loaded` o `disputed` (`06`, D-101) |
 | `TORNEO_NO_EN_CURSO` | 409 | Cargar resultado con el torneo fuera de `in_progress` |
 | `TORNEO_YA_EMPEZADO` | 409 | Cambiar el formato con partidos jugados (UC-17) |
 | `TRANSICION_NO_PERMITIDA` | 409 | Salto de estado inválido (UC-20) |

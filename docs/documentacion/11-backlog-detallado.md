@@ -598,7 +598,7 @@ Publicar, además, es el momento donde se cruza la verificación de la organizac
 
 ### Alcance técnico
 
-- `publicarTorneo` (UC-18): valida los **datos mínimos** —nombre, modalidad, formato, **ciudad y dirección**, fecha estimada y cupo—; falta alguno → `DATOS_MINIMOS_INCOMPLETOS` con el detalle de cuál. **El reglamento no es requisito** (`06`, D-29).
+- `publicarTorneo` (UC-18): valida los **datos mínimos** —nombre, modalidad, formato, **ciudad y dirección**, **fecha de inicio y de fin** estimadas y cupo—; falta alguno → `DATOS_MINIMOS_INCOMPLETOS` con el detalle de cuál. **El reglamento no es requisito** (`06`, D-29).
 - Visibilidad al publicar: organización `basic` o superior → `public`; `unverified` → **`unlisted`**, con la respuesta indicando el motivo. Intentar forzar `public` sin verificación → `ORGANIZACION_NO_VERIFICADA`.
 - Publicar **abre las inscripciones**: pasa a `registration_open`. No hay estado intermedio (`06`, D-58).
 - `avanzarEstado` (UC-20) con las transiciones de `10`, 4.4 y las cuatro reglas: no se pasa a `in_progress` sin fixture generado; no se genera fixture con inscripciones abiertas; `registration_open → registration_closed` ocurre **automáticamente al alcanzar el cupo**, y el organizador puede reabrirlas o cerrarlas antes; `finished` es **manual**, con sugerencia del sistema cuando no quedan partidos pendientes (`06`, D-23b). Transición inválida → `TRANSICION_NO_PERMITIDA`.
@@ -748,6 +748,7 @@ El fundamento está en `06`, D-31b y hay que respetarlo aunque tiente automatiza
 - Los partidos nacen en `unscheduled` o `scheduled` según corresponda (`04`, 4.6).
 - Falla con `INSCRIPCIONES_ABIERTAS` si el torneo todavía las tiene abiertas: un equipo que entra después obliga a rehacerlo todo.
 - Falla con `FIXTURE_CON_PARTIDOS_JUGADOS` al regenerar sobre partidos ya disputados; es una acción destructiva y requiere confirmación explícita sobre lo que se pierde.
+- **Cerrar una fase para generar la siguiente exige sus resultados `confirmed`** (`06`, D-101): si queda alguno en `loaded` o `disputed` → `FASE_CON_RESULTADOS_SIN_CONFIRMAR`, devolviendo cuáles. **No es una regla de torneos relámpago**: en un torneo extendido nunca se dispara porque las 72 horas ya vencieron; en uno de un día es lo que evita cruzar mal una semifinal delante de todo el mundo.
 - Edición de la propuesta antes de confirmar: cambiar cruces, mover partidos de fecha, reasignar equipos a zonas.
 
 ### Fuera de alcance de este ticket
@@ -1266,7 +1267,8 @@ Y hay una pantalla que merece atención especial: **sin resultados no es un erro
 
 ### Alcance técnico
 
-- `buscarTorneos` (UC-22): **la ciudad como contexto** más los cuatro filtros que operan dentro de ella — modalidad, categoría, estado de inscripción y fecha de inicio.
+- `buscarTorneos` (UC-22): **la ciudad como contexto** más los filtros que operan dentro de ella — modalidad, categoría, estado de inscripción, fecha de inicio y **duración**.
+- **Filtro de duración** (`06`, D-102): `single_day`, `weekend` o `extended`, **calculado** sobre `fecha_inicio_estimada` y `fecha_fin_estimada` (`04`, 5.4). **No agregar columna ni bandera** — se resuelve con una condición sobre las dos fechas, que ya están en el índice.
 - **Solo devuelve torneos `public`.** Los `unlisted` son accesibles por identificador directo, nunca por búsqueda (`06`, D-21b).
 - **Orden dentro de la ciudad** (`06`, D-26b, D-51): inscripciones abiertas → fecha de inicio cercana, con las organizaciones **verificadas por delante** a igualdad de condiciones.
 - Paginación **por cursor** (`10`, 2.7): el listado se ordena por fecha y se le insertan filas mientras alguien scrollea.
@@ -1653,6 +1655,7 @@ La pieza que hay que entender antes de escribir código son **los cuatro caminos
 - **Dado** un resultado que **nació `confirmed` porque lo cargó el organizador**, **cuando** un capitán lo objeta dentro de las 72 horas, **entonces** pasa a `disputed` igual que cualquier otro (`06`, D-95).
 - **Dado** ese mismo resultado, **cuando** un capitán intenta objetarlo pasadas las 72 horas, **entonces** la operación se rechaza: la ventana venció.
 - **Dado** una disputa abierta, **cuando** corre la tarea de confirmación automática, **entonces** **no** la confirma: el plazo está congelado.
+- **Dado** un torneo **relámpago** (ventana de 3 días o menos), **cuando** pasa a `finished`, **entonces** sus resultados en `loaded` sin disputa **se confirman ahí** y la ventana de objeción **se cierra**, sin esperar las 72 horas (`06`, D-100).
 - **Dado** una disputa abierta, **cuando** el organizador la resuelve, **entonces** el partido vuelve a `confirmed` con el marcador que él fije y la tabla se reaplica en la misma transacción.
 
 ### Cómo demostrarlo

@@ -424,6 +424,22 @@ Se agrupan en dos categorías con umbrales distintos (ver UC-46): las **accionab
 
 **[Definido] `open` es el default y no una opción más.** La enorme mayoría de los torneos amateur son categoría libre, y para ellos la pregunta ni siquiera debería aparecer al crear el torneo. El corte exacto de edad de cada categoría lo define el reglamento del torneo (ER 3.20), no este catálogo.
 
+### 5.4 Duración del torneo — **clasificación derivada**
+
+*No es un campo: **se calcula** a partir de `fecha_inicio_estimada` y `fecha_fin_estimada` (`06`, D-99). Se documenta acá porque las etiquetas son visibles y este catálogo es la fuente de verdad de lo que el usuario lee.*
+
+| Valor derivado | Etiqueta visible | Cómo se calcula | ¿Dónde se usa? |
+|---|---|---|---|
+| `single_day` | Un día | Inicio y fin el mismo día | UC-22, UC-32 |
+| `weekend` | Fin de semana | Ventana de 2 o 3 días | UC-22, UC-32 |
+| `extended` | Liga extendida | Ventana de más de 3 días | UC-22 |
+
+**[Definido — D-99] Los dos primeros son "relámpago"**, y es la distinción que importa para las reglas: en un torneo de 3 días o menos **los plazos de confirmación se cierran al finalizar el torneo** y no a las 72 horas (`06`, D-100).
+
+**[Definido — D-99] No se guarda, se deriva.** Una bandera que pudiera contradecir a las fechas sería un estado de más — el mismo criterio con que el árbol de zonas no guarda sus ancestros (`06`, D-88). Y no le pide al organizador ningún dato nuevo: las dos fechas ya se cargan al crear el torneo.
+
+**[Definido] El cuadrangular no aparece acá porque no es un tipo.** Es un torneo con `cupo_equipos = 4` y formato `league` o `groups_knockout` (4.2) — el modelo ya lo soporta sin nada nuevo.
+
 ---
 
 ## 6. Colores semánticos — referencia rápida

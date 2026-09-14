@@ -1,5 +1,7 @@
 # Reglas de negocio y decisiones — INVICTA
 
+> **Revisión 16.** Entran los **torneos relámpago** (1 a 3 días) y los **cuadrangulares**. El modelo no necesitaba nada nuevo —el formato y las dos fechas ya estaban—, pero comprimir un torneo en un día **rompe dos reglas que se calibraron sobre una fecha por semana**: el plazo de confirmación de 72 horas sobrevive al campeonato (D-100) y el pase de fase puede armarse sobre una tabla provisoria (D-101). Se suma además el filtro de duración en el descubrimiento (D-102), que es donde está la oportunidad.
+>
 > **Revisión 15.** Al revisar la **lista de buena fe** aparece un choque que abrió la revisión 10 y nadie reconectó: UC-27 dice que sumar a alguien a la lista lo suma también al plantel permanente, pero desde D-85 entrar a un plantel **necesita el consentimiento de las dos partes**. La consecuencia es perversa — **la persona con cuenta se vuelve más difícil de sumar que la que no la tiene**. Se resuelve en D-98.
 >
 > **Revisión 14.** Se cierran las decisiones de infraestructura que T28 necesitaba: **proveedores, planes y región** (D-96) y el **dominio, `invicta.com.ar`** (D-97). Con eso T28 deja de estar bloqueado. El detalle técnico y el orden de ejecución están en las notas `decisiones-infraestructura-T28.md` y `pasos-infraestructura-T28.md`.
@@ -393,6 +395,33 @@ Es decir: **la persona que ya es usuaria del producto es más difícil de sumar 
 **[Definido — D-98] No hace falta ningún estado nuevo.** El "pendiente" no vive en `INTEGRANTE_HABILITADO` sino en el vínculo con el equipo, que ya tiene `invited` (`04`, 3.6). La lista de buena fe simplemente **no incluye** a quien no está `active`; lo que se agrega es que la pantalla lo muestre aparte, para que el capitán sepa a quién le falta responder.
 
 **Qué cambia en el set (ya aplicado):** UC-27 en `02` reescribe el paso 2 y suma las reglas; `03`, 3.10 aclara la precondición; `10`, 4.6 suma las dos validaciones a `confirmarPlantel`; y T20 en `11` las incorpora al alcance y a los criterios de aceptación.
+
+---
+
+### 4.16 Decisiones de la revisión 16 — torneos relámpago y cuadrangulares
+
+**De dónde sale:** del pedido de manejar **torneos relámpago de 1 a 3 días** y **cuadrangulares**. Lo primero que conviene decir es lo que **no** hizo falta:
+
+| Lo que parecía nuevo | Dónde ya estaba |
+|---|---|
+| **El cuadrangular** | Es un torneo con `cupo_equipos = 4` y formato `league` o `groups_knockout` (`04`, 4.2). **No es un formato nuevo ni una entidad nueva** |
+| **La duración del torneo** | `fecha_inicio_estimada` y `fecha_fin_estimada` ya existen en `TORNEO` (`03`, 3.7) |
+| **Varios partidos el mismo día** | `Partido.fecha_hora_programada` ya es fecha y hora, y el fixture no asume nada sobre el espaciado |
+
+**Lo que sí se rompe es otra cosa, y no es estructural: son dos reglas calibradas sobre un supuesto que el relámpago invalida.**
+
+| # | Pregunta | Decisión | Fundamento |
+|---|---|---|---|
+| **D-99** | ¿Cómo sabe el sistema que un torneo es relámpago? | **Se deriva de las fechas, no se declara.** Un torneo cuya ventana entre inicio y fin es de **3 días o menos** es un relámpago. **No hay campo ni enumeración nueva**; la clasificación visible está en `04`, 5.4 | Un indicador que se pueda contradecir con las fechas es un estado de más y una fuente de incoherencia — mismo criterio con que el árbol de zonas no guarda sus ancestros (D-88). Y la ventaja práctica: el organizador ya carga las dos fechas, así que **no se le pide nada nuevo** |
+| **D-100** | ¿Corre el plazo de 72 horas en un torneo de un día? | **No. En un relámpago, la confirmación automática (D-60) y la ventana de objeción (D-95) vencen cuando el torneo pasa a `finished`**, no a las 72 horas | **D-60 se calibró explícitamente sobre esto:** su fundamento dice que 72 horas *"siguen siendo menos que la semana entre fechas, así que la tabla queda firme antes de que se juegue la siguiente"*. **En un relámpago la fecha siguiente es veinte minutos después.** Un plazo que sobrevive al campeonato deja la definición del campeón abierta tres días después de la premiación, con la copa ya entregada |
+| **D-101** | ¿Se puede generar la fase eliminatoria con resultados sin confirmar? | **No. Cerrar una fase exige que sus resultados estén `confirmed`.** Los que sigan en `loaded` los confirma el organizador en el acto, que es lo que ya puede hacer (D-07b) | **No es una regla para relámpagos: es una regla que siempre fue correcta y que solo en un relámpago se nota.** En un torneo extendido se cumple sola, porque entre fase y fase pasa una semana y las 72 horas ya vencieron. En un relámpago el cruce de semifinales se arma sobre una tabla que todavía puede moverse — y ahí **se cruza mal a dos equipos delante de todo el mundo**, sin margen para corregir |
+| **D-102** | ¿El descubrimiento distingue un relámpago de una liga? | **Sí: filtro de duración**, derivado de las fechas — *un día*, *fin de semana* (2-3 días) o *liga extendida* | Es la oportunidad que el pedido deja a la vista, y es gratis porque el dato ya existe. **Un capitán con ocho amigos y un sábado libre es una intención completamente distinta** de la de alguien buscando una liga de tres meses, y hoy el descubrimiento los trata igual. Probablemente sea la intención más frecuente del fútbol amateur, y es la que mejor convierte: el compromiso que pide es una tarde |
+
+**[Definido — D-100] El caso normal del relámpago ya funcionaba, y conviene no sobre-diseñarlo.** El organizador de un torneo de un día **está parado en el complejo con la planilla**, así que carga él los resultados — y un resultado que carga el organizador **nace `confirmed`** (D-95). El plazo de 72 horas casi no se ejerce. Lo que D-100 arregla es el **residuo**: el partido que cargó un capitán, y la ventana de objeción que sobrevivía al torneo.
+
+**[Definido — D-99] El cuadrangular no se documenta como caso especial.** Es un torneo de cuatro equipos, y el set ya lo soporta sin una línea nueva. Lo que sí conviene es que la interfaz **lo ofrezca como atajo al crear el torneo** —cupo 4, formato liga, un día—, porque es una de las formas más comunes del amateur y adivinar la configuración desde cero es fricción sin necesidad (`08`, 11.5).
+
+**Qué cambia en el set (ya aplicado):** `03`, 3.7 explica la derivación en las fechas; `04` suma la clasificación por duración en 5.4; en `02`, UC-16 pide las dos fechas, UC-22 suma el filtro, UC-29 suma la precondición de cierre de fase y UC-32 acota la ventana; `10` lo refleja en los servicios y en la tarea programada de 6.1; y `11` lo incorpora a T9, T13, T22 y T29.
 
 ---
 

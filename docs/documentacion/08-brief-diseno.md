@@ -260,6 +260,8 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 
 **Tarjeta de torneo (componente clave):** nombre · modalidad y categoría · zona · fecha de inicio estimada · **estado de inscripción con su badge** · cupo (inscriptos / total) · organización con su **distintivo de verificación** si lo tiene.
 
+**[Definido — D-102] El filtro de duración merece más peso que los otros tres.** *Un día · Fin de semana · Liga extendida*. **Un capitán con ocho amigos y un sábado libre es otra persona** que alguien buscando una liga de tres meses, y es probablemente la intención más frecuente del amateur — la que menos compromiso pide y mejor convierte. Conviene que se vea sin desplegar los filtros secundarios.
+
 **[Definido — D-90] Esta pantalla cambió de carácter y es lo más importante de esta sección: dejó de ser un buscador.** Antes se entraba, se elegían filtros y se ejecutaba. Ahora **se entra y ya se están viendo los torneos de la ciudad propia**. Nadie tiene que aprender a filtrar para ver algo útil.
 
 **[Definido — D-90] La ciudad sube de categoría: es contexto, no filtro.** Deja de ser uno de cinco filtros y pasa a ser un **elemento persistente del encabezado**, del tipo que usan las aplicaciones de delivery para la dirección de entrega. Los otros cuatro siguen siendo filtros, **operan dentro de la ciudad** y pueden quedar plegados: la mayoría de la gente no los va a tocar. Cambiar de ciudad se llama **explorar, no filtrar** — la intención es mirar otro lado, no acotar lo que ya se ve—, y **volver a la propia tiene que ser trivial**.

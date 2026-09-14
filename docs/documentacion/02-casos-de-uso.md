@@ -482,7 +482,8 @@ flowchart LR
 - **Descripción:** da de alta una competencia y su información general, todavía en borrador y no visible para nadie más.
 - **Precondiciones:** la organización existe (UC-06).
 - **Flujo principal:**
-  1. El organizador carga la información general del torneo: nombre, modalidad (F5/F7/F11), categoría, fechas previstas, **ciudad y dirección**, cupo de equipos y descripción.
+  1. El organizador carga la información general del torneo: nombre, modalidad (F5/F7/F11), categoría, **fecha de inicio y de fin previstas**, **ciudad y dirección**, cupo de equipos y descripción.
+  1b. **[Definido — D-99]** De esas dos fechas **se deriva la duración** —un día, fin de semana o liga extendida (`04`, 5.4)—, sin pedirle nada más. Un torneo de **3 días o menos es un relámpago**, y eso cambia dos cosas: acorta los plazos de confirmación (D-100) y lo hace encontrable por duración en el descubrimiento (UC-22).
   2. El sistema crea el torneo en estado **borrador**, visible solo para la organización.
   3. El organizador define el formato de competencia (UC-17).
   4. Opcionalmente carga el reglamento del torneo desde la misma configuración (UC-51).
@@ -494,6 +495,7 @@ flowchart LR
   - **[Definido]** Un torneo pertenece siempre a una organización — nunca queda huérfano.
   - **[Definido — D-91]** El torneo lleva **ciudad y dirección**, y son dos datos con dos usos: la **ciudad** sale del catálogo y sirve para **encontrarlo**; la **dirección** es texto libre y sirve para **llegar**. Ninguno cubre al otro.
   - **[Definido — D-91]** La dirección del torneo **no reemplaza a la de la Sede de cada partido** (`03`, 3.17): es la referencia general —el complejo habitual—, y la de un partido puntual manda sobre ella. Con una sola sede, coinciden.
+  - **[Definido — D-99]** El **cuadrangular no es un tipo de torneo**: es un torneo con **cupo 4** y formato liga o grupos + eliminatoria. No hace falta nada nuevo en el modelo, pero **conviene ofrecerlo como atajo** al crear el torneo —cupo 4, liga, un día—, porque es una de las formas más comunes del amateur y reconstruir esa configuración a mano es fricción sin necesidad (`08`, 11.5).
   - **[Definido — D-88]** El catálogo de ciudades **es nacional y lo administra la plataforma**, no el organizador. Que cualquiera pueda agregar deja de ser un catálogo —aparecen "Centro", "centro" y "Zona Centro" como tres lugares—, que es exactamente lo que D-25b evitó al no usar texto libre. Al ser completo desde el día uno, **ningún organizador se queda sin la suya**.
   - **[Definido]** El torneo nace en borrador y **no es descubrible hasta que se publica explícitamente** (UC-18). Separar "crear" de "publicar" es lo que le permite al organizador armarlo con calma sin exponer un torneo a medio configurar.
   - **[Definido]** En esta versión **no existen competencias recurrentes con ediciones**: cada torneo es independiente. El modelo deja previsto un vínculo opcional hacia una competencia agrupadora, de modo que se pueda agregar más adelante sin migrar todos los dominios derivados. Ver `06`, D-19b.
@@ -631,7 +633,8 @@ flowchart LR
   - **[Definido — D-89] No hay coordenadas, distancias ni radios.** Con la ciudad propia como vista por defecto, ordenar por cercanía deja de tener sentido: ya no se está mirando el país. Cuando la ciudad no alcanza, el paso siguiente es **su provincia**.
   - **[Definido — D-90]** La ciudad se pide **en el primer uso del descubrimiento, no en el registro** (D-52), y se recuerda. Un visitante sin cuenta la elige ahí mismo, **sin que sea un paso previo que bloquee** — sigue vigente que el contenido va antes que la cuenta (D-04b).
   - **[Definido] Sin resultados no es un error**, y con una lista nacional va a pasar seguido: la mayoría de las ciudades no va a tener torneos durante mucho tiempo. Ofrece, en orden: **los torneos de la provincia** con su cantidad, **avisar cuando se publique uno acá**, y **publicar uno**. Ver `05`, sección 5.
-  - **[Definido]** Los otros cuatro filtros —modalidad, categoría, estado de inscripción y fecha— **operan dentro de la ciudad** y son secundarios.
+  - **[Definido — D-102] Se suma un filtro de duración** —un día, fin de semana, liga extendida—, derivado de las fechas del torneo (`04`, 5.4). **Fundamento:** un capitán con ocho amigos y un sábado libre tiene una intención completamente distinta de la de alguien buscando una liga de tres meses, y hoy el descubrimiento los trata igual. Es probablemente la intención más frecuente del amateur, y la que mejor convierte — el compromiso que pide es una tarde. No cuesta ningún dato nuevo: las dos fechas ya existen.
+  - **[Definido]** Los otros filtros —modalidad, categoría, estado de inscripción y fecha— **operan dentro de la ciudad** y son secundarios.
 - **Resultado esperado:** un equipo o jugador encuentra dónde jugar sin depender de conocer al organizador.
 
 ---
@@ -797,6 +800,7 @@ flowchart LR
 - **Reglas de negocio:**
   - **[Definido]** No se genera fixture con las inscripciones abiertas: un equipo que entra después obliga a rehacerlo todo.
   - **[Definido]** Regenerar el fixture con partidos ya jugados debe estar bloqueado o requerir una confirmación explícita e inequívoca sobre lo que se pierde — es una acción destructiva (mismo criterio que la anulación de venta en el set de referencia).
+  - **[Definido — D-101] Cerrar una fase para generar la siguiente exige que sus resultados estén `confirmed`.** Los que sigan cargados sin confirmar los resuelve el organizador en el acto, que es algo que ya puede hacer (D-07b). **Fundamento:** el cruce de la eliminatoria se arma desde la tabla de la fase anterior; si esa tabla todavía puede moverse, **se cruza mal a dos equipos delante de todo el mundo** y no hay margen para corregir. **No es una regla para relámpagos** — es una regla que siempre fue correcta y que en un torneo extendido se cumple sola, porque entre fase y fase pasa una semana y las 72 horas ya vencieron. En un relámpago, donde la semifinal es veinte minutos después, es la que evita el desastre. Ver `06`, D-101.
   - **[Definido]** El sorteo **no admite criterios** (cabezas de serie, separar equipos del mismo club, zonas geográficas): el fixture generado es **editable a mano**, y eso resuelve todos los casos. Ningún generador conoce las restricciones reales del organizador, y la edición manual las cubre todas con menos complejidad. Ver `06`, D-31b.
 - **Resultado esperado:** el torneo tiene su calendario de partidos armado y listo para programarse.
 
@@ -861,6 +865,7 @@ flowchart LR
   3. Si lo disputa, el resultado queda marcado como **en disputa** y el organizador es notificado para resolverlo.
   4. El organizador corrige el resultado o lo ratifica; su decisión cierra la disputa, contrastándola contra el **reglamento vigente** del torneo si tiene uno (UC-51).
 - **Flujos alternativos / excepciones:**
+  - **[Definido — D-100] En un torneo relámpago los plazos se cierran al finalizar el torneo**, no a las 72 horas: tanto la confirmación automática (D-60) como la ventana de objeción vencen cuando el torneo pasa a *finalizado*. **Fundamento:** D-60 se calibró diciendo que 72 horas son *"menos que la semana entre fechas"* — en un relámpago la fecha siguiente es **veinte minutos después**, y un plazo que sobrevive al campeonato deja abierta la definición del campeón tres días después de entregada la copa. Ver `06`, D-100.
   - **[Definido — D-95]** También se objeta un resultado que **nació confirmado** porque lo cargó el organizador o un colaborador: la ventana de objeción es **la misma de 72 horas desde la carga**, y objetarlo lo lleva a *en disputa* igual que en cualquier otro caso. En el amateur el organizador no siempre es neutral, y sin esta ventana un resultado que él cargó quedaría fuera de discusión. Ver `06`, D-95.
   - **[Definido — D-60]** Un resultado sin confirmar **se da por confirmado a las 72 horas de haberse cargado** —contadas desde la carga, no desde la fecha del partido—. Sin vencimiento, la mitad de los resultados quedaría eternamente "sin confirmar" y la tabla nunca sería definitiva; 72 horas cubren el fin de semana largo típico del amateur y siguen siendo menos que la semana entre fechas, así que la tabla queda firme antes de que se juegue la siguiente. Ver `06`, D-60.
   - **[Definido — D-60]** Con una **disputa abierta, el plazo se congela** hasta que el organizador la resuelva. De lo contrario el vencimiento automático cerraría a favor de quien cargó el resultado justo en el caso que el mecanismo tiene que proteger. Ver `06`, D-60.
