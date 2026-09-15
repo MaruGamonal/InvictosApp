@@ -201,6 +201,14 @@
   justify-content: space-between;
 }
 
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-texto);
+}
+
 .enlaceChico {
   font-weight: 600;
   font-size: 13px;

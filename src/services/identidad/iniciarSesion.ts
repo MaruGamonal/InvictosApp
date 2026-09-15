@@ -1,9 +1,13 @@
 import { z } from 'zod';
+import { cookies } from 'next/headers';
 import type { Servicio } from '@/lib/servicio';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
-import { crearClienteServidor } from '@/lib/supabase/servidor';
+import { crearClienteServidor, NOMBRE_COOKIE_RECORDAR } from '@/lib/supabase/servidor';
+
+/** Mismo tope que usa `@supabase/ssr` para sus propias cookies de sesión (400 días, el máximo de Chrome). */
+const DURACION_RECORDAR_SEGUNDOS = 400 * 24 * 60 * 60;
 
 /**
  * UC-01 (ingreso) — Inicia sesión con correo y contraseña. A diferencia
@@ -20,9 +24,12 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
 const esquemaEntrada = z.object({
   identificadorAcceso: z.string().trim().email(),
   password: z.string().min(1),
+  /** UC-01 — "Recordarme": si no se manda, se recuerda (comportamiento de siempre). */
+  recordarme: z.boolean().optional().default(true),
 });
 
-export type IniciarSesionInput = z.infer<typeof esquemaEntrada>;
+/** `z.input`, no `z.infer`: `recordarme` es opcional para quien llama (el default lo pone Zod). */
+export type IniciarSesionInput = z.input<typeof esquemaEntrada>;
 export interface IniciarSesionResultado {
   ingresado: true;
 }
@@ -44,7 +51,7 @@ export const iniciarSesion: Servicio<IniciarSesionInput, IniciarSesionResultado>
     ]);
   }
 
-  const supabase = await crearClienteServidor();
+  const supabase = await crearClienteServidor({ recordarSesion: datos.recordarme });
   const { error } = await supabase.auth.signInWithPassword({
     email: datos.identificadorAcceso,
     password: datos.password,
@@ -53,6 +60,14 @@ export const iniciarSesion: Servicio<IniciarSesionInput, IniciarSesionResultado>
   if (error) {
     throw crearError('CREDENCIALES_INVALIDAS');
   }
+
+  const cookieStore = await cookies();
+  cookieStore.set(NOMBRE_COOKIE_RECORDAR, datos.recordarme ? '1' : '0', {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    ...(datos.recordarme ? { maxAge: DURACION_RECORDAR_SEGUNDOS } : {}),
+  });
 
   return { ingresado: true };
 };

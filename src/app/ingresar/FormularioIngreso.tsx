@@ -41,6 +41,7 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
   const [identificadorAcceso, setIdentificadorAcceso] = useState('');
   const [nombreVisible, setNombreVisible] = useState('');
   const [password, setPassword] = useState('');
+  const [recordarme, setRecordarme] = useState(true);
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -60,7 +61,7 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
                   ? { tipo: 'seguir', datos: seguirPendiente }
                   : undefined,
               }
-            : { identificadorAcceso, password },
+            : { identificadorAcceso, password, recordarme },
         ),
       });
       const cuerpo = await respuesta.json();
@@ -158,6 +159,17 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
         />
         {esCrear && <span className={styles.ayuda}>Al menos 8 caracteres.</span>}
       </div>
+
+      {!esCrear && (
+        <label className={styles.checkbox}>
+          <input
+            type="checkbox"
+            checked={recordarme}
+            onChange={(evento) => setRecordarme(evento.target.checked)}
+          />
+          Recordarme
+        </label>
+      )}
 
       <button type="submit" className={styles.boton} disabled={estado.paso === 'enviando'}>
         {estado.paso === 'enviando' ? 'Enviando…' : esCrear ? 'Crear cuenta' : 'Ingresar'}
