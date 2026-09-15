@@ -151,6 +151,29 @@ describe('cargarResultado', () => {
     );
   });
 
+  it('al cargar un resultado, avisa a quien sigue cualquiera de los dos equipos, no solo al torneo', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner' });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      { partidoId: PARTIDO, version: 1, golesLocal: 2, golesVisitante: 1 },
+      contextoCon('usuario-organizador'),
+    );
+
+    expect(notificarMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tipo: 'result_published',
+        destinatarios: expect.objectContaining({
+          seguidoresDe: expect.arrayContaining([
+            { tipoSeguido: 'team', entidadId: EQUIPO_A },
+            { tipoSeguido: 'team', entidadId: EQUIPO_B },
+          ]),
+        }),
+      }),
+      expect.anything(),
+    );
+  });
+
   it('un colaborador asignado también carga como confirmed', async () => {
     mockearDb({ esColaborador: true });
     const { cargarResultado } = await import('./cargarResultado');

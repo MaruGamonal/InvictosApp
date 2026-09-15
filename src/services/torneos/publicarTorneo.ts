@@ -6,6 +6,7 @@ import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { CONFIGURACION } from '@/lib/configuracion';
 import { invalidarCacheTorneo } from '@/lib/cache';
+import { notificarCambioDeTorneo } from './_notificarCambio';
 
 /**
  * UC-18 — Publicar un torneo: `draft → registration_open`, sin estado
@@ -98,6 +99,8 @@ export const publicarTorneo: Servicio<PublicarTorneoInput, PublicarTorneoResulta
   );
 
   invalidarCacheTorneo(datos.torneoId);
+
+  await notificarCambioDeTorneo(datos.torneoId, 'tournament_published', contexto);
 
   return {
     id: datos.torneoId,

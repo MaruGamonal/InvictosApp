@@ -382,7 +382,11 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       entidadOrigenId: datos.partidoId,
       destinatarios: {
         usuarioIds,
-        seguidoresDe: [{ tipoSeguido: 'tournament', entidadId: partido.torneo_id }],
+        seguidoresDe: [
+          { tipoSeguido: 'tournament', entidadId: partido.torneo_id },
+          { tipoSeguido: 'team', entidadId: partido.equipo_local_id },
+          { tipoSeguido: 'team', entidadId: partido.equipo_visitante_id },
+        ],
       },
     },
     contexto,

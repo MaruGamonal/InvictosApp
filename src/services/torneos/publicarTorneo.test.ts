@@ -10,7 +10,13 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 const TORNEO = '11111111-1111-1111-1111-111111111111';
 const ORG = '22222222-2222-2222-2222-222222222222';
 
-beforeEach(() => vi.resetModules());
+const notificarMock = vi.fn(async () => {});
+
+beforeEach(() => {
+  vi.resetModules();
+  notificarMock.mockClear();
+  vi.doMock('@/services/notificaciones/notificar', () => ({ notificar: notificarMock }));
+});
 
 const TORNEO_COMPLETO = {
   nombre: 'Copa Amateur',
@@ -75,6 +81,20 @@ describe('publicarTorneo', () => {
       visibilidad: 'public',
       motivoNoListado: null,
     });
+  });
+
+  it('al publicar, avisa a quien sigue el torneo (feed de actividad, tournament_published)', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', nivelVerificacion: 'basic' });
+    const { publicarTorneo } = await import('./publicarTorneo');
+    await publicarTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+    expect(notificarMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tipo: 'tournament_published',
+        entidadOrigenTipo: 'torneo',
+        entidadOrigenId: TORNEO,
+      }),
+      expect.anything(),
+    );
   });
 
   it('una organización sin verificar publica igual, pero unlisted con el motivo', async () => {
