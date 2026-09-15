@@ -54,6 +54,7 @@ function mockearDb(opciones: {
   rolEnOrganizacion?: 'owner' | 'admin';
   esColaborador?: boolean;
   equiposInscriptos?: Array<{ id: string; nombre: string; escudo_url: string | null }>;
+  seguidores?: number;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -81,6 +82,9 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT id, tipo_fase FROM fase')) return { rows: [] };
         if (t.startsWith('SELECT e.id, e.nombre, e.escudo_url')) {
           return { rows: opciones.equiposInscriptos ?? [] };
+        }
+        if (t.startsWith("SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament'")) {
+          return { rows: [{ cantidad: String(opciones.seguidores ?? 0) }] };
         }
         return { rows: [] };
       },
@@ -331,6 +335,20 @@ describe('obtenerFichaTorneo', () => {
       nombre: 'Equipo A',
       escudoUrl: 'https://cdn.example.com/a.png',
     });
+  });
+
+  it('devuelve la cantidad de seguidores del torneo', async () => {
+    mockearDb({ seguidores: 42 });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.seguidores).toBe(42);
+  });
+
+  it('un torneo sin seguidores todavía devuelve 0, no null', async () => {
+    mockearDb({});
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.seguidores).toBe(0);
   });
 
   it('torneo inexistente, NO_ENCONTRADO', async () => {

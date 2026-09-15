@@ -7,6 +7,8 @@ import styles from './BotonSeguir.module.css';
 export interface BotonSeguirProps {
   tipoSeguido: 'tournament' | 'team';
   entidadId: string;
+  /** Cantidad de seguidores al momento del render (server-side). Se ajusta localmente al seguir/dejar de seguir. */
+  cantidadSeguidoresInicial?: number;
 }
 
 /**
@@ -28,9 +30,18 @@ export interface BotonSeguirProps {
  * repite del lado del cliente, ya con sesión) sin volver a tocar
  * "Seguir".
  */
-export function BotonSeguir({ tipoSeguido, entidadId }: BotonSeguirProps) {
+function formatearCantidad(cantidad: number): string {
+  return cantidad.toLocaleString('es-AR');
+}
+
+export function BotonSeguir({
+  tipoSeguido,
+  entidadId,
+  cantidadSeguidoresInicial = 0,
+}: BotonSeguirProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<'inicial' | 'enviando' | 'siguiendo'>('inicial');
+  const [cantidad, setCantidad] = useState(cantidadSeguidoresInicial);
 
   useEffect(() => {
     let cancelado = false;
@@ -70,19 +81,25 @@ export function BotonSeguir({ tipoSeguido, entidadId }: BotonSeguirProps) {
         return;
       }
       setEstado(siguiendo ? 'inicial' : 'siguiendo');
+      setCantidad((actual) => Math.max(0, actual + (siguiendo ? -1 : 1)));
     } catch {
       setEstado(siguiendo ? 'siguiendo' : 'inicial');
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={alTocar}
-      disabled={estado === 'enviando'}
-      className={estado === 'siguiendo' ? styles.botonActivo : styles.boton}
-    >
-      {estado === 'siguiendo' ? 'Siguiendo ✓' : 'Seguir'}
-    </button>
+    <div className={styles.envoltorio}>
+      <button
+        type="button"
+        onClick={alTocar}
+        disabled={estado === 'enviando'}
+        className={estado === 'siguiendo' ? styles.botonActivo : styles.boton}
+      >
+        {estado === 'siguiendo' ? 'Siguiendo ✓' : 'Seguir'}
+      </button>
+      <span className={styles.cantidad}>
+        {formatearCantidad(cantidad)} {cantidad === 1 ? 'seguidor' : 'seguidores'}
+      </span>
+    </div>
   );
 }

@@ -114,7 +114,11 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           funcional: no necesita cuenta ni confirmación.
         */}
         <div className={styles.accionesHero}>
-          <BotonSeguir tipoSeguido="team" entidadId={id} />
+          <BotonSeguir
+            tipoSeguido="team"
+            entidadId={id}
+            cantidadSeguidoresInicial={equipo.seguidores}
+          />
           <BotonPedirSumarme equipoId={id} />
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>

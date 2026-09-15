@@ -46,6 +46,8 @@ export interface FichaTorneo {
   imagenUrl: string | null;
   organizacion: { id: string; nombre: string; nivelVerificacion: string };
   tieneReglamento: boolean;
+  /** Cuántas cuentas siguen este torneo (`seguimiento`, UC-42/43) — nunca negativo, 0 es un estado normal. */
+  seguidores: number;
   proximoPartido: {
     id: string;
     equipoLocal: { id: string; nombre: string; escudoUrl: string | null };
@@ -245,11 +247,16 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     [datos.torneoId],
   );
 
-  const [proximoPartido, campeon, equiposInscriptos] = await Promise.all([
+  const [proximoPartido, campeon, equiposInscriptos, filaSeguidores] = await Promise.all([
     torneo.estado === 'in_progress' ? obtenerProximoPartido(pool, datos.torneoId) : null,
     torneo.estado === 'finished' ? obtenerCampeon(pool, datos.torneoId) : null,
     obtenerEquiposInscriptos(pool, datos.torneoId),
+    pool.query<{ cantidad: string }>(
+      `SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament' AND entidad_seguida_id = $1`,
+      [datos.torneoId],
+    ),
   ]);
+  const seguidores = Number(filaSeguidores.rows[0]?.cantidad ?? 0);
 
   return {
     id: torneo.id,
@@ -281,5 +288,6 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     proximoPartido,
     campeon,
     equiposInscriptos,
+    seguidores,
   };
 };

@@ -86,7 +86,11 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         ni confirmación.
       */}
       <div className={styles.accionesHero}>
-        <BotonSeguir tipoSeguido="tournament" entidadId={id} />
+        <BotonSeguir
+          tipoSeguido="tournament"
+          entidadId={id}
+          cantidadSeguidoresInicial={ficha.seguidores}
+        />
         {ficha.estado === 'registration_open' && (
           <BotonInscribirEquipo torneoId={id} reglamentoVigente={reglamentoVigente} />
         )}

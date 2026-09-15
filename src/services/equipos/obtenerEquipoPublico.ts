@@ -129,6 +129,8 @@ export interface EquipoPublico {
   score: ScoreEquipo | null;
   proximoPartido: ProximoPartidoEquipo | null;
   ultimoResultado: UltimoResultadoEquipo | null;
+  /** Cuántas cuentas siguen este equipo (`seguimiento`, UC-42/43) — nunca negativo, 0 es un estado normal. */
+  seguidores: number;
 }
 
 interface FilaIntegrante {
@@ -408,6 +410,12 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
       }
     : null;
 
+  const { rows: filaSeguidores } = await pool.query<{ cantidad: string }>(
+    `SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'team' AND entidad_seguida_id = $1`,
+    [datos.equipoId],
+  );
+  const seguidores = Number(filaSeguidores[0]?.cantidad ?? 0);
+
   return {
     id: equipo.id,
     nombre: equipo.nombre,
@@ -424,5 +432,6 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
     score,
     proximoPartido,
     ultimoResultado,
+    seguidores,
   };
 };

@@ -1,3 +1,15 @@
+.envoltorio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cantidad {
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  color: var(--ink-600);
+}
+
 .boton {
   display: inline-flex;
   align-items: center;

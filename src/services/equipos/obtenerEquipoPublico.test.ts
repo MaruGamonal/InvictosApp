@@ -27,6 +27,7 @@ function mockearDb(opciones: {
   proximo?: Record<string, unknown>[];
   ultimo?: Record<string, unknown>[];
   score?: Record<string, unknown>[];
+  seguidores?: number;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -63,6 +64,9 @@ function mockearDb(opciones: {
         }
         if (t.startsWith('SELECT valor, partidos_computados')) {
           return { rows: opciones.score ?? [] };
+        }
+        if (t.startsWith("SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'team'")) {
+          return { rows: [{ cantidad: String(opciones.seguidores ?? 0) }] };
         }
         return { rows: [] };
       },
@@ -337,6 +341,20 @@ describe('obtenerEquipoPublico', () => {
       golesPropios: 3,
       golesRival: 1,
     });
+  });
+
+  it('devuelve la cantidad de seguidores del equipo', async () => {
+    mockearDb({ seguidores: 128 });
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.seguidores).toBe(128);
+  });
+
+  it('un equipo sin seguidores todavía devuelve 0, no null', async () => {
+    mockearDb({});
+    const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');
+    const equipo = await obtenerEquipoPublico({ equipoId: EQUIPO }, VISITANTE);
+    expect(equipo.seguidores).toBe(0);
   });
 
   it('equipo inexistente, NO_ENCONTRADO', async () => {
