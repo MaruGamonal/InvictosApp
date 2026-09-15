@@ -14,6 +14,14 @@
   flex: none;
 }
 
+.ciudad {
+  font: 600 11px/1 var(--fuente-texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--identidad-texto-secundario);
+  margin-bottom: 8px;
+}
+
 .filaUsuario {
   display: flex;
   align-items: center;

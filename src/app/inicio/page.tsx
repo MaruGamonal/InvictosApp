@@ -3,9 +3,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerInicio } from '@/services/inicio/obtenerInicio';
+import { obtenerActividad } from '@/services/inicio/obtenerActividad';
 import { NavInferior } from '@/components/NavInferior';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { TarjetaTorneoResumen } from '@/components/TarjetaTorneoResumen';
+import { TarjetaActividad } from '@/components/TarjetaActividad';
+import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import styles from './pagina.module.css';
@@ -20,16 +23,56 @@ const FORMATO_FECHA = new Intl.DateTimeFormat('es-AR', {
   minute: '2-digit',
 });
 
+interface TorneoActivo {
+  id: string;
+  nombre: string;
+  categoriaGenero: string;
+  modalidad: string;
+  imagenUrl: string | null;
+}
+
+interface TorneoConEstado {
+  id: string;
+  nombre: string;
+  categoriaGenero: string;
+  modalidad: string;
+  imagenUrl: string | null;
+  estado: string;
+}
+
+/** Torneos en curso entre los que juego/administro/sigo — únicos por id, más recientes primero (ya vienen ordenados así). */
+function torneosEnCurso(...listas: TorneoConEstado[][]): TorneoActivo[] {
+  const porId = new Map<string, TorneoActivo>();
+  for (const lista of listas) {
+    for (const torneo of lista) {
+      if (torneo.estado === 'in_progress' && !porId.has(torneo.id)) {
+        porId.set(torneo.id, {
+          id: torneo.id,
+          nombre: torneo.nombre,
+          categoriaGenero: torneo.categoriaGenero,
+          modalidad: torneo.modalidad,
+          imagenUrl: torneo.imagenUrl,
+        });
+      }
+    }
+  }
+  return [...porId.values()];
+}
+
 /**
- * Pantalla de Inicio (paquete de diseño, `Invictos - Inicio.dc.html`).
- * Simplificación deliberada frente al prototipo: el encabezado siempre
- * dice "Hola, {nombre}" sin el título contextual que cambia según el
- * modo (nombre del equipo / de la organización, dato que
- * `obtenerInicio` no trae todavía). Los avisos de "Cargar resultados" /
- * "Resolver inscripciones" no enlazan directo al torneo puntual porque
- * `obtenerInicio` solo trae el conteo agregado, no el torneoId de cada
- * pendiente — señalan la sección "Mis torneos" de más abajo en su
- * lugar.
+ * Pantalla de Inicio: el feed social del fútbol amateur (evolución
+ * sobre el paquete de diseño original `Invictos - Inicio.dc.html`) — "AHORA" y
+ * "ACTIVIDAD" son la parte nueva (UC-44, `obtenerActividad.ts`), todo lo
+ * demás (próximo partido, mis equipos/torneos) ya existía.
+ *
+ * "AHORA" sigue la cascada de prioridad del caso de uso (partidos en
+ * vivo → torneos activos → actividad reciente) con un matiz real: no
+ * existe todavía un estado "en vivo" por partido (`partido.estado` no
+ * lo tiene), así que ese primer nivel nunca aplica — no se inventa. El
+ * segundo nivel si aplica se muestra acá; si no hay torneos en curso, la
+ * sección se omite en vez de repetir el primer item de "ACTIVIDAD"
+ * (que ya está inmediatamente debajo — nada queda oculto, solo no se
+ * duplica).
  */
 export default async function PaginaInicio({
   searchParams,
@@ -39,7 +82,10 @@ export default async function PaginaInicio({
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
 
-  const inicio = await obtenerInicio(undefined, contexto);
+  const [inicio, actividad] = await Promise.all([
+    obtenerInicio(undefined, contexto),
+    obtenerActividad({}, contexto),
+  ]);
   const parametros = await searchParams;
 
   const mostrarSwitch = inicio.esJugador && inicio.esOrganizador;
@@ -52,16 +98,74 @@ export default async function PaginaInicio({
           ? 'jugador'
           : 'organizador';
 
+  const activos =
+    !inicio.esRecienLlegado && modo === 'jugador' && inicio.jugador
+      ? torneosEnCurso(
+          inicio.jugador.torneos.map((torneo) => ({ ...torneo, id: torneo.torneoId })),
+          inicio.jugador.torneosSeguidos,
+        )
+      : !inicio.esRecienLlegado && modo === 'organizador' && inicio.organizador
+        ? torneosEnCurso(
+            inicio.organizador.torneosAdministrados,
+            inicio.organizador.torneosSeguidos,
+          )
+        : [];
+
+  const bloqueAhoraActividad = (
+    <>
+      {activos.length > 0 && (
+        <section className={styles.seccion}>
+          <h2 className={styles.tituloSeccion}>Ahora</h2>
+          <div className={styles.lista}>
+            {activos.map((torneo) => (
+              <TarjetaTorneoResumen
+                key={torneo.id}
+                torneoId={torneo.id}
+                nombre={torneo.nombre}
+                categoriaGenero={torneo.categoriaGenero}
+                modalidad={torneo.modalidad}
+                imagenUrl={torneo.imagenUrl}
+                etiquetaDerecha="En curso"
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Actividad</h2>
+        {actividad.items.length > 0 ? (
+          <div className={styles.lista}>
+            {actividad.items.map((item) => (
+              <TarjetaActividad key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <EstadoVacio
+            mensaje="Todavía no hay novedades de lo que seguís."
+            textoAccion="Descubrir más"
+            hrefAccion="/torneos"
+          />
+        )}
+      </section>
+    </>
+  );
+
   return (
     <div className={styles.pagina}>
       <header className={styles.encabezado}>
+        {inicio.ciudadNombre && <div className={styles.ciudad}>{inicio.ciudadNombre}</div>}
         <div className={styles.filaUsuario}>
           <div className={styles.avatar} aria-hidden>
             {inicio.nombreUsuario.trim().charAt(0).toUpperCase() || '?'}
           </div>
           <div className={styles.filaUsuarioTexto}>
             <div className={styles.saludo}>Hola, {inicio.nombreUsuario}</div>
-            <div className={`fuente-display ${styles.titulo}`}>Inicio</div>
+            <div className={`fuente-display ${styles.titulo}`}>
+              {modo === 'jugador' && inicio.jugador?.equipos[0]
+                ? inicio.jugador.equipos[0].nombre
+                : 'Inicio'}
+            </div>
           </div>
           <Link href="/notificaciones" className={styles.enlaceNotificaciones} aria-label="Notificaciones">
             <svg
@@ -182,6 +286,8 @@ export default async function PaginaInicio({
               </div>
             )}
 
+            {bloqueAhoraActividad}
+
             {inicio.jugador.resultadosPorConfirmar > 0 && (
               <div className={styles.avisoPendiente}>
                 {inicio.jugador.resultadosPorConfirmar === 1
@@ -294,6 +400,8 @@ export default async function PaginaInicio({
                 Entrá al torneo, abajo, para cargarlo.
               </div>
             )}
+
+            {bloqueAhoraActividad}
 
             <section className={styles.seccion}>
               <div className={styles.filaTituloSeccion}>

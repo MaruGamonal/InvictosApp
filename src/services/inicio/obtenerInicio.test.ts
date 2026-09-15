@@ -10,7 +10,7 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 beforeEach(() => vi.resetModules());
 
 interface Opciones {
-  perfil?: { id: string; nombre_visible: string } | null;
+  perfil?: { id: string; nombre_visible: string; ciudad_nombre?: string | null } | null;
   equipos?: Array<{
     id: string;
     nombre: string;
@@ -32,7 +32,9 @@ interface Opciones {
     nombre: string;
     categoria_genero: string;
     modalidad: string;
+    imagen_url?: string | null;
     organizacion_logo_url?: string | null;
+    estado?: string;
   }>;
   resultadosPorConfirmar?: number;
   torneosAdministrados?: Array<Record<string, unknown>>;
@@ -48,7 +50,7 @@ function mockearDb(opciones: Opciones) {
           return {
             rows:
               opciones.perfil === undefined
-                ? [{ id: 'perfil-1', nombre_visible: 'Vale' }]
+                ? [{ id: 'perfil-1', nombre_visible: 'Vale', ciudad_nombre: null }]
                 : opciones.perfil
                   ? [opciones.perfil]
                   : [],
@@ -197,15 +199,77 @@ describe('obtenerInicio', () => {
       ],
       organizaciones: [],
       torneosSeguidos: [
-        { id: 'tor-seguido', nombre: 'Copa Amigos', categoria_genero: 'mixed', modalidad: 'f7' },
+        {
+          id: 'tor-seguido',
+          nombre: 'Copa Amigos',
+          categoria_genero: 'mixed',
+          modalidad: 'f7',
+          imagen_url: null,
+          organizacion_logo_url: null,
+          estado: 'in_progress',
+        },
       ],
     });
     const { obtenerInicio } = await import('./obtenerInicio');
     const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
 
     expect(resultado.jugador?.torneosSeguidos).toEqual([
-      { id: 'tor-seguido', nombre: 'Copa Amigos', categoriaGenero: 'mixed', modalidad: 'f7' },
+      {
+        id: 'tor-seguido',
+        nombre: 'Copa Amigos',
+        categoriaGenero: 'mixed',
+        modalidad: 'f7',
+        imagenUrl: null,
+        estado: 'in_progress',
+      },
     ]);
+  });
+
+  it('un torneo con imagen propia la usa en vez del logo de la organización', async () => {
+    mockearDb({
+      equipos: [
+        { id: 'eq-1', nombre: 'Los Pibes', categoria_genero: 'male', rol_equipo: 'captain' },
+      ],
+      organizaciones: [],
+      torneosSeguidos: [
+        {
+          id: 'tor-seguido',
+          nombre: 'Copa Amigos',
+          categoria_genero: 'mixed',
+          modalidad: 'f7',
+          imagen_url: 'https://cdn.example.com/portada.png',
+          organizacion_logo_url: 'https://cdn.example.com/logo-org.png',
+          estado: 'in_progress',
+        },
+      ],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+    expect(resultado.jugador?.torneosSeguidos[0]?.imagenUrl).toBe(
+      'https://cdn.example.com/portada.png',
+    );
+  });
+
+  it('trae la ciudad del perfil para el encabezado', async () => {
+    mockearDb({
+      perfil: { id: 'perfil-1', nombre_visible: 'Vale', ciudad_nombre: 'La Plata' },
+      equipos: [],
+      organizaciones: [],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+    expect(resultado.ciudadNombre).toBe('La Plata');
+  });
+
+  it('sin ciudad cargada en el perfil, ciudadNombre es null (no se inventa una zona)', async () => {
+    mockearDb({
+      perfil: { id: 'perfil-1', nombre_visible: 'Vale', ciudad_nombre: null },
+      equipos: [],
+      organizaciones: [],
+    });
+    const { obtenerInicio } = await import('./obtenerInicio');
+    const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
+    expect(resultado.ciudadNombre).toBeNull();
   });
 
   it('organizador: también trae los torneos que sigue', async () => {

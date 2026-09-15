@@ -42,8 +42,8 @@ export interface MiTorneo {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
-  /** Logo de la organización que lo organiza — el torneo en sí no tiene escudo propio. */
   imagenUrl: string | null;
+  estado: string;
   miEquipoId: string;
   miEquipoNombre: string;
   posicionActual: number | null;
@@ -62,6 +62,7 @@ export interface TorneoSeguido {
   categoriaGenero: string;
   modalidad: string;
   imagenUrl: string | null;
+  estado: string;
 }
 
 export interface TorneoAdministrado {
@@ -78,6 +79,8 @@ export interface TorneoAdministrado {
 
 export interface InicioResultado {
   nombreUsuario: string;
+  /** Ciudad del perfil, si la cargó — `null` en vez de inventar una zona que no existe en el dato. */
+  ciudadNombre: string | null;
   esJugador: boolean;
   esOrganizador: boolean;
   esRecienLlegado: boolean;
@@ -102,8 +105,15 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
   const pool = obtenerPool();
 
-  const { rows: perfilRows } = await pool.query<{ id: string; nombre_visible: string }>(
-    `SELECT id, nombre_visible FROM perfil_deportivo WHERE usuario_id = $1`,
+  const { rows: perfilRows } = await pool.query<{
+    id: string;
+    nombre_visible: string;
+    ciudad_nombre: string | null;
+  }>(
+    `SELECT p.id, p.nombre_visible, c.nombre AS ciudad_nombre
+     FROM perfil_deportivo p
+     LEFT JOIN ciudad c ON c.id = p.ciudad_id
+     WHERE p.usuario_id = $1`,
     [contexto.usuarioId],
   );
   const perfil = perfilRows[0];
@@ -206,13 +216,15 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      imagen_url: string | null;
       organizacion_logo_url: string | null;
+      estado: string;
       equipo_id: string;
       equipo_nombre: string;
       posicion_actual: number | null;
     }>(
       `SELECT t.id AS torneo_id, t.nombre, t.categoria_genero, t.modalidad,
-              o.logo_url AS organizacion_logo_url,
+              t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado,
               i.equipo_id, e.nombre AS equipo_nombre, pos.posicion_actual
        FROM inscripcion i
        JOIN torneo t ON t.id = i.torneo_id
@@ -246,9 +258,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      imagen_url: string | null;
       organizacion_logo_url: string | null;
+      estado: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad,
+              t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
        JOIN organizacion o ON o.id = t.organizacion_id
@@ -275,7 +290,8 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
-        imagenUrl: fila.organizacion_logo_url,
+        imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
+        estado: fila.estado,
         miEquipoId: fila.equipo_id,
         miEquipoNombre: fila.equipo_nombre,
         posicionActual: fila.posicion_actual,
@@ -285,7 +301,8 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
-        imagenUrl: fila.organizacion_logo_url,
+        imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
+        estado: fila.estado,
       })),
       equiposSeguidos: equiposSeguidosRows.map((fila) => ({
         id: fila.id,
@@ -304,13 +321,14 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      imagen_url: string | null;
       organizacion_logo_url: string | null;
       estado: string;
       fecha_inicio_estimada: Date | null;
       cupo_equipos: number;
       inscriptos: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url,
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.imagen_url, o.logo_url AS organizacion_logo_url,
               t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
               (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved') AS inscriptos
        FROM torneo t
@@ -341,9 +359,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      imagen_url: string | null;
       organizacion_logo_url: string | null;
+      estado: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, o.logo_url AS organizacion_logo_url
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad,
+              t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
        JOIN organizacion o ON o.id = t.organizacion_id
@@ -374,7 +395,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
-        imagenUrl: fila.organizacion_logo_url,
+        imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
         estado: fila.estado,
         fechaInicioEstimada: fila.fecha_inicio_estimada?.toISOString() ?? null,
         inscriptos: Number(fila.inscriptos),
@@ -391,7 +412,8 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
-        imagenUrl: fila.organizacion_logo_url,
+        imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
+        estado: fila.estado,
       })),
       inscripcionesPendientes: Number(inscripcionesPendRows[0]?.cantidad ?? 0),
       resultadosSinCargar: Number(resultadosSinCargarRows[0]?.cantidad ?? 0),
@@ -400,6 +422,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
 
   return {
     nombreUsuario: perfil.nombre_visible,
+    ciudadNombre: perfil.ciudad_nombre,
     esJugador,
     esOrganizador,
     esRecienLlegado: !esJugador && !esOrganizador,
