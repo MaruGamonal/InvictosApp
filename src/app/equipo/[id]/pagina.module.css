@@ -133,14 +133,27 @@
   margin-bottom: 10px;
 }
 
+/*
+ * "Grid blowout" (bug reportado en vivo, el menú inferior se veía
+ * cortado): una columna `1fr` sola es `minmax(auto, 1fr)` — el track
+ * nunca se achica por debajo del min-content de lo que tiene adentro.
+ * `FilaPartido` trunca el nombre del rival con `white-space: nowrap`
+ * + ellipsis, pero eso solo recorta visualmente una vez que hay un
+ * ancho definido; el min-content igual mide el texto completo sin
+ * cortar, así que un nombre de equipo largo empujaba la tarjeta (y
+ * con ella la página entera) más ancha que la pantalla — un
+ * `position: fixed` como el nav inferior queda anclado a ESE ancho
+ * mayor, no al de la pantalla, y aparece cortado. `minmax(0, 1fr)`
+ * le da al track un piso de 0 en vez de "lo que haga falta".
+ */
 .filaResumen {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
 .filaResumen:has(> :only-child) {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .tarjetaPartido {
