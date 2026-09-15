@@ -57,6 +57,7 @@ export default async function PaginaConfiguracion({
           torneoId={id}
           nombre={gestion.nombre}
           descripcion={gestion.descripcion}
+          imagenUrl={gestion.imagenUrl}
           direccion={gestion.direccion}
           costoInscripcion={gestion.costoInscripcion}
           costoPlanilla={gestion.costoPlanilla}

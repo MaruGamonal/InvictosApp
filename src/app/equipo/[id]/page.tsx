@@ -49,9 +49,9 @@ async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | 
     // 'v3' sumó `proximoPartido`/`ultimoResultado`; 'v4' reemplazó
     // `scoreEstado` fijo por `score` real; 'v5' sumó `torneoModalidad`/
     // `torneoCategoriaGenero`/`posicion` a cada fila de `historial`
-    // (sección "Torneos en juego"). Si el shape vuelve a cambiar, esto
-    // hay que volver a bumpearlo.
-    return await cachearLecturaDeEquipo('equipo-publico-v5', equipoId, () =>
+    // (sección "Torneos en juego"); 'v6' sumó `seguidores`. Si el shape
+    // vuelve a cambiar, esto hay que volver a bumpearlo.
+    return await cachearLecturaDeEquipo('equipo-publico-v6', equipoId, () =>
       obtenerEquipoPublico({ equipoId }, CONTEXTO_PUBLICO),
     )();
   } catch (error) {

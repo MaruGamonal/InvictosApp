@@ -64,6 +64,7 @@ export interface GestionTorneoResultado {
   miRolEnOrganizacion: 'owner' | 'admin' | null;
   nombre: string;
   descripcion: string | null;
+  imagenUrl: string | null;
   direccion: string | null;
   ciudadId: string;
   costoInscripcion: number | null;
@@ -92,6 +93,7 @@ export const obtenerGestionTorneo: Servicio<
     id: string;
     nombre: string;
     descripcion: string | null;
+    imagen_url: string | null;
     direccion: string | null;
     ciudad_id: string;
     costo_inscripcion: string | null;
@@ -103,7 +105,7 @@ export const obtenerGestionTorneo: Servicio<
     formato: 'league' | 'knockout' | 'groups_knockout';
     organizacion_id: string;
   }>(
-    `SELECT id, nombre, descripcion, direccion, ciudad_id, costo_inscripcion, costo_planilla,
+    `SELECT id, nombre, descripcion, imagen_url, direccion, ciudad_id, costo_inscripcion, costo_planilla,
             cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
@@ -203,6 +205,7 @@ export const obtenerGestionTorneo: Servicio<
     miRolEnOrganizacion,
     nombre: torneo.nombre,
     descripcion: torneo.descripcion,
+    imagenUrl: torneo.imagen_url,
     direccion: torneo.direccion,
     ciudadId: torneo.ciudad_id,
     costoInscripcion: torneo.costo_inscripcion != null ? Number(torneo.costo_inscripcion) : null,

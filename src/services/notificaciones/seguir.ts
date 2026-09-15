@@ -3,12 +3,18 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 
 /**
  * UC-42 / UC-43 — Seguir un torneo o un equipo. Es la acción de
  * conversión de menor compromiso del producto (`02`, UC-42): inmediata,
  * reversible y sin que nadie más intervenga. Idempotente (`10`, 2.6):
  * seguir dos veces no duplica ni falla.
+ *
+ * La ficha pública del torneo/equipo cachea su cantidad de seguidores —
+ * sin invalidar acá, quedaría desactualizada para cualquiera que no sea
+ * quien acaba de seguir (su propio conteo se corrige solo, en el
+ * cliente, vía `BotonSeguir`).
  */
 
 const esquemaEntrada = z.object({
@@ -28,6 +34,9 @@ export const seguir: Servicio<SeguirInput, { siguiendo: true }> = async (input, 
      ON CONFLICT (usuario_id, tipo_seguido, entidad_seguida_id) DO NOTHING`,
     [contexto.usuarioId, datos.tipoSeguido, datos.entidadId],
   );
+
+  if (datos.tipoSeguido === 'tournament') invalidarCacheTorneo(datos.entidadId);
+  else invalidarCacheEquipo(datos.entidadId);
 
   return { siguiendo: true };
 };

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { BuscadorDireccionTorneo } from '@/components/BuscadorDireccionTorneo';
+import { Escudo } from '@/components/Escudo';
 import styles from './pagina.module.css';
 
 interface Props {
   torneoId: string;
   nombre: string;
   descripcion: string | null;
+  imagenUrl: string | null;
   direccion: string | null;
   costoInscripcion: number | null;
   costoPlanilla: number | null;
@@ -28,6 +30,7 @@ export function FormularioEditarTorneo({
   torneoId,
   nombre: nombreInicial,
   descripcion: descripcionInicial,
+  imagenUrl: imagenUrlInicial,
   direccion: direccionInicial,
   costoInscripcion: costoInscripcionInicial,
   costoPlanilla: costoPlanillaInicial,
@@ -39,6 +42,63 @@ export function FormularioEditarTorneo({
   const [nombre, setNombre] = useState(nombreInicial);
   const [descripcion, setDescripcion] = useState(descripcionInicial ?? '');
   const [direccion, setDireccion] = useState(direccionInicial ?? '');
+
+  const inputImagenRef = useRef<HTMLInputElement>(null);
+  const [imagenUrl, setImagenUrl] = useState(imagenUrlInicial);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const [errorImagen, setErrorImagen] = useState<string | null>(null);
+
+  async function subirImagen(evento: ChangeEvent<HTMLInputElement>) {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+
+    setSubiendoImagen(true);
+    setErrorImagen(null);
+    try {
+      const datosFormulario = new FormData();
+      datosFormulario.append('torneoId', torneoId);
+      datosFormulario.append('archivo', archivo);
+      const respuesta = await fetch('/api/torneos/imagen', {
+        method: 'POST',
+        body: datosFormulario,
+      });
+      const cuerpo = await respuesta.json();
+      if (!respuesta.ok || !cuerpo.ok) {
+        setErrorImagen(cuerpo?.error?.mensaje ?? 'No se pudo subir la imagen. Probá de nuevo.');
+        return;
+      }
+      setImagenUrl(cuerpo.data.imagenUrl);
+      router.refresh();
+    } catch {
+      setErrorImagen('No pudimos conectar. Probá de nuevo.');
+    } finally {
+      setSubiendoImagen(false);
+    }
+  }
+
+  async function quitarImagen() {
+    setSubiendoImagen(true);
+    setErrorImagen(null);
+    try {
+      const respuesta = await fetch('/api/torneos/actualizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ torneoId, imagenUrl: null }),
+      });
+      const cuerpo = await respuesta.json();
+      if (!respuesta.ok || !cuerpo.ok) {
+        setErrorImagen(cuerpo?.error?.mensaje ?? 'No se pudo quitar la imagen. Probá de nuevo.');
+        return;
+      }
+      setImagenUrl(null);
+      router.refresh();
+    } catch {
+      setErrorImagen('No pudimos conectar. Probá de nuevo.');
+    } finally {
+      setSubiendoImagen(false);
+    }
+  }
   const [coordenadas, setCoordenadas] = useState<{ lat: number; lng: number } | null>(null);
   const [costoInscripcion, setCostoInscripcion] = useState(
     costoInscripcionInicial != null ? String(costoInscripcionInicial) : '',
@@ -102,6 +162,52 @@ export function FormularioEditarTorneo({
     <form className={styles.formularioChico} onSubmit={enviar}>
       {error && <p className={styles.errorChico}>{error}</p>}
       {guardado && !error && <p className={styles.avisoChico}>Guardado.</p>}
+
+      <div className={styles.filaImagen}>
+        <button
+          type="button"
+          className={styles.botonImagen}
+          onClick={() => inputImagenRef.current?.click()}
+          disabled={subiendoImagen}
+          aria-label="Cambiar imagen del torneo"
+        >
+          <Escudo src={imagenUrl} nombre={nombre} tamano={64} />
+        </button>
+        <input
+          ref={inputImagenRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={subirImagen}
+        />
+        <div>
+          <div className={styles.accionesImagen}>
+            <button
+              type="button"
+              className={styles.enlaceImagen}
+              onClick={() => inputImagenRef.current?.click()}
+              disabled={subiendoImagen}
+            >
+              {subiendoImagen ? 'Subiendo…' : imagenUrl ? 'Cambiar imagen' : 'Subir imagen'}
+            </button>
+            {imagenUrl && (
+              <button
+                type="button"
+                className={styles.enlaceImagenQuitar}
+                onClick={quitarImagen}
+                disabled={subiendoImagen}
+              >
+                Quitar imagen
+              </button>
+            )}
+          </div>
+          {errorImagen && <p className={styles.errorChico}>{errorImagen}</p>}
+        </div>
+      </div>
+      <span className={styles.avisoSinNotificar}>
+        Imagen opcional del torneo (JPG, PNG o WEBP). Sin cargar, se usa el logo de la
+        organización.
+      </span>
 
       <label>
         Nombre del torneo

@@ -79,6 +79,7 @@ interface FilaTorneo {
   cupo_equipos: number;
   fecha_inicio_estimada: Date | null;
   fecha_fin_estimada: Date | null;
+  imagen_url: string | null;
   organizacion_id: string;
   organizacion_nombre: string;
   organizacion_logo_url: string | null;
@@ -221,7 +222,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
             c.id AS ciudad_id, c.nombre AS ciudad_nombre, t.direccion, t.latitud, t.longitud,
             t.costo_inscripcion, t.costo_planilla,
             t.estado, t.visibilidad, t.formato, t.cupo_equipos,
-            t.fecha_inicio_estimada, t.fecha_fin_estimada,
+            t.fecha_inicio_estimada, t.fecha_fin_estimada, t.imagen_url,
             o.id AS organizacion_id, o.nombre AS organizacion_nombre,
             o.logo_url AS organizacion_logo_url, o.nivel_verificacion AS organizacion_nivel_verificacion
      FROM torneo t
@@ -278,7 +279,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     equiposAprobados: Number(aprobadosRows[0]!.count),
     fechaInicioEstimada: torneo.fecha_inicio_estimada?.toISOString() ?? null,
     fechaFinEstimada: torneo.fecha_fin_estimada?.toISOString() ?? null,
-    imagenUrl: torneo.organizacion_logo_url,
+    imagenUrl: torneo.imagen_url ?? torneo.organizacion_logo_url,
     organizacion: {
       id: torneo.organizacion_id,
       nombre: torneo.organizacion_nombre,

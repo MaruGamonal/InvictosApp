@@ -38,6 +38,7 @@ function filaTorneoBase(over: Partial<Record<string, unknown>> = {}) {
     cupo_equipos: 8,
     fecha_inicio_estimada: null,
     fecha_fin_estimada: null,
+    imagen_url: null,
     organizacion_id: ORG,
     organizacion_nombre: 'Liga Sur',
     organizacion_logo_url: 'https://cdn.example.com/liga-sur.png',
@@ -335,6 +336,20 @@ describe('obtenerFichaTorneo', () => {
       nombre: 'Equipo A',
       escudoUrl: 'https://cdn.example.com/a.png',
     });
+  });
+
+  it('con imagen propia cargada, la ficha la usa en vez del logo de la organización', async () => {
+    mockearDb({ torneo: filaTorneoBase({ imagen_url: 'https://cdn.example.com/portada.png' }) });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.imagenUrl).toBe('https://cdn.example.com/portada.png');
+  });
+
+  it('sin imagen propia, cae al logo de la organización (comportamiento de siempre)', async () => {
+    mockearDb({ torneo: filaTorneoBase({ imagen_url: null }) });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.imagenUrl).toBe('https://cdn.example.com/liga-sur.png');
   });
 
   it('devuelve la cantidad de seguidores del torneo', async () => {

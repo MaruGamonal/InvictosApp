@@ -11,6 +11,7 @@ function filaTorneo(id: string, over: Partial<Record<string, unknown>> = {}) {
   return {
     id,
     nombre: `Torneo ${id}`,
+    imagen_url: null,
     organizacion_logo_url: null,
     organizacion_nombre: 'Organización de prueba',
     modalidad: 'f5',
@@ -208,6 +209,31 @@ describe('buscarTorneos', () => {
 
     expect(resultado.torneos.find((t) => t.id === 't1')!.duracion).toBe('single_day');
     expect(resultado.torneos.find((t) => t.id === 't2')!.duracion).toBeNull();
+  });
+
+  it('con imagen propia cargada, la usa en vez del logo de la organización', async () => {
+    mockearDb({
+      torneos: [
+        filaTorneo('t1', {
+          imagen_url: 'https://cdn.example.com/portada.png',
+          organizacion_logo_url: 'https://cdn.example.com/logo-org.png',
+        }),
+      ],
+    });
+    const { buscarTorneos } = await import('./buscarTorneos');
+    const resultado = await buscarTorneos({ ciudadId: CIUDAD }, VISITANTE);
+    expect(resultado.torneos[0]!.imagenUrl).toBe('https://cdn.example.com/portada.png');
+  });
+
+  it('sin imagen propia, cae al logo de la organización (comportamiento de siempre)', async () => {
+    mockearDb({
+      torneos: [
+        filaTorneo('t1', { imagen_url: null, organizacion_logo_url: 'https://cdn.example.com/logo-org.png' }),
+      ],
+    });
+    const { buscarTorneos } = await import('./buscarTorneos');
+    const resultado = await buscarTorneos({ ciudadId: CIUDAD }, VISITANTE);
+    expect(resultado.torneos[0]!.imagenUrl).toBe('https://cdn.example.com/logo-org.png');
   });
 
   it('una ciudad sin torneos trae la sugerencia de provincia con su cantidad', async () => {

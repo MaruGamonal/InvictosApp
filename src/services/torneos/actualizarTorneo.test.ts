@@ -18,9 +18,12 @@ function mockearDb(opciones: {
   rowCountUpdate?: number;
   estadoTorneo?: string;
 }) {
+  const update = vi.fn(async (_texto: string, _valores: unknown[]) => ({
+    rowCount: opciones.rowCountUpdate ?? 1,
+  }));
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
-      query: async (texto: string) => {
+      query: async (texto: string, valores: unknown[]) => {
         if (texto.includes('organizacion_id FROM torneo')) {
           return { rows: [{ organizacion_id: ORG }] };
         }
@@ -37,12 +40,13 @@ function mockearDb(opciones: {
           return { rows: [{ count: String(opciones.equiposAprobados ?? 0) }] };
         }
         if (texto.startsWith('UPDATE torneo')) {
-          return { rowCount: opciones.rowCountUpdate ?? 1 };
+          return update(texto, valores);
         }
         return { rows: [] };
       },
     }),
   }));
+  return update;
 }
 
 function mockearNotificarCambio() {
@@ -137,6 +141,46 @@ describe('actualizarTorneo', () => {
 
     await actualizarTorneo(
       { torneoId: TORNEO, costoInscripcion: 5000, costoPlanilla: 1500, latitud: -32.9, longitud: -60.6 },
+      contextoCon('usuario-1'),
+    );
+
+    expect(notificarCambio).not.toHaveBeenCalled();
+  });
+
+  it('sube una imagen: la guarda como imagen_url', async () => {
+    const update = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, imagenUrl: 'https://cdn.example.com/torneo.png' },
+      contextoCon('usuario-1'),
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      expect.stringContaining('imagen_url = $1'),
+      expect.arrayContaining(['https://cdn.example.com/torneo.png']),
+    );
+  });
+
+  it('quitar la imagen manda imagenUrl null, que limpia imagen_url en vez de ignorarse', async () => {
+    const update = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo({ torneoId: TORNEO, imagenUrl: null }, contextoCon('usuario-1'));
+
+    expect(update).toHaveBeenCalledWith(
+      expect.stringContaining('imagen_url = $1'),
+      expect.arrayContaining([null]),
+    );
+  });
+
+  it('cambiar solo la imagen no notifica (no es de los cinco campos relevantes)', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', estadoTorneo: 'registration_open' });
+    const notificarCambio = mockearNotificarCambio();
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+
+    await actualizarTorneo(
+      { torneoId: TORNEO, imagenUrl: 'https://cdn.example.com/torneo.png' },
       contextoCon('usuario-1'),
     );
 

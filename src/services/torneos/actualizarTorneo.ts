@@ -31,6 +31,8 @@ const esquemaEntrada = z.object({
   torneoId: z.string().uuid(),
   nombre: z.string().trim().min(1).optional(),
   descripcion: z.string().trim().optional(),
+  /** Portada real del torneo — `null` la quita, sin tocarla se deja como está. */
+  imagenUrl: z.string().url().nullable().optional(),
   categoriaEdad: z
     .enum(['open', 'u13', 'u15', 'u17', 'u20', 'veterans_35', 'veterans_45'])
     .optional(),
@@ -61,6 +63,7 @@ export type ActualizarTorneoInput = z.infer<typeof esquemaEntrada>;
 const CAMPOS: Array<[keyof ActualizarTorneoInput, string]> = [
   ['nombre', 'nombre'],
   ['descripcion', 'descripcion'],
+  ['imagenUrl', 'imagen_url'],
   ['categoriaEdad', 'categoria_edad'],
   ['direccion', 'direccion'],
   ['latitud', 'latitud'],

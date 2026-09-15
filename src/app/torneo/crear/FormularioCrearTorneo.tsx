@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { BuscadorDireccionTorneo } from '@/components/BuscadorDireccionTorneo';
+import { Escudo } from '@/components/Escudo';
 import styles from '../../ingresar/pagina.module.css';
 
 interface Props {
@@ -54,6 +55,18 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const inputImagenRef = useRef<HTMLInputElement>(null);
+  const [archivoImagen, setArchivoImagen] = useState<File | null>(null);
+  const [previsualizacionImagen, setPrevisualizacionImagen] = useState<string | null>(null);
+
+  function elegirImagen(evento: ChangeEvent<HTMLInputElement>) {
+    const archivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!archivo) return;
+    setArchivoImagen(archivo);
+    setPrevisualizacionImagen(URL.createObjectURL(archivo));
+  }
+
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEnviando(true);
@@ -86,7 +99,20 @@ export function FormularioCrearTorneo({ provincias }: Props) {
         return;
       }
 
-      window.location.assign(`/torneo/${cuerpo.data.id}/crear/reglamento`);
+      const torneoId = cuerpo.data.id;
+
+      if (archivoImagen) {
+        try {
+          const datosFormulario = new FormData();
+          datosFormulario.append('torneoId', torneoId);
+          datosFormulario.append('archivo', archivoImagen);
+          await fetch('/api/torneos/imagen', { method: 'POST', body: datosFormulario });
+        } catch {
+          // El torneo ya se creó — la imagen se puede volver a intentar desde "Configuración".
+        }
+      }
+
+      window.location.assign(`/torneo/${torneoId}/crear/reglamento`);
     } catch {
       setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
@@ -99,6 +125,35 @@ export function FormularioCrearTorneo({ provincias }: Props) {
       <p className={styles.texto}>Nace en borrador. Lo publicás cuando esté listo.</p>
 
       {error && <p className={styles.error}>{error}</p>}
+
+      <div className={styles.campo}>
+        <label htmlFor="imagen">Imagen del torneo (opcional)</label>
+        <div className={styles.filaEscudo}>
+          <button
+            type="button"
+            className={styles.botonEscudo}
+            onClick={() => inputImagenRef.current?.click()}
+            aria-label="Elegir imagen del torneo"
+          >
+            <Escudo src={previsualizacionImagen} nombre={nombre || 'Torneo'} tamano={64} />
+          </button>
+          <input
+            id="imagen"
+            ref={inputImagenRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={elegirImagen}
+          />
+          <button
+            type="button"
+            className={styles.enlaceEscudo}
+            onClick={() => inputImagenRef.current?.click()}
+          >
+            {archivoImagen ? 'Cambiar imagen' : 'Subir imagen'}
+          </button>
+        </div>
+      </div>
 
       <div className={styles.campo}>
         <label htmlFor="nombre">Nombre del torneo</label>

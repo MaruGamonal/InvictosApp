@@ -88,6 +88,7 @@ export interface ResultadoBusquedaTorneos {
 interface FilaTorneo {
   id: string;
   nombre: string;
+  imagen_url: string | null;
   organizacion_logo_url: string | null;
   modalidad: string;
   categoria_genero: string;
@@ -153,7 +154,7 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
   }
 
   const { rows } = await pool.query<FilaTorneo>(
-    `SELECT t.id, t.nombre, o.logo_url AS organizacion_logo_url, o.nombre AS organizacion_nombre,
+    `SELECT t.id, t.nombre, t.imagen_url, o.logo_url AS organizacion_logo_url, o.nombre AS organizacion_nombre,
             t.modalidad, t.categoria_genero, t.categoria_edad,
             t.estado, t.fecha_inicio_estimada, t.fecha_fin_estimada, t.cupo_equipos,
             (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved')
@@ -206,7 +207,7 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
     torneos: pagina.map((fila) => ({
       id: fila.id,
       nombre: fila.nombre,
-      imagenUrl: fila.organizacion_logo_url,
+      imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
       modalidad: fila.modalidad,
       categoriaGenero: fila.categoria_genero,
       categoriaEdad: fila.categoria_edad,

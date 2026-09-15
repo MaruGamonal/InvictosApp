@@ -3,10 +3,12 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
+import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 
 /**
  * UC-42 / UC-43 — Dejar de seguir un torneo o un equipo, en cualquier
  * momento. Idempotente: dejar de seguir algo que ya no se sigue no falla.
+ * Invalida la misma caché que `seguir.ts` — ver ahí el porqué.
  */
 
 const esquemaEntrada = z.object({
@@ -27,6 +29,9 @@ export const dejarDeSeguir: Servicio<DejarDeSeguirInput, { siguiendo: false }> =
     'DELETE FROM seguimiento WHERE usuario_id = $1 AND tipo_seguido = $2 AND entidad_seguida_id = $3',
     [contexto.usuarioId, datos.tipoSeguido, datos.entidadId],
   );
+
+  if (datos.tipoSeguido === 'tournament') invalidarCacheTorneo(datos.entidadId);
+  else invalidarCacheEquipo(datos.entidadId);
 
   return { siguiendo: false };
 };

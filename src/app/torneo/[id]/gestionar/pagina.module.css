@@ -438,6 +438,50 @@
   color: var(--acento-oscuro);
 }
 
+.filaImagen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.botonImagen {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.botonImagen:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.accionesImagen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enlaceImagen {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--acento);
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.enlaceImagen:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.enlaceImagenQuitar {
+  composes: enlaceImagen;
+  color: var(--error-texto);
+}
+
 .avisoSinNotificar {
   margin-top: -4px;
   font-size: 12px;

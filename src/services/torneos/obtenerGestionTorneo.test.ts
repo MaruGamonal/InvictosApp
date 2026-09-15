@@ -20,6 +20,7 @@ function mockearDb(opciones: {
     estado: string;
     formato: string;
     descripcion?: string | null;
+    imagen_url?: string | null;
     direccion?: string | null;
     ciudad_id?: string;
     costo_inscripcion?: string | null;
@@ -75,7 +76,7 @@ function mockearDb(opciones: {
         if (texto.includes('SELECT rol FROM miembro_organizacion')) {
           return { rows: opciones.rolOrganizacion ? [{ rol: opciones.rolOrganizacion }] : [] };
         }
-        if (texto.includes('SELECT id, nombre, descripcion, direccion')) {
+        if (texto.includes('SELECT id, nombre, descripcion, imagen_url, direccion')) {
           return { rows: opciones.torneo ? [opciones.torneo] : [] };
         }
         if (texto.includes('FROM fase f LEFT JOIN grupo')) {
@@ -201,6 +202,7 @@ describe('obtenerGestionTorneo', () => {
         estado: 'registration_open',
         formato: 'league',
         descripcion: 'La copa de siempre',
+        imagen_url: 'https://cdn.example.com/copa-otono.png',
         direccion: 'Cancha 3',
         costo_inscripcion: '5000',
         costo_planilla: '1500',
@@ -213,11 +215,29 @@ describe('obtenerGestionTorneo', () => {
     const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
 
     expect(resultado.descripcion).toBe('La copa de siempre');
+    expect(resultado.imagenUrl).toBe('https://cdn.example.com/copa-otono.png');
     expect(resultado.direccion).toBe('Cancha 3');
     expect(resultado.costoInscripcion).toBe(5000);
     expect(resultado.costoPlanilla).toBe(1500);
     expect(resultado.cupoEquipos).toBe(16);
     expect(resultado.fechaInicioEstimada).toBe('2026-04-12T00:00:00.000Z');
+  });
+
+  it('sin imagen cargada, imagenUrl es null (no undefined ni string vacío)', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      torneo: {
+        id: TORNEO,
+        nombre: 'Copa Otoño',
+        estado: 'registration_open',
+        formato: 'league',
+        imagen_url: null,
+      },
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+    expect(resultado.imagenUrl).toBeNull();
   });
 
   it('UC-07: expone la organización y el rol de quien mira, para saber si puede gestionar Administradores', async () => {
