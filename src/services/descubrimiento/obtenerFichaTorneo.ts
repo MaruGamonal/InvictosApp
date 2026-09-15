@@ -54,6 +54,17 @@ export interface FichaTorneo {
     equipoVisitante: { id: string; nombre: string; escudoUrl: string | null };
     fechaHoraProgramada: string | null;
   } | null;
+  /** El partido finalizado (`played`/`walkover`) más reciente, nunca uno futuro. `null` si el torneo todavía no jugó ninguno. */
+  ultimoPartido: {
+    id: string;
+    equipoLocal: { id: string; nombre: string; escudoUrl: string | null };
+    equipoVisitante: { id: string; nombre: string; escudoUrl: string | null };
+    golesLocal: number;
+    golesVisitante: number;
+    estado: 'played' | 'walkover';
+    fechaHoraProgramada: string | null;
+    jugadorDelPartido: { perfilId: string; nombreVisible: string } | null;
+  } | null;
   campeon: { equipoId: string; nombre: string; escudoUrl: string | null } | null;
   /** Equipos con inscripción `approved` (`08` — Ficha pública, sección "Equipos inscriptos"). */
   equiposInscriptos: Array<{ id: string; nombre: string; escudoUrl: string | null }>;
@@ -137,6 +148,58 @@ async function obtenerProximoPartido(
       escudoUrl: fila.visitante_escudo,
     },
     fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
+  };
+}
+
+async function obtenerUltimoPartido(
+  pool: ReturnType<typeof obtenerPool>,
+  torneoId: string,
+): Promise<FichaTorneo['ultimoPartido']> {
+  const { rows } = await pool.query<{
+    id: string;
+    fecha_hora_programada: Date | null;
+    estado: 'played' | 'walkover';
+    goles_local: number;
+    goles_visitante: number;
+    local_id: string;
+    local_nombre: string;
+    local_escudo: string | null;
+    visitante_id: string;
+    visitante_nombre: string;
+    visitante_escudo: string | null;
+    jugador_del_partido_perfil_id: string | null;
+    jugador_del_partido_nombre: string | null;
+  }>(
+    `SELECT p.id, p.fecha_hora_programada, p.estado, p.goles_local, p.goles_visitante,
+            el.id AS local_id, el.nombre AS local_nombre, el.escudo_url AS local_escudo,
+            ev.id AS visitante_id, ev.nombre AS visitante_nombre, ev.escudo_url AS visitante_escudo,
+            jp.id AS jugador_del_partido_perfil_id, jp.nombre_visible AS jugador_del_partido_nombre
+     FROM partido p
+     JOIN equipo el ON el.id = p.equipo_local_id
+     JOIN equipo ev ON ev.id = p.equipo_visitante_id
+     LEFT JOIN perfil_deportivo jp ON jp.id = p.jugador_del_partido_perfil_id
+     WHERE p.torneo_id = $1 AND p.estado IN ('played', 'walkover')
+     ORDER BY p.fecha_hora_programada DESC NULLS LAST
+     LIMIT 1`,
+    [torneoId],
+  );
+  const fila = rows[0];
+  if (!fila) return null;
+  return {
+    id: fila.id,
+    equipoLocal: { id: fila.local_id, nombre: fila.local_nombre, escudoUrl: fila.local_escudo },
+    equipoVisitante: {
+      id: fila.visitante_id,
+      nombre: fila.visitante_nombre,
+      escudoUrl: fila.visitante_escudo,
+    },
+    golesLocal: fila.goles_local,
+    golesVisitante: fila.goles_visitante,
+    estado: fila.estado,
+    fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
+    jugadorDelPartido: fila.jugador_del_partido_perfil_id
+      ? { perfilId: fila.jugador_del_partido_perfil_id, nombreVisible: fila.jugador_del_partido_nombre! }
+      : null,
   };
 }
 
@@ -248,15 +311,17 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     [datos.torneoId],
   );
 
-  const [proximoPartido, campeon, equiposInscriptos, filaSeguidores] = await Promise.all([
-    torneo.estado === 'in_progress' ? obtenerProximoPartido(pool, datos.torneoId) : null,
-    torneo.estado === 'finished' ? obtenerCampeon(pool, datos.torneoId) : null,
-    obtenerEquiposInscriptos(pool, datos.torneoId),
-    pool.query<{ cantidad: string }>(
-      `SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament' AND entidad_seguida_id = $1`,
-      [datos.torneoId],
-    ),
-  ]);
+  const [proximoPartido, ultimoPartido, campeon, equiposInscriptos, filaSeguidores] =
+    await Promise.all([
+      torneo.estado === 'in_progress' ? obtenerProximoPartido(pool, datos.torneoId) : null,
+      obtenerUltimoPartido(pool, datos.torneoId),
+      torneo.estado === 'finished' ? obtenerCampeon(pool, datos.torneoId) : null,
+      obtenerEquiposInscriptos(pool, datos.torneoId),
+      pool.query<{ cantidad: string }>(
+        `SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament' AND entidad_seguida_id = $1`,
+        [datos.torneoId],
+      ),
+    ]);
   const seguidores = Number(filaSeguidores.rows[0]?.cantidad ?? 0);
 
   return {
@@ -287,6 +352,7 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     },
     tieneReglamento: reglamentoRows.length > 0,
     proximoPartido,
+    ultimoPartido,
     campeon,
     equiposInscriptos,
     seguidores,

@@ -169,6 +169,52 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         </section>
       )}
 
+      {ficha.ultimoPartido && (
+        <section className={styles.destacado}>
+          <h2 className={styles.tituloSeccion}>Último partido</h2>
+          <div className={styles.proximoPartido}>
+            <span className={styles.equipoProximo}>
+              <Escudo
+                src={ficha.ultimoPartido.equipoLocal.escudoUrl}
+                nombre={ficha.ultimoPartido.equipoLocal.nombre}
+                tamano={28}
+              />
+              <span className={styles.nombreEquipoProximo}>
+                {ficha.ultimoPartido.equipoLocal.nombre}
+              </span>
+            </span>
+            <span className={styles.resultadoUltimo}>
+              {ficha.ultimoPartido.golesLocal} - {ficha.ultimoPartido.golesVisitante}
+            </span>
+            <span className={styles.equipoProximo}>
+              <Escudo
+                src={ficha.ultimoPartido.equipoVisitante.escudoUrl}
+                nombre={ficha.ultimoPartido.equipoVisitante.nombre}
+                tamano={28}
+              />
+              <span className={styles.nombreEquipoProximo}>
+                {ficha.ultimoPartido.equipoVisitante.nombre}
+              </span>
+            </span>
+          </div>
+          {ficha.ultimoPartido.jugadorDelPartido && (
+            <p className={styles.jugadorDelPartidoUltimo}>
+              ⭐ {ficha.ultimoPartido.jugadorDelPartido.nombreVisible}
+            </p>
+          )}
+          <Link href={`/torneo/${id}/fixture`} className={styles.enlaceSecundario}>
+            Ver fixture completo →
+          </Link>
+        </section>
+      )}
+
+      {!ficha.ultimoPartido && ficha.estado === 'in_progress' && !ficha.proximoPartido && (
+        <section className={styles.destacado}>
+          <h2 className={styles.tituloSeccion}>Último partido</h2>
+          <p className={styles.sinPartidos}>Todavía no hay partidos jugados.</p>
+        </section>
+      )}
+
       {ficha.estado === 'in_progress' && ficha.proximoPartido && (
         <section className={styles.destacado}>
           <h2 className={styles.tituloSeccion}>Próxima fecha</h2>

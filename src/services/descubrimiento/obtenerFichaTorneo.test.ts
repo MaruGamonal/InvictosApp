@@ -52,6 +52,7 @@ function mockearDb(opciones: {
   aprobados?: number;
   hayReglamento?: boolean;
   proximoPartido?: Record<string, unknown> | null;
+  ultimoPartido?: Record<string, unknown> | null;
   rolEnOrganizacion?: 'owner' | 'admin';
   esColaborador?: boolean;
   equiposInscriptos?: Array<{ id: string; nombre: string; escudo_url: string | null }>;
@@ -77,8 +78,14 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT 1 FROM reglamento')) {
           return { rows: opciones.hayReglamento ? [{}] : [] };
         }
-        if (t.startsWith('SELECT p.id, p.fecha_hora_programada')) {
+        if (t.startsWith('SELECT p.id, p.fecha_hora_programada') && t.includes("p.estado = 'scheduled'")) {
           return { rows: opciones.proximoPartido ? [opciones.proximoPartido] : [] };
+        }
+        if (
+          t.startsWith('SELECT p.id, p.fecha_hora_programada') &&
+          t.includes("p.estado IN ('played', 'walkover')")
+        ) {
+          return { rows: opciones.ultimoPartido ? [opciones.ultimoPartido] : [] };
         }
         if (t.startsWith('SELECT id, tipo_fase FROM fase')) return { rows: [] };
         if (t.startsWith('SELECT e.id, e.nombre, e.escudo_url')) {
@@ -196,6 +203,46 @@ describe('obtenerFichaTorneo', () => {
       fechaHoraProgramada: '2026-05-01T18:00:00.000Z',
     });
     expect(ficha.campeon).toBeNull();
+  });
+
+  it('trae el último partido jugado, con el jugador del partido si lo eligieron', async () => {
+    mockearDb({
+      torneo: filaTorneoBase({ estado: 'in_progress' }),
+      ultimoPartido: {
+        id: 'partido-jugado',
+        fecha_hora_programada: new Date('2026-04-20T18:00:00.000Z'),
+        estado: 'played',
+        goles_local: 2,
+        goles_visitante: 1,
+        local_id: EQUIPO_A,
+        local_nombre: 'Equipo A',
+        local_escudo: null,
+        visitante_id: EQUIPO_B,
+        visitante_nombre: 'Equipo B',
+        visitante_escudo: null,
+        jugador_del_partido_perfil_id: 'perfil-1',
+        jugador_del_partido_nombre: 'Jugador Uno',
+      },
+    });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.ultimoPartido).toEqual({
+      id: 'partido-jugado',
+      equipoLocal: { id: EQUIPO_A, nombre: 'Equipo A', escudoUrl: null },
+      equipoVisitante: { id: EQUIPO_B, nombre: 'Equipo B', escudoUrl: null },
+      golesLocal: 2,
+      golesVisitante: 1,
+      estado: 'played',
+      fechaHoraProgramada: '2026-04-20T18:00:00.000Z',
+      jugadorDelPartido: { perfilId: 'perfil-1', nombreVisible: 'Jugador Uno' },
+    });
+  });
+
+  it('sin partidos jugados todavía, ultimoPartido es null (no se inventa)', async () => {
+    mockearDb({});
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.ultimoPartido).toBeNull();
   });
 
   it('un torneo registration_open no calcula próximo partido ni campeón', async () => {
