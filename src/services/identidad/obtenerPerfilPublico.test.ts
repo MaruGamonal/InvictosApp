@@ -8,11 +8,14 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 });
 const PERFIL = '11111111-1111-1111-1111-111111111111';
 
-function mockearDb(perfil: { usuario_id: string | null; visibilidad: 'public' | 'restricted' }) {
+function mockearDb(
+  perfil: { usuario_id: string | null; visibilidad: 'public' | 'restricted' },
+  opciones: { vecesJugadorDelPartido?: number } = {},
+) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
-        if (texto.includes('FROM perfil_deportivo')) {
+        if (texto.includes('FROM perfil_deportivo p')) {
           return {
             rows: [
               {
@@ -28,20 +31,26 @@ function mockearDb(perfil: { usuario_id: string | null; visibilidad: 'public' | 
             ],
           };
         }
-        return {
-          rows: [
-            {
-              id: 'equipo-1',
-              nombre: 'Equipo A',
-              escudo_url: null,
-              categoria_genero: 'male',
-              rol_equipo: 'player',
-              estado_vinculo: 'active',
-              fecha_incorporacion: '2024-01-01T00:00:00.000Z',
-              fecha_baja: null,
-            },
-          ],
-        };
+        if (texto.includes('FROM integrante_equipo ie')) {
+          return {
+            rows: [
+              {
+                id: 'equipo-1',
+                nombre: 'Equipo A',
+                escudo_url: null,
+                categoria_genero: 'male',
+                rol_equipo: 'player',
+                estado_vinculo: 'active',
+                fecha_incorporacion: '2024-01-01T00:00:00.000Z',
+                fecha_baja: null,
+              },
+            ],
+          };
+        }
+        if (texto.includes("FROM partido") && texto.includes('jugador_del_partido_perfil_id')) {
+          return { rows: [{ cantidad: String(opciones.vecesJugadorDelPartido ?? 0) }] };
+        }
+        return { rows: [] };
       },
     }),
   }));
@@ -90,6 +99,22 @@ describe('obtenerPerfilPublico', () => {
     const perfil = await obtenerPerfilPublico({ perfilId: PERFIL }, contextoCon('dueño-1'));
     expect(perfil.fotoUrl).not.toBeNull();
     expect(perfil.posicion).not.toBeNull();
+    vi.doUnmock('@/db/cliente');
+  });
+
+  it('cuenta cuántas veces fue elegido jugador del partido', async () => {
+    mockearDb({ usuario_id: 'dueño-1', visibilidad: 'public' }, { vecesJugadorDelPartido: 5 });
+    const { obtenerPerfilPublico } = await import('./obtenerPerfilPublico');
+    const perfil = await obtenerPerfilPublico({ perfilId: PERFIL }, contextoCon(null));
+    expect(perfil.vecesJugadorDelPartido).toBe(5);
+    vi.doUnmock('@/db/cliente');
+  });
+
+  it('sin ninguna elección todavía, es 0 (no null ni undefined)', async () => {
+    mockearDb({ usuario_id: 'dueño-1', visibilidad: 'public' });
+    const { obtenerPerfilPublico } = await import('./obtenerPerfilPublico');
+    const perfil = await obtenerPerfilPublico({ perfilId: PERFIL }, contextoCon(null));
+    expect(perfil.vecesJugadorDelPartido).toBe(0);
     vi.doUnmock('@/db/cliente');
   });
 

@@ -41,6 +41,7 @@ function mockearDb(opciones: {
   updateAfectaCeroFilas?: boolean;
   elegibles?: Array<{ perfil_id: string; equipo_id: string; rol_en_torneo: string }>;
   eventosPrevios?: Array<{ perfil_id: string; equipo_id: string; tipo_evento: string }>;
+  elegiblePotm?: 'player' | 'coach' | 'delegate' | null;
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
   vi.doMock('@/db/cliente', () => ({
@@ -91,6 +92,14 @@ function mockearDb(opciones: {
         }
         if (t.startsWith('SELECT perfil_id, equipo_id, rol_en_torneo FROM integrante_habilitado')) {
           return { rows: opciones.elegibles ?? [] };
+        }
+        if (t.startsWith('SELECT rol_en_torneo FROM integrante_habilitado')) {
+          return {
+            rows:
+              opciones.elegiblePotm === undefined || opciones.elegiblePotm === null
+                ? []
+                : [{ rol_en_torneo: opciones.elegiblePotm }],
+          };
         }
         return { rows: [] };
       },
@@ -501,6 +510,110 @@ describe('cargarResultado', () => {
 
     expect(consultas.some((c) => c.texto.includes('evento_partido'))).toBe(false);
     expect(consultas.some((c) => c.texto.includes('estadistica_jugador'))).toBe(false);
+  });
+
+  it('elige jugador del partido: un jugador elegible de alguno de los dos equipos se guarda', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', elegiblePotm: 'player' });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 2,
+        golesVisitante: 1,
+        jugadorDelPartidoPerfilId: PERFIL_JUGADOR,
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const update = consultas.find((c) => c.texto.startsWith('UPDATE partido'));
+    expect(update?.texto).toContain('jugador_del_partido_perfil_id = $6');
+    expect(update?.valores).toEqual([
+      PARTIDO,
+      2,
+      1,
+      'confirmed',
+      'usuario-organizador',
+      PERFIL_JUGADOR,
+      1,
+    ]);
+  });
+
+  it('jugador del partido fuera de la lista de buena fe de los dos equipos: DATOS_INVALIDOS, no arranca la transacción', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', elegiblePotm: null });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 1,
+          golesVisitante: 0,
+          jugadorDelPartidoPerfilId: PERFIL_JUGADOR,
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+    expect(consultas.some((c) => c.texto === 'BEGIN')).toBe(false);
+  });
+
+  it('un DT (no jugador) no puede ser elegido jugador del partido', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', elegiblePotm: 'coach' });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 1,
+          golesVisitante: 0,
+          jugadorDelPartidoPerfilId: PERFIL_DT,
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('sin mandar jugadorDelPartidoPerfilId, no se toca esa columna', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      { partidoId: PARTIDO, version: 1, golesLocal: 1, golesVisitante: 0 },
+      contextoCon('usuario-organizador'),
+    );
+
+    const update = consultas.find((c) => c.texto.startsWith('UPDATE partido'));
+    expect(update?.texto).not.toContain('jugador_del_partido_perfil_id');
+  });
+
+  it('mandar jugadorDelPartidoPerfilId null lo limpia explícitamente', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      estadoPartido: 'played',
+      golesLocalPrevios: 1,
+      golesVisitantePrevios: 0,
+      version: 2,
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 2,
+        golesLocal: 1,
+        golesVisitante: 0,
+        jugadorDelPartidoPerfilId: null,
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const update = consultas.find((c) => c.texto.startsWith('UPDATE partido'));
+    expect(update?.texto).toContain('jugador_del_partido_perfil_id = $6');
+    expect(update?.valores).toEqual([PARTIDO, 1, 0, 'confirmed', 'usuario-organizador', null, 2]);
   });
 
   it('partido inexistente, NO_ENCONTRADO', async () => {

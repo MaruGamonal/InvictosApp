@@ -86,6 +86,12 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
                 {perfil.ciudadNombre && <span>{perfil.ciudadNombre}</span>}
               </div>
             )}
+            {perfil.vecesJugadorDelPartido > 0 && (
+              <p className={styles.statJugadorDelPartido}>
+                ⭐ Jugador del partido — {perfil.vecesJugadorDelPartido}{' '}
+                {perfil.vecesJugadorDelPartido === 1 ? 'vez' : 'veces'}
+              </p>
+            )}
           </div>
         </div>
       </header>

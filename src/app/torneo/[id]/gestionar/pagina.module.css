@@ -360,6 +360,23 @@
   font-feature-settings: 'tnum';
 }
 
+.campoJugadorDelPartido {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.campoJugadorDelPartido select {
+  font-weight: 400;
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 8px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+}
+
 .eventos {
   display: flex;
   flex-direction: column;

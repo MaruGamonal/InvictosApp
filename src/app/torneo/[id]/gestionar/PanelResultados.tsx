@@ -48,6 +48,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
   const router = useRouter();
   const [goles, setGoles] = useState<Record<string, { local: string; visitante: string }>>({});
   const [eventos, setEventos] = useState<Record<string, EventoForm[]>>({});
+  const [jugadorDelPartido, setJugadorDelPartido] = useState<Record<string, string>>({});
   const [abiertoEventos, setAbiertoEventos] = useState<Record<string, boolean>>({});
   const [enviando, setEnviando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +132,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
     setError(null);
     try {
       const eventosPartido = eventos[partido.id] ?? [];
+      const elegidoJugadorDelPartido = jugadorDelPartido[partido.id];
       const respuesta = await fetch('/api/partidos/cargar-resultado', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,6 +149,9 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                   tipoEvento: evento.tipoEvento,
                 })),
               }
+            : {}),
+          ...(elegidoJugadorDelPartido
+            ? { jugadorDelPartidoPerfilId: elegidoJugadorDelPartido }
             : {}),
         }),
       });
@@ -176,6 +181,11 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
         const elegiblesVisitante = elegiblesPorEquipo[partido.equipoVisitanteId] ?? [];
         const hayElegibles = elegiblesLocal.length > 0 || elegiblesVisitante.length > 0;
         const eventosPartido = eventos[partido.id] ?? [];
+        const jugadoresLocal = elegiblesLocal.filter((persona) => persona.rolEnTorneo === 'player');
+        const jugadoresVisitante = elegiblesVisitante.filter(
+          (persona) => persona.rolEnTorneo === 'player',
+        );
+        const hayJugadores = jugadoresLocal.length > 0 || jugadoresVisitante.length > 0;
 
         return (
           <div key={partido.id} className={styles.filaPartido}>
@@ -209,6 +219,42 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                 {enviando === partido.id ? 'Cargando…' : 'Cargar'}
               </button>
             </div>
+
+            {hayJugadores && (
+              <label className={styles.campoJugadorDelPartido}>
+                Jugador del partido (opcional)
+                <select
+                  aria-label="Jugador del partido"
+                  value={jugadorDelPartido[partido.id] ?? ''}
+                  onChange={(evento) =>
+                    setJugadorDelPartido((actual) => ({
+                      ...actual,
+                      [partido.id]: evento.target.value,
+                    }))
+                  }
+                >
+                  <option value="">Sin elegir</option>
+                  {jugadoresLocal.length > 0 && (
+                    <optgroup label={partido.equipoLocalNombre}>
+                      {jugadoresLocal.map((persona) => (
+                        <option key={persona.perfilId} value={persona.perfilId}>
+                          {persona.nombreVisible}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {jugadoresVisitante.length > 0 && (
+                    <optgroup label={partido.equipoVisitanteNombre}>
+                      {jugadoresVisitante.map((persona) => (
+                        <option key={persona.perfilId} value={persona.perfilId}>
+                          {persona.nombreVisible}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </label>
+            )}
 
             {hayElegibles && (
               <div className={styles.eventos}>

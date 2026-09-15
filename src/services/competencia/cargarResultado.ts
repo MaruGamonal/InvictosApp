@@ -70,6 +70,12 @@ const esquemaEntrada = z.object({
   golesVisitante: z.number().int().min(0),
   /** UC-34, opcional: si viene, reemplaza por completo la planilla de este partido. */
   eventos: z.array(esquemaEvento).optional(),
+  /**
+   * Opcional: `null` lo quita, sin mandarlo se deja como está. Igual que
+   * `eventos`, solo alguien elegible (`integrante_habilitado`,
+   * `rol_en_torneo = 'player'`) de alguno de los dos equipos.
+   */
+  jugadorDelPartidoPerfilId: z.string().uuid().nullable().optional(),
 });
 export type CargarResultadoInput = z.infer<typeof esquemaEntrada>;
 
@@ -211,26 +217,55 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
     }
   }
 
+  if (datos.jugadorDelPartidoPerfilId) {
+    const { rows: elegible } = await pool.query<{ rol_en_torneo: 'player' | 'coach' | 'delegate' }>(
+      `SELECT rol_en_torneo FROM integrante_habilitado
+       WHERE torneo_id = $1 AND equipo_id = ANY($2) AND perfil_id = $3 AND estado = 'eligible'`,
+      [partido.torneo_id, [...equiposDelPartido], datos.jugadorDelPartidoPerfilId],
+    );
+    if (elegible[0]?.rol_en_torneo !== 'player') {
+      throw crearError('DATOS_INVALIDOS', [
+        {
+          campo: 'jugadorDelPartidoPerfilId',
+          problema: 'Solo se puede elegir a un jugador habilitado en la lista de buena fe de alguno de los dos equipos.',
+        },
+      ]);
+    }
+  }
+
   const cliente = await pool.connect();
   let nuevaVersion: number;
   try {
     await cliente.query('BEGIN');
 
+    const asignaciones = [
+      'goles_local = $2',
+      'goles_visitante = $3',
+      "estado = 'played'",
+      'estado_resultado = $4',
+      'cargado_por_usuario_id = $5',
+      'fecha_carga_resultado = now()',
+      'version = version + 1',
+    ];
+    const valoresUpdate: unknown[] = [
+      datos.partidoId,
+      datos.golesLocal,
+      datos.golesVisitante,
+      estadoResultado,
+      contexto.usuarioId,
+    ];
+    if (datos.jugadorDelPartidoPerfilId !== undefined) {
+      valoresUpdate.push(datos.jugadorDelPartidoPerfilId);
+      asignaciones.push(`jugador_del_partido_perfil_id = $${valoresUpdate.length}`);
+    }
+    valoresUpdate.push(datos.version);
+
     const { rows: actualizadas } = await cliente.query<{ version: number }>(
       `UPDATE partido
-       SET goles_local = $2, goles_visitante = $3, estado = 'played',
-           estado_resultado = $4, cargado_por_usuario_id = $5, fecha_carga_resultado = now(),
-           version = version + 1
-       WHERE id = $1 AND version = $6
+       SET ${asignaciones.join(', ')}
+       WHERE id = $1 AND version = $${valoresUpdate.length}
        RETURNING version`,
-      [
-        datos.partidoId,
-        datos.golesLocal,
-        datos.golesVisitante,
-        estadoResultado,
-        contexto.usuarioId,
-        datos.version,
-      ],
+      valoresUpdate,
     );
     if (actualizadas.length === 0) {
       // Alguien más ganó la carrera entre la lectura de arriba y este

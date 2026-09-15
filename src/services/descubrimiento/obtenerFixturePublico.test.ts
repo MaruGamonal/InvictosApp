@@ -31,6 +31,8 @@ function filaPartido(over: Partial<Record<string, unknown>> = {}) {
     fecha_hora_programada: null,
     fecha_hora_original: null,
     sede_nombre: null,
+    jugador_del_partido_perfil_id: null,
+    jugador_del_partido_nombre: null,
     ...over,
   };
 }
@@ -128,6 +130,28 @@ describe('obtenerFixturePublico', () => {
     const { obtenerFixturePublico } = await import('./obtenerFixturePublico');
     const fixture = await obtenerFixturePublico({ torneoId: TORNEO }, VISITANTE);
     expect(fixture).toEqual({ fechaVigente: null, partidos: [] });
+  });
+
+  it('con jugador del partido elegido, lo devuelve; sin elegir, null', async () => {
+    mockearDb({
+      partidos: [
+        filaPartido({
+          estado: 'played',
+          goles_local: 2,
+          goles_visitante: 1,
+          jugador_del_partido_perfil_id: 'perfil-1',
+          jugador_del_partido_nombre: 'Jugador Uno',
+        }),
+        filaPartido({ id: 'p2', estado: 'scheduled' }),
+      ],
+    });
+    const { obtenerFixturePublico } = await import('./obtenerFixturePublico');
+    const fixture = await obtenerFixturePublico({ torneoId: TORNEO }, VISITANTE);
+    expect(fixture.partidos[0]!.jugadorDelPartido).toEqual({
+      perfilId: 'perfil-1',
+      nombreVisible: 'Jugador Uno',
+    });
+    expect(fixture.partidos[1]!.jugadorDelPartido).toBeNull();
   });
 
   it('un torneo draft no es visible para un visitante: NO_ENCONTRADO', async () => {

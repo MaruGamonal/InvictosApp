@@ -13,6 +13,8 @@ export interface FilaPartidoProps {
   golesVisitante?: number | null;
   /** Texto ya formateado ("Sáb 14, 18:00") — el formato de fecha no es de este componente. */
   fechaProgramadaTexto?: string;
+  /** Jugador del partido, si quien organizó lo eligió al cargar el resultado — solo aplica a partidos jugados. */
+  jugadorDelPartido?: { nombreVisible: string } | null;
 }
 
 /**
@@ -28,6 +30,7 @@ export function FilaPartido({
   golesLocal,
   golesVisitante,
   fechaProgramadaTexto,
+  jugadorDelPartido,
 }: FilaPartidoProps) {
   const hayResultado = estado === 'played' || estado === 'walkover';
 
@@ -49,6 +52,9 @@ export function FilaPartido({
           <span className={styles.resultado}>vs</span>
         )}
         {estado !== 'unscheduled' && <Badge campo="partido.estado" valor={estado} />}
+        {hayResultado && jugadorDelPartido && (
+          <span className={styles.jugadorDelPartido}>⭐ {jugadorDelPartido.nombreVisible}</span>
+        )}
       </div>
 
       <div className={`${styles.equipo} ${styles.visitante}`}>

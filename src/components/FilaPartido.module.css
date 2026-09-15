@@ -56,3 +56,14 @@
   font-size: 13px;
   color: var(--color-texto-secundario);
 }
+
+.jugadorDelPartido {
+  font-family: var(--fuente-texto);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--color-texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

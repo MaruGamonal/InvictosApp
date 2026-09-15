@@ -83,6 +83,46 @@ describe('PanelResultados', () => {
     ]);
   });
 
+  it('sin jugadores elegibles en ningún equipo, no ofrece elegir jugador del partido', () => {
+    const { queryByLabelText } = render(
+      <PanelResultados
+        partidos={[PARTIDO]}
+        elegiblesPorEquipo={{
+          'equipo-local': [{ perfilId: 'perfil-dt', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' }],
+        }}
+      />,
+    );
+    expect(queryByLabelText('Jugador del partido')).toBeNull();
+  });
+
+  it('elige un jugador del partido y lo manda al cargar; sin elegir, no manda el campo', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByLabelText, getByText } = render(
+      <PanelResultados
+        partidos={[PARTIDO]}
+        elegiblesPorEquipo={{
+          'equipo-local': [{ perfilId: 'perfil-1', nombreVisible: 'Juan', rolEnTorneo: 'player' }],
+        }}
+      />,
+    );
+
+    fireEvent.change(getByLabelText('Goles de Los Pibes'), { target: { value: '1' } });
+    fireEvent.change(getByLabelText('Goles de Racing del Barrio'), { target: { value: '0' } });
+    fireEvent.click(getByText('Cargar'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    let cuerpo = JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string);
+    expect(cuerpo.jugadorDelPartidoPerfilId).toBeUndefined();
+
+    fetchMock.mockClear();
+    fireEvent.change(getByLabelText('Jugador del partido'), { target: { value: 'perfil-1' } });
+    fireEvent.click(getByText('Cargar'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    cuerpo = JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string);
+    expect(cuerpo.jugadorDelPartidoPerfilId).toBe('perfil-1');
+  });
+
   it('a un integrante del cuerpo técnico solo se le puede acreditar amarilla o roja, no gol', () => {
     const { getByText, getByLabelText } = render(
       <PanelResultados

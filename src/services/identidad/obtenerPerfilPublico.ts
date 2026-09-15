@@ -40,6 +40,8 @@ export interface PerfilPublico {
   ciudadId: string | null;
   ciudadNombre: string | null;
   visibilidad: 'public' | 'restricted';
+  /** Cuántas veces fue elegido jugador del partido, en partidos jugados o ganados por presentación. */
+  vecesJugadorDelPartido: number;
 }
 
 export const obtenerPerfilPublico: Servicio<ObtenerPerfilPublicoInput, PerfilPublico> = async (
@@ -93,6 +95,13 @@ export const obtenerPerfilPublico: Servicio<ObtenerPerfilPublicoInput, PerfilPub
   );
   equipos.sort((a, b) => (b.fecha_incorporacion ?? '').localeCompare(a.fecha_incorporacion ?? ''));
 
+  const { rows: filaVecesJugadorDelPartido } = await pool.query<{ cantidad: string }>(
+    `SELECT count(*) AS cantidad FROM partido
+     WHERE jugador_del_partido_perfil_id = $1 AND estado IN ('played', 'walkover')`,
+    [datos.perfilId],
+  );
+  const vecesJugadorDelPartido = Number(filaVecesJugadorDelPartido[0]?.cantidad ?? 0);
+
   const esElPropioDueño = contexto.usuarioId !== null && contexto.usuarioId === perfil.usuario_id;
   const mostrarCompleto = perfil.visibilidad === 'public' || esElPropioDueño;
 
@@ -114,5 +123,6 @@ export const obtenerPerfilPublico: Servicio<ObtenerPerfilPublicoInput, PerfilPub
     ciudadId: mostrarCompleto ? perfil.ciudad_id : null,
     ciudadNombre: mostrarCompleto ? perfil.ciudad_nombre : null,
     visibilidad: perfil.visibilidad,
+    vecesJugadorDelPartido,
   };
 };

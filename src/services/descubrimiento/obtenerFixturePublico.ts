@@ -29,6 +29,7 @@ export interface PartidoFixturePublico {
   fechaHoraProgramada: string | null;
   fechaHoraOriginal: string | null;
   sedeNombre: string | null;
+  jugadorDelPartido: { perfilId: string; nombreVisible: string } | null;
 }
 
 export interface FechaVigente {
@@ -88,18 +89,22 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
     fecha_hora_programada: Date | null;
     fecha_hora_original: Date | null;
     sede_nombre: string | null;
+    jugador_del_partido_perfil_id: string | null;
+    jugador_del_partido_nombre: string | null;
   }>(
     `SELECT p.id, p.numero_fecha, f.id AS fase_id, f.nombre AS fase_nombre, g.nombre AS grupo_nombre, p.estado,
             el.id AS local_id, el.nombre AS local_nombre, el.escudo_url AS local_escudo,
             ev.id AS visitante_id, ev.nombre AS visitante_nombre, ev.escudo_url AS visitante_escudo,
             p.goles_local, p.goles_visitante, p.fecha_hora_programada, p.fecha_hora_original,
-            s.nombre AS sede_nombre
+            s.nombre AS sede_nombre,
+            jp.id AS jugador_del_partido_perfil_id, jp.nombre_visible AS jugador_del_partido_nombre
      FROM partido p
      JOIN fase f ON f.id = p.fase_id
      LEFT JOIN grupo g ON g.id = p.grupo_id
      JOIN equipo el ON el.id = p.equipo_local_id
      JOIN equipo ev ON ev.id = p.equipo_visitante_id
      LEFT JOIN sede s ON s.id = p.sede_id
+     LEFT JOIN perfil_deportivo jp ON jp.id = p.jugador_del_partido_perfil_id
      WHERE p.torneo_id = $1
      ORDER BY f.orden ASC, p.numero_fecha ASC`,
     [datos.torneoId],
@@ -123,6 +128,9 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
     fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
     fechaHoraOriginal: fila.fecha_hora_original?.toISOString() ?? null,
     sedeNombre: fila.sede_nombre,
+    jugadorDelPartido: fila.jugador_del_partido_perfil_id
+      ? { perfilId: fila.jugador_del_partido_perfil_id, nombreVisible: fila.jugador_del_partido_nombre! }
+      : null,
   }));
 
   // `partidos` ya viene ordenado por fase (f.orden) y luego numero_fecha:

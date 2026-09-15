@@ -104,6 +104,7 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
                     golesLocal={partido.golesLocal}
                     golesVisitante={partido.golesVisitante}
                     fechaProgramadaTexto={formatearFecha(partido.fechaHoraProgramada)}
+                    jugadorDelPartido={partido.jugadorDelPartido}
                   />
                   {partido.sedeNombre && <span className={styles.sede}>{partido.sedeNombre}</span>}
                 </div>
