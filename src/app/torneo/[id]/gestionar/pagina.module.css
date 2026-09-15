@@ -193,7 +193,20 @@
   font-size: 13px;
 }
 
-.filaAccion button {
+/*
+ * Botón primario "pelado" (sin className): el criterio de este
+ * archivo es que un <button> sin botonSecundarioChico/botonPeligro*
+ * es la acción principal de su fila y se ve con el acento — pero
+ * eso solo se cumplía adentro de .filaAccion. Quedaban sin estilo
+ * los mismos botones dentro de .filaAcciones (plural, otro
+ * contenedor), .filaIntegranteCabecera y .filaGoles: mismo bug,
+ * cuatro lugares. Se extiende acá para que no vuelva a faltar un
+ * quinto.
+ */
+.filaAccion button,
+.filaAcciones button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
+.filaIntegranteCabecera button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
+.filaGoles button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro) {
   background: var(--acento);
   color: var(--acento-texto-sobre);
   border: none;
@@ -204,7 +217,10 @@
   white-space: nowrap;
 }
 
-.filaAccion button:disabled {
+.filaAccion button:disabled,
+.filaAcciones button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled,
+.filaIntegranteCabecera button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled,
+.filaGoles button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled {
   opacity: 0.6;
   cursor: default;
 }
@@ -262,6 +278,7 @@
 .formularioChico input[type='number'],
 .formularioChico input[type='date'],
 .formularioChico input[type='datetime-local'],
+.formularioChico input[type='email'],
 .formularioChico select,
 .formularioChico textarea {
   border: 1px solid var(--borde-neutro);
