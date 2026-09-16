@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from '@/app/ingresar/pagina.module.css';
 import pasoStyles from './pagina.module.css';
 
@@ -14,10 +15,12 @@ export function PanelPublicarInicial({ torneoId }: Props) {
   const router = useRouter();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [camposFaltantes, setCamposFaltantes] = useState<string[]>([]);
 
   async function publicar() {
     setEnviando(true);
     setError(null);
+    setCamposFaltantes([]);
     try {
       const respuesta = await fetch('/api/torneos/publicar', {
         method: 'POST',
@@ -27,6 +30,12 @@ export function PanelPublicarInicial({ torneoId }: Props) {
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
         setError(cuerpo?.error?.mensaje ?? 'No se pudo publicar el torneo.');
+        if (Array.isArray(cuerpo?.error?.detalle)) {
+          const nombres = (cuerpo.error.detalle as Array<{ campo?: unknown }>)
+            .map((item) => item?.campo)
+            .filter((campo): campo is string => typeof campo === 'string');
+          setCamposFaltantes(nombres);
+        }
         setEnviando(false);
         return;
       }
@@ -39,7 +48,17 @@ export function PanelPublicarInicial({ torneoId }: Props) {
 
   return (
     <div>
-      {error && <p className={pasoStyles.errorChico}>{error}</p>}
+      {error && (
+        <>
+          <p className={pasoStyles.errorChico}>{error}</p>
+          {camposFaltantes.length > 0 && (
+            <p className={pasoStyles.errorChico}>
+              Falta: {camposFaltantes.join(', ')}. Completalo desde{' '}
+              <Link href={`/torneo/${torneoId}/gestionar/configuracion`}>Configuración</Link>.
+            </p>
+          )}
+        </>
+      )}
       <button type="button" className={styles.boton} onClick={publicar} disabled={enviando}>
         {enviando ? 'Publicando…' : 'Publicar'}
       </button>

@@ -50,6 +50,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [coordenadas, setCoordenadas] = useState<{ lat: number; lng: number } | null>(null);
   const [descripcion, setDescripcion] = useState('');
   const [cupoEquipos, setCupoEquipos] = useState('');
+  const [fechaInicioEstimada, setFechaInicioEstimada] = useState('');
   const [costoInscripcion, setCostoInscripcion] = useState('');
   const [costoPlanilla, setCostoPlanilla] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -89,6 +90,9 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           costoInscripcion: costoInscripcion ? Number(costoInscripcion) : undefined,
           costoPlanilla: costoPlanilla ? Number(costoPlanilla) : undefined,
           cupoEquipos: Number(cupoEquipos),
+          fechaInicioEstimada: fechaInicioEstimada
+            ? new Date(fechaInicioEstimada).toISOString()
+            : undefined,
         }),
       });
       const cuerpo = await respuesta.json();
@@ -274,6 +278,19 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           value={cupoEquipos}
           onChange={(evento) => setCupoEquipos(evento.target.value)}
         />
+      </div>
+
+      <div className={styles.campo}>
+        <label htmlFor="fechaInicioEstimada">Fecha estimada de inicio (opcional)</label>
+        <input
+          id="fechaInicioEstimada"
+          type="date"
+          value={fechaInicioEstimada}
+          onChange={(evento) => setFechaInicioEstimada(evento.target.value)}
+        />
+        <span className={styles.ayuda}>
+          Se puede ajustar después, pero hace falta cargarla para publicar el torneo.
+        </span>
       </div>
 
       <fieldset className={styles.costos}>

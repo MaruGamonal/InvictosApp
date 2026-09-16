@@ -47,4 +47,27 @@ describe('PanelPublicarInicial', () => {
     await waitFor(() => expect(getByText('No se pudo.')).toBeTruthy());
     expect(push).not.toHaveBeenCalled();
   });
+
+  it('si faltan datos mínimos, lista los campos y enlaza a Configuración', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({
+        ok: false,
+        error: {
+          mensaje: 'Para publicar el torneo todavía falta completar algunos datos.',
+          detalle: [{ campo: 'fecha estimada de inicio', problema: 'Falta para poder publicar el torneo.' }],
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByText, getByRole } = render(<PanelPublicarInicial torneoId="t-1" />);
+    fireEvent.click(getByText('Publicar'));
+
+    await waitFor(() => expect(getByText(/Falta: fecha estimada de inicio/)).toBeTruthy());
+    expect(getByRole('link', { name: 'Configuración' })).toHaveAttribute(
+      'href',
+      '/torneo/t-1/gestionar/configuracion',
+    );
+  });
 });
