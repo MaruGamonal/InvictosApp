@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { construirContexto } from '@/lib/contexto';
 import { NOMBRE_PRODUCTO, conNombreProducto } from '@/lib/nombreProducto';
 import styles from './bienvenida.module.css';
 
@@ -24,8 +26,17 @@ export const metadata: Metadata = {
  * Ingresar y Crear cuenta llevan al mismo formulario (`/ingresar`), con
  * el campo de contraseña que corresponde a cada uno — solo cambia el
  * copy y a qué ruta se manda el formulario.
+ *
+ * Quien ya tiene sesión iniciada no debería ver esta puerta de entrada
+ * de nuevo cada vez que abre la app — va directo a `/inicio` (reportado
+ * en vivo: "siempre me manda al login").
  */
-export default function PaginaBienvenida() {
+export default async function PaginaBienvenida() {
+  const contexto = await construirContexto();
+  if (contexto.usuarioId) {
+    redirect('/inicio');
+  }
+
   return (
     <div className={styles.pantalla}>
       <div className={styles.foto}>

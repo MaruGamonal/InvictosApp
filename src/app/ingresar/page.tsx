@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { construirContexto } from '@/lib/contexto';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioIngreso } from './FormularioIngreso';
 import styles from './pagina.module.css';
@@ -20,6 +22,12 @@ export const metadata: Metadata = {
  * ejecutor en `registrarEjecutorSeguir.ts`. Con eso en la URL, terminar
  * el ingreso o el registro deja a la persona directamente siguiendo lo
  * que quería, sin volver a tocar "Seguir".
+ *
+ * Quien ya tiene sesión iniciada no debería ver este formulario de nuevo —
+ * va directo a `/inicio` (reportado en vivo: "siempre me manda al login").
+ * Excepción: si llegó con una acción de seguir pendiente (D-04b), esa
+ * combinación solo se da sin sesión (`BotonSeguir` manda acá recién cuando
+ * `POST /api/seguir` responde 401), así que no hace falta contemplarla.
  */
 export default async function PaginaIngresar({
   searchParams,
@@ -32,6 +40,11 @@ export default async function PaginaIngresar({
     accion === 'seguir' && esTipoSeguidoValido && entidadId
       ? { tipoSeguido: tipoSeguido as 'tournament' | 'team', entidadId }
       : null;
+
+  const contexto = await construirContexto();
+  if (contexto.usuarioId && !seguirPendiente) {
+    redirect('/inicio');
+  }
 
   return (
     <div className={styles.pagina}>
