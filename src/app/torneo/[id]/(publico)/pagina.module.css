@@ -22,9 +22,15 @@
   color: var(--color-texto-secundario);
 }
 
+.bloqueSeguir {
+  display: flex;
+  justify-content: center;
+}
+
 .accionesHero {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 8px;
 }

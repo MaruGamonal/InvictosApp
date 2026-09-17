@@ -28,7 +28,7 @@ export default async function LayoutTorneo({
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.heroContenido}>
-          <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={64} />
+          <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={88} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{ficha.nombre}</h1>
             <div className={styles.meta}>

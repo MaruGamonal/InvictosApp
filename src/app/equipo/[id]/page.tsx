@@ -91,7 +91,7 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.heroContenido}>
-          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={64} />
+          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={88} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{equipo.nombre}</h1>
             <div className={styles.meta}>
@@ -113,12 +113,14 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           (las dos redirigen a /ingresar sin sesión). Compartir es
           funcional: no necesita cuenta ni confirmación.
         */}
-        <div className={styles.accionesHero}>
+        <div className={styles.bloqueSeguir}>
           <BotonSeguir
             tipoSeguido="team"
             entidadId={id}
             cantidadSeguidoresInicial={equipo.seguidores}
           />
+        </div>
+        <div className={styles.accionesHero}>
           <BotonPedirSumarme equipoId={id} />
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>
