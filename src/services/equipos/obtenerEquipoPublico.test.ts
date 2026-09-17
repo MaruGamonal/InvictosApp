@@ -65,7 +65,9 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT valor, partidos_computados')) {
           return { rows: opciones.score ?? [] };
         }
-        if (t.startsWith("SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'team'")) {
+        if (
+          t.startsWith("SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'team'")
+        ) {
           return { rows: [{ cantidad: String(opciones.seguidores ?? 0) }] };
         }
         return { rows: [] };
@@ -152,7 +154,12 @@ describe('obtenerEquipoPublico', () => {
   it('con estado insufficient_activity o stale, score null aunque haya una fila', async () => {
     mockearDb({
       score: [
-        { valor: null, partidos_computados: 0, estado: 'insufficient_activity', desglose_componentes: null },
+        {
+          valor: null,
+          partidos_computados: 0,
+          estado: 'insufficient_activity',
+          desglose_componentes: null,
+        },
       ],
     });
     const { obtenerEquipoPublico } = await import('./obtenerEquipoPublico');

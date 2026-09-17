@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Contexto } from '@/lib/contexto';
 
-const USUARIO: Contexto = { usuarioId: '11111111-1111-1111-1111-111111111111', permisos: {}, esSistema: false };
+const USUARIO: Contexto = {
+  usuarioId: '11111111-1111-1111-1111-111111111111',
+  permisos: {},
+  esSistema: false,
+};
 const VISITANTE: Contexto = { usuarioId: null, permisos: {}, esSistema: false };
 
 beforeEach(() => vi.resetModules());
@@ -22,7 +26,8 @@ function mockearDb() {
 describe('actualizarPreferenciaNotificacion', () => {
   it('sin sesión, NO_AUTENTICADO', async () => {
     mockearDb();
-    const { actualizarPreferenciaNotificacion } = await import('./actualizarPreferenciaNotificacion');
+    const { actualizarPreferenciaNotificacion } =
+      await import('./actualizarPreferenciaNotificacion');
     await expect(
       actualizarPreferenciaNotificacion(
         { categoria: 'followed_results', canal: 'in_app', activo: false },
@@ -33,7 +38,8 @@ describe('actualizarPreferenciaNotificacion', () => {
 
   it('apagar una categoría informativa inserta la fila de mute', async () => {
     const consultas = mockearDb();
-    const { actualizarPreferenciaNotificacion } = await import('./actualizarPreferenciaNotificacion');
+    const { actualizarPreferenciaNotificacion } =
+      await import('./actualizarPreferenciaNotificacion');
 
     await actualizarPreferenciaNotificacion(
       { categoria: 'followed_results', canal: 'in_app', activo: false },
@@ -46,7 +52,8 @@ describe('actualizarPreferenciaNotificacion', () => {
 
   it('prender una categoría borra la fila de mute', async () => {
     const consultas = mockearDb();
-    const { actualizarPreferenciaNotificacion } = await import('./actualizarPreferenciaNotificacion');
+    const { actualizarPreferenciaNotificacion } =
+      await import('./actualizarPreferenciaNotificacion');
 
     await actualizarPreferenciaNotificacion(
       { categoria: 'followed_results', canal: 'in_app', activo: true },
@@ -58,7 +65,8 @@ describe('actualizarPreferenciaNotificacion', () => {
 
   it('apagar el canal in_app de una categoría accionable, DATOS_INVALIDOS', async () => {
     mockearDb();
-    const { actualizarPreferenciaNotificacion } = await import('./actualizarPreferenciaNotificacion');
+    const { actualizarPreferenciaNotificacion } =
+      await import('./actualizarPreferenciaNotificacion');
 
     await expect(
       actualizarPreferenciaNotificacion(
@@ -70,7 +78,8 @@ describe('actualizarPreferenciaNotificacion', () => {
 
   it('apagar el canal email de una categoría accionable sí se permite', async () => {
     const consultas = mockearDb();
-    const { actualizarPreferenciaNotificacion } = await import('./actualizarPreferenciaNotificacion');
+    const { actualizarPreferenciaNotificacion } =
+      await import('./actualizarPreferenciaNotificacion');
 
     await actualizarPreferenciaNotificacion(
       { categoria: 'team_invitation', canal: 'email', activo: false },

@@ -170,7 +170,12 @@ export const obtenerActividad: Servicio<ObtenerActividadInput, ActividadResultad
 
   const [torneosResultado, partidosResultado] = await Promise.all([
     torneoIds.length > 0
-      ? pool.query<{ id: string; nombre: string; imagen_url: string | null; organizacion_logo_url: string | null }>(
+      ? pool.query<{
+          id: string;
+          nombre: string;
+          imagen_url: string | null;
+          organizacion_logo_url: string | null;
+        }>(
           `SELECT t.id, t.nombre, t.imagen_url, o.logo_url AS organizacion_logo_url
            FROM torneo t JOIN organizacion o ON o.id = t.organizacion_id
            WHERE t.id = ANY($1)`,

@@ -20,7 +20,17 @@ interface Props {
 
 function IconoCampana() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" />
       <path d="M10 20a2 2 0 0 0 4 0" />
     </svg>
@@ -29,7 +39,17 @@ function IconoCampana() {
 
 function IconoSobre() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="m3 7 9 6 9-6" />
     </svg>
@@ -45,7 +65,11 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
   const accionables = preferencias.filter((p) => p.accionable);
   const informativas = preferencias.filter((p) => !p.accionable);
 
-  async function cambiar(categoria: CategoriaPreferencia, canal: 'in_app' | 'email', activo: boolean) {
+  async function cambiar(
+    categoria: CategoriaPreferencia,
+    canal: 'in_app' | 'email',
+    activo: boolean,
+  ) {
     const clave = `${categoria}:${canal}`;
     setEnviando(clave);
     setError(null);
@@ -102,7 +126,11 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
               </button>
               <button
                 type="button"
-                className={pref.emailActivo ? `${styles.botonCanal} ${styles.botonCanalActivo}` : styles.botonCanal}
+                className={
+                  pref.emailActivo
+                    ? `${styles.botonCanal} ${styles.botonCanalActivo}`
+                    : styles.botonCanal
+                }
                 onClick={() => cambiar(pref.categoria, 'email', !pref.emailActivo)}
                 disabled={enviando !== null}
                 aria-pressed={pref.emailActivo}
@@ -122,7 +150,9 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
             <span className={styles.filaTitulo}>{ETIQUETAS[pref.categoria]}</span>
             <button
               type="button"
-              className={pref.inAppActivo ? `${styles.switch} ${styles.switchActivo}` : styles.switch}
+              className={
+                pref.inAppActivo ? `${styles.switch} ${styles.switchActivo}` : styles.switch
+              }
               role="switch"
               aria-checked={pref.inAppActivo}
               aria-label={ETIQUETAS[pref.categoria]}

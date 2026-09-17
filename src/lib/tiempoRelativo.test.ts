@@ -18,9 +18,7 @@ describe('tiempoRelativo', () => {
   });
 
   it('minutos', () => {
-    expect(tiempoRelativo(new Date(AHORA.getTime() - 5 * 60_000).toISOString())).toBe(
-      'hace 5 min',
-    );
+    expect(tiempoRelativo(new Date(AHORA.getTime() - 5 * 60_000).toISOString())).toBe('hace 5 min');
   });
 
   it('horas', () => {

@@ -78,7 +78,10 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT 1 FROM reglamento')) {
           return { rows: opciones.hayReglamento ? [{}] : [] };
         }
-        if (t.startsWith('SELECT p.id, p.fecha_hora_programada') && t.includes("p.estado = 'scheduled'")) {
+        if (
+          t.startsWith('SELECT p.id, p.fecha_hora_programada') &&
+          t.includes("p.estado = 'scheduled'")
+        ) {
           return { rows: opciones.proximoPartido ? [opciones.proximoPartido] : [] };
         }
         if (
@@ -91,7 +94,11 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT e.id, e.nombre, e.escudo_url')) {
           return { rows: opciones.equiposInscriptos ?? [] };
         }
-        if (t.startsWith("SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament'")) {
+        if (
+          t.startsWith(
+            "SELECT count(*) AS cantidad FROM seguimiento WHERE tipo_seguido = 'tournament'",
+          )
+        ) {
           return { rows: [{ cantidad: String(opciones.seguidores ?? 0) }] };
         }
         return { rows: [] };

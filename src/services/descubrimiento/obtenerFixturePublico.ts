@@ -129,7 +129,10 @@ export const obtenerFixturePublico: Servicio<ObtenerFixturePublicoInput, Fixture
     fechaHoraOriginal: fila.fecha_hora_original?.toISOString() ?? null,
     sedeNombre: fila.sede_nombre,
     jugadorDelPartido: fila.jugador_del_partido_perfil_id
-      ? { perfilId: fila.jugador_del_partido_perfil_id, nombreVisible: fila.jugador_del_partido_nombre! }
+      ? {
+          perfilId: fila.jugador_del_partido_perfil_id,
+          nombreVisible: fila.jugador_del_partido_nombre!,
+        }
       : null,
   }));
 

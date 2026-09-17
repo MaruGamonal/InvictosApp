@@ -134,8 +134,8 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
 
       <p className={styles.avisoChico}>
         Va a poder cargar resultados, programar partidos y marcar partidos no disputados en este
-        torneo — nada más. Es una asignación por torneo: quitarlo de acá no lo saca de otros
-        torneos donde también colabore.
+        torneo — nada más. Es una asignación por torneo: quitarlo de acá no lo saca de otros torneos
+        donde también colabore.
       </p>
     </div>
   );

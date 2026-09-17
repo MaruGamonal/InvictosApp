@@ -272,9 +272,9 @@ describe('generarFixture — eliminación directa', () => {
       ],
     });
     const { generarFixture } = await import('./generarFixture');
-    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject(
-      { codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR' },
-    );
+    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject({
+      codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR',
+    });
   });
 
   it('la segunda fase de grupos + eliminatoria arma las llaves con los clasificados', async () => {
@@ -320,8 +320,8 @@ describe('generarFixture — eliminación directa', () => {
       resultadosSinConfirmar: ['partido-loaded-1'],
     });
     const { generarFixture } = await import('./generarFixture');
-    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject(
-      { codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR' },
-    );
+    await expect(generarFixture({ faseId: FASE }, contextoCon('usuario-1'))).rejects.toMatchObject({
+      codigo: 'FASE_CON_RESULTADOS_SIN_CONFIRMAR',
+    });
   });
 });

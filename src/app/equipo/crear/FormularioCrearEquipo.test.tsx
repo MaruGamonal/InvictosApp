@@ -49,8 +49,14 @@ describe('FormularioCrearEquipo', () => {
     vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:preview') });
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true, data: { id: 'eq-nuevo' } }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true, data: { escudoUrl: 'x' } }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, data: { id: 'eq-nuevo' } }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, data: { escudoUrl: 'x' } }),
+      });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByLabelText, getByRole, container } = render(

@@ -22,9 +22,7 @@ describe('BotonInscribirEquipo', () => {
       .mockResolvedValue({ ok: true, status: 200, json: async () => ({ ok: true, data: [] }) });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByRole } = render(
-      <BotonInscribirEquipo torneoId="t-1" reglamentoVigente={null} />,
-    );
+    const { getByRole } = render(<BotonInscribirEquipo torneoId="t-1" reglamentoVigente={null} />);
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith('/api/torneos/mi-inscripcion?torneoId=t-1'),
@@ -38,7 +36,14 @@ describe('BotonInscribirEquipo', () => {
       status: 200,
       json: async () => ({
         ok: true,
-        data: [{ equipoId: 'eq-1', equipoNombre: 'Los Pibes', estado: 'pending', advertenciaCategoria: false }],
+        data: [
+          {
+            equipoId: 'eq-1',
+            equipoNombre: 'Los Pibes',
+            estado: 'pending',
+            advertenciaCategoria: false,
+          },
+        ],
       }),
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -62,7 +67,12 @@ describe('BotonInscribirEquipo', () => {
       json: async () => ({
         ok: true,
         data: [
-          { equipoId: 'eq-1', equipoNombre: 'Los Pibes', estado: 'approved', advertenciaCategoria: false },
+          {
+            equipoId: 'eq-1',
+            equipoNombre: 'Los Pibes',
+            estado: 'approved',
+            advertenciaCategoria: false,
+          },
         ],
       }),
     });
@@ -90,7 +100,12 @@ describe('BotonInscribirEquipo', () => {
       json: async () => ({
         ok: true,
         data: [
-          { equipoId: 'eq-1', equipoNombre: 'Los Pibes', estado: 'rejected', advertenciaCategoria: false },
+          {
+            equipoId: 'eq-1',
+            equipoNombre: 'Los Pibes',
+            estado: 'rejected',
+            advertenciaCategoria: false,
+          },
         ],
       }),
     });

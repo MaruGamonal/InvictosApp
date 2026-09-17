@@ -109,11 +109,13 @@ export default async function PaginaGestionarEquipo({
         )}
 
         <p className={styles.avisoInfo}>
-          El Capitán no puede irse sin designar reemplazo. Cualquier otro se da de baja al
-          instante — nadie tiene que confirmarlo.
+          El Capitán no puede irse sin designar reemplazo. Cualquier otro se da de baja al instante
+          — nadie tiene que confirmarlo.
         </p>
 
-        {gestion && <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />}
+        {gestion && (
+          <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />
+        )}
       </section>
 
       {esCapitan && (
@@ -121,8 +123,8 @@ export default async function PaginaGestionarEquipo({
           {gestion?.torneoEnCursoQueBloqueaArchivado ? (
             <p className={styles.avisoBloqueo}>
               No podés archivar el equipo: está jugando{' '}
-              {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, un torneo en curso. Primero
-              tenés que dar de baja al equipo de ese torneo.
+              {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, un torneo en curso. Primero tenés
+              que dar de baja al equipo de ese torneo.
             </p>
           ) : (
             <BotonArchivarEquipo equipoId={id} />

@@ -80,8 +80,8 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
           onChange={(evento) => setNombreVisible(evento.target.value)}
         />
         <p className={styles.ayuda}>
-          Si todavía no tiene cuenta, igual queda cargado en el equipo — lo puede reclamar apenas
-          se registre.
+          Si todavía no tiene cuenta, igual queda cargado en el equipo — lo puede reclamar apenas se
+          registre.
         </p>
       </div>
 

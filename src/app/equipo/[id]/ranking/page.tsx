@@ -74,8 +74,9 @@ export default async function PaginaRanking({ params }: { params: Promise<{ id: 
           )}
 
           <p className={styles.textoAyuda}>
-            No existe un ranking global: comparar un {obtenerEtiqueta('torneo.modalidad', ranking.modalidad).etiqueta} de
-            esta ciudad con otra modalidad o ciudad no significa nada.
+            No existe un ranking global: comparar un{' '}
+            {obtenerEtiqueta('torneo.modalidad', ranking.modalidad).etiqueta} de esta ciudad con
+            otra modalidad o ciudad no significa nada.
           </p>
         </>
       )}

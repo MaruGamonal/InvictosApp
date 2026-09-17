@@ -266,9 +266,24 @@ describe('obtenerGestionTorneo', () => {
       rolOrganizacion: 'owner',
       torneo: { id: TORNEO, nombre: 'Copa Otoño', estado: 'in_progress', formato: 'league' },
       elegibles: [
-        { equipo_id: 'equipo-1', perfil_id: 'perfil-1', nombre_visible: 'Juan', rol_en_torneo: 'player' },
-        { equipo_id: 'equipo-1', perfil_id: 'perfil-2', nombre_visible: 'DT Pedro', rol_en_torneo: 'coach' },
-        { equipo_id: 'equipo-2', perfil_id: 'perfil-3', nombre_visible: 'Ana', rol_en_torneo: 'player' },
+        {
+          equipo_id: 'equipo-1',
+          perfil_id: 'perfil-1',
+          nombre_visible: 'Juan',
+          rol_en_torneo: 'player',
+        },
+        {
+          equipo_id: 'equipo-1',
+          perfil_id: 'perfil-2',
+          nombre_visible: 'DT Pedro',
+          rol_en_torneo: 'coach',
+        },
+        {
+          equipo_id: 'equipo-2',
+          perfil_id: 'perfil-3',
+          nombre_visible: 'Ana',
+          rol_en_torneo: 'player',
+        },
       ],
     });
     const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');

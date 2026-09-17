@@ -205,8 +205,7 @@ export function FormularioEditarTorneo({
         </div>
       </div>
       <span className={styles.avisoSinNotificar}>
-        Imagen opcional del torneo (JPG, PNG o WEBP). Sin cargar, se usa el logo de la
-        organización.
+        Imagen opcional del torneo (JPG, PNG o WEBP). Sin cargar, se usa el logo de la organización.
       </span>
 
       <label>

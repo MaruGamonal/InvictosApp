@@ -15,7 +15,9 @@ describe('construirEnlaceNotificacion', () => {
   });
 
   it('el resto de las de equipo manda a la ficha pública', () => {
-    expect(construirEnlaceNotificacion('team_join_resolved', 'equipo', 'eq-1')).toBe('/equipo/eq-1');
+    expect(construirEnlaceNotificacion('team_join_resolved', 'equipo', 'eq-1')).toBe(
+      '/equipo/eq-1',
+    );
   });
 
   it('una inscripción nueva manda a gestionar el torneo', () => {
@@ -25,7 +27,9 @@ describe('construirEnlaceNotificacion', () => {
   });
 
   it('el resto de las de torneo manda a la ficha pública', () => {
-    expect(construirEnlaceNotificacion('tournament_cancelled', 'torneo', 't-1')).toBe('/torneo/t-1');
+    expect(construirEnlaceNotificacion('tournament_cancelled', 'torneo', 't-1')).toBe(
+      '/torneo/t-1',
+    );
   });
 
   it('sin origen de partido todavía no hay pantalla propia: sin enlace', () => {

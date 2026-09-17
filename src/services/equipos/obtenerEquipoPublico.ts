@@ -118,7 +118,12 @@ export interface EquipoPublico {
   historial: DesempenioTorneo[];
   acumulado: Omit<
     DesempenioTorneo,
-    'torneoId' | 'torneoNombre' | 'torneoEstado' | 'torneoModalidad' | 'torneoCategoriaGenero' | 'posicion'
+    | 'torneoId'
+    | 'torneoNombre'
+    | 'torneoEstado'
+    | 'torneoModalidad'
+    | 'torneoCategoriaGenero'
+    | 'posicion'
   >;
   /**
    * `null` cuando todavía no hay suficiente actividad para un score
@@ -293,7 +298,10 @@ export const obtenerEquipoPublico: Servicio<ObtenerEquipoPublicoInput, EquipoPub
   );
   const filaScore = scoreRows[0];
   const score: ScoreEquipo | null =
-    filaScore && filaScore.estado === 'active' && filaScore.valor !== null && filaScore.desglose_componentes
+    filaScore &&
+    filaScore.estado === 'active' &&
+    filaScore.valor !== null &&
+    filaScore.desglose_componentes
       ? {
           valor: Number(filaScore.valor),
           partidosComputados: filaScore.partidos_computados,

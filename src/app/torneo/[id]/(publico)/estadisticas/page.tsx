@@ -16,7 +16,9 @@ export async function generateMetadata({
     obtenerEstadisticasCacheadas(id),
   ]);
   const lider = estadisticas?.goleadores[0];
-  const descripcion = lider ? `${lider.nombreVisible} lidera la tabla de goleadores` : 'Estadísticas del torneo';
+  const descripcion = lider
+    ? `${lider.nombreVisible} lidera la tabla de goleadores`
+    : 'Estadísticas del torneo';
 
   return {
     title: conNombreProducto(`Estadísticas — ${ficha.nombre}`),
@@ -31,15 +33,14 @@ export async function generateMetadata({
  * opcional (`06`, D-26), así que un torneo con resultados puede no tener
  * nada acá — la pantalla lo explica, no muestra una tabla vacía.
  */
-export default async function PaginaEstadisticas({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PaginaEstadisticas({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const estadisticas = await obtenerEstadisticasCacheadas(id);
 
-  if (!estadisticas || (estadisticas.goleadores.length === 0 && estadisticas.tarjetas.length === 0)) {
+  if (
+    !estadisticas ||
+    (estadisticas.goleadores.length === 0 && estadisticas.tarjetas.length === 0)
+  ) {
     return (
       <EstadoVacio mensaje="Todavía nadie cargó goleadores ni tarjetas de este torneo — es un dato opcional al cargar cada resultado." />
     );

@@ -84,7 +84,10 @@ describe('obtenerGestionEquipo', () => {
       contextoCon('usuario-1'),
     );
 
-    expect(resultado.torneoEnCursoQueBloqueaArchivado).toEqual({ id: 't-1', nombre: 'Copa Otoño F5' });
+    expect(resultado.torneoEnCursoQueBloqueaArchivado).toEqual({
+      id: 't-1',
+      nombre: 'Copa Otoño F5',
+    });
   });
 
   it('sin ser capitán ni delegado, SIN_PERMISO', async () => {

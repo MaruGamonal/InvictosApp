@@ -30,7 +30,11 @@ const MOTIVOS = [
 const ESTADOS_PENDIENTES = new Set(['pending', 'waitlisted']);
 
 /** UC-25 — Aprobar o rechazar cada inscripción pendiente o en lista de espera. */
-export function PanelInscripciones({ torneoId, inscripciones, cupoEquipos }: PanelInscripcionesProps) {
+export function PanelInscripciones({
+  torneoId,
+  inscripciones,
+  cupoEquipos,
+}: PanelInscripcionesProps) {
   const router = useRouter();
   const [rechazando, setRechazando] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('withdrew');

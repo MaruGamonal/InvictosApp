@@ -167,12 +167,18 @@ export default async function PaginaDescubrimiento({
           {parametros.categoriaEdad && (
             <input type="hidden" name="categoriaEdad" value={parametros.categoriaEdad} />
           )}
-          {parametros.abiertas && <input type="hidden" name="abiertas" value={parametros.abiertas} />}
+          {parametros.abiertas && (
+            <input type="hidden" name="abiertas" value={parametros.abiertas} />
+          )}
           <button
             type="submit"
             name="duracion"
             value=""
-            className={!duracion ? `${styles.chipDuracion} ${styles.chipDuracionActivo}` : styles.chipDuracion}
+            className={
+              !duracion
+                ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
+                : styles.chipDuracion
+            }
           >
             Cualquier duración
           </button>
@@ -182,7 +188,11 @@ export default async function PaginaDescubrimiento({
               type="submit"
               name="duracion"
               value={valor}
-              className={duracion === valor ? `${styles.chipDuracion} ${styles.chipDuracionActivo}` : styles.chipDuracion}
+              className={
+                duracion === valor
+                  ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
+                  : styles.chipDuracion
+              }
             >
               {etiquetaDuracionTorneo(valor)}
             </button>

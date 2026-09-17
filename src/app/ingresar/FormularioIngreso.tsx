@@ -111,7 +111,11 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
         {esCrear ? 'Solo lo justo para empezar.' : 'Con el correo y la contraseña de tu cuenta.'}
       </p>
 
-      {estado.paso === 'error' && <p className={styles.error} role="alert">{estado.mensaje}</p>}
+      {estado.paso === 'error' && (
+        <p className={styles.error} role="alert">
+          {estado.mensaje}
+        </p>
+      )}
 
       {esCrear && (
         <div className={styles.campo}>

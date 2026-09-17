@@ -22,7 +22,9 @@ describe('FormularioInvitarIntegrante', () => {
   });
 
   it('con nombre y rol, envía la invitación y navega a gestionar', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: {} }) });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: {} }) });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText, getByLabelText } = render(<FormularioInvitarIntegrante equipoId="eq-1" />);
@@ -35,7 +37,11 @@ describe('FormularioInvitarIntegrante', () => {
         '/api/equipos/invitar',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ equipoId: 'eq-1', roles: ['coach'], nombreVisible: 'Leo Ferrari' }),
+          body: JSON.stringify({
+            equipoId: 'eq-1',
+            roles: ['coach'],
+            nombreVisible: 'Leo Ferrari',
+          }),
         }),
       ),
     );
@@ -54,9 +60,7 @@ describe('FormularioInvitarIntegrante', () => {
     fireEvent.click(getByText('Jugador'));
     fireEvent.click(getByText('Enviar invitación'));
 
-    await waitFor(() =>
-      expect(getByText(/Ya había un perfil con ese nombre/)).toBeTruthy(),
-    );
+    await waitFor(() => expect(getByText(/Ya había un perfil con ese nombre/)).toBeTruthy());
     expect(push).not.toHaveBeenCalled();
   });
 

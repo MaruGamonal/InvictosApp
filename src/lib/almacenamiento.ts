@@ -52,7 +52,12 @@ async function subirArchivoPublico(
  * vieja cacheada después de reemplazarla.
  */
 export async function subirImagenPublica(carpeta: string, archivo: File): Promise<string> {
-  return subirArchivoPublico(carpeta, archivo, TIPOS_IMAGEN, 'Formato no soportado — usá JPG, PNG o WEBP.');
+  return subirArchivoPublico(
+    carpeta,
+    archivo,
+    TIPOS_IMAGEN,
+    'Formato no soportado — usá JPG, PNG o WEBP.',
+  );
 }
 
 /** Igual que `subirImagenPublica`, para el PDF adjunto del reglamento (`06`, D-28). */

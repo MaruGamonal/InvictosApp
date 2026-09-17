@@ -62,7 +62,8 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
   }
 
   function rolDe(equipoId: string, perfilId: string): 'player' | 'coach' | undefined {
-    return elegiblesPorEquipo[equipoId]?.find((persona) => persona.perfilId === perfilId)?.rolEnTorneo;
+    return elegiblesPorEquipo[equipoId]?.find((persona) => persona.perfilId === perfilId)
+      ?.rolEnTorneo;
   }
 
   function tiposPermitidos(equipoId: string, perfilId: string): TipoEvento[] {
@@ -74,7 +75,8 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
 
   function agregarEvento(partido: PartidoResultado) {
     const primerElegible =
-      elegiblesPorEquipo[partido.equipoLocalId]?.[0] ?? elegiblesPorEquipo[partido.equipoVisitanteId]?.[0];
+      elegiblesPorEquipo[partido.equipoLocalId]?.[0] ??
+      elegiblesPorEquipo[partido.equipoVisitanteId]?.[0];
     if (!primerElegible) return;
     const equipoId = elegiblesPorEquipo[partido.equipoLocalId]?.includes(primerElegible)
       ? partido.equipoLocalId
@@ -262,10 +264,15 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                   type="button"
                   className={styles.botonSecundarioChico}
                   onClick={() =>
-                    setAbiertoEventos((actual) => ({ ...actual, [partido.id]: !actual[partido.id] }))
+                    setAbiertoEventos((actual) => ({
+                      ...actual,
+                      [partido.id]: !actual[partido.id],
+                    }))
                   }
                 >
-                  {abiertoEventos[partido.id] ? 'Ocultar goleadores y tarjetas' : 'Goleadores y tarjetas (opcional)'}
+                  {abiertoEventos[partido.id]
+                    ? 'Ocultar goleadores y tarjetas'
+                    : 'Goleadores y tarjetas (opcional)'}
                 </button>
 
                 {abiertoEventos[partido.id] && (
@@ -314,7 +321,11 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                             aria-label="Tipo de evento"
                             value={evento.tipoEvento}
                             onChange={(cambio) =>
-                              actualizarTipo(partido.id, evento.clave, cambio.target.value as TipoEvento)
+                              actualizarTipo(
+                                partido.id,
+                                evento.clave,
+                                cambio.target.value as TipoEvento,
+                              )
                             }
                           >
                             {tipos.map((tipo) => (

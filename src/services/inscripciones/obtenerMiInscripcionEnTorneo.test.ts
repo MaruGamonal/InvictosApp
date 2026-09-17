@@ -40,7 +40,10 @@ describe('obtenerMiInscripcionEnTorneo', () => {
   it('sin sesión, lista vacía (no es un error)', async () => {
     mockearDb({});
     const { obtenerMiInscripcionEnTorneo } = await import('./obtenerMiInscripcionEnTorneo');
-    const resultado = await obtenerMiInscripcionEnTorneo({ torneoId: TORNEO_ID }, contextoCon(null));
+    const resultado = await obtenerMiInscripcionEnTorneo(
+      { torneoId: TORNEO_ID },
+      contextoCon(null),
+    );
     expect(resultado).toEqual([]);
   });
 

@@ -47,7 +47,7 @@ function mockearDb(
             ],
           };
         }
-        if (texto.includes("FROM partido") && texto.includes('jugador_del_partido_perfil_id')) {
+        if (texto.includes('FROM partido') && texto.includes('jugador_del_partido_perfil_id')) {
           return { rows: [{ cantidad: String(opciones.vecesJugadorDelPartido ?? 0) }] };
         }
         return { rows: [] };

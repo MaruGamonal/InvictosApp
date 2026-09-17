@@ -47,7 +47,12 @@ describe('obtenerRanking', () => {
 
   it('sin ciudad definida, no disponible', async () => {
     mockearDb({
-      equipo: { ciudad_id: null, ciudad_nombre: null, modalidad_habitual: 'f5', categoria_genero: 'male' },
+      equipo: {
+        ciudad_id: null,
+        ciudad_nombre: null,
+        modalidad_habitual: 'f5',
+        categoria_genero: 'male',
+      },
     });
     const { obtenerRanking } = await import('./obtenerRanking');
     const resultado = await obtenerRanking({ equipoId: EQUIPO }, VISITANTE);
@@ -84,7 +89,13 @@ describe('obtenerRanking', () => {
       modalidad: 'f5',
       categoriaGenero: 'male',
       equipos: [
-        { equipoId: 'eq-otro', nombre: 'Deportivo Belgrano', escudoUrl: null, valor: 81, esElEquipoActual: false },
+        {
+          equipoId: 'eq-otro',
+          nombre: 'Deportivo Belgrano',
+          escudoUrl: null,
+          valor: 81,
+          esElEquipoActual: false,
+        },
         {
           equipoId: EQUIPO,
           nombre: 'Los Pibes del Fondo',

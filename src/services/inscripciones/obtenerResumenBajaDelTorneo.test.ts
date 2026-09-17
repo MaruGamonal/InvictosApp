@@ -24,7 +24,9 @@ function mockearDb(opciones: {
           return { rows: opciones.perfilId ? [{ id: opciones.perfilId }] : [] };
         }
         if (sql.startsWith('SELECT rol_equipo FROM integrante_equipo')) {
-          return { rows: (opciones.rolesEnEquipo ?? ['captain']).map((rol_equipo) => ({ rol_equipo })) };
+          return {
+            rows: (opciones.rolesEnEquipo ?? ['captain']).map((rol_equipo) => ({ rol_equipo })),
+          };
         }
         if (sql.includes('FROM inscripcion i')) {
           return {

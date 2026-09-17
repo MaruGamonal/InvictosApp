@@ -58,9 +58,10 @@ describe('PanelSolicitudesIngreso', () => {
   });
 
   it('si la API falla, muestra el error y la fila sigue accionable', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: false, json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText, getAllByText } = render(

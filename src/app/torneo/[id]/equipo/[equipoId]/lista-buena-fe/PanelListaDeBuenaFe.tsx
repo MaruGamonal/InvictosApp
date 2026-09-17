@@ -124,8 +124,7 @@ export function PanelListaDeBuenaFe({
           )}
           {resultado.pendientes.length > 0 && (
             <p className={styles.avisoChico}>
-              Sin responder todavía:{' '}
-              {resultado.pendientes.map((p) => p.nombreVisible).join(', ')}.
+              Sin responder todavía: {resultado.pendientes.map((p) => p.nombreVisible).join(', ')}.
             </p>
           )}
         </div>

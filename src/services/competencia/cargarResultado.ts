@@ -199,7 +199,8 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
         throw crearError('DATOS_INVALIDOS', [
           {
             campo: 'eventos',
-            problema: 'Solo se puede acreditar un evento a alguien habilitado en la lista de buena fe de este torneo.',
+            problema:
+              'Solo se puede acreditar un evento a alguien habilitado en la lista de buena fe de este torneo.',
           },
         ]);
       }
@@ -211,7 +212,10 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       }
       if (!esGol && rol !== 'player' && rol !== 'coach') {
         throw crearError('DATOS_INVALIDOS', [
-          { campo: 'eventos', problema: 'Las tarjetas se acreditan a jugadores o al cuerpo técnico.' },
+          {
+            campo: 'eventos',
+            problema: 'Las tarjetas se acreditan a jugadores o al cuerpo técnico.',
+          },
         ]);
       }
     }
@@ -227,7 +231,8 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       throw crearError('DATOS_INVALIDOS', [
         {
           campo: 'jugadorDelPartidoPerfilId',
-          problema: 'Solo se puede elegir a un jugador habilitado en la lista de buena fe de alguno de los dos equipos.',
+          problema:
+            'Solo se puede elegir a un jugador habilitado en la lista de buena fe de alguno de los dos equipos.',
         },
       ]);
     }
@@ -311,16 +316,29 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
         string,
         { perfilId: string; equipoId: string; goles: number; amarillas: number; rojas: number }
       >();
-      const aplicarDelta = (perfilId: string, equipoId: string, tipoEvento: TipoEvento, signo: 1 | -1) => {
+      const aplicarDelta = (
+        perfilId: string,
+        equipoId: string,
+        tipoEvento: TipoEvento,
+        signo: 1 | -1,
+      ) => {
         const clave = `${equipoId}:${perfilId}`;
-        const acumulado = deltas.get(clave) ?? { perfilId, equipoId, goles: 0, amarillas: 0, rojas: 0 };
+        const acumulado = deltas.get(clave) ?? {
+          perfilId,
+          equipoId,
+          goles: 0,
+          amarillas: 0,
+          rojas: 0,
+        };
         if (tipoEvento === 'goal') acumulado.goles += signo;
         if (tipoEvento === 'yellow_card') acumulado.amarillas += signo;
         if (tipoEvento === 'red_card') acumulado.rojas += signo;
         deltas.set(clave, acumulado);
       };
-      for (const previo of previos) aplicarDelta(previo.perfil_id, previo.equipo_id, previo.tipo_evento, -1);
-      for (const evento of datos.eventos) aplicarDelta(evento.perfilId, evento.equipoId, evento.tipoEvento, 1);
+      for (const previo of previos)
+        aplicarDelta(previo.perfil_id, previo.equipo_id, previo.tipo_evento, -1);
+      for (const evento of datos.eventos)
+        aplicarDelta(evento.perfilId, evento.equipoId, evento.tipoEvento, 1);
 
       await cliente.query('DELETE FROM evento_partido WHERE partido_id = $1', [datos.partidoId]);
 
@@ -349,7 +367,14 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
              tarjetas_amarillas = estadistica_jugador.tarjetas_amarillas + excluded.tarjetas_amarillas,
              tarjetas_rojas = estadistica_jugador.tarjetas_rojas + excluded.tarjetas_rojas,
              ultima_actualizacion = now()`,
-          [partido.torneo_id, delta.perfilId, delta.equipoId, delta.goles, delta.amarillas, delta.rojas],
+          [
+            partido.torneo_id,
+            delta.perfilId,
+            delta.equipoId,
+            delta.goles,
+            delta.amarillas,
+            delta.rojas,
+          ],
         );
       }
     }

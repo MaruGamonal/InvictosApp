@@ -63,7 +63,10 @@ function calcularPesoPorAntiguedad(fecha: Date): number {
 
 /** Diferencia de gol "acotada, no lineal": cae la del partido a un tope, y comprime con raíz cuadrada. */
 function comprimirDiferenciaDeGol(diferencia: number): number {
-  const acotada = Math.max(-TOPE_DIFERENCIA_GOL_BRUTA, Math.min(TOPE_DIFERENCIA_GOL_BRUTA, diferencia));
+  const acotada = Math.max(
+    -TOPE_DIFERENCIA_GOL_BRUTA,
+    Math.min(TOPE_DIFERENCIA_GOL_BRUTA, diferencia),
+  );
   return Math.sign(acotada) * Math.sqrt(Math.abs(acotada));
 }
 
@@ -175,7 +178,9 @@ async function recalcularScoreDeUnEquipo(
     if (bonus !== null) bonusPorTorneo.push(bonus);
   }
   const bonusPosicionPromedio =
-    bonusPorTorneo.length > 0 ? bonusPorTorneo.reduce((a, b) => a + b, 0) / bonusPorTorneo.length : 0;
+    bonusPorTorneo.length > 0
+      ? bonusPorTorneo.reduce((a, b) => a + b, 0) / bonusPorTorneo.length
+      : 0;
 
   const componenteResultados = 50 * (promedioPuntos / 3);
   const componenteDiferencia =
@@ -186,7 +191,10 @@ async function recalcularScoreDeUnEquipo(
   const valor = Math.round(
     Math.max(
       0,
-      Math.min(100, componenteResultados + componenteDiferencia + componenteTorneos + componentePosicion),
+      Math.min(
+        100,
+        componenteResultados + componenteDiferencia + componenteTorneos + componentePosicion,
+      ),
     ),
   );
 

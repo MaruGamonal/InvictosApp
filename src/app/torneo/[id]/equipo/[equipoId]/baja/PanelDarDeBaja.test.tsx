@@ -17,12 +17,8 @@ afterEach(() => {
 
 describe('PanelDarDeBaja', () => {
   it('con el torneo en curso, muestra el aviso de partidos pendientes', () => {
-    const { getByText } = render(
-      <PanelDarDeBaja torneoId="t-1" equipoId="eq-1" torneoEnCurso />,
-    );
-    expect(
-      getByText(/los pendientes se dan por ganados a sus rivales/),
-    ).toBeTruthy();
+    const { getByText } = render(<PanelDarDeBaja torneoId="t-1" equipoId="eq-1" torneoEnCurso />);
+    expect(getByText(/los pendientes se dan por ganados a sus rivales/)).toBeTruthy();
   });
 
   it('sin el torneo en curso, no muestra el aviso', () => {

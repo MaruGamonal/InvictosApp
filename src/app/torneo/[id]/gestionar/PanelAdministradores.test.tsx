@@ -56,7 +56,9 @@ describe('PanelAdministradores', () => {
     );
     expect(queryByText('Invitar administrador')).toBeNull();
     expect(queryByText('Quitar')).toBeNull();
-    expect(getByText('Solo el Titular puede sumar o sacar administradores de la organización.')).toBeTruthy();
+    expect(
+      getByText('Solo el Titular puede sumar o sacar administradores de la organización.'),
+    ).toBeTruthy();
   });
 
   it('el Titular invita a alguien nuevo: manda el email a la API', async () => {

@@ -37,7 +37,12 @@ describe('PanelInscripciones', () => {
         torneoId="t-1"
         cupoEquipos={16}
         inscripciones={[
-          { equipoId: 'e-1', nombreEquipo: 'La Gloria', estado: 'approved', advertenciaCategoria: false },
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'La Gloria',
+            estado: 'approved',
+            advertenciaCategoria: false,
+          },
         ]}
       />,
     );
@@ -58,8 +63,18 @@ describe('PanelInscripciones', () => {
         torneoId="t-1"
         cupoEquipos={16}
         inscripciones={[
-          { equipoId: 'e-1', nombreEquipo: 'Pendiente FC', estado: 'pending', advertenciaCategoria: false },
-          { equipoId: 'e-2', nombreEquipo: 'La Gloria', estado: 'approved', advertenciaCategoria: false },
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'Pendiente FC',
+            estado: 'pending',
+            advertenciaCategoria: false,
+          },
+          {
+            equipoId: 'e-2',
+            nombreEquipo: 'La Gloria',
+            estado: 'approved',
+            advertenciaCategoria: false,
+          },
         ]}
       />,
     );
@@ -76,8 +91,18 @@ describe('PanelInscripciones', () => {
         torneoId="t-1"
         cupoEquipos={16}
         inscripciones={[
-          { equipoId: 'e-1', nombreEquipo: 'La Gloria', estado: 'approved', advertenciaCategoria: false },
-          { equipoId: 'e-2', nombreEquipo: 'Se Retiró FC', estado: 'rejected', advertenciaCategoria: false },
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'La Gloria',
+            estado: 'approved',
+            advertenciaCategoria: false,
+          },
+          {
+            equipoId: 'e-2',
+            nombreEquipo: 'Se Retiró FC',
+            estado: 'rejected',
+            advertenciaCategoria: false,
+          },
         ]}
       />,
     );
@@ -99,7 +124,12 @@ describe('PanelInscripciones', () => {
         torneoId="t-1"
         cupoEquipos={16}
         inscripciones={[
-          { equipoId: 'e-1', nombreEquipo: 'Pendiente FC', estado: 'pending', advertenciaCategoria: false },
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'Pendiente FC',
+            estado: 'pending',
+            advertenciaCategoria: false,
+          },
         ]}
       />,
     );
@@ -110,7 +140,12 @@ describe('PanelInscripciones', () => {
         '/api/inscripciones/resolver',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ torneoId: 't-1', equipoId: 'e-1', decision: 'approved', motivo: undefined }),
+          body: JSON.stringify({
+            torneoId: 't-1',
+            equipoId: 'e-1',
+            decision: 'approved',
+            motivo: undefined,
+          }),
         }),
       ),
     );

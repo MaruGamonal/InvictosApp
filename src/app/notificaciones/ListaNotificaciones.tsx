@@ -17,9 +17,7 @@ interface Props {
 /** Más nuevas primero — `listarNotificaciones` las trae ascendente (para cursor estable), se invierte acá. */
 export function ListaNotificaciones({ notificacionesIniciales, cursorInicial }: Props) {
   const router = useRouter();
-  const [notificaciones, setNotificaciones] = useState(
-    [...notificacionesIniciales].reverse(),
-  );
+  const [notificaciones, setNotificaciones] = useState([...notificacionesIniciales].reverse());
   const [cursor, setCursor] = useState(cursorInicial);
   const [cargandoMas, setCargandoMas] = useState(false);
 
@@ -55,7 +53,10 @@ export function ListaNotificaciones({ notificacionesIniciales, cursorInicial }: 
       const respuesta = await fetch(`/api/notificaciones?cursor=${encodeURIComponent(cursor)}`);
       const cuerpo = await respuesta.json();
       if (respuesta.ok && cuerpo.ok) {
-        setNotificaciones((actuales) => [...actuales, ...[...cuerpo.data.notificaciones].reverse()]);
+        setNotificaciones((actuales) => [
+          ...actuales,
+          ...[...cuerpo.data.notificaciones].reverse(),
+        ]);
         setCursor(cuerpo.data.cursorSiguiente);
       }
     } catch {

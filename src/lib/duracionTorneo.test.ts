@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { calcularDuracionTorneo, esTorneoRelampago, etiquetaDuracionTorneo } from './duracionTorneo';
+import {
+  calcularDuracionTorneo,
+  esTorneoRelampago,
+  etiquetaDuracionTorneo,
+} from './duracionTorneo';
 
 describe('calcularDuracionTorneo', () => {
   it('mismo día es single_day', () => {
@@ -20,9 +24,7 @@ describe('calcularDuracionTorneo', () => {
   });
 
   it('más de 3 días es extended', () => {
-    expect(calcularDuracionTorneo('2026-09-01T00:00:00Z', '2026-09-08T00:00:00Z')).toBe(
-      'extended',
-    );
+    expect(calcularDuracionTorneo('2026-09-01T00:00:00Z', '2026-09-08T00:00:00Z')).toBe('extended');
   });
 
   it('sin alguna de las dos fechas, no se clasifica', () => {

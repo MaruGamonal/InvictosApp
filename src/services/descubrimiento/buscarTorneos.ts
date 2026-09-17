@@ -143,7 +143,8 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
   if (datos.duracion) {
     // D-102: se deriva de las mismas dos columnas de fecha, sin índice
     // ni columna nueva (`10`, sección sobre buscarTorneos).
-    const ventana = 't.fecha_inicio_estimada IS NOT NULL AND t.fecha_fin_estimada IS NOT NULL AND (t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date)';
+    const ventana =
+      't.fecha_inicio_estimada IS NOT NULL AND t.fecha_fin_estimada IS NOT NULL AND (t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date)';
     if (datos.duracion === 'single_day') {
       condiciones.push(`${ventana} = 0`);
     } else if (datos.duracion === 'weekend') {

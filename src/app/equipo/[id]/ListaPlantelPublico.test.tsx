@@ -29,7 +29,10 @@ describe('ListaPlantelPublico', () => {
   it('sin sesión (o sin vínculo), ninguna fila se marca "(vos)"', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: { roles: [], perfilId: null } }) }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: true, data: { roles: [], perfilId: null } }),
+      }),
     );
     const { getByText } = render(
       <ListaPlantelPublico equipoId="eq-1" integrantes={INTEGRANTES} mostrarRoles />,
@@ -42,9 +45,10 @@ describe('ListaPlantelPublico', () => {
   it('cuando mi perfilId coincide con una fila, la marca "(vos)"', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: { roles: ['player'], perfilId: 'perfil-2' } }) }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: true, data: { roles: ['player'], perfilId: 'perfil-2' } }),
+      }),
     );
     const { getByText } = render(
       <ListaPlantelPublico equipoId="eq-1" integrantes={INTEGRANTES} mostrarRoles />,
@@ -56,7 +60,10 @@ describe('ListaPlantelPublico', () => {
   it('con mostrarRoles en false, no muestra la etiqueta de rol', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: { roles: [], perfilId: null } }) }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: true, data: { roles: [], perfilId: null } }),
+      }),
     );
     const { queryByText } = render(
       <ListaPlantelPublico equipoId="eq-1" integrantes={INTEGRANTES} mostrarRoles={false} />,

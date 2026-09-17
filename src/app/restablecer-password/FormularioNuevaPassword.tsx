@@ -46,7 +46,11 @@ export function FormularioNuevaPassword() {
       <h1 className={`fuente-display ${styles.titulo}`}>Elegí una contraseña nueva</h1>
       <p className={styles.texto}>Reemplaza la anterior en toda tu cuenta.</p>
 
-      {estado.paso === 'error' && <p className={styles.error} role="alert">{estado.mensaje}</p>}
+      {estado.paso === 'error' && (
+        <p className={styles.error} role="alert">
+          {estado.mensaje}
+        </p>
+      )}
 
       <div className={styles.campo}>
         <label htmlFor="password">Contraseña nueva</label>

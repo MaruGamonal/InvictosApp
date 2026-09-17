@@ -140,7 +140,13 @@ describe('actualizarTorneo', () => {
     const { actualizarTorneo } = await import('./actualizarTorneo');
 
     await actualizarTorneo(
-      { torneoId: TORNEO, costoInscripcion: 5000, costoPlanilla: 1500, latitud: -32.9, longitud: -60.6 },
+      {
+        torneoId: TORNEO,
+        costoInscripcion: 5000,
+        costoPlanilla: 1500,
+        latitud: -32.9,
+        longitud: -60.6,
+      },
       contextoCon('usuario-1'),
     );
 

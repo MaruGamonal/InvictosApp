@@ -46,12 +46,13 @@ describe('PanelListaDeBuenaFe', () => {
   });
 
   it('al confirmar, envía solo a los seleccionados con el rol inferido', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
         ok: true,
-        json: async () => ({ ok: true, data: { advertenciaMinimoNoAlcanzado: false, pendientes: [] } }),
-      });
+        data: { advertenciaMinimoNoAlcanzado: false, pendientes: [] },
+      }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText } = render(
@@ -100,9 +101,10 @@ describe('PanelListaDeBuenaFe', () => {
   });
 
   it('si la API falla, muestra el error', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: false, json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText } = render(

@@ -34,7 +34,8 @@ export function calcularDuracionTorneo(
 ): DuracionTorneo | null {
   if (!fechaInicioEstimada || !fechaFinEstimada) return null;
 
-  const inicio = typeof fechaInicioEstimada === 'string' ? new Date(fechaInicioEstimada) : fechaInicioEstimada;
+  const inicio =
+    typeof fechaInicioEstimada === 'string' ? new Date(fechaInicioEstimada) : fechaInicioEstimada;
   const fin = typeof fechaFinEstimada === 'string' ? new Date(fechaFinEstimada) : fechaFinEstimada;
   const inicioDia = Date.UTC(inicio.getUTCFullYear(), inicio.getUTCMonth(), inicio.getUTCDate());
   const finDia = Date.UTC(fin.getUTCFullYear(), fin.getUTCMonth(), fin.getUTCDate());

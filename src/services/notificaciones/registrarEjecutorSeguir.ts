@@ -16,10 +16,7 @@ import { seguir } from './seguir';
  */
 registrarAccionPendiente('seguir', async (datos, usuarioId) => {
   const { tipoSeguido, entidadId } = datos;
-  if (
-    (tipoSeguido !== 'tournament' && tipoSeguido !== 'team') ||
-    typeof entidadId !== 'string'
-  ) {
+  if ((tipoSeguido !== 'tournament' && tipoSeguido !== 'team') || typeof entidadId !== 'string') {
     return;
   }
   await seguir({ tipoSeguido, entidadId }, { usuarioId, permisos: {}, esSistema: false });

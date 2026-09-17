@@ -32,11 +32,7 @@ const ESTADOS_CON_CANCELAR = new Set([
  * misma pregunta ("¿en qué estado está esto?"), solo que con la
  * respuesta más drástica.
  */
-export default async function PaginaConfiguracion({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PaginaConfiguracion({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const contexto = await obtenerContextoCacheado();
   const [gestion, reglamentos, colaboradores] = await Promise.all([

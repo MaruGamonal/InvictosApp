@@ -29,7 +29,9 @@ function mockearDb(opciones: {
         if (t.startsWith('SELECT tipo_seguido, entidad_seguida_id FROM seguimiento')) {
           return { rows: opciones.seguidos ?? [] };
         }
-        if (t.startsWith('SELECT id, tipo, entidad_origen_tipo, entidad_origen_id, fecha_generacion')) {
+        if (
+          t.startsWith('SELECT id, tipo, entidad_origen_tipo, entidad_origen_id, fecha_generacion')
+        ) {
           return { rows: opciones.notificaciones ?? [] };
         }
         if (t.startsWith('SELECT i.torneo_id, i.equipo_id, i.fecha_resolucion')) {
@@ -137,7 +139,11 @@ describe('obtenerActividad', () => {
         id: 'notif-2',
         fecha: '2026-04-02T18:00:00.000Z',
         partidoId: PARTIDO,
-        torneo: { id: TORNEO, nombre: 'Copa Otoño', imagenUrl: 'https://cdn.example.com/logo-org.png' },
+        torneo: {
+          id: TORNEO,
+          nombre: 'Copa Otoño',
+          imagenUrl: 'https://cdn.example.com/logo-org.png',
+        },
         equipoLocal: { id: EQUIPO_A, nombre: 'Los Pibes', escudoUrl: null },
         equipoVisitante: { id: EQUIPO_B, nombre: 'Rival FC', escudoUrl: null },
         golesLocal: 2,
@@ -228,7 +234,9 @@ describe('obtenerActividad', () => {
           fecha_generacion: new Date('2026-01-01T00:00:00Z'),
         },
       ],
-      torneos: [{ id: TORNEO, nombre: 'Copa Otoño', imagen_url: null, organizacion_logo_url: null }],
+      torneos: [
+        { id: TORNEO, nombre: 'Copa Otoño', imagen_url: null, organizacion_logo_url: null },
+      ],
       inscripciones: [
         {
           torneo_id: TORNEO,

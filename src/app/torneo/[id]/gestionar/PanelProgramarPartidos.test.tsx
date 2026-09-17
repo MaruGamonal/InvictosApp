@@ -81,7 +81,9 @@ describe('PanelProgramarPartidos', () => {
     const inputFecha = container.querySelector('input[type="datetime-local"]') as HTMLInputElement;
     fireEvent.change(inputFecha, { target: { value: '2026-05-01T18:00' } });
     fireEvent.change(getByPlaceholderText('Sede (opcional)'), { target: { value: 'Cancha 3' } });
-    fireEvent.change(getByPlaceholderText('Dirección'), { target: { value: 'Av. Siempreviva 742' } });
+    fireEvent.change(getByPlaceholderText('Dirección'), {
+      target: { value: 'Av. Siempreviva 742' },
+    });
     fireEvent.click(getByText('Guardar'));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());

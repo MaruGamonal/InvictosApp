@@ -61,9 +61,10 @@ describe('FormularioReglamentoInicial', () => {
   });
 
   it('al elegir un archivo, lo sube y muestra el nombre', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: true, json: async () => ({ ok: true, data: { archivoUrl: 'https://cdn/x.pdf' } }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, data: { archivoUrl: 'https://cdn/x.pdf' } }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText, container } = render(<FormularioReglamentoInicial torneoId="t-1" />);
@@ -82,9 +83,10 @@ describe('FormularioReglamentoInicial', () => {
   });
 
   it('si publicar el reglamento falla, muestra el error', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: false, json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText, getByPlaceholderText } = render(

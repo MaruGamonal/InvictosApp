@@ -48,9 +48,10 @@ function mockearDb(opciones: {
 describe('invitarColaborador', () => {
   it('el titular invita a alguien sin cuenta: se crea invited, se manda el enlace y queda asignado', async () => {
     const inserts = mockearDb({ rolEnOrganizacion: 'owner', usuarioExistente: null });
-    const inviteUserByEmail = vi
-      .fn()
-      .mockResolvedValue({ data: { user: { id: '44444444-4444-4444-4444-444444444444' } }, error: null });
+    const inviteUserByEmail = vi.fn().mockResolvedValue({
+      data: { user: { id: '44444444-4444-4444-4444-444444444444' } },
+      error: null,
+    });
     vi.doMock('@/lib/supabase/admin', () => ({
       obtenerClienteAdmin: () => ({ auth: { admin: { inviteUserByEmail } } }),
     }));
@@ -74,7 +75,10 @@ describe('invitarColaborador', () => {
     }));
     const { invitarColaborador } = await import('./invitarColaborador');
     await expect(
-      invitarColaborador({ torneoId: TORNEO, email: 'nuevo@example.com' }, contextoCon('usuario-titular')),
+      invitarColaborador(
+        { torneoId: TORNEO, email: 'nuevo@example.com' },
+        contextoCon('usuario-titular'),
+      ),
     ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
   });
 

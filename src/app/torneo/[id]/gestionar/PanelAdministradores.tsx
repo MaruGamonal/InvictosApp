@@ -49,7 +49,11 @@ export function PanelAdministradores({
       const respuesta = await fetch('/api/organizaciones/invitar-administrador', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizacionId, email, nombreCompleto: nombreCompleto || undefined }),
+        body: JSON.stringify({
+          organizacionId,
+          email,
+          nombreCompleto: nombreCompleto || undefined,
+        }),
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
@@ -105,7 +109,9 @@ export function PanelAdministradores({
             <span className={styles.nombreIntegrante}>{persona.nombreCompleto}</span>
             <div className={styles.filaBadgesRol}>
               <Badge campo="miembroOrganizacion.rol" valor={persona.rol} />
-              {persona.estado !== 'active' && <Badge campo="usuario.estado" valor={persona.estado} />}
+              {persona.estado !== 'active' && (
+                <Badge campo="usuario.estado" valor={persona.estado} />
+              )}
             </div>
           </div>
           {esTitular && persona.rol === 'admin' && (
@@ -147,8 +153,8 @@ export function PanelAdministradores({
             </button>
           </form>
           <p className={styles.avisoChico}>
-            Un Administrador opera sobre todos los torneos de la organización, igual que vos —
-            salvo que no puede sumar ni sacar administradores.
+            Un Administrador opera sobre todos los torneos de la organización, igual que vos — salvo
+            que no puede sumar ni sacar administradores.
           </p>
         </>
       ) : (

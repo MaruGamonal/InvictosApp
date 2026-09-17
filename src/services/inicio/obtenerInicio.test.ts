@@ -300,7 +300,12 @@ describe('obtenerInicio', () => {
     const resultado = await obtenerInicio(undefined, contextoCon('usuario-1'));
 
     expect(resultado.jugador?.equipos).toEqual([
-      { id: 'eq-1', nombre: 'Los Pibes', categoriaGenero: 'male', rolesEquipo: ['player', 'delegate'] },
+      {
+        id: 'eq-1',
+        nombre: 'Los Pibes',
+        categoriaGenero: 'male',
+        rolesEquipo: ['player', 'delegate'],
+      },
     ]);
   });
 

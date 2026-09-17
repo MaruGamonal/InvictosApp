@@ -45,9 +45,9 @@ describe('obtenerEstadisticasTorneo', () => {
   it('torneo inexistente, NO_ENCONTRADO', async () => {
     mockearDb({ torneo: null });
     const { obtenerEstadisticasTorneo } = await import('./obtenerEstadisticasTorneo');
-    await expect(
-      obtenerEstadisticasTorneo({ torneoId: TORNEO }, VISITANTE),
-    ).rejects.toMatchObject({ codigo: 'NO_ENCONTRADO' });
+    await expect(obtenerEstadisticasTorneo({ torneoId: TORNEO }, VISITANTE)).rejects.toMatchObject({
+      codigo: 'NO_ENCONTRADO',
+    });
   });
 
   it('sin eventos cargados, listas vacías', async () => {

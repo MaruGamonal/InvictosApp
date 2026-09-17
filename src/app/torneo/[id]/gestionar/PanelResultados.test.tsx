@@ -88,7 +88,9 @@ describe('PanelResultados', () => {
       <PanelResultados
         partidos={[PARTIDO]}
         elegiblesPorEquipo={{
-          'equipo-local': [{ perfilId: 'perfil-dt', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' }],
+          'equipo-local': [
+            { perfilId: 'perfil-dt', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' },
+          ],
         }}
       />,
     );
@@ -128,7 +130,9 @@ describe('PanelResultados', () => {
       <PanelResultados
         partidos={[PARTIDO]}
         elegiblesPorEquipo={{
-          'equipo-local': [{ perfilId: 'perfil-dt', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' }],
+          'equipo-local': [
+            { perfilId: 'perfil-dt', nombreVisible: 'DT Pedro', rolEnTorneo: 'coach' },
+          ],
         }}
       />,
     );

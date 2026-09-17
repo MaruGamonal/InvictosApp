@@ -20,10 +20,10 @@ export interface PreferenciaCategoria {
   emailActivo: boolean;
 }
 
-export const obtenerPreferenciasNotificacion: Servicio<
-  void,
-  PreferenciaCategoria[]
-> = async (_input, contexto) => {
+export const obtenerPreferenciasNotificacion: Servicio<void, PreferenciaCategoria[]> = async (
+  _input,
+  contexto,
+) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
 
   const pool = obtenerPool();

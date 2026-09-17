@@ -11,7 +11,9 @@ describe('subirImagenPublica', () => {
     vi.doMock('./supabase/admin', () => ({ obtenerClienteAdmin: () => ({}) }));
     const { subirImagenPublica } = await import('./almacenamiento');
 
-    await expect(subirImagenPublica('perfiles/u-1', archivoFalso('application/pdf', 10))).rejects.toMatchObject({
+    await expect(
+      subirImagenPublica('perfiles/u-1', archivoFalso('application/pdf', 10)),
+    ).rejects.toMatchObject({
       codigo: 'DATOS_INVALIDOS',
     });
   });
@@ -39,7 +41,9 @@ describe('subirImagenPublica', () => {
 
   it('sube el archivo y devuelve la URL pública', async () => {
     const upload = vi.fn().mockResolvedValue({ error: null });
-    const getPublicUrl = vi.fn().mockReturnValue({ data: { publicUrl: 'https://cdn/media/perfiles/u-1/1.png' } });
+    const getPublicUrl = vi
+      .fn()
+      .mockReturnValue({ data: { publicUrl: 'https://cdn/media/perfiles/u-1/1.png' } });
     vi.doMock('./supabase/admin', () => ({
       obtenerClienteAdmin: () => ({ storage: { from: () => ({ upload, getPublicUrl }) } }),
     }));

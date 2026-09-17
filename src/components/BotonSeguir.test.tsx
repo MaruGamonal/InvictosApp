@@ -56,13 +56,18 @@ describe('BotonSeguir', () => {
     fireEvent.click(getByRole('button', { name: 'Seguir' }));
 
     await waitFor(() =>
-      expect(push).toHaveBeenCalledWith('/ingresar?accion=seguir&tipoSeguido=tournament&entidadId=t-1'),
+      expect(push).toHaveBeenCalledWith(
+        '/ingresar?accion=seguir&tipoSeguido=tournament&entidadId=t-1',
+      ),
     );
     expect(getByRole('button', { name: 'Seguir' })).toBeTruthy();
   });
 
   it('muestra la cantidad inicial de seguidores recibida por prop', () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }),
+    );
     const { getByText } = render(
       <BotonSeguir tipoSeguido="team" entidadId="e-1" cantidadSeguidoresInicial={128} />,
     );
@@ -70,13 +75,19 @@ describe('BotonSeguir', () => {
   });
 
   it('sin seguidores todavía, muestra "0 seguidores" (no lo oculta)', () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }),
+    );
     const { getByText } = render(<BotonSeguir tipoSeguido="team" entidadId="e-1" />);
     expect(getByText('0 seguidores')).toBeTruthy();
   });
 
   it('con un solo seguidor, usa el singular', () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }),
+    );
     const { getByText } = render(
       <BotonSeguir tipoSeguido="team" entidadId="e-1" cantidadSeguidoresInicial={1} />,
     );
@@ -100,7 +111,10 @@ describe('BotonSeguir', () => {
   });
 
   it('un número grande de seguidores se muestra con separador de miles', () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) }),
+    );
     const { getByText } = render(
       <BotonSeguir tipoSeguido="team" entidadId="e-1" cantidadSeguidoresInicial={12345} />,
     );

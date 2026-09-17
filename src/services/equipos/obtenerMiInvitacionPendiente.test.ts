@@ -59,7 +59,13 @@ describe('obtenerMiInvitacionPendiente', () => {
   it('con vínculo invited, devuelve el equipo y el/los rol/es propuestos', async () => {
     mockearDb({
       perfilId: 'perfil-1',
-      filas: [{ equipo_nombre: 'Defemi', escudo_url: 'https://ejemplo.com/escudo.png', rol_equipo: 'player' }],
+      filas: [
+        {
+          equipo_nombre: 'Defemi',
+          escudo_url: 'https://ejemplo.com/escudo.png',
+          rol_equipo: 'player',
+        },
+      ],
     });
     const { obtenerMiInvitacionPendiente } = await import('./obtenerMiInvitacionPendiente');
     const resultado = await obtenerMiInvitacionPendiente(

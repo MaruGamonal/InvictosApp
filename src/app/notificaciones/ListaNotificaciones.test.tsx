@@ -48,7 +48,10 @@ describe('ListaNotificaciones', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/notificaciones/marcar-leida',
-      expect.objectContaining({ method: 'POST', body: JSON.stringify({ notificacionId: 'notif-1' }) }),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ notificacionId: 'notif-1' }),
+      }),
     );
     expect(push).toHaveBeenCalledWith('/equipo/eq-1/invitacion');
   });

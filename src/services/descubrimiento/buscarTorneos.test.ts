@@ -174,19 +174,19 @@ describe('buscarTorneos', () => {
     await buscarTorneos({ ciudadId: CIUDAD, duracion: 'single_day' }, VISITANTE);
     let busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
     expect(busqueda!.texto).toContain(
-      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) = 0",
+      '(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) = 0',
     );
 
     await buscarTorneos({ ciudadId: CIUDAD, duracion: 'weekend' }, VISITANTE);
     busqueda = consultas.filter((c) => c.texto.startsWith('SELECT t.id, t.nombre')).pop();
     expect(busqueda!.texto).toContain(
-      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) BETWEEN 1 AND 2",
+      '(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) BETWEEN 1 AND 2',
     );
 
     await buscarTorneos({ ciudadId: CIUDAD, duracion: 'extended' }, VISITANTE);
     busqueda = consultas.filter((c) => c.texto.startsWith('SELECT t.id, t.nombre')).pop();
     expect(busqueda!.texto).toContain(
-      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) >= 3",
+      '(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) >= 3',
     );
   });
 
@@ -228,7 +228,10 @@ describe('buscarTorneos', () => {
   it('sin imagen propia, cae al logo de la organización (comportamiento de siempre)', async () => {
     mockearDb({
       torneos: [
-        filaTorneo('t1', { imagen_url: null, organizacion_logo_url: 'https://cdn.example.com/logo-org.png' }),
+        filaTorneo('t1', {
+          imagen_url: null,
+          organizacion_logo_url: 'https://cdn.example.com/logo-org.png',
+        }),
       ],
     });
     const { buscarTorneos } = await import('./buscarTorneos');

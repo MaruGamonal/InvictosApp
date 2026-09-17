@@ -18,8 +18,21 @@ export default async function PaginaPreferencias() {
 
   return (
     <div className={styles.pagina}>
-      <Link href="/notificaciones" className={styles.enlaceVolver} aria-label="Volver a notificaciones">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <Link
+        href="/notificaciones"
+        className={styles.enlaceVolver}
+        aria-label="Volver a notificaciones"
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="m15 5-7 7 7 7" />
         </svg>
       </Link>

@@ -53,8 +53,7 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
     <div className={styles.pagina}>
       <p className={styles.subtitulo}>
         {aprobados} equipo{aprobados === 1 ? '' : 's'}
-        {totalPartidos > 0 &&
-          ` · ${cantidadFechas} fecha${cantidadFechas === 1 ? '' : 's'}`}
+        {totalPartidos > 0 && ` · ${cantidadFechas} fecha${cantidadFechas === 1 ? '' : 's'}`}
       </p>
 
       {proximo ? (

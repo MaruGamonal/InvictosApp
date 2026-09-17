@@ -67,9 +67,10 @@ describe('BotonesResponderInvitacion', () => {
   });
 
   it('si la API falla, muestra un error y no navega', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ ok: false, json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }) });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const { getByText } = render(<BotonesResponderInvitacion equipoId="eq-1" />);

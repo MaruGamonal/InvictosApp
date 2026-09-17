@@ -76,9 +76,7 @@ describe('confirmarResultadosVencidos', () => {
 
     const consulta = consultas.find((c) => c.startsWith('SELECT p.id'));
     expect(consulta).toContain("t.estado = 'finished'");
-    expect(consulta).toContain(
-      "(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) <= 2",
-    );
+    expect(consulta).toContain('(t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) <= 2');
     expect(consulta).toContain("p.fecha_carga_resultado < now() - interval '72 hours'");
   });
 });

@@ -14,9 +14,7 @@ export default async function PaginaResultados({ params }: { params: Promise<{ i
   const gestion = await obtenerGestionCacheada(id);
 
   const partidosSinJugar = gestion.partidos.filter((p) => p.estado !== 'played');
-  const cargados = gestion.partidos.filter(
-    (p) => p.estado === 'played' || p.estado === 'walkover',
-  );
+  const cargados = gestion.partidos.filter((p) => p.estado === 'played' || p.estado === 'walkover');
 
   if (gestion.partidos.length === 0) {
     return <EstadoVacio mensaje="Todavía no hay partidos generados en el fixture." />;

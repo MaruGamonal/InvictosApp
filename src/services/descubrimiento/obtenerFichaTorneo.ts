@@ -198,7 +198,10 @@ async function obtenerUltimoPartido(
     estado: fila.estado,
     fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
     jugadorDelPartido: fila.jugador_del_partido_perfil_id
-      ? { perfilId: fila.jugador_del_partido_perfil_id, nombreVisible: fila.jugador_del_partido_nombre! }
+      ? {
+          perfilId: fila.jugador_del_partido_perfil_id,
+          nombreVisible: fila.jugador_del_partido_nombre!,
+        }
       : null,
   };
 }

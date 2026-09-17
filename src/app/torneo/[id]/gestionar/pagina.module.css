@@ -205,7 +205,8 @@
  */
 .filaAccion button,
 .filaAcciones button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
-.filaIntegranteCabecera button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
+.filaIntegranteCabecera
+  button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
 .filaGoles button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro) {
   background: var(--acento);
   color: var(--acento-texto-sobre);
@@ -219,7 +220,8 @@
 
 .filaAccion button:disabled,
 .filaAcciones button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled,
-.filaIntegranteCabecera button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled,
+.filaIntegranteCabecera
+  button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled,
 .filaGoles button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro):disabled {
   opacity: 0.6;
   cursor: default;

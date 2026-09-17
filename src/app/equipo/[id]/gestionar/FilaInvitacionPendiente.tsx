@@ -15,7 +15,13 @@ interface Props {
 }
 
 /** Invitación pendiente en el plantel: se ve igual que un integrante activo, con badge INVITADO en vez del rol. */
-export function FilaInvitacionPendiente({ equipoId, perfilId, nombreVisible, fotoUrl, rol }: Props) {
+export function FilaInvitacionPendiente({
+  equipoId,
+  perfilId,
+  nombreVisible,
+  fotoUrl,
+  rol,
+}: Props) {
   const router = useRouter();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);

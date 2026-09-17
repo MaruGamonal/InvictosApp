@@ -48,7 +48,11 @@ export default async function LayoutGestionar({
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.filaSuperior}>
-          <Link href={`/torneo/${id}`} className={styles.enlaceVolver} aria-label="Volver a la ficha del torneo">
+          <Link
+            href={`/torneo/${id}`}
+            className={styles.enlaceVolver}
+            aria-label="Volver a la ficha del torneo"
+          >
             <svg
               width="22"
               height="22"

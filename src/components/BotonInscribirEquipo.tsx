@@ -44,9 +44,7 @@ const MENSAJE_POR_ESTADO: Record<'pending' | 'waitlisted' | 'approved', string> 
 
 const ESTADOS_VIGENTES = new Set(['pending', 'waitlisted', 'approved']);
 
-function esEstadoVigente(
-  estado: string,
-): estado is 'pending' | 'waitlisted' | 'approved' {
+function esEstadoVigente(estado: string): estado is 'pending' | 'waitlisted' | 'approved' {
   return ESTADOS_VIGENTES.has(estado);
 }
 

@@ -36,7 +36,8 @@ export async function crearClienteServidor(opciones?: { recordarSesion?: boolean
     );
   }
 
-  const recordar = opciones?.recordarSesion ?? cookieStore.get(NOMBRE_COOKIE_RECORDAR)?.value !== '0';
+  const recordar =
+    opciones?.recordarSesion ?? cookieStore.get(NOMBRE_COOKIE_RECORDAR)?.value !== '0';
 
   return createServerClient(url, anonKey, {
     cookies: {

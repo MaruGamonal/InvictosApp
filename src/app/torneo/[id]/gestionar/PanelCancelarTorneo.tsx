@@ -100,8 +100,8 @@ export function PanelCancelarTorneo({ torneoId }: PanelCancelarTorneoProps) {
       )}
 
       <p className={styles.avisoChico}>
-        Los partidos ya jugados cuentan para el score de los equipos, aunque el torneo no
-        termine — nadie es responsable de la cancelación.
+        Los partidos ya jugados cuentan para el score de los equipos, aunque el torneo no termine —
+        nadie es responsable de la cancelación.
       </p>
 
       <div className={styles.filaAcciones}>
