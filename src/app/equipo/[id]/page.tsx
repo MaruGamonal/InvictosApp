@@ -5,7 +5,7 @@ import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { CompartirBoton } from '@/components/CompartirBoton';
-import { BloqueSeguimiento } from '@/components/BloqueSeguimiento';
+import { BotonSeguir } from '@/components/BotonSeguir';
 import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
 import { EnlaceGestionarEquipo } from '@/components/EnlaceGestionarEquipo';
 import { FilaPartido } from '@/components/FilaPartido';
@@ -15,6 +15,7 @@ import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
 import { cachearLecturaDeEquipo } from '@/lib/cache';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import { obtenerEquipoPublico, type EquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
 import { ListaPlantelPublico } from './ListaPlantelPublico';
 import styles from './pagina.module.css';
@@ -91,9 +92,16 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.heroContenido}>
-          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={88} />
+          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={80} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{equipo.nombre}</h1>
+            <p className={styles.metaLinea}>{formatearCantidadSeguidores(equipo.seguidores)}</p>
+            <p className={styles.metaLinea}>
+              {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
+              {equipo.ciudad && ` · ${equipo.ciudad.nombre}`}
+              {equipo.modalidadHabitual &&
+                ` · ${obtenerEtiqueta('torneo.modalidad', equipo.modalidadHabitual).etiqueta}`}
+            </p>
           </div>
         </div>
 
@@ -102,31 +110,16 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           (las dos redirigen a /ingresar sin sesión). Compartir es
           funcional: no necesita cuenta ni confirmación.
         */}
-        <BloqueSeguimiento
-          tipoSeguido="team"
-          entidadId={id}
-          cantidadSeguidoresInicial={equipo.seguidores}
-          claseCantidad={styles.seguidores}
-          claseAcciones={styles.accionesHero}
-          accionesExtra={
-            <>
-              <BotonPedirSumarme equipoId={id} />
-              <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
-            </>
-          }
-        >
-          <div className={styles.meta}>
-            <span className={styles.pillMeta}>
-              {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
-              {equipo.ciudad && ` · ${equipo.ciudad.nombre}`}
-            </span>
-            {equipo.modalidadHabitual && (
-              <span className={styles.pillMeta}>
-                {obtenerEtiqueta('torneo.modalidad', equipo.modalidadHabitual).etiqueta}
-              </span>
-            )}
-          </div>
-        </BloqueSeguimiento>
+        <div className={styles.accionesHero}>
+          <BotonSeguir
+            tipoSeguido="team"
+            entidadId={id}
+            cantidadSeguidoresInicial={equipo.seguidores}
+            mostrarCantidad={false}
+          />
+          <BotonPedirSumarme equipoId={id} />
+          <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
+        </div>
         {/*
           A diferencia de accionesHero (siempre visibles, D-04b), este
           enlace solo tiene sentido para quien tiene vínculo con el

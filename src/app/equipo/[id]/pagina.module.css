@@ -12,10 +12,8 @@
 
 .heroContenido {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 12px;
+  gap: 14px;
   max-width: 640px;
   margin: 0 auto;
 }
@@ -24,49 +22,25 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 3px;
 }
 
 .nombre {
-  font-size: 26px;
-  line-height: 1.15;
+  font-size: 22px;
+  line-height: 1.2;
   color: var(--identidad-texto);
   overflow-wrap: break-word;
 }
 
-.seguidores {
-  margin: 4px 0 0;
-  text-align: center;
+.metaLinea {
+  margin: 0;
   font-size: 13px;
   color: var(--identidad-texto-secundario);
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.pillMeta {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: var(--radio-pill);
-  background: var(--ink-700);
-  color: var(--identidad-texto-secundario);
-  font: 600 12px/1 var(--fuente-texto);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .accionesHero {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   max-width: 640px;

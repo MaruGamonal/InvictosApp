@@ -29,17 +29,14 @@ export default async function LayoutTorneo({
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.heroContenido}>
-          <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={88} />
+          <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={80} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{ficha.nombre}</h1>
-            <p className={styles.seguidores}>{formatearCantidadSeguidores(ficha.seguidores)}</p>
-            <div className={styles.meta}>
-              <span>{ficha.ciudad.nombre}</span>
-              <span className={styles.punto}>
-                {obtenerEtiqueta('torneo.modalidad', ficha.modalidad).etiqueta}
-              </span>
-              <Badge campo="torneo.estado" valor={ficha.estado} />
-            </div>
+            <p className={styles.metaLinea}>
+              {formatearCantidadSeguidores(ficha.seguidores)} · {ficha.ciudad.nombre} ·{' '}
+              {obtenerEtiqueta('torneo.modalidad', ficha.modalidad).etiqueta}
+            </p>
+            <Badge campo="torneo.estado" valor={ficha.estado} />
           </div>
         </div>
       </header>
