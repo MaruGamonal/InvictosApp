@@ -1,0 +1,64 @@
+.contenedor {
+  position: relative;
+}
+
+.contenedor input {
+  border: 1px solid var(--borde-neutro);
+  border-radius: 6px;
+  padding: 13px 14px;
+  font-family: var(--fuente-texto);
+  font-size: 15px;
+  min-height: 48px;
+  outline: none;
+  width: 100%;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+
+.contenedor input:focus {
+  border: 2px solid var(--acento);
+  padding: 12px 13px;
+}
+
+.panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.estado {
+  margin: 4px;
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.opcion {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 9px 8px;
+  border-radius: 6px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-texto);
+}
+
+.opcion:hover {
+  background: var(--fondo-sutil);
+}

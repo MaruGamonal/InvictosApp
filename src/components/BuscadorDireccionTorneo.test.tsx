@@ -1,30 +1,28 @@
 // @vitest-environment happy-dom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { BuscadorDireccionTorneo } from './BuscadorDireccionTorneo';
 
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+function renderConLabel(onChange = vi.fn()) {
+  const utils = render(
+    <>
+      <label htmlFor="direccion">Dirección</label>
+      <BuscadorDireccionTorneo id="direccion" value="" onChange={onChange} />
+    </>,
+  );
+  return { ...utils, onChange };
+}
+
 describe('BuscadorDireccionTorneo', () => {
-  beforeEach(() => {
-    vi.stubEnv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY', '');
-    // @ts-expect-error -- se limpia entre tests
-    delete window.google;
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.unstubAllEnvs();
-  });
-
-  it('sin API key, funciona como input de texto libre: cada tecleo llega al padre', () => {
-    const onChange = vi.fn();
-    const { getByLabelText } = render(
-      <>
-        <label htmlFor="direccion">Dirección</label>
-        <BuscadorDireccionTorneo id="direccion" value="" onChange={onChange} />
-      </>,
-    );
-
+  it('escribir sin elegir una sugerencia funciona como texto libre, sin coordenadas', () => {
+    const { getByLabelText, onChange } = renderConLabel();
     const input = getByLabelText('Dirección') as HTMLInputElement;
+
     fireEvent.change(input, { target: { value: 'Cancha 3' } });
 
     expect(onChange).toHaveBeenCalledWith({
@@ -34,42 +32,91 @@ describe('BuscadorDireccionTorneo', () => {
     });
   });
 
-  it('con Places disponible, solo actualiza al elegir una sugerencia real (con coordenadas)', async () => {
-    vi.stubEnv('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY', 'una-key-de-prueba');
+  it('con menos de 3 caracteres, no busca', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const { getByLabelText } = renderConLabel();
 
-    let callbackPlaceChanged: (() => void) | undefined;
-    const getPlace = vi.fn().mockReturnValue({
-      formatted_address: 'Cancha 3, Parque Sarmiento, Rosario, Argentina',
-      geometry: { location: { lat: () => -32.9468, lng: () => -60.6393 } },
+    fireEvent.change(getByLabelText('Dirección'), { target: { value: 'Ca' } });
+    fireEvent.focus(getByLabelText('Dirección'));
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('con 3+ caracteres, busca (con debounce) y lista las sugerencias', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          resultados: [
+            {
+              direccion: 'Cancha 3, Parque Sarmiento, Rosario, Argentina',
+              latitud: -32.9468,
+              longitud: -60.6393,
+            },
+          ],
+        },
+      }),
     });
-    const addListener = vi.fn((evento: string, callback: () => void) => {
-      if (evento === 'place_changed') callbackPlaceChanged = callback;
-    });
-    const AutocompleteMock = vi.fn().mockImplementation(() => ({ addListener, getPlace }));
+    vi.stubGlobal('fetch', fetchMock);
 
-    // @ts-expect-error -- stub mínimo para el test
-    window.google = { maps: { places: { Autocomplete: AutocompleteMock } } };
+    const { getByLabelText, getByText, getByRole } = renderConLabel();
+    fireEvent.change(getByLabelText('Dirección'), { target: { value: 'Parque Sarmiento' } });
 
-    const onChange = vi.fn();
-    const { getByLabelText } = render(
-      <>
-        <label htmlFor="direccion">Dirección</label>
-        <BuscadorDireccionTorneo id="direccion" value="" onChange={onChange} />
-      </>,
+    await waitFor(() =>
+      expect(getByText('Cancha 3, Parque Sarmiento, Rosario, Argentina')).toBeTruthy(),
     );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/api/geocodificacion/buscar?q=Parque'),
+    );
+    expect(getByRole('listbox')).toBeTruthy();
+  });
 
-    await waitFor(() => expect(AutocompleteMock).toHaveBeenCalled());
+  it('elegir una sugerencia llama a onChange con direccion+coordenadas y cierra el panel', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          resultados: [
+            {
+              direccion: 'Cancha 3, Parque Sarmiento, Rosario, Argentina',
+              latitud: -32.9468,
+              longitud: -60.6393,
+            },
+          ],
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
 
-    const input = getByLabelText('Dirección') as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'texto sin elegir de la lista' } });
-    expect(onChange).not.toHaveBeenCalled();
+    const { getByLabelText, getByText, queryByRole, onChange } = renderConLabel();
+    fireEvent.change(getByLabelText('Dirección'), { target: { value: 'Parque Sarmiento' } });
+    await waitFor(() =>
+      expect(getByText('Cancha 3, Parque Sarmiento, Rosario, Argentina')).toBeTruthy(),
+    );
+    onChange.mockClear();
 
-    callbackPlaceChanged?.();
+    fireEvent.click(getByText('Cancha 3, Parque Sarmiento, Rosario, Argentina'));
 
     expect(onChange).toHaveBeenCalledWith({
       direccion: 'Cancha 3, Parque Sarmiento, Rosario, Argentina',
       latitud: -32.9468,
       longitud: -60.6393,
     });
+    expect(queryByRole('listbox')).toBeNull();
+  });
+
+  it('si la búsqueda falla, no rompe: muestra "sin resultados" en vez de una sugerencia', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    const { getByLabelText, getByText } = renderConLabel();
+
+    fireEvent.change(getByLabelText('Dirección'), { target: { value: 'Parque Sarmiento' } });
+
+    await waitFor(() =>
+      expect(getByText('No encontramos ninguna dirección con ese texto.')).toBeTruthy(),
+    );
   });
 });
