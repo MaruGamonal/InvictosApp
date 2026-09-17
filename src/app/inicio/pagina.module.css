@@ -70,28 +70,13 @@
   text-transform: uppercase;
 }
 
-.switchModo {
-  display: flex;
-  background: var(--ink-800);
-  border-radius: var(--radio-boton);
-  padding: 3px;
+.selectorModo {
+  display: inline-block;
   margin-top: 14px;
-}
-
-.switchOpcion,
-.switchOpcionActiva {
-  flex: 1;
-  text-align: center;
-  padding: 9px 0;
-  border-radius: 6px;
-  font: 700 13px/1 var(--fuente-texto);
-  text-decoration: none;
+  font: 600 12px/1 var(--fuente-texto);
+  text-decoration: underline;
+  text-underline-offset: 2px;
   color: var(--identidad-texto-secundario);
-}
-
-.switchOpcionActiva {
-  background: var(--acento);
-  color: var(--acento-texto-sobre);
 }
 
 .contenido {

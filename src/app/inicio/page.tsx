@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerInicio } from '@/services/inicio/obtenerInicio';
 import { obtenerActividad } from '@/services/inicio/obtenerActividad';
+import { NOMBRE_COOKIE_MODO_INICIO, comoModoInicio, type ModoInicio } from '@/lib/modoInicio';
 import { NavInferior } from '@/components/NavInferior';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { TarjetaTorneoResumen } from '@/components/TarjetaTorneoResumen';
 import { TarjetaActividad } from '@/components/TarjetaActividad';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { SelectorModoInicio } from './SelectorModoInicio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import styles from './pagina.module.css';
@@ -89,14 +92,24 @@ export default async function PaginaInicio({
   const parametros = await searchParams;
 
   const mostrarSwitch = inicio.esJugador && inicio.esOrganizador;
-  const modo: 'jugador' | 'organizador' =
-    parametros.modo === 'organizador' && inicio.esOrganizador
-      ? 'organizador'
-      : parametros.modo === 'jugador' && inicio.esJugador
-        ? 'jugador'
-        : inicio.esJugador
-          ? 'jugador'
-          : 'organizador';
+
+  function resolverModo(candidato: ModoInicio | null): ModoInicio | null {
+    if (candidato === 'jugador' && inicio.esJugador) return 'jugador';
+    if (candidato === 'organizador' && inicio.esOrganizador) return 'organizador';
+    return null;
+  }
+
+  const cookieStore = await cookies();
+  const modoPreferido = comoModoInicio(cookieStore.get(NOMBRE_COOKIE_MODO_INICIO)?.value);
+
+  // Inicio siempre arranca en modo Jugador por defecto (`SelectorModoInicio`
+  // ofrece pasar a Organizador de forma discreta) — ?modo= manda para el
+  // enlace recién clickeado, y si no viene, la preferencia guardada decide
+  // qué mostrar en las visitas siguientes.
+  const modo: ModoInicio =
+    resolverModo(comoModoInicio(parametros.modo)) ??
+    resolverModo(modoPreferido) ??
+    (inicio.esJugador ? 'jugador' : 'organizador');
 
   const activos =
     !inicio.esRecienLlegado && modo === 'jugador' && inicio.jugador
@@ -184,22 +197,7 @@ export default async function PaginaInicio({
           </Link>
         </div>
 
-        {mostrarSwitch && (
-          <div className={styles.switchModo}>
-            <Link
-              href="/inicio?modo=jugador"
-              className={modo === 'jugador' ? styles.switchOpcionActiva : styles.switchOpcion}
-            >
-              Jugador
-            </Link>
-            <Link
-              href="/inicio?modo=organizador"
-              className={modo === 'organizador' ? styles.switchOpcionActiva : styles.switchOpcion}
-            >
-              Organizador
-            </Link>
-          </div>
-        )}
+        {mostrarSwitch && <SelectorModoInicio modoActual={modo} />}
       </header>
 
       <div className={styles.contenido}>
