@@ -55,12 +55,6 @@
   letter-spacing: 0.04em;
 }
 
-.bloqueSeguir {
-  display: flex;
-  justify-content: center;
-  margin: 16px auto 0;
-}
-
 .accionesHero {
   display: flex;
   align-items: center;
@@ -68,15 +62,7 @@
   flex-wrap: wrap;
   gap: 8px;
   max-width: 640px;
-  margin: 10px auto 0;
-}
-
-.avisoHero {
-  max-width: 640px;
-  margin: 10px auto 0;
-  color: var(--identidad-texto-secundario);
-  font-size: 12px;
-  line-height: 1.4;
+  margin: 16px auto 0;
 }
 
 .contenido {

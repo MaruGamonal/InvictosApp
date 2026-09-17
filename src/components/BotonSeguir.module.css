@@ -1,8 +1,7 @@
 .envoltorio {
   display: inline-flex;
-  flex-direction: column-reverse;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .cantidad {

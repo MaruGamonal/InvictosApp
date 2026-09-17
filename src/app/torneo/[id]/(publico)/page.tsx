@@ -85,14 +85,12 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         /ingresar sin sesión). Compartir es funcional: no necesita cuenta
         ni confirmación.
       */}
-      <div className={styles.bloqueSeguir}>
+      <div className={styles.accionesHero}>
         <BotonSeguir
           tipoSeguido="tournament"
           entidadId={id}
           cantidadSeguidoresInicial={ficha.seguidores}
         />
-      </div>
-      <div className={styles.accionesHero}>
         {ficha.estado === 'registration_open' && (
           <BotonInscribirEquipo torneoId={id} reglamentoVigente={reglamentoVigente} />
         )}

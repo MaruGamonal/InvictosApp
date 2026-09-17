@@ -113,20 +113,15 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           (las dos redirigen a /ingresar sin sesión). Compartir es
           funcional: no necesita cuenta ni confirmación.
         */}
-        <div className={styles.bloqueSeguir}>
+        <div className={styles.accionesHero}>
           <BotonSeguir
             tipoSeguido="team"
             entidadId={id}
             cantidadSeguidoresInicial={equipo.seguidores}
           />
-        </div>
-        <div className={styles.accionesHero}>
           <BotonPedirSumarme equipoId={id} />
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>
-        <p className={styles.avisoHero}>
-          Seguir es al toque. Sumarte al plantel necesita que alguien del equipo lo confirme.
-        </p>
         {/*
           A diferencia de accionesHero (siempre visibles, D-04b), este
           enlace solo tiene sentido para quien tiene vínculo con el
@@ -334,7 +329,7 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
         </section>
       </main>
 
-      <NavInferior activo="torneos" />
+      <NavInferior activo="equipos" />
     </div>
   );
 }
