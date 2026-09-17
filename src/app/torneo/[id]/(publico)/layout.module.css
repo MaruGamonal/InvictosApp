@@ -35,6 +35,12 @@
   overflow-wrap: break-word;
 }
 
+.seguidores {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gris-claro-sobre-oscuro);
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;

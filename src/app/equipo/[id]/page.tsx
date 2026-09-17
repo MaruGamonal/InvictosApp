@@ -5,7 +5,7 @@ import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { CompartirBoton } from '@/components/CompartirBoton';
-import { BotonSeguir } from '@/components/BotonSeguir';
+import { BloqueSeguimiento } from '@/components/BloqueSeguimiento';
 import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
 import { EnlaceGestionarEquipo } from '@/components/EnlaceGestionarEquipo';
 import { FilaPartido } from '@/components/FilaPartido';
@@ -94,17 +94,6 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={88} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{equipo.nombre}</h1>
-            <div className={styles.meta}>
-              <span className={styles.pillMeta}>
-                {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
-                {equipo.ciudad && ` · ${equipo.ciudad.nombre}`}
-              </span>
-              {equipo.modalidadHabitual && (
-                <span className={styles.pillMeta}>
-                  {obtenerEtiqueta('torneo.modalidad', equipo.modalidadHabitual).etiqueta}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
@@ -113,15 +102,31 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           (las dos redirigen a /ingresar sin sesión). Compartir es
           funcional: no necesita cuenta ni confirmación.
         */}
-        <div className={styles.accionesHero}>
-          <BotonSeguir
-            tipoSeguido="team"
-            entidadId={id}
-            cantidadSeguidoresInicial={equipo.seguidores}
-          />
-          <BotonPedirSumarme equipoId={id} />
-          <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
-        </div>
+        <BloqueSeguimiento
+          tipoSeguido="team"
+          entidadId={id}
+          cantidadSeguidoresInicial={equipo.seguidores}
+          claseCantidad={styles.seguidores}
+          claseAcciones={styles.accionesHero}
+          accionesExtra={
+            <>
+              <BotonPedirSumarme equipoId={id} />
+              <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
+            </>
+          }
+        >
+          <div className={styles.meta}>
+            <span className={styles.pillMeta}>
+              {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
+              {equipo.ciudad && ` · ${equipo.ciudad.nombre}`}
+            </span>
+            {equipo.modalidadHabitual && (
+              <span className={styles.pillMeta}>
+                {obtenerEtiqueta('torneo.modalidad', equipo.modalidadHabitual).etiqueta}
+              </span>
+            )}
+          </div>
+        </BloqueSeguimiento>
         {/*
           A diferencia de accionesHero (siempre visibles, D-04b), este
           enlace solo tiene sentido para quien tiene vínculo con el

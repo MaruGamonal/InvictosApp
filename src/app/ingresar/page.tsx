@@ -32,7 +32,12 @@ export const metadata: Metadata = {
 export default async function PaginaIngresar({
   searchParams,
 }: {
-  searchParams: Promise<{ modo?: string; accion?: string; tipoSeguido?: string; entidadId?: string }>;
+  searchParams: Promise<{
+    modo?: string;
+    accion?: string;
+    tipoSeguido?: string;
+    entidadId?: string;
+  }>;
 }) {
   const { modo, accion, tipoSeguido, entidadId } = await searchParams;
   const esTipoSeguidoValido = tipoSeguido === 'tournament' || tipoSeguido === 'team';

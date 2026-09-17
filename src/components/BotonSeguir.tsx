@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import styles from './BotonSeguir.module.css';
 
 export interface BotonSeguirProps {
@@ -9,6 +10,10 @@ export interface BotonSeguirProps {
   entidadId: string;
   /** Cantidad de seguidores al momento del render (server-side). Se ajusta localmente al seguir/dejar de seguir. */
   cantidadSeguidoresInicial?: number;
+  /** false cuando la cantidad se muestra aparte (p. ej. debajo del nombre) — el botón sigue solo. */
+  mostrarCantidad?: boolean;
+  /** Se llama con la cantidad ya ajustada, para que quien la muestre aparte quede sincronizado. */
+  onCambioCantidad?: (cantidad: number) => void;
 }
 
 /**
@@ -30,18 +35,25 @@ export interface BotonSeguirProps {
  * repite del lado del cliente, ya con sesión) sin volver a tocar
  * "Seguir".
  */
-function formatearCantidad(cantidad: number): string {
-  return cantidad.toLocaleString('es-AR');
-}
-
 export function BotonSeguir({
   tipoSeguido,
   entidadId,
   cantidadSeguidoresInicial = 0,
+  mostrarCantidad = true,
+  onCambioCantidad,
 }: BotonSeguirProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<'inicial' | 'enviando' | 'siguiendo'>('inicial');
   const [cantidad, setCantidad] = useState(cantidadSeguidoresInicial);
+
+  useEffect(() => {
+    onCambioCantidad?.(cantidad);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cantidad]);
+
+  function ajustarCantidad(delta: number) {
+    setCantidad((actual) => Math.max(0, actual + delta));
+  }
 
   useEffect(() => {
     let cancelado = false;
@@ -71,9 +83,7 @@ export function BotonSeguir({
       });
 
       if (respuesta.status === 401) {
-        router.push(
-          `/ingresar?accion=seguir&tipoSeguido=${tipoSeguido}&entidadId=${entidadId}`,
-        );
+        router.push(`/ingresar?accion=seguir&tipoSeguido=${tipoSeguido}&entidadId=${entidadId}`);
         return;
       }
       if (!respuesta.ok) {
@@ -81,7 +91,7 @@ export function BotonSeguir({
         return;
       }
       setEstado(siguiendo ? 'inicial' : 'siguiendo');
-      setCantidad((actual) => Math.max(0, actual + (siguiendo ? -1 : 1)));
+      ajustarCantidad(siguiendo ? -1 : 1);
     } catch {
       setEstado(siguiendo ? 'siguiendo' : 'inicial');
     }
@@ -97,9 +107,9 @@ export function BotonSeguir({
       >
         {estado === 'siguiendo' ? 'Siguiendo ✓' : 'Seguir'}
       </button>
-      <span className={styles.cantidad}>
-        {formatearCantidad(cantidad)} {cantidad === 1 ? 'seguidor' : 'seguidores'}
-      </span>
+      {mostrarCantidad && (
+        <span className={styles.cantidad}>{formatearCantidadSeguidores(cantidad)}</span>
+      )}
     </div>
   );
 }

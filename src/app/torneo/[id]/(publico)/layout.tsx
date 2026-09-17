@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import { obtenerFichaOFallar } from '../_datos';
 import styles from './layout.module.css';
 
@@ -31,6 +32,7 @@ export default async function LayoutTorneo({
           <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={88} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{ficha.nombre}</h1>
+            <p className={styles.seguidores}>{formatearCantidadSeguidores(ficha.seguidores)}</p>
             <div className={styles.meta}>
               <span>{ficha.ciudad.nombre}</span>
               <span className={styles.punto}>

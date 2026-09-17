@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Contexto } from '@/lib/contexto';
 
-const USUARIO: Contexto = { usuarioId: '11111111-1111-1111-1111-111111111111', permisos: {}, esSistema: false };
+const USUARIO: Contexto = {
+  usuarioId: '11111111-1111-1111-1111-111111111111',
+  permisos: {},
+  esSistema: false,
+};
 const VISITANTE: Contexto = { usuarioId: null, permisos: {}, esSistema: false };
 
 const cookieSet = vi.fn();

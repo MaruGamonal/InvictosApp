@@ -35,12 +35,20 @@
   overflow-wrap: break-word;
 }
 
+.seguidores {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--identidad-texto-secundario);
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   align-items: center;
+  margin-top: 8px;
 }
 
 .pillMeta {

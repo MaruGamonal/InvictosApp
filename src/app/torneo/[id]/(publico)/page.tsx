@@ -90,6 +90,7 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
           tipoSeguido="tournament"
           entidadId={id}
           cantidadSeguidoresInicial={ficha.seguidores}
+          mostrarCantidad={false}
         />
         {ficha.estado === 'registration_open' && (
           <BotonInscribirEquipo torneoId={id} reglamentoVigente={reglamentoVigente} />

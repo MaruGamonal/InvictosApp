@@ -180,7 +180,11 @@ export default async function PaginaInicio({
                 : 'Inicio'}
             </div>
           </div>
-          <Link href="/notificaciones" className={styles.enlaceNotificaciones} aria-label="Notificaciones">
+          <Link
+            href="/notificaciones"
+            className={styles.enlaceNotificaciones}
+            aria-label="Notificaciones"
+          >
             <svg
               width="22"
               height="22"
