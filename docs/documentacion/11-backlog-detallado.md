@@ -217,6 +217,8 @@ Este ticket traduce el modelo conceptual de `03` a tablas, y sube al esquema las
 - Columna `version` en `partido` y en `torneo`, para el control optimista de T15.
 - Las enumeraciones de `04` como tipos del esquema, con exactamente los valores documentados.
 - Los índices críticos de `10`, 3.3, cada uno con la consulta que sostiene — incluido el de `ciudad`.
+- **Tabla `certamen`** (`03`, 3.23): tres columnas —`id`, `organizacion_id`, `nombre`— y nada más. `torneo` suma **`certamen_id` (nulable)** y **`division` (texto libre, nulable)**. **[`06`, D-103]** Se llama `certamen` y no `competencia` para no chocar con el dominio D7, que ya se llama así.
+- **Dos restricciones de la tabla `torneo`** (`10`, 3.2): **único parcial** sobre `(certamen_id, division)` **donde `certamen_id` no es nulo** —dos divisiones del mismo evento no pueden llamarse igual (`06`, D-104)—, y **`certamen_id` y `division` nulos o ambos cargados**. El parcial importa: el caso normal tiene los dos campos vacíos y **no puede verse afectado**.
 - **Tablas `provincia` y `ciudad`** (`03`, 3.22): dos niveles y una clave foránea, nada más. Las cinco entidades que las usan —torneo, equipo, sede, organización, perfil_deportivo— referencian **`ciudad_id`**, no texto. El **torneo suma además `direccion`** en texto libre.
 - **Nada de árboles, rutas materializadas, `ltree` ni PostGIS** (`10`, 3.3): con dos niveles, filtrar es igualdad y el escalón a provincia es un `join`. **Sin coordenadas** (`06`, D-89).
 - El catálogo de ciudades es **de solo lectura para la aplicación**: se carga una vez y solo lo toca la administración de la plataforma (`06`, D-88).
@@ -239,6 +241,7 @@ Este ticket traduce el modelo conceptual de `03` a tablas, y sube al esquema las
 - **Dado** un partido, **cuando** se intenta referenciar un equipo que no tiene inscripción en ese torneo, **entonces** la clave foránea hacia `inscripcion` lo rechaza.
 - **Dado** un torneo con la regla de jugador único activa, **cuando** se intenta habilitar al mismo perfil con rol de jugador por dos equipos del mismo torneo, **entonces** el único parcial lo rechaza.
 - **Dado** un reglamento con `numero_version` 2 en un torneo, **cuando** se intenta insertar otra versión 2 del mismo torneo, **entonces** la base lo rechaza.
+- **Dado** un certamen con una división "B", **cuando** se intenta insertar otro torneo con `division` "B" y el mismo `certamen_id`, **entonces** la base lo rechaza; **y dado** dos torneos sueltos cualesquiera, **cuando** los dos tienen `certamen_id` y `division` nulos, **entonces** la base los acepta —el único es parcial—.
 - **Dado** el filtro de descubrimiento con ciudad, modalidad, categoría, estado y fecha, **cuando** se explica el plan de la consulta, **entonces** usa el índice de `torneo` y no recorre la tabla entera.
 
 ### Cómo demostrarlo
@@ -540,7 +543,7 @@ Con dos torneos de la misma organización a la vista, se asigna a una persona co
 ## Ticket 9 — Torneos: crear, configurar y definir formato
 
 **Dominio:** D4 Torneos | **Prioridad:** Alta | **Estado:** 🟢 MVP
-**Referencia:** Especificación sección 4.4 · Casos de uso UC-16, UC-17 · Decisiones D-20b, D-30b, D-38b, D-59 · Enumeraciones `04`, 4.2, 4.3, 5
+**Referencia:** Especificación sección 4.4 · Casos de uso UC-16, UC-17 · Decisiones D-20b, D-30b, D-38b, D-59, **D-103 a D-106** · Enumeraciones `04`, 4.2, 4.3, 5
 **Depende de:** T7
 
 ### Contexto y objetivo
@@ -557,6 +560,9 @@ El formato, además, es la decisión que determina cómo se genera el fixture y 
 - Configuración con sus defaults documentados: puntos **3/1/0** (`06`, D-20b); desempates en orden **diferencia de gol → goles a favor → enfrentamiento directo**; `categoria_edad` con **`open`** por defecto (`06`, D-38b); walkover **3-0** (`06`, D-33b); cierre de incorporaciones a la lista **"siempre abierta"** (`06`, D-30b); mínimo y máximo de lista **ambos opcionales** (`06`, D-59).
 - Parámetros configurables por torneo que otros tickets consultan: jugador habilitado en dos equipos (`06`, D-17b), qué pasa con los partidos de un equipo que abandona (`06`, D-08b), y si solo el organizador carga resultados (`06`, D-07b). **No hay parámetro de aprobación automática de inscripciones**: se eliminó (`06`, D-93).
 - `definirFormato` (UC-17): crea **fases y grupos** según el formato elegido de `04`, 4.2 — `league`, `knockout`, `groups_knockout`. Falla con `TORNEO_YA_EMPEZADO` si hay partidos jugados.
+- **`agregarDivision`** (UC-16, `10`, 4.4): abre otra **categoría competitiva** del mismo evento —la B, la C—. Crea el `certamen` si el torneo de origen no tenía, se lo asigna **también al de origen**, y **copia** el torneo: ciudad, dirección, fechas, modalidad, categorías, formato y sus parámetros, puntajes, desempates, mín/máx de lista, cupo, visibilidad, **última versión del reglamento** y **filas de `colaborador_torneo`**. El nuevo nace en `draft`. **No copia** inscripciones, partidos, posiciones ni `fecha_publicacion`. Etiqueta repetida → `DIVISION_DUPLICADA`.
+- **[`06`, D-103] Es una copia, no una referencia, y de eso depende todo el resto del backlog.** Después de este servicio **ningún otro ticket sabe que las divisiones existen**: T12, T13, T14, T16 y T18 leen un torneo normal, con todos sus campos propios. Si en vez de copiar se compartiera la configuración, cada uno de ellos tendría que preguntar antes si el torneo tiene certamen.
+- **[`06`, D-106] No hay servicios de certamen.** Ni `avanzarEstadoCertamen` ni `finalizarCertamen`: cada división avanza por su cuenta. `certamen` es una tabla de dos columnas que solo se lee para agrupar en el listado (T18).
 - `actualizarTorneo` (UC-19), con la regla de que el cupo **no puede bajarse** por debajo de los equipos ya aprobados (`06`, A-04, confirmado en D-68).
 - Columna `version` del torneo, en uso para el control optimista (`10`, 2.5).
 
@@ -577,6 +583,9 @@ El formato, además, es la decisión que determina cómo se genera el fixture y 
 - **Dado** un torneo con partidos ya jugados, **cuando** se intenta cambiar el formato, **entonces** la operación se rechaza con `TORNEO_YA_EMPEZADO`.
 - **Dado** un torneo con seis equipos aprobados, **cuando** se intenta bajar el cupo a cuatro, **entonces** la operación se rechaza y el cupo no cambia.
 - **Dado** un torneo de grupos más eliminatoria, **cuando** se define el formato con la cantidad de zonas y de clasificados por zona, **entonces** quedan creadas las fases en orden y los grupos de la primera.
+- **Dado** un torneo configurado con reglamento y dos colaboradores, **cuando** se le agrega la división "B", **entonces** queda creado un certamen con los dos torneos, el nuevo está en `draft` con la misma ciudad, fechas, formato, reglamento y los dos colaboradores, y **sin ninguna inscripción**.
+- **Dado** un certamen que ya tiene una división "B", **cuando** se intenta agregar otra "B", **entonces** la operación se rechaza con `DIVISION_DUPLICADA`.
+- **Dado** un certamen con divisiones "A" y "B", **cuando** se finaliza la "A", **entonces** la "B" **no cambia de estado** — cada división avanza por su cuenta.
 
 ### Cómo demostrarlo
 
@@ -679,7 +688,7 @@ Se carga un reglamento como texto en un torneo que ya tiene equipos inscriptos y
 ## Ticket 12 — Inscripciones: resolver, inscribir a mano y lista de espera
 
 **Dominio:** D6 Inscripciones | **Prioridad:** Alta | **Estado:** 🟢 MVP
-**Referencia:** Especificación sección 4.6 · Casos de uso UC-25, UC-26 · Decisiones D-27b, D-29b, D-32, D-82, D-93 · Enumeraciones `04`, 4.4
+**Referencia:** Especificación sección 4.6 · Casos de uso UC-25, UC-26 · Decisiones D-27b, D-29b, D-32, D-82, D-93, **D-108, D-109** · Enumeraciones `04`, 4.4, 4.15
 **Depende de:** T10, T11, T19, T25
 
 ### Contexto y objetivo
@@ -696,8 +705,10 @@ La otra pieza es quién decide: el organizador **siempre** decide quién entra a
 - **Lista de espera** (`06`, D-27b): al alcanzarse el cupo las solicitudes entran en `waitlisted`. Si el torneo no admite lista de espera → `CUPO_COMPLETO`.
 - Promoción desde la lista de espera cuando se libera un cupo.
 - Panel de inscripciones del organizador, apoyado en el índice `inscripcion (torneo_id, estado)`. **Cada solicitud con `advertencia_categoria = true` se muestra marcada** (`06`, D-82, `08`, 11.5): el género del equipo no coincide con el del torneo. **Es información para decidir, no un bloqueo** — el organizador aprueba o rechaza igual con ese dato a la vista.
+- **Rechazo por división equivocada** (`06`, D-108): `resolverInscripcion` acepta el motivo **`wrong_division`** (`04`, 4.15) con el `torneo_id` de la división sugerida, y la notificación al capitán lleva **el enlace directo a inscribirse ahí**. **No construir `reasignarInscripcion`:** la clave de `inscripcion` es `(torneo_id, equipo_id)`, así que mover un equipo sería borrar y reinsertar — y, sobre todo, la división es un juicio sobre el nivel del equipo y el equipo tiene que poder aceptarlo.
+- **Aviso de equipo en dos divisiones** (`06`, D-109): si el equipo ya tiene inscripción vigente en otra división del mismo certamen, la ficha de la solicitud lo muestra. **Avisa, no bloquea** — mismo tratamiento que `advertencia_categoria`.
 - Notificación al capitán en cada resolución (`04`, 4.12, `registration_resolved`).
-- Estados de `04`, 4.4: `pending`, `approved`, `rejected`, `withdrawn`, `excluded`, `waitlisted`.
+- Estados de `04`, 4.4: `pending`, `approved`, `rejected`, `withdrawn`, `excluded`, `waitlisted`. Motivos de `04`, 4.15, incluido **`wrong_division`**.
 
 ### Fuera de alcance de este ticket
 
@@ -716,6 +727,8 @@ La otra pieza es quién decide: el organizador **siempre** decide quién entra a
 - **Dado** un torneo con una vacante y una inscripción pendiente, **cuando** el organizador la aprueba, **entonces** en la misma operación la inscripción queda `approved` y el torneo pasa a `registration_closed`.
 - **Dado** un torneo con el cupo lleno y lista de espera habilitada, **cuando** llega una solicitud nueva, **entonces** queda `waitlisted`.
 - **Dado** un torneo con el cupo lleno y sin lista de espera, **cuando** llega una solicitud nueva, **entonces** la operación se rechaza con `CUPO_COMPLETO`.
+- **Dado** un certamen con divisiones "A" y "B" y un equipo anotado en la "A", **cuando** el organizador la rechaza con motivo `wrong_division` señalando la "B", **entonces** la inscripción queda `rejected` con ese motivo y la notificación al capitán ofrece inscribirse en la "B" en un paso.
+- **Dado** un equipo ya inscripto en la división "A", **cuando** solicita inscribirse también en la "B", **entonces** la solicitud **se acepta** y la ficha que ve el organizador muestra el aviso de que ya está en otra división.
 - **Dado** un Colaborador asignado al torneo, **cuando** intenta resolver una inscripción, **entonces** la operación se rechaza con `SIN_PERMISO`.
 - **Dado** cualquier torneo con inscripciones abiertas, **cuando** un equipo solicita inscribirse, **entonces** la inscripción queda `pending` — **no existe configuración alguna que la deje `approved` sin que el organizador intervenga**.
 
@@ -1254,7 +1267,7 @@ Se pega el link del torneo en un chat real y se muestra la previsualización con
 ## Ticket 22 — Descubrimiento: búsqueda, filtros y orden
 
 **Dominio:** D5 Descubrimiento | **Prioridad:** Alta | **Estado:** 🟢 MVP
-**Referencia:** Especificación secciones 2.7, 4.5 · Casos de uso UC-22 · Decisiones D-02, D-21b, D-25b, D-26b, D-51, D-65 · Brief `08`, 11.3
+**Referencia:** Especificación secciones 2.7, 4.5 · Casos de uso UC-22 · Decisiones D-02, D-21b, D-25b, D-26b, D-51, D-65, D-102, **D-107** · Brief `08`, 11.3
 **Depende de:** T10, T21
 
 ### Contexto y objetivo
@@ -1277,7 +1290,11 @@ Y hay una pantalla que merece atención especial: **sin resultados no es un erro
 - **Nada de coordenadas, radios ni cálculo de cercanía** (`06`, D-89), y **nunca inferir la ciudad por IP ni por el último uso** (D-90).
 - **Selector de ciudad**: búsqueda por nombre, **ciudades con torneos primero**, agrupadas por provincia y con la provincia siempre visible. Es el mismo componente que usan el alta de torneo, la de equipo y el perfil (`08`, 11.3).
 - Ruta `/torneos` renderizada en servidor, con caché corta (`10`, 2.8).
-- Tarjeta de torneo que se entienda **sin abrirla** (`08`, 11.10).
+- Tarjeta de torneo que se entienda **sin abrirla** (`08`, 11.10), con la **etiqueta de división** cuando el torneo pertenece a un certamen.
+- **Agrupar las divisiones de un mismo certamen** (`06`, D-107): si varios resultados contiguos comparten `certamen_id`, se muestran como **un bloque encabezado por el nombre del certamen, con una fila por división** — no como tres tarjetas casi idénticas.
+- **[`06`, D-107] El agrupamiento es de presentación, no de consulta. Esto es una restricción del ticket, no un detalle:** `buscarTorneos` sigue devolviendo **torneos**, con los mismos filtros, el mismo índice y la misma paginación por cursor. **No cambiar la consulta a devolver certámenes ni agregar semántica de "coincide si alguna división coincide"** — sería rehacer la consulta más caliente del producto para un caso poco frecuente.
+- **Consecuencia aceptada y a manejar en la interfaz:** si el corte de página cae en medio de un bloque, **el bloque se parte**. La parte de abajo **repite el encabezado del certamen** para que se siga leyendo.
+- **No hay filtro por división** (`06`, D-104): la etiqueta es texto libre y local a un organizador. Se muestra, no se filtra.
 
 ### Fuera de alcance de este ticket
 
@@ -1298,6 +1315,8 @@ Y hay una pantalla que merece atención especial: **sin resultados no es un erro
 - **Dado** una ciudad sin torneos, **cuando** se la consulta, **entonces** la respuesta es exitosa con lista vacía y trae **la provincia con su cantidad de torneos**.
 - **Dado** una persona sin ciudad indicada, **cuando** abre el descubrimiento, **entonces** el producto la pide **dentro de la pantalla**, sin bloquear el acceso y sin inferirla.
 - **Dado** un listado paginado por cursor, **cuando** se publica un torneo nuevo entre dos páginas, **entonces** no se repiten ni se saltean torneos.
+- **Dado** un certamen con tres divisiones publicadas en la misma ciudad, **cuando** se abre el descubrimiento, **entonces** se ven **como un bloque** con el nombre del certamen y tres filas, y no como tres tarjetas sueltas.
+- **Dado** ese mismo certamen, **cuando** se inspecciona la consulta que lo devuelve, **entonces** es la misma consulta de torneos, con el mismo índice y el mismo cursor — el agrupamiento ocurre al renderizar.
 - **Dado** la pantalla de descubrimiento, **cuando** se la abre, **entonces** la ciudad actual está visible en el encabezado y cambiarla es una acción evidente.
 
 ### Cómo demostrarlo

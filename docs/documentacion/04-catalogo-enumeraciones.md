@@ -354,7 +354,7 @@ Se agrupan en dos categorías con umbrales distintos (ver UC-46): las **accionab
 
 ### 4.15 `Inscripcion.motivo_estado` — motivos de baja de un equipo
 
-*Por qué un equipo dejó de participar de un torneo (ER 3.9; estados `withdrawn` y `excluded` de 4.4). **Lista cerrada mínima más `other` con texto libre** (`06`, D-66).*
+*Por qué un equipo no participa o dejó de participar de un torneo (ER 3.9; estados `rejected`, `withdrawn` y `excluded` de 4.4). **Lista cerrada mínima más `other` con texto libre** (`06`, D-66).*
 
 | Valor técnico | Etiqueta visible | Significado | ¿Dónde se usa? |
 |---|---|---|---|
@@ -362,7 +362,10 @@ Se agrupan en dos categorías con umbrales distintos (ver UC-46): las **accionab
 | `no_show` | No se presentó | Dejó de presentarse a los partidos | UC-28, UC-33 |
 | `roster_incomplete` | No completó el plantel | No llegó a la lista de buena fe que el torneo requiere | UC-27, UC-28 |
 | `disciplinary` | Sanción | El organizador lo excluyó por una cuestión disciplinaria | UC-28 |
-| `other` | Otro | Cualquier otro motivo. **Habilita texto libre** para explicar el caso puntual | UC-28 |
+| `wrong_division` | División equivocada | **[D-108]** El equipo se anotó en una categoría que no le corresponde. **Habilita texto libre** para indicar cuál sí | UC-25 |
+| `other` | Otro | Cualquier otro motivo. **Habilita texto libre** para explicar el caso puntual | UC-25, UC-28 |
+
+**[Definido — D-108] `wrong_division` es el único motivo que sirve para un `rejected`, y existe por una razón concreta.** En un evento con categorías (`06`, D-103) el equipo no siempre sabe en cuál va — lo sabe el organizador. La inscripción **no se reasigna**: se rechaza indicando la división que corresponde, y el equipo se inscribe ahí. **Fundamento:** la división es un juicio sobre el nivel del equipo, y el rechazo con sugerencia es lo que le da la oportunidad de aceptarlo.
 
 ### 4.16 `Torneo.motivo_cancelacion` — motivos de cancelación de un torneo
 
@@ -380,7 +383,7 @@ Se agrupan en dos categorías con umbrales distintos (ver UC-46): las **accionab
 
 ---
 
-## 5. Modalidad y categoría de la competencia
+## 5. Modalidad y categoría del certamen
 
 ### 5.1 `Torneo.modalidad` / `Equipo.modalidad_habitual`
 
@@ -439,6 +442,28 @@ Se agrupan en dos categorías con umbrales distintos (ver UC-46): las **accionab
 **[Definido — D-99] No se guarda, se deriva.** Una bandera que pudiera contradecir a las fechas sería un estado de más — el mismo criterio con que el árbol de zonas no guarda sus ancestros (`06`, D-88). Y no le pide al organizador ningún dato nuevo: las dos fechas ya se cargan al crear el torneo.
 
 **[Definido] El cuadrangular no aparece acá porque no es un tipo.** Es un torneo con `cupo_equipos = 4` y formato `league` o `groups_knockout` (4.2) — el modelo ya lo soporta sin nada nuevo.
+
+### 5.5 `Torneo.division` — **etiqueta libre, deliberadamente**
+
+*Cómo llama el organizador a cada **categoría competitiva** de un evento con varias: "A", "B", "C", "Primera", "Oro", "Ascenso". Solo tiene valor si el torneo pertenece a un Certamen (`03`, 3.23).*
+
+**[Definido — D-104] Esta es la única cosa de la sección 5 que NO es una lista cerrada, y conviene decir por qué**, porque el criterio de las otras cuatro es el que la descarta.
+
+`categoria_edad` es lista fija porque *"solo una lista cerrada permite filtrar y comparar"* (5.3). Aplicado acá, el criterio da el resultado opuesto:
+
+| Pregunta | `categoria_edad` | `division` |
+|---|---|---|
+| ¿El sistema compara este valor **entre organizadores**? | Sí — Sub 17 es Sub 17 en todos lados | **No.** La "A" de un organizador no tiene nada que ver con la "A" de otro |
+| ¿Hay algún **filtro** del descubrimiento que corte por acá? | Sí (UC-22) | **No** — el descubrimiento agrupa las divisiones, no filtra por ellas (`06`, D-107) |
+| ¿Entra en el recorte del **ranking**? | Sí (UC-41) | **No** (`06`, P-52) |
+| ¿Hay **movimiento entre valores** que el sistema deba entender? | No aplica | **No**: no hay ascensos ni descensos, porque no hay competencias recurrentes (`06`, D-19b) |
+
+Con las cuatro respuestas en "no", una enumeración no le compra nada al sistema y sí le cuesta al organizador: lo obligaría a llamar "A" a lo que en su complejo se llama "Oro".
+
+**[Definido — D-104] Lo que sí se valida** es que dos divisiones de el mismo certamen **no lleven la misma etiqueta** — dos "B" en el mismo evento no son un caso legítimo, son un error de carga.
+
+**[Definido — D-103] La división no es una tercera categoría.** `categoria_genero` (5.2) y `categoria_edad` (5.3) describen **quién puede jugar**; la división describe **contra quién**. Son ejes independientes: un evento puede abrir A, B y C dentro de su categoría masculina libre, y otras tres dentro de la femenina — lo que son **seis torneos**, agrupados por una o por dos competencias según cómo lo piense el organizador.
+
 
 ---
 

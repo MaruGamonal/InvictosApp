@@ -258,7 +258,13 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 | **Sin torneos en esta ciudad** | No perder a alguien con intención real | **Ver los de la provincia** diciendo cuántos hay · avisarme cuando se publique uno acá · publicar uno | UC-22 |
 | **Selector de ciudad** | Elegir dónde mirar | Búsqueda por nombre · **ciudades con torneos primero**, distinguidas de las que no tienen · agrupadas por provincia, con la provincia siempre visible · **componente compartido** con el alta de torneo, de equipo y el perfil | UC-22, UC-16 · Ciudad |
 
-**Tarjeta de torneo (componente clave):** nombre · modalidad y categoría · zona · fecha de inicio estimada · **estado de inscripción con su badge** · cupo (inscriptos / total) · organización con su **distintivo de verificación** si lo tiene.
+**Tarjeta de torneo (componente clave):** nombre · modalidad y categoría · zona · fecha de inicio estimada · **estado de inscripción con su badge** · cupo (inscriptos / total) · organización con su **distintivo de verificación** si lo tiene · **etiqueta de división** si el torneo pertenece a una competencia.
+
+**[Definido — D-107] Las divisiones de un mismo evento se muestran como un bloque, no como tarjetas sueltas.** Si un organizador abrió la A, la B y la C (`06`, D-103), tres tarjetas casi idénticas son exactamente el ruido que esta pantalla existe para evitar. La forma: **una tarjeta encabezada por el nombre del certamen** —"Apertura 2026"— con **una fila por división**, y cada fila lleva lo que cambia entre ellas: etiqueta, cupo y estado de inscripción. Lo compartido —ciudad, fechas, organización— se dice **una sola vez, arriba**.
+
+**[Definido — D-107] El agrupamiento es de presentación, no de consulta**, y eso tiene una consecuencia que el diseño tiene que asumir: el listado sigue devolviendo torneos y la interfaz junta las filas contiguas de el mismo certamen, así que **si el corte de página cae en el medio, el bloque se parte**. Está aceptado (`06`, D-107) — es un defecto cosmético de un caso poco frecuente, y evitarlo costaría rehacer la consulta más caliente del producto. Lo que el diseño sí debe cuidar es que **un bloque partido siga leyéndose**: la parte de abajo repite el encabezado del certamen.
+
+**[Definido — D-104] No hay filtro por división.** La etiqueta es texto libre y local a un organizador: filtrar por "A" no significa nada entre eventos distintos (`04`, 5.5). Se muestra, no se filtra.
 
 **[Definido — D-102] El filtro de duración merece más peso que los otros tres.** *Un día · Fin de semana · Liga extendida*. **Un capitán con ocho amigos y un sábado libre es otra persona** que alguien buscando una liga de tres meses, y es probablemente la intención más frecuente del amateur — la que menos compromiso pide y mejor convierte. Conviene que se vea sin desplegar los filtros secundarios.
 
@@ -272,7 +278,7 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 
 **[Definido] Los estados vacíos pasan a ser frecuentes, no excepcionales.** Con catálogo nacional, la mayoría de las ciudades no va a tener torneos por mucho tiempo. Es un estado normal y hay que diseñarlo con cuidado: **nunca puede parecer un error ni sugerir que el producto entero está vacío** porque lo esté una ciudad.
 
-**[Pendiente de definición] El Gran Buenos Aires no encaja en "una ciudad", y esta pantalla es la que lo sufre.** Alguien de Vicente López juega en San Isidro y en CABA, que son entradas distintas del catálogo. **Afecta directamente al selector**, así que conviene resolverlo antes de fijarlo (`06`, 4.11).
+**[Pendiente de definición — `06`, P-51] El Gran Buenos Aires no encaja en "una ciudad", y esta pantalla es la que lo sufre.** Alguien de Vicente López juega en San Isidro y en CABA, que son entradas distintas del catálogo. **Afecta directamente al selector**, así que conviene resolverlo antes de fijarlo (`06`, 4.11).
 
 **[Definido] El orden por defecto es proximidad + inscripciones abiertas + fecha cercana**, y los organizadores verificados tienen mejor posición (`06`, D-26b, D-51). El orden de un marketplace es una decisión de producto: no puede quedar como un detalle de implementación.
 
@@ -306,9 +312,10 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 |---|---|---|---|
 | **Mis torneos** | Ver el estado de todo lo que administra | Por torneo: nombre, estado, inscripciones pendientes, **resultados sin cargar** | UC-20 |
 | **Crear / configurar torneo** | Definir la competencia | Nombre, descripción, modalidad, categoría (género y edad), zona, cupo, fechas estimadas, visibilidad · puntos por victoria/empate/derrota (default 3/1/0) · criterios de desempate · mínimo y máximo de jugadores de la lista | UC-16, UC-17 · Torneo |
+| **Agregar una categoría (A, B, C)** | Abrir otra división del mismo evento | **Acción secundaria dentro del torneo ya configurado**, no un paso del alta · pide el **nombre del evento** (si es la primera vez) y la **etiqueta de la división** · muestra qué se copia y permite cambiar cupo, fechas y reglamento | UC-16 · Certamen, Torneo |
 | **Formato de competencia** | Definir cómo se compite | Liga / eliminación directa / grupos + eliminatoria · cantidad de zonas, ida y vuelta, cuántos clasifican | UC-17 · Fase, Grupo |
 | **Publicar** | Hacerlo descubrible | Validación de datos mínimos · **aviso de verificación** si la organización no está verificada | UC-18 · Torneo, Organización |
-| **Inscripciones** | Resolver quién entra | Solicitudes pendientes con: equipo, escudo, zona, **score**, plantel · **advertencia de categoría cruzada**, si la hay · aprobar / rechazar con motivo · agregar equipo a mano | UC-25, UC-26 · Inscripción, Equipo, Score |
+| **Inscripciones** | Resolver quién entra | Solicitudes pendientes con: equipo, escudo, zona, **score**, plantel · **advertencia de categoría cruzada**, si la hay · **aviso de que el equipo ya está en otra división**, si lo está · aprobar / rechazar con motivo, incluido **"división equivocada" con la sugerida** · agregar equipo a mano | UC-25, UC-26 · Inscripción, Equipo, Score |
 | **Fixture** | Armar y ajustar el calendario | Propuesta generada, **editable a mano** · asignar día, hora y sede por partido · reprogramar | UC-29, UC-30 · Partido, Sede |
 | **Cargar resultados** ⭐ | Cerrar la fecha | **Lista de partidos pendientes de la fecha**, con carga en la propia fila · marcar no disputado con motivo · goleadores como paso opcional | UC-31, UC-33, UC-34 · Partido, Evento |
 | **Estado del torneo** | Hacerlo avanzar | Cerrar inscripciones, iniciar, avanzar de fase, finalizar, suspender, cancelar con motivo | UC-20, UC-21 · Torneo |
@@ -321,6 +328,10 @@ Es **independiente** de la marca y cumple otra función: comunicar el estado de 
 1. **La carga ocurre en la propia lista**, no entrando y saliendo de un detalle por cada partido. Un organizador con seis partidos hace ese recorrido seis veces por fecha.
 2. **Los goleadores son un paso claramente omitible**, no un formulario que haya que atravesar. Si estorba, se deja de cargar el resultado también.
 3. **La tabla se actualiza sola y hay que verla actualizarse.** Es la recompensa inmediata del trabajo de carga, y el mejor argumento para no volver a la planilla.
+
+**[Definido — D-103] Con divisiones, el panel tiene que decir todo el tiempo en cuál se está parado.** Cada división es un torneo completo y separado —su fixture, su tabla, su campeón, su estado (`06`, D-106)—, y **cargar un resultado de la B en la tabla de la A es el error caro de estas pantallas**. Dos consecuencias de diseño: "Mis torneos" agrupa las divisiones bajo su competencia igual que el descubrimiento, y una vez adentro, **la división viaja en el encabezado de todas las pantallas de operación**, no solo en la primera.
+
+**[Definido — D-103] Agregar una categoría es una acción del torneo, no un paso del alta.** El caso frecuente es el torneo suelto y **no puede pagar el precio de esta funcionalidad**: el formulario de creación no menciona divisiones. La acción aparece en el torneo ya configurado, y **el sistema copia todo lo que ya se decidió** —ciudad, dirección, fechas, modalidad, categoría, reglamento y colaboradores (`06`, D-105)—, pidiendo solo la etiqueta y lo que difiera. La pantalla debe **mostrar qué está copiando**: copiar en silencio deja al organizador sin saber si su reglamento llegó a la C.
 
 **[Definido] El fixture generado es siempre una propuesta editable.** Ningún generador conoce las restricciones reales del organizador —canchas, disponibilidad, clásicos que conviene separar—: un fixture que no se puede tocar se abandona en la primera excepción (`06`, D-31b).
 

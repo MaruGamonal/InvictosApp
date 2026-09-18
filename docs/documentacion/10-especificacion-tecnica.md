@@ -158,6 +158,8 @@ Traducción directa del modelo conceptual de `03`. Nombres de tabla en minúscul
 | `partido.goles_local`, `goles_visitante` **≥ 0** | — |
 | Clave foránea de `partido` hacia `inscripcion`, **no hacia `equipo`** | Un partido solo puede involucrar equipos efectivamente inscriptos en ese torneo (`03`, 3.9) |
 | `reglamento` único por `(torneo_id, numero_version)` | El versionado no puede tener huecos ni repetidos (`06`, D-28) |
+| Único parcial sobre `(certamen_id, division)` en `torneo` **donde `certamen_id` no es nulo** | Dos divisiones de un mismo evento no pueden llamarse igual (`06`, D-104). Parcial, porque **el caso normal tiene los dos campos vacíos** y no debe verse afectado |
+| `torneo.certamen_id` y `torneo.division` **nulos o ambos cargados** | Una división sin evento, o un evento sin etiqueta, son estados sin significado (`03`, 3.7) |
 
 ### 3.3 Índices críticos
 
@@ -288,6 +290,7 @@ Los que sostienen las consultas más frecuentes o más caras:
 |---|---|---|---|---|
 | `crearTorneo` | UC-16 | Titular, Admin | datos generales, cupo, categorías, puntajes, desempates, mín/máx de lista | torneo en `draft` |
 | `definirFormato` | UC-17 | Titular, Admin | formato + parámetros | fases y grupos creados |
+| `agregarDivision` | UC-16 | Titular, Admin | `torneo_id` de origen, nombre del evento (la primera vez), etiqueta de la división, campos a pisar | competencia (si no existía) + **torneo nuevo en `draft`** |
 | `actualizarTorneo` | UC-19 | Titular, Admin | campos a modificar | torneo + notificaciones si el cambio es relevante |
 | `publicarTorneo` | UC-18 | Titular, Admin | `torneo_id` | torneo en `registration_open` |
 | `avanzarEstado` | UC-20 | Titular, Admin | transición solicitada | torneo |
@@ -328,6 +331,17 @@ draft → registration_open → registration_closed → in_progress → finished
 
 Cada publicación crea una versión nueva con `numero_version` incremental, pasa la anterior a `superseded`, y **si el torneo tiene equipos inscriptos, los notifica**. Las versiones anteriores **nunca se borran**: son lo que permite responder qué texto regía cuando ocurrió un hecho.
 
+**`agregarDivision` — cómo se implementa (`02`, UC-16; `06`, D-103 a D-106)**
+
+1. Si el torneo de origen **no tiene** `certamen_id`, crea la `certamen` con el nombre recibido y **se lo asigna también al torneo de origen**. Si ya lo tiene, reutiliza esa.
+2. **Copia** el torneo de origen: ciudad, dirección, fechas, modalidad, `categoria_genero`, `categoria_edad`, formato y sus parámetros, puntajes, desempates, mín/máx de lista, cupo, visibilidad, **última versión del reglamento** y **filas de `colaborador_torneo`**. Los campos recibidos pisan a los copiados.
+3. El torneo nuevo nace en **`draft`**, con su `division` y su `certamen_id`. **No copia** inscripciones, fases con partidos, posiciones ni `fecha_publicacion`.
+4. Etiqueta repetida dentro de el mismo certamen → `DIVISION_DUPLICADA` (`06`, D-104).
+
+**[Definido — `06`, D-105] Es una copia, no una referencia, y eso es deliberado.** Después de este servicio **ningún otro servicio del sistema sabe que la división existe**: lee un torneo normal, con todos sus campos propios. Es lo que hace que el fixture, la tabla, el cupo, la inscripción y el score no necesiten una sola línea nueva.
+
+**[Definido — `06`, D-106] No hay servicios de certamen.** No existe `avanzarEstadoCertamen` ni `finalizarCertamen`: cada división avanza por su cuenta con `avanzarEstado` sobre su propio torneo. `certamen` es una tabla de dos columnas que solo se lee para agrupar en el listado.
+
 ### 4.5 D5 — Descubrimiento
 
 | Servicio | UC | Quién | Entrada | Salida |
@@ -358,6 +372,7 @@ Cada publicación crea una versión nueva con `numero_version` incremental, pasa
 2. Si ya existe inscripción vigente de ese equipo → idempotente, devuelve la existente.
 3. Si el torneo tiene reglamento, **registra qué versión se aceptó** en `reglamento_version_aceptada` (`06`, D-54). Sin aceptación → `REGLAMENTO_NO_ACEPTADO`.
 4. Si se alcanzó el cupo → `waitlisted` (`06`, D-27b).
+5. **[`06`, D-109]** Si el equipo ya tiene inscripción vigente en **otra división de el mismo certamen**, la solicitud **se acepta igual** y se devuelve una **advertencia** —no un error— que viaja hasta la ficha que ve el organizador. Mismo tratamiento que la categoría cruzada de D-82.
 5. **El equipo pasa a seguir el torneo automáticamente** (`02`, UC-42), con `origen = automatico`.
 6. **Compatibilidad de categoría (`06`, D-82).** Si `torneo.categoria_genero != 'mixed'` y `equipo.categoria_genero != torneo.categoria_genero`, la inscripción se crea igual y se marca `advertencia_categoria = true`. **No es un código de error: es una bandera que viaja con el registro** hasta la ficha que ve el organizador (UC-25). El caller la recibe para poder pedir confirmación antes de enviar; el servicio no la exige. Con `torneo.categoria_genero = 'mixed'` la bandera nunca se levanta.
 
@@ -389,6 +404,10 @@ Antes de empezar el torneo: libera el cupo, promueve al primero de la lista de e
 - Los partidos **ya jugados se mantienen**.
 - Los **pendientes se dan por ganados a sus rivales** (`walkover`), lo que **recalcula la posición de todos ellos**, no solo la del equipo que se va.
 - El resultado del walkover usa el configurado del torneo (default 3-0); **cuenta para diferencia de gol, no para estadísticas individuales ni como partido jugado a efectos del score** (`06`, D-33b).
+
+**`resolverInscripcion` — el rechazo por división (`02`, UC-25; `06`, D-108)**
+
+**[Definido] No existe `reasignarInscripcion`.** La identidad de `inscripcion` es `(torneo_id, equipo_id)` (3.1), así que mover un equipo de división sería **borrar y reinsertar** con otra clave, arrastrando a mano `fecha_solicitud` y `solicitada_por_usuario_id`. En su lugar, `resolverInscripcion` acepta el motivo **`wrong_division`** (`04`, 4.15) con el `torneo_id` de la división sugerida en el texto libre, y la notificación al capitán lleva el enlace directo a inscribirse ahí. **La razón de fondo no es técnica** (`06`, D-108): la división es un juicio sobre el nivel del equipo, y moverlo en silencio a una categoría más baja es una decisión social que el sistema no debería tomar solo.
 
 ### 4.7 D7 — Competencia
 
@@ -580,6 +599,7 @@ Módulo central de constantes; ningún servicio inventa códigos sueltos.
 | `INSCRIPCIONES_ABIERTAS` | 409 | Generar fixture antes de cerrarlas (UC-29) |
 | `FIXTURE_CON_PARTIDOS_JUGADOS` | 409 | Regenerar sobre partidos disputados |
 | `FASE_CON_RESULTADOS_SIN_CONFIRMAR` | 409 | Cerrar una fase con resultados en `loaded` o `disputed` (`06`, D-101) |
+| `DIVISION_DUPLICADA` | 409 | Dos divisiones con la misma etiqueta en el mismo certamen (`06`, D-104) |
 | `TORNEO_NO_EN_CURSO` | 409 | Cargar resultado con el torneo fuera de `in_progress` |
 | `TORNEO_YA_EMPEZADO` | 409 | Cambiar el formato con partidos jugados (UC-17) |
 | `TRANSICION_NO_PERMITIDA` | 409 | Salto de estado inválido (UC-20) |

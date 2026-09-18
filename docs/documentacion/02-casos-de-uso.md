@@ -435,7 +435,7 @@ flowchart LR
   - **[Definido]** El rol de **DT es deportivo, no administrativo**: por sí solo **no habilita gestionar el plantel ni inscribir al equipo**. Si además tiene que gestionar, se le asigna **también** el rol de Delegado, o es el Capitán. Sumar a un DT no debería entregarle el control del equipo sin que el capitán lo haya decidido. Ver `06`, D-25.
   - **[Definido]** Un equipo puede tener **cero, uno o varios DT** (DT, ayudante, preparador físico), a diferencia del Capitán, que es uno y obligatorio. Ninguna regla del sistema depende de que haya un solo DT, así que imponer unicidad sería una restricción sin fundamento. Ver `06`, D-27.
   - **[Definido — D-87] Darse de baja de un equipo es inmediato y no requiere confirmación de nadie.** No hay solicitud de baja, ni aprobación del capitán, ni plazo: la persona se retira y el vínculo pasa a *dejó el equipo* en el acto. **Es deliberadamente asimétrico respecto de la entrada** (UC-11, UC-53), que sí necesita el consentimiento de las dos partes. El fundamento es que estar en un plantel es público y tiene consecuencias —figurar en el equipo, poder ser anotado en una lista de buena fe (UC-27)—, así que nadie puede ser puesto ahí sin aceptar **ni mantenido ahí sin querer**. Un capitán que pudiera retener a alguien en su plantel convertiría un dato deportivo en una atadura.
-  - **[Definido — D-87] Las dos únicas excepciones ya están definidas y no son confirmaciones**, son consecuencias: el **Capitán no puede irse sin designar reemplazo** (regla de arriba), y quien esté **habilitado en un torneo en curso sigue habilitado hasta que ese torneo termine** (`06`, D-18b) — sale del plantel permanente, no de la competencia en la que ya está jugando.
+  - **[Definido — D-87] Las dos únicas excepciones ya están definidas y no son confirmaciones**, son consecuencias: el **Capitán no puede irse sin designar reemplazo** (regla de arriba), y quien esté **habilitado en un torneo en curso sigue habilitado hasta que ese torneo termine** (`06`, D-18b) — sale del plantel permanente, no del certamen en la que ya está jugando.
 - **Resultado esperado:** el plantel está al día sin que ninguna baja destruya información histórica.
 
 ---
@@ -487,10 +487,11 @@ flowchart LR
   2. El sistema crea el torneo en estado **borrador**, visible solo para la organización.
   3. El organizador define el formato de competencia (UC-17).
   4. Opcionalmente carga el reglamento del torneo desde la misma configuración (UC-51).
-  5. El torneo queda listo para publicarse (UC-18).
+  5. **[Definido — D-103]** Opcionalmente **agrega otra categoría competitiva** —la B, la C— desde el torneo ya configurado. El sistema crea un **Certamen** que agrupa a las dos (`03`, 3.23), **copia** la configuración del torneo de origen y pide solo la etiqueta de la nueva división y lo que difiera. Cada categoría queda como un **torneo completo e independiente**.
+  6. El torneo queda listo para publicarse (UC-18).
 - **Flujos alternativos / excepciones:**
   - Un torneo puede quedar en borrador indefinidamente, sin consecuencias.
-- **Entidades involucradas:** **Torneo**, **Organización**, **Ciudad**.
+- **Entidades involucradas:** **Torneo**, **Organización**, **Ciudad**, **Certamen** *(solo si se abre más de una categoría)*.
 - **Reglas de negocio:**
   - **[Definido]** Un torneo pertenece siempre a una organización — nunca queda huérfano.
   - **[Definido — D-91]** El torneo lleva **ciudad y dirección**, y son dos datos con dos usos: la **ciudad** sale del catálogo y sirve para **encontrarlo**; la **dirección** es texto libre y sirve para **llegar**. Ninguno cubre al otro.
@@ -498,7 +499,11 @@ flowchart LR
   - **[Definido — D-99]** El **cuadrangular no es un tipo de torneo**: es un torneo con **cupo 4** y formato liga o grupos + eliminatoria. No hace falta nada nuevo en el modelo, pero **conviene ofrecerlo como atajo** al crear el torneo —cupo 4, liga, un día—, porque es una de las formas más comunes del amateur y reconstruir esa configuración a mano es fricción sin necesidad (`08`, 11.5).
   - **[Definido — D-88]** El catálogo de ciudades **es nacional y lo administra la plataforma**, no el organizador. Que cualquiera pueda agregar deja de ser un catálogo —aparecen "Centro", "centro" y "Zona Centro" como tres lugares—, que es exactamente lo que D-25b evitó al no usar texto libre. Al ser completo desde el día uno, **ningún organizador se queda sin la suya**.
   - **[Definido]** El torneo nace en borrador y **no es descubrible hasta que se publica explícitamente** (UC-18). Separar "crear" de "publicar" es lo que le permite al organizador armarlo con calma sin exponer un torneo a medio configurar.
-  - **[Definido]** En esta versión **no existen competencias recurrentes con ediciones**: cada torneo es independiente. El modelo deja previsto un vínculo opcional hacia una competencia agrupadora, de modo que se pueda agregar más adelante sin migrar todos los dominios derivados. Ver `06`, D-19b.
+  - **[Definido — D-103] Un torneo con categorías A, B y C son varios torneos, no uno.** Cada categoría tiene fixture, tabla, campeón, cupo y estado propios —que es la definición de Torneo en este modelo—, así que se modelan como **torneos agrupados por un Certamen** (`03`, 3.23) y no como un nivel adentro del torneo. **No son fases ni grupos:** el grupo reparte un fixture dentro de una fase, y la fase es una etapa en el tiempo; las categorías corren en paralelo y no comparten tabla.
+  - **[Definido — D-104]** La división es **texto libre** —"A", "Primera", "Oro"— y no un catálogo: ningún filtro ni ranking corta por ella, así que una lista cerrada solo obligaría al organizador a renombrar lo suyo. Ver `04`, 5.5.
+  - **[Definido — D-105] Lo compartido se copia, no se comparte.** Ciudad, dirección, fechas, modalidad, categoría, reglamento y **colaboradores** se copian a cada división al crearla, y desde ahí cada una es dueña de lo suyo. **Fundamento:** las divisiones legítimamente difieren —la C juega sábados y la A domingos—, y dos fuentes de verdad para la misma fecha es una incoherencia esperando ocurrir.
+  - **[Definido — D-103] El caso normal no se entera.** Un torneo sin categorías no tiene competencia ni división, y la interfaz **no menciona las divisiones** hasta que el organizador elige agregar una. Ver `06`, D-103.
+  - **[Definido]** En esta versión **no existen competencias recurrentes con ediciones**: cada torneo es independiente. **[Definido — D-103]** El Certamen agrupa **divisiones que corren en paralelo**, no ediciones que corren en serie — son dos ejes distintos y el segundo sigue sin modelarse. Ver `06`, D-19b y D-103.
 - **Resultado esperado:** existe un torneo configurable, todavía privado.
 
 ---
@@ -620,10 +625,10 @@ flowchart LR
 - **Flujo principal:**
   1. El actor busca torneos, con o sin criterios.
   2. Filtra por los criterios que le importan.
-  3. El sistema muestra los torneos que coinciden, con la información mínima para decidir si le sirven.
-  4. El actor entra a la ficha del torneo (UC-23).
+  3. El sistema muestra los torneos que coinciden, con la información mínima para decidir si le sirven. **[Definido — D-107]** Si varios son **divisiones del mismo evento**, se muestran agrupados bajo el nombre del certamen.
+  4. El actor entra a la ficha del torneo (UC-23) — con divisiones, a la de la que le corresponde.
 - **Flujos alternativos / excepciones:** si no hay resultados, el sistema ofrece caminos alternativos (ver los de la provincia, avisar cuando se publique uno que coincida) — **[Definido]**, ver `05-flujos-ux-user-journeys.md`.
-- **Entidades involucradas:** **Torneo**, **Organización**.
+- **Entidades involucradas:** **Torneo**, **Organización**, **Certamen**.
 - **Reglas de negocio:**
   - **[Definido]** Criterios de filtro de la primera versión: **ciudad** *(el contexto por defecto, D-90)*, **modalidad** (F5/F7/F11), **categoría**, **estado de inscripción** (abiertas / próximas), **fecha de inicio** y **día u horario habitual**. Fundamento: son las preguntas que un capitán se hace, en ese orden — dónde, de cuántos, para quién, ¿llego a tiempo?, ¿me sirve el día?
   - **[Definido]** La **ubicación es el filtro primario** y no debería estar escondido detrás de una búsqueda por texto: nadie viaja dos horas para jugar un torneo amateur.
@@ -634,6 +639,9 @@ flowchart LR
   - **[Definido — D-90]** La ciudad se pide **en el primer uso del descubrimiento, no en el registro** (D-52), y se recuerda. Un visitante sin cuenta la elige ahí mismo, **sin que sea un paso previo que bloquee** — sigue vigente que el contenido va antes que la cuenta (D-04b).
   - **[Definido] Sin resultados no es un error**, y con una lista nacional va a pasar seguido: la mayoría de las ciudades no va a tener torneos durante mucho tiempo. Ofrece, en orden: **los torneos de la provincia** con su cantidad, **avisar cuando se publique uno acá**, y **publicar uno**. Ver `05`, sección 5.
   - **[Definido — D-102] Se suma un filtro de duración** —un día, fin de semana, liga extendida—, derivado de las fechas del torneo (`04`, 5.4). **Fundamento:** un capitán con ocho amigos y un sábado libre tiene una intención completamente distinta de la de alguien buscando una liga de tres meses, y hoy el descubrimiento los trata igual. Es probablemente la intención más frecuente del amateur, y la que mejor convierte — el compromiso que pide es una tarde. No cuesta ningún dato nuevo: las dos fechas ya existen.
+  - **[Definido — D-107] Las categorías de un mismo evento se muestran agrupadas, no como torneos sueltos.** Si un organizador abrió la A, la B y la C (`06`, D-103), el listado las presenta como **un bloque encabezado por el nombre del certamen, con una fila por división** — no como tres tarjetas casi idénticas, que es exactamente el ruido que este caso de uso existe para evitar.
+  - **[Definido — D-107] El agrupamiento es de presentación, no de consulta.** El listado sigue devolviendo **torneos**, y los filtros y la paginación no cambian: es la interfaz la que junta las filas contiguas de el mismo certamen. **Limitación aceptada:** si el corte de página cae en el medio, el bloque se parte. Es un defecto cosmético de un caso poco frecuente, y el precio de evitarlo —un listado que devuelva competencias y coincida "si alguna división coincide"— es rehacer la consulta más caliente del producto.
+  - **[Definido — D-104] No hay filtro por división.** La etiqueta es libre y local a un organizador, así que filtrar por "A" no significa nada entre eventos distintos. Ver `04`, 5.5.
   - **[Definido]** Los otros filtros —modalidad, categoría, estado de inscripción y fecha— **operan dentro de la ciudad** y son secundarios.
 - **Resultado esperado:** un equipo o jugador encuentra dónde jugar sin depender de conocer al organizador.
 
@@ -669,7 +677,7 @@ flowchart LR
 - **Descripción:** postula al equipo para participar de un torneo publicado. Es la bisagra entre el producto público y el producto de gestión.
 - **Precondiciones:** el torneo tiene las inscripciones abiertas (UC-18, UC-20); el equipo existe (UC-10).
 - **Flujo principal:**
-  1. El capitán, desde la ficha del torneo (UC-23), elige con qué equipo inscribirse.
+  1. El capitán, desde la ficha del torneo (UC-23), elige con qué equipo inscribirse. **[Definido — D-103]** Si el evento tiene varias categorías, **se inscribe en una división puntual**: cada división es un torneo, con su cupo y su tabla.
   2. Confirma la solicitud, con los datos que el torneo pida.
   3. El sistema registra la inscripción en estado **pendiente** y notifica al organizador (UC-46). **[Definido — D-93]** Siempre queda pendiente: **la inscripción nunca es directa**, sin excepción ni configuración que lo permita.
   4. El organizador la resuelve (UC-25).
@@ -678,9 +686,12 @@ flowchart LR
   - Si el equipo ya tiene una inscripción vigente en ese torneo, el sistema no crea una segunda.
   - Si el capitán no tiene un equipo creado, el flujo debería permitirle crearlo sin perder el contexto del torneo (**[Definido]**, ver `05-flujos-ux-user-journeys.md`).
   - **[Definido — D-82]** Si la **categoría de género del equipo no coincide con la del torneo**, el sistema lo advierte antes de confirmar y **deja continuar**. La misma advertencia viaja con la inscripción hasta la ficha que ve el organizador (UC-25). Un torneo mixto no genera advertencia.
+  - **[Definido — D-109]** Si el equipo **ya tiene una inscripción vigente en otra división del mismo evento** (`06`, D-103), el sistema lo advierte antes de confirmar y **deja continuar**. La advertencia llega también al organizador. Un equipo en dos divisiones es raro pero legítimo —la primera en la A y la reserva en la B, o el mismo plantel en la libre y en la de veteranos—, y quien decide es el organizador.
 - **Entidades involucradas:** **Inscripción** (estado, versión de reglamento aceptada), **Equipo**, **Torneo**, **Reglamento**, **Notificación**.
 - **Reglas de negocio:**
   - **[Definido]** Un equipo tiene como máximo **una inscripción vigente por torneo** — modelado con identidad determinística `torneo + equipo`, mismo criterio de unicidad estructural del set de referencia. Vuelve imposible que un equipo aparezca dos veces en la misma tabla.
+  - **[Definido — D-109]** Esa unicidad es **por torneo, no por evento**: dos divisiones son dos torneos, así que un equipo puede estar en las dos. El sistema **avisa y no bloquea**, mismo criterio que D-82 y D-16b — el reglamento del torneo manda y el organizador ya aprueba cada inscripción (D-93).
+  - **[Definido — D-108]** Si el equipo **se anotó en la división equivocada**, el organizador **no lo mueve**: lo rechaza indicando cuál le corresponde (UC-25) y el equipo se inscribe ahí. Ver `06`, D-108.
   - **[Definido]** Solo el Capitán o un Delegado pueden inscribir al equipo: es una decisión que compromete a todo el plantel (y, si hubiera costo, económicamente).
   - **[Definido]** Existe **lista de espera** al llegar al cupo. Cubrir una baja sin salir a buscar equipos es exactamente el trabajo manual que el producto promete evitar. Ver `06`, D-27b.
   - **[Definido]** **Hoy la inscripción no tiene costo dentro de la plataforma**: el producto arranca gratis para todos, y la comisión sobre transacciones de pago es la última de las cuatro etapas de monetización. No hay pago que ocurra dentro del producto. Ver `06`, D-31.
@@ -705,12 +716,15 @@ flowchart LR
   - Si al aprobar se alcanza el cupo, el torneo cierra sus inscripciones automáticamente (UC-20).
   - **[Definido — D-82]** Si la **categoría de género del equipo no coincide con la del torneo**, la inscripción llega con una advertencia visible en su ficha. **No se bloquea**: el organizador aprueba o rechaza con ese dato a la vista. Un torneo mixto no genera advertencia con ningún equipo.
   - **[Definido]** El rechazo debería poder acompañarse de un motivo — un rechazo sin explicación en un producto de comunidad genera más fricción de la que ahorra.
+  - **[Definido — D-108]** Si el evento tiene varias categorías (`06`, D-103) y el equipo se anotó en la que no le corresponde, el organizador **rechaza con el motivo `wrong_division`** (`04`, 4.15) **indicando cuál sí**, y el equipo vuelve a inscribirse ahí. El sistema le ofrece la división sugerida en un solo paso desde la notificación.
+  - **[Definido — D-109]** Si el equipo **ya está inscripto en otra división del mismo evento**, la ficha de la inscripción lo muestra. **No bloquea**: el organizador aprueba o rechaza con ese dato a la vista.
 - **Entidades involucradas:** **Inscripción** (estado), **Torneo**, **Equipo**, **Notificación**.
 - **Reglas de negocio:**
   - **[Definido]** El organizador **siempre** decide quién entra a su torneo. Aunque haya cupo disponible, la inscripción no es automática: el organizador conoce a los equipos de su ciudad y tiene criterios propios (nivel, antecedentes, cercanía).
   - **[Definido]** El score del equipo (UC-40) es **información para esta decisión** — es uno de los usos más concretos que justifica que el score exista. Con D-93 no queda ningún camino en el que esa información, ni la advertencia de categoría cruzada (D-82), pasen sin que nadie las mire.
   - **[Definido — D-93] No existe la aprobación automática de inscripciones.** Toda inscripción solicitada por un equipo (UC-24) queda **pendiente** hasta que el organizador o un administrador la resuelva; no hay opción por torneo que permita saltear ese paso. **Fundamento:** mientras el costo de inscripción se paga **fuera de la aplicación** (`06`, D-31), la aprobación del organizador es la única señal de que el equipo está realmente adentro — en el amateur, casi siempre significa "confirmo que pagaron". Un equipo aprobado solo porque se anotó entra al fixture (UC-29) y el organizador se entera el domingo, cuando no se presenta. Ver `06`, D-93, que supera a D-28b.
   - **[Definido — D-93]** El daño de una aprobación equivocada **no se queda en la inscripción**: el fixture se genera desde las inscripciones aprobadas, así que se propaga al calendario, a la tabla y al score. Es lo que convierte este paso en una validación y no en un trámite.
+  - **[Definido — D-108] La inscripción no se reasigna de división, se rechaza y se vuelve a hacer.** **Fundamento, y la razón de producto pesa más que la técnica.** *La de producto:* la división es un **juicio sobre el nivel del equipo**, y moverlo a una categoría más baja sin preguntarle es una decisión social que la aplicación no debería tomar en silencio — el rechazo con sugerencia le deja al equipo la posibilidad de aceptarla. *La técnica:* la identidad de la Inscripción es `torneo + equipo` (`03`, 3.9), así que reasignarla es borrar y recrear una fila con otra clave, arrastrando fechas y autoría a mano. Rechazar no cuesta una línea de modelo. Ver `06`, D-108.
   - **[Definido — D-93] Se revisa cuando la plataforma procese el pago** (etapa 4 de la monetización, `06`, D-31). Recién ahí el sistema sabe si el equipo pagó, y la forma correcta no sería "aprobar sin mirar" sino **aprobar al confirmarse el pago**.
   - **[Definido]** El **Colaborador de torneo no resuelve inscripciones**, aunque esté asignado a ese torneo (UC-52). Sus permisos son fijos y cubren la operación de la fecha; decidir quién entra al torneo es una potestad del organizador y no se delega junto con la planilla. Ver `06`, D-32.
 - **Resultado esperado:** la nómina de equipos del torneo refleja una decisión explícita del organizador.
@@ -944,7 +958,7 @@ flowchart LR
 ### UC-36 — Consultar las estadísticas del torneo
 
 - **Actor(es) / Iniciador(es):** Visitante, Usuario registrado, Jugador, Capitán, Organizador.
-- **Descripción:** muestra los datos agregados de la competencia: goleadores, equipos más goleadores, tarjetas.
+- **Descripción:** muestra los datos agregados del certamen: goleadores, equipos más goleadores, tarjetas.
 - **Precondiciones:** el torneo tiene resultados cargados (UC-31) y, para las estadísticas individuales, eventos cargados (UC-34).
 - **Flujo principal:**
   1. El actor accede a las estadísticas desde la ficha del torneo.

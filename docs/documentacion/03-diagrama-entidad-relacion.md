@@ -37,6 +37,8 @@ erDiagram
     PERFIL_DEPORTIVO ||--o{ EQUIPO : "es capitán de"
 
     ORGANIZACION ||--o{ TORNEO : "organiza"
+    ORGANIZACION ||--o{ CERTAMEN : "agrupa divisiones mediante"
+    CERTAMEN ||--o{ TORNEO : "agrupa como divisiones a"
     TORNEO ||--o{ FASE : "se compone de"
     FASE ||--o{ GRUPO : "se divide en"
     TORNEO ||--o{ REGLAMENTO : "se rige por (versionado)"
@@ -155,6 +157,8 @@ erDiagram
     TORNEO {
         identificador id
         identificador organizacion_id
+        identificador certamen_id
+        texto division
         texto nombre
         texto descripcion
         texto modalidad
@@ -176,6 +180,12 @@ erDiagram
         fecha fecha_fin_estimada
         texto motivo_cancelacion
         fecha fecha_publicacion
+    }
+
+    CERTAMEN {
+        identificador id
+        identificador organizacion_id
+        texto nombre
     }
 
     FASE {
@@ -463,7 +473,9 @@ erDiagram
 | Atributo | Objetivo / Fundamento |
 |---|---|
 | `organizacion_id` | A qué organización pertenece — nunca queda huérfano (UC-16). |
-| `nombre` / `descripcion` | Identidad pública del torneo. |
+| `certamen_id` **[Definido — D-103]** | **Opcional.** Si el torneo es una de las **categorías competitivas** de un evento más grande —la A, la B, la C—, apunta al Certamen que las agrupa (3.23). **Vacío en el caso normal**, que es un torneo suelto. **Fundamento:** una categoría competitiva tiene fixture, tabla, campeón, cupo y estado propios, que es la definición de Torneo en este modelo — así que no es un nivel adentro del torneo, es un torneo más. |
+| `division` **[Definido — D-104]** | **Opcional, texto libre.** Cómo llama el organizador a esta categoría: "A", "Primera", "Oro", "Ascenso". **No es una enumeración**, y el fundamento es el mismo de `04`, 5.3: lista cerrada solo donde el sistema compara, y acá **no hay nada que comparar** — la "A" de un organizador no significa lo mismo que la de otro, no hay ascensos ni descensos (`06`, D-19b) y **ningún ranking corta por división** (`06`, P-52). Solo tiene sentido con `certamen_id` cargado. |
+| `nombre` / `descripcion` | Identidad pública del torneo. **[Definido — D-105]** Con divisiones, el nombre del evento vive en el Certamen y **no se repite acá**: la tarjeta pública se lee "Apertura 2026 · Categoría B". |
 | `modalidad` / `categoria_genero` / `categoria_edad` | Los tres ejes por los que un equipo decide si un torneo le sirve — y por lo tanto, los filtros centrales del descubrimiento (UC-22). Valores en `04`, sección 5. `categoria_edad` es una **lista fija** con `open` (Libre) por defecto (`06`, D-38b). |
 | `ciudad_id` | **Dónde se juega, y el dato que ordena todo el descubrimiento.** Referencia a una ciudad del catálogo nacional (3.22). **[Definido — D-90]** No es solo un filtro: la vista por defecto de cada persona son **los torneos de su ciudad** (UC-22). **[Definido — D-88]** El catálogo es nacional y completo, así que ningún organizador se queda sin la suya — lo que se ordena en la interfaz es cuáles se ofrecen primero (`08`, 11.3). |
 | `direccion` | Dónde se juega, en texto libre. **[Definido]** Es la **referencia general** del torneo —el complejo o la dirección habitual—, y no reemplaza a la de cada Sede (3.17), que es la que manda para un partido puntual. **Fundamento (`06`, D-25b):** la ciudad sirve para **encontrar** el torneo, la dirección para **llegar**. Son dos usos distintos y ninguno cubre al otro. |
@@ -480,7 +492,7 @@ erDiagram
 
 ### 3.8 Fase y Grupo
 
-**Objetivo de las entidades:** representan la estructura interna de la competencia. **Fase** es una etapa del torneo (fase de grupos, cuartos, final); **Grupo** es una zona dentro de una fase.
+**Objetivo de las entidades:** representan la estructura interna del certamen. **Fase** es una etapa del torneo (fase de grupos, cuartos, final); **Grupo** es una zona dentro de una fase.
 
 | Atributo | Objetivo / Fundamento |
 |---|---|
@@ -490,6 +502,8 @@ erDiagram
 | `Fase.clasifican_por_grupo` | Cuántos equipos de cada grupo pasan a la fase siguiente. |
 | `Fase.estado` | Si la fase está pendiente, en curso o cerrada — el torneo avanza fase por fase (UC-20). |
 | `Grupo.nombre` | "Zona A", "Zona B". |
+
+**[Definido — D-103] Ni Fase ni Grupo representan una categoría competitiva.** Si un evento abre categorías A, B y C, **no son tres grupos ni tres fases**: son tres torneos agrupados por un Certamen (3.23). La zona reparte un fixture dentro de una fase; la fase es una etapa en el tiempo. Una categoría no es ninguna de las dos — no comparte tabla con las otras y corre en paralelo, con su propia secuencia completa de fases.
 
 **[Definido] Fase y Grupo existen incluso en el formato más simple.** Un torneo de liga tiene una única fase con un único grupo. Fundamento: sin esta uniformidad, cada consulta de tabla o de fixture necesitaría un camino distinto según el formato, y agregar un formato nuevo obligaría a tocar todo lo derivado.
 
@@ -510,6 +524,10 @@ erDiagram
 | `fecha_aceptacion_reglamento` **[Definido — D-54]** | Cuándo se aceptó esa versión. **Fundamento:** es el dato que ubica la aceptación en la línea de tiempo del reglamento versionado (3.20) y permite responder qué texto regía en ese momento. Vacío si el torneo no tiene reglamento. |
 
 **[Definido] La Inscripción no tiene `id` propio: su identidad es la combinación `torneo + equipo`.** Es una relación 1 a 1 (un equipo no puede tener dos inscripciones vigentes en el mismo torneo), así que la clave compuesta *es* la identidad — mismo criterio que Stock y Membresía en el set de referencia. Esto vuelve estructuralmente imposible que un equipo aparezca dos veces en la misma tabla de posiciones.
+
+**[Definido — D-108] Una inscripción no se mueve de torneo.** Si un equipo se anotó en la división equivocada de un evento con categorías (3.23), el organizador **lo rechaza indicando cuál le corresponde** (`04`, 4.15) y el equipo se inscribe ahí. **Fundamento:** la identidad de la Inscripción es `torneo + equipo`, así que reasignarla es borrar y recrear una fila con otra clave, arrastrando a mano fechas y autoría; y, más importante, **la división es un juicio sobre el nivel del equipo** y moverlo en silencio a una categoría más baja es una decisión social que la aplicación no debería tomar sola.
+
+**[Definido — D-109] Un equipo puede inscribirse en dos divisiones del mismo evento.** Son dos torneos distintos, así que la clave compuesta ya lo permite. El sistema **avisa** —a quien inscribe y al organizador— y **no bloquea**, igual que con la categoría de género cruzada (D-82) y el nombre duplicado (D-16b): el club que manda su primera a la A y su reserva a la B es un caso legítimo y frecuente.
 
 **[Definido] El Partido apunta a la Inscripción, no al Equipo.** Es una decisión deliberada: garantiza que un partido de un torneo solo pueda involucrar equipos efectivamente inscriptos en ese torneo. Si apuntara al Equipo directamente, nada impediría (por un error de datos) que un equipo no inscripto apareciera en el fixture.
 
@@ -543,7 +561,7 @@ erDiagram
 
 | Atributo | Objetivo / Fundamento |
 |---|---|
-| `torneo_id` / `fase_id` / `grupo_id` | Ubican al partido en la estructura de la competencia. `torneo_id` es redundante respecto de `fase_id` a propósito: es el filtro más frecuente de todo el sistema. |
+| `torneo_id` / `fase_id` / `grupo_id` | Ubican al partido en la estructura del certamen. `torneo_id` es redundante respecto de `fase_id` a propósito: es el filtro más frecuente de todo el sistema. |
 | `numero_fecha` | A qué fecha o jornada pertenece — es cómo la gente se refiere a los partidos ("la fecha 4"), no por su identificador. |
 | `equipo_local_id` / `equipo_visitante_id` | Los dos participantes, referenciados a través de su Inscripción (ver 3.9). |
 | `sede_id` | Dónde se juega (ver 3.16). Opcional. |
@@ -725,7 +743,33 @@ erDiagram
 
 **[Definido] La ciudad no reemplaza la dirección.** Son dos datos con dos usos: **la ciudad sirve para encontrar, la dirección para llegar** (`06`, D-25b). El Torneo lleva `direccion` como **texto libre de referencia** —dónde se juega en general—, y la **Sede** conserva la suya para cada partido (3.17). Cuando el torneo tiene una sola sede, coinciden; cuando tiene varias, la del torneo es la principal y la de cada partido manda sobre ella.
 
-**[Pendiente de definición] El Gran Buenos Aires no encaja del todo en "una ciudad".** Alguien de Vicente López juega habitualmente en San Isidro y en CABA, que son ciudades distintas del catálogo, y con una sola seleccionada ve una porción chica de lo que le sirve. Es el mercado más denso del país, así que conviene resolverlo antes de fijar el selector. **Las tres salidas posibles:** permitir seleccionar **más de una ciudad**; tratar al **AMBA como una entrada propia**; o dejar que el escalón a provincia lo cubra —que funciona mal, porque Buenos Aires como provincia incluye Bahía Blanca—. **No se decide acá.**
+**[Pendiente de definición — `06`, P-51] El Gran Buenos Aires no encaja del todo en "una ciudad".** Alguien de Vicente López juega habitualmente en San Isidro y en CABA, que son ciudades distintas del catálogo, y con una sola seleccionada ve una porción chica de lo que le sirve. Es el mercado más denso del país, así que conviene resolverlo antes de fijar el selector. **Las tres salidas posibles:** permitir seleccionar **más de una ciudad**; tratar al **AMBA como una entrada propia**; o dejar que el escalón a provincia lo cubra —que funciona mal, porque Buenos Aires como provincia incluye Bahía Blanca—. **No se decide acá.**
+
+### 3.23 Certamen
+
+**Objetivo de la entidad:** agrupa las **categorías competitivas** de un mismo evento —la A, la B, la C— cuando el organizador abre más de una. Cada categoría es un **Torneo** completo (3.7); el Certamen es solo el nombre que las junta.
+
+| Atributo | Objetivo / Fundamento |
+|---|---|
+| `organizacion_id` | A qué organización pertenece. Todas sus divisiones son de la misma organización: el Certamen no cruza organizadores. |
+| `nombre` | El nombre del evento tal como lo dice la gente — "Apertura 2026", "Copa del Complejo". Es lo que encabeza la tarjeta agrupada del descubrimiento (`06`, D-107). |
+
+**[Definido — D-103] Es una entidad de agrupación, y por eso tiene tres atributos y ninguno más.** No guarda ciudad, ni fechas, ni formato, ni cupo, ni reglamento, ni estado, ni campeón. **Fundamento (`06`, D-105):** lo compartido **se copia** a cada división al crearla y desde ahí cada una es dueña de lo suyo. Guardarlo acá crearía dos fuentes de verdad para el mismo dato, y además sería falso: las divisiones legítimamente difieren —la C juega sábados y la A domingos, el reglamento de la A pide 18 jugadores y el de la C 14—.
+
+**[Definido — D-103] Por qué la categoría competitiva no es Fase ni Grupo.** Es la pregunta que esta entidad responde, y conviene dejarla escrita:
+
+| Candidato | Por qué no sirve |
+|---|---|
+| **Grupo** (3.8) | El Grupo es una zona **dentro de una fase**, y existe para repartir un fixture. La categoría A no es una zona de la B: **no se cruzan nunca y no comparten tabla**. |
+| **Fase** (3.8) | La Fase es **secuencial en el tiempo** (`Fase.orden`): grupos → cuartos → final. Las categorías corren **en paralelo**, y cada una tiene su propia secuencia completa de fases. La categoría está **por encima** de la Fase, no por debajo. |
+
+El único nivel por encima de la Fase es el Torneo. De ahí la decisión: **no se agrega un nivel, se agrupan torneos** — lo que deja intactos fixture, tabla, posiciones, cupo, inscripción y score, que ya funcionan por torneo.
+
+**[Definido — D-106] Las divisiones son independientes entre sí.** Cada una tiene su estado, su fixture, su tabla, su campeón y su cupo, y avanzan por separado: la A puede estar `finished` con la C todavía `in_progress`. **El Certamen no tiene estado** — no hay una máquina de estados de grupo, y no hace falta inventar qué pasa cuando una división se cancela y las otras siguen.
+
+**[Definido — D-103] El caso normal no lo usa.** Un torneo suelto tiene `certamen_id` vacío y se comporta exactamente como antes de esta revisión. Mismo criterio que el reglamento opcional (`06`, D-29): **lo nuevo no puede encarecer el caso frecuente**.
+
+**[Definido — D-103] No es la "competencia recurrente" de D-19b, aunque el nombre se parezca.** Esta agrupa **divisiones que corren en paralelo** dentro de un mismo evento. Las **ediciones** —Apertura 2026 después de Apertura 2025— corren **en serie** y siguen sin modelarse. Son dos ejes distintos: si la misma entidad tuviera que cubrir los dos, "Apertura" contendría seis torneos sin forma de saber cuáles juegan entre sí. Cuando las ediciones entren, entran **encima** del Certamen.
 
 ---
 
@@ -754,5 +798,7 @@ Las dos entidades siguientes se listan **para que quede constancia de que se las
 | **Pago / Transacción** | Inscripción (3.9) | El pago concreto de una inscripción y la **comisión** que la plataforma retiene sobre él (`06`, D-31, etapa 4) | No modelada. El punto de anclaje ya existe: el atributo `costo` de la Inscripción (3.9), hoy siempre cero |
 
 **[Definido] Lo único que se aplicó hoy es el atributo `costo` en la Inscripción (`06`, D-33).** Es la pieza mínima que evita rehacer el dominio de inscripciones más adelante: la comisión de D-31 se cobra sobre una transacción que todavía no existe, y esa transacción va a colgar de una inscripción que ya tiene importe. Ninguna otra estructura de pagos se agrega en esta versión.
+
+**[Definido — D-103] Queda previsto un nivel más arriba del Certamen: la edición.** El Certamen (3.23) agrupa las **divisiones** de un evento, que corren en paralelo. Agrupar **ediciones** —Apertura 2026 después de Apertura 2025, que corren en serie— sigue sin modelarse (`06`, D-19b), y **no se resuelve reutilizando la misma entidad**: si lo hiciera, "Apertura" contendría seis torneos sin forma de saber cuáles juegan entre sí. Cuando entre, entra como un vínculo opcional **desdel Certamen**, sin tocar nada de lo que cuelga del Torneo.
 
 **[Definido] La publicidad no genera entidades.** Se sirve por una red externa y su decisión es de **superficies**, no de modelo de datos: qué pantallas la muestran y cuáles no (`06`, D-35). **[Definido — D-63]** Las superficies con publicidad son **ficha pública del torneo, fixture y descubrimiento** — las tres de consulta, donde se mira y no se opera. **No la llevan** los flujos de tarea del organizador —cargar resultados, armar el fixture, resolver inscripciones— ni los del capitán al inscribirse: agregarle fricción a la tarea más repetida del producto pondría en riesgo justamente el dato del que vive todo lo demás.

@@ -101,7 +101,7 @@ flowchart TB
 
 **[Definido] La gestión de miembros vive en la organización; la de colaboradores, en el torneo.** UC-07 administra los roles de **organización** —titular y administradores— y por eso cuelga de "Mi organización". UC-52 asigna **colaboradores a un torneo puntual** y por eso cuelga del panel de ese torneo (`06`, D-32, D-34). Son dos pantallas distintas porque son dos alcances distintos: una misma persona puede colaborar en varios torneos a la vez, incluso de organizaciones distintas, y sacarla de uno no la saca de los demás.
 
-**[Definido] Dos vistas del mismo torneo, no dos torneos.** La *ficha pública* (UC-23) y el *panel del organizador* son la misma competencia con dos capas de acceso. El organizador debería poder saltar de una a otra en un toque — necesita ver su torneo como lo ve un capitán que evalúa inscribirse.
+**[Definido] Dos vistas del mismo torneo, no dos torneos.** La *ficha pública* (UC-23) y el *panel del organizador* son el mismo certamen con dos capas de acceso. El organizador debería poder saltar de una a otra en un toque — necesita ver su torneo como lo ve un capitán que evalúa inscribirse.
 
 ---
 
@@ -137,8 +137,12 @@ flowchart TB
     C --> D["Define el formato<br/>(UC-17)"]
     D --> R{"¿Tiene reglamento<br/>escrito?"}
     R -->|"sí"| R2["Lo carga como texto<br/>o archivo (UC-51)"]
-    R -->|"no, o después"| E{"¿Ya tiene<br/>sus equipos?"}
-    R2 --> E
+    R -->|"no, o después"| DV{"¿Abre más de una<br/>categoría (A, B, C)?"}
+    R2 --> DV
+    DV -->|"sí"| DV2["Agrega la división:<br/>se crea el Certamen<br/>y se copia todo (UC-16)"]
+    DV -->|"no"| E{"¿Ya tiene<br/>sus equipos?"}
+    DV2 -.->|"se repite por<br/>cada categoría"| DV
+    DV2 --> E
     E -->|"sí, los conoce"| F["Los carga a mano<br/>(UC-26)"]
     E -->|"no, busca equipos"| G["Publica el torneo<br/>(UC-18)"]
     F --> G
@@ -153,6 +157,8 @@ flowchart TB
     K --> L["Programa la primera fecha<br/>(UC-30)"]
     L --> M(["Torneo en curso"])
 ```
+
+**[Definido — D-103] Las categorías A, B y C se agregan desde el torneo ya armado, y cada una queda como un torneo completo.** El organizador no configura tres torneos desde cero: configura el primero, agrega la división siguiente y **el sistema copia todo** —ciudad, dirección, fechas, modalidad, categoría, reglamento y colaboradores (`06`, D-105)—, pidiéndole solo la etiqueta y lo que difiera. Desde ahí **cada división es independiente**: su propio fixture, su propia tabla, su propio campeón y su propio estado (`06`, D-106). El diseño tiene dos obligaciones acá: que el paso **no aparezca** en el recorrido del torneo suelto, que es el caso frecuente, y que una vez que hay divisiones **el panel deje claro en cuál se está parado** — cargar un resultado de la B en la tabla de la A es el error caro de esta pantalla.
 
 **[Definido] El reglamento es un paso del armado, no un requisito de publicación.** El organizador puede cargarlo como texto, como archivo o de las dos formas (UC-51), pero **su ausencia no bloquea publicar el torneo** (`06`, D-29): la mayoría de los torneos de barrio no tienen reglamento escrito, y exigirlo sería una barrera de entrada sin contrapartida. En el diseño esto significa que el paso se ofrece —porque es lo que le da respaldo al organizador cuando aparece una disputa— pero se puede saltear y volver a él con el torneo ya publicado.
 
@@ -198,8 +204,11 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    A(["Busca torneos (UC-22)"]) --> B["Filtra por zona,<br/>modalidad y categoría"]
-    B --> C["Ficha del torneo (UC-23)"]
+    A(["Busca torneos (UC-22)"]) --> B["Filtra por ciudad,<br/>modalidad, categoría<br/>y duración"]
+    B --> DV{"¿El evento tiene<br/>categorías A, B, C?"}
+    DV -->|"no"| C["Ficha del torneo (UC-23)"]
+    DV -->|"sí"| DV2["Elige su división<br/>— cada una es un<br/>torneo con su cupo"]
+    DV2 --> C
     C --> D{"¿Le sirve?"}
     D -->|"no"| A
     D -->|"sí"| E{"¿Tiene equipo<br/>creado?"}
@@ -213,11 +222,14 @@ flowchart TB
     H --> I(["Espera resolución<br/>— sigue el torneo<br/>automáticamente"])
     I --> J{"Resolución<br/>(UC-25)"}
     J -->|"aprobada"| K["Confirma el plantel<br/>habilitado (UC-27)"]
-    J -->|"rechazada"| A
+    J -->|"rechazada:<br/>división equivocada"| DV2
+    J -->|"rechazada:<br/>otro motivo"| A
     K --> L(["Listo para jugar —<br/>ve su fixture cuando<br/>se genere"])
 ```
 
 **[Definido] Aceptar el reglamento es parte del paso de inscripción, no una pantalla más.** Cuando el torneo tiene reglamento cargado, inscribirse incluye **aceptarlo explícitamente con un clic**, y el sistema guarda **qué versión** se aceptó (`06`, D-54). Si el reglamento cambia después no se pide volver a aceptarlo: se notifica, y ante una disputa se ve que la versión vigente es posterior a la que el capitán aceptó. Es la fricción más barata del recorrido —un clic— y lo único que le da respaldo al organizador cuando la discusión llega; si el torneo no tiene reglamento, el paso directamente no aparece (`06`, D-29).
+
+**[Definido — D-108] El rechazo por división equivocada no devuelve al capitán a la búsqueda.** Es el único rechazo que **no es un no**: el organizador está diciendo *"acá no, en la C"*. El diseño tiene que tratarlo como tal — la notificación lleva **la división sugerida** y un solo paso para inscribirse ahí, sin volver a empezar. Mandarlo de nuevo al buscador después de haberle dicho exactamente dónde va sería el peor final posible de este recorrido. **Fundamento (`06`, D-108):** la inscripción **no se reasigna sola** porque la división es un juicio sobre el nivel del equipo y el equipo tiene que poder aceptarlo; el precio de esa decisión es que el rediseño del paso corra por cuenta de la interfaz.
 
 **[Definido] El paso F es el que más se suele romper en productos de este tipo.** Un capitán que encontró el torneo que buscaba y descubre que primero tiene que salir a crear un equipo, cargar un plantel y recién después volver, se pierde en el camino. Crear el equipo tiene que ocurrir **dentro** del flujo de inscripción, con el torneo esperándolo del otro lado, y con el plantel como paso posterior y opcional (UC-10).
 
@@ -281,7 +293,7 @@ Estos son los puntos donde el sistema tiene que comunicar algo delicado sin gene
 | Una institución tiene equipo masculino y femenino | UC-10, UC-14 | **[Definido]** (`06`, D-83) Son **dos equipos**, y así se ven: dos tarjetas en "Mis equipos" y dos resultados en la búsqueda, con el mismo nombre y el mismo escudo. Lo único que los distingue a simple vista es la **etiqueta de categoría**, así que tiene que estar presente y ser legible en cada lugar donde aparezcan juntos. **No hay vista de club ni encabezado común**: el agrupador es de la segunda etapa (`07`), y sugerirlo en el diseño promete una navegación que no existe. |
 | "Seguir" y "sumarme al plantel" conviven en la misma pantalla | UC-14, UC-43, UC-53 | **[Definido]** (`06`, D-85) Son dos acciones de peso muy distinto y **no pueden verse equivalentes**: seguir es inmediato, reversible y no compromete a nadie; sumarse abre una **solicitud** que alguien tiene que resolver y que, si se acepta, pone a la persona en un plantel público. La jerarquía visual y el texto tienen que dejar claro cuál es cuál **antes** del toque, no después. Mientras la solicitud está pendiente, la pantalla lo dice y ofrece retirarla. |
 | Al capitán le llegan solicitudes y también tiene invitaciones sin responder | UC-11, UC-53 | **[Definido]** (`06`, D-85) En el plantel conviven dos pendientes que se ven parecidos y exigen cosas opuestas: *"lo invitamos y no contesta"* —donde no hay nada que hacer salvo esperar o cancelar— y *"nos pidió entrar y no le contestamos"* —donde la acción es del capitán—. **Tienen que estar separados y etiquetados**, no mezclados en una lista de "pendientes": es la única forma de que el capitán sepa de un vistazo qué depende de él. |
-| Alguien se va de un equipo estando en un torneo en curso | UC-13, UC-27 | **[Definido]** (`06`, D-87, D-18b) La baja es inmediata y no la confirma nadie, pero **la persona sigue habilitada en ese torneo hasta que termine**. El producto tiene que decirlo en el momento de la baja, con esas palabras: salió del equipo, no de la competencia. Sin ese aviso, el jugador cree que dejó de estar disponible y el capitán cree que perdió a alguien que en realidad todavía puede jugar. |
+| Alguien se va de un equipo estando en un torneo en curso | UC-13, UC-27 | **[Definido]** (`06`, D-87, D-18b) La baja es inmediata y no la confirma nadie, pero **la persona sigue habilitada en ese torneo hasta que termine**. El producto tiene que decirlo en el momento de la baja, con esas palabras: salió del equipo, no del certamen. Sin ese aviso, el jugador cree que dejó de estar disponible y el capitán cree que perdió a alguien que en realidad todavía puede jugar. |
 | El equipo se inscribió y no pasa nada visible | UC-24, UC-25 | **[Definido]** (`06`, D-93) La inscripción **nunca es directa**: queda pendiente hasta que el organizador la resuelva, y eso puede tardar días. La pantalla tiene que dejar claro **que el paso siguiente no es del capitán** —no hay nada que completar ni que pagar dentro de la aplicación— y que va a llegar un aviso cuando se resuelva. Sin eso, el capitán cree que hizo algo mal y vuelve a inscribirse, o llama al organizador. |
 | El capitán arma la lista de buena fe y falta gente por aceptar | UC-27, UC-11 | **[Definido]** (`06`, D-98) Sumar a alguien a la lista **se bifurca**: sin cuenta entra en el acto, con cuenta sale una invitación y queda **pendiente**, sin poder jugar. Los pendientes van en **un bloque aparte y etiquetado**, nunca mezclados con los habilitados — el capitán tiene que poder contar cuántos tiene de verdad para el domingo. Y la pantalla tiene que anticipar la bifurcación **antes** del toque, no después. |
 | Un torneo entero ocurre en una tarde | UC-29, UC-31, UC-32 | **[Definido]** (`06`, D-100, D-101) En un relámpago el organizador está **parado en el complejo con la gente esperando**, y dos momentos se vuelven críticos: **cerrar la fase de grupos** —que exige confirmar los resultados que falten, ahí mismo, antes de generar las llaves— y **cargar el resultado entre partido y partido**. Las dos cosas tienen que resolverse de pie, con una mano y en pocos toques. Y el producto **no puede mostrar contadores de 72 horas** en un torneo que termina hoy: los plazos se cierran al finalizar. |
