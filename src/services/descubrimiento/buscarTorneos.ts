@@ -32,6 +32,14 @@ import {
  * orden codifica los tres criterios más el id como desempate final, así
  * que un torneo nuevo insertado entre dos lecturas nunca repite ni
  * saltea filas de la página siguiente.
+ *
+ * **`certamenId`/`certamenNombre`/`division`** (`06`, D-107): se agregan
+ * solo para que quien llama pueda agrupar en el render las filas
+ * contiguas de un mismo certamen. Es una restricción del ticket, no un
+ * detalle: la consulta sigue devolviendo **torneos**, con los mismos
+ * filtros, el mismo orden y la misma paginación — nada de esto cambia
+ * "coincide si alguna división coincide" ni agrega semántica de
+ * certamen a la búsqueda.
  */
 
 const MODALIDADES = ['f5', 'f7', 'f8', 'f9', 'f11'] as const;
@@ -76,6 +84,10 @@ export interface TorneoBuscado {
   inscriptosAprobados: number;
   organizacionNombre: string;
   organizacionVerificada: boolean;
+  /** `06`, D-107 — `null` si el torneo no pertenece a un certamen (caso normal, D-103). */
+  certamenId: string | null;
+  certamenNombre: string | null;
+  division: string | null;
 }
 
 export interface ResultadoBusquedaTorneos {
@@ -100,6 +112,9 @@ interface FilaTorneo {
   inscriptos_aprobados: string;
   organizacion_nombre: string;
   organizacion_verificada: boolean;
+  certamen_id: string | null;
+  certamen_nombre: string | null;
+  division: string | null;
 }
 
 export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneos> = async (
@@ -160,9 +175,11 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
             t.estado, t.fecha_inicio_estimada, t.fecha_fin_estimada, t.cupo_equipos,
             (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved')
               AS inscriptos_aprobados,
-            (o.nivel_verificacion != 'unverified') AS organizacion_verificada
+            (o.nivel_verificacion != 'unverified') AS organizacion_verificada,
+            t.certamen_id, cer.nombre AS certamen_nombre, t.division
      FROM torneo t
      JOIN organizacion o ON o.id = t.organizacion_id
+     LEFT JOIN certamen cer ON cer.id = t.certamen_id
      WHERE ${condiciones.join(' AND ')}
      ORDER BY
        (t.estado = 'registration_open') DESC,
@@ -219,6 +236,9 @@ export const buscarTorneos: Servicio<BuscarTorneosInput, ResultadoBusquedaTorneo
       inscriptosAprobados: Number(fila.inscriptos_aprobados),
       organizacionNombre: fila.organizacion_nombre,
       organizacionVerificada: fila.organizacion_verificada,
+      certamenId: fila.certamen_id,
+      certamenNombre: fila.certamen_nombre,
+      division: fila.division,
     })),
     cursorSiguiente,
     sugerenciaProvincia,

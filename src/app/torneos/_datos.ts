@@ -28,7 +28,8 @@ export async function buscarTorneosCacheado(input: BuscarTorneosInput) {
     // que `equipo-publico-v4` en `equipo/[id]/page.tsx`: si el shape de
     // `TorneoBuscado` vuelve a cambiar, hay que volver a bumpear esto.
     // v3: sumó `duracion` (`06`, D-102).
-    ['buscar-torneos-v3', JSON.stringify(input)],
+    // v4: sumó `certamenId`/`certamenNombre`/`division` (`06`, D-107).
+    ['buscar-torneos-v4', JSON.stringify(input)],
     { revalidate: REVALIDACION_CORTA_SEGUNDOS },
   )();
 }

@@ -23,6 +23,9 @@ function filaTorneo(id: string, over: Partial<Record<string, unknown>> = {}) {
     cupo_equipos: 16,
     inscriptos_aprobados: '3',
     organizacion_verificada: false,
+    certamen_id: null,
+    certamen_nombre: null,
+    division: null,
     ...over,
   };
 }
@@ -263,6 +266,42 @@ describe('buscarTorneos', () => {
 
     expect(resultado.sugerenciaProvincia).toBeNull();
     expect(consultas.some((c) => c.texto.startsWith('SELECT p.nombre, count(t.id)'))).toBe(false);
+  });
+
+  it('sin certamen, certamenId/certamenNombre/division vienen null (caso normal, D-103)', async () => {
+    mockearDb({ torneos: [filaTorneo('t1')] });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    const resultado = await buscarTorneos({ ciudadId: CIUDAD }, VISITANTE);
+
+    expect(resultado.torneos[0]).toMatchObject({
+      certamenId: null,
+      certamenNombre: null,
+      division: null,
+    });
+  });
+
+  it('con certamen, propaga certamenId/certamenNombre/division sin cambiar filtros ni orden (`06`, D-107)', async () => {
+    const consultas = mockearDb({
+      torneos: [
+        filaTorneo('t1', {
+          certamen_id: 'cert-1',
+          certamen_nombre: 'Apertura 2026',
+          division: 'A',
+        }),
+      ],
+    });
+    const { buscarTorneos } = await import('./buscarTorneos');
+
+    const resultado = await buscarTorneos({ ciudadId: CIUDAD }, VISITANTE);
+
+    expect(resultado.torneos[0]).toMatchObject({
+      certamenId: 'cert-1',
+      certamenNombre: 'Apertura 2026',
+      division: 'A',
+    });
+    const busqueda = consultas.find((c) => c.texto.startsWith('SELECT t.id, t.nombre'));
+    expect(busqueda!.texto).toContain('LEFT JOIN certamen cer ON cer.id = t.certamen_id');
   });
 
   it('pagina por cursor: la segunda página empieza después de la última clave vista', async () => {

@@ -68,6 +68,10 @@ export interface FichaTorneo {
   campeon: { equipoId: string; nombre: string; escudoUrl: string | null } | null;
   /** Equipos con inscripción `approved` (`08` — Ficha pública, sección "Equipos inscriptos"). */
   equiposInscriptos: Array<{ id: string; nombre: string; escudoUrl: string | null }>;
+  /** `06`, D-107 — `null` si el torneo no pertenece a un certamen (caso normal, D-103). */
+  certamenId: string | null;
+  certamenNombre: string | null;
+  division: string | null;
 }
 
 interface FilaTorneo {
@@ -95,6 +99,9 @@ interface FilaTorneo {
   organizacion_nombre: string;
   organizacion_logo_url: string | null;
   organizacion_nivel_verificacion: string;
+  certamen_id: string | null;
+  certamen_nombre: string | null;
+  division: string | null;
 }
 
 async function obtenerEquiposInscriptos(
@@ -290,10 +297,12 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
             t.estado, t.visibilidad, t.formato, t.cupo_equipos,
             t.fecha_inicio_estimada, t.fecha_fin_estimada, t.imagen_url,
             o.id AS organizacion_id, o.nombre AS organizacion_nombre,
-            o.logo_url AS organizacion_logo_url, o.nivel_verificacion AS organizacion_nivel_verificacion
+            o.logo_url AS organizacion_logo_url, o.nivel_verificacion AS organizacion_nivel_verificacion,
+            t.certamen_id, cer.nombre AS certamen_nombre, t.division
      FROM torneo t
      JOIN ciudad c ON c.id = t.ciudad_id
      JOIN organizacion o ON o.id = t.organizacion_id
+     LEFT JOIN certamen cer ON cer.id = t.certamen_id
      WHERE t.id = $1`,
     [datos.torneoId],
   );
@@ -359,5 +368,8 @@ export const obtenerFichaTorneo: Servicio<ObtenerFichaTorneoInput, FichaTorneo> 
     campeon,
     equiposInscriptos,
     seguidores,
+    certamenId: torneo.certamen_id,
+    certamenNombre: torneo.certamen_nombre,
+    division: torneo.division,
   };
 };

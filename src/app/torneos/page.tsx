@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { TarjetaTorneoDescubrimiento } from '@/components/TarjetaTorneoDescubrimiento';
+import { TarjetaCertamenDescubrimiento } from '@/components/TarjetaCertamenDescubrimiento';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { NavInferior } from '@/components/NavInferior';
@@ -13,6 +14,7 @@ import { conNombreProducto } from '@/lib/nombreProducto';
 import { VALORES_DURACION_TORNEO, etiquetaDuracionTorneo } from '@/lib/duracionTorneo';
 import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from './_constantes';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
+import { agruparCertamenesContiguos } from './_agruparCertamenes';
 import { SelectorDeCiudad } from './SelectorDeCiudad';
 import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
 import { EnlaceIngresar } from './EnlaceIngresar';
@@ -256,24 +258,47 @@ export default async function PaginaDescubrimiento({
           </>
         ) : (
           <div className={styles.lista}>
-            {resultado.torneos.map((torneo, indice) => (
-              <Fragment key={torneo.id}>
-                <Link href={`/torneo/${torneo.id}`} className={styles.tarjetaEnlace}>
-                  <TarjetaTorneoDescubrimiento
-                    nombre={torneo.nombre}
-                    imagenUrl={torneo.imagenUrl}
+            {agruparCertamenesContiguos(resultado.torneos).map((bloque, indice) => (
+              <Fragment
+                key={bloque.tipo === 'torneo' ? bloque.torneo.id : bloque.certamenId + indice}
+              >
+                {bloque.tipo === 'torneo' ? (
+                  <Link href={`/torneo/${bloque.torneo.id}`} className={styles.tarjetaEnlace}>
+                    <TarjetaTorneoDescubrimiento
+                      nombre={bloque.torneo.nombre}
+                      imagenUrl={bloque.torneo.imagenUrl}
+                      ciudad={ciudadActual?.nombre ?? ''}
+                      modalidad={bloque.torneo.modalidad}
+                      categoriaGenero={bloque.torneo.categoriaGenero}
+                      categoriaEdad={bloque.torneo.categoriaEdad}
+                      estado={bloque.torneo.estado}
+                      fechaInicioEstimada={bloque.torneo.fechaInicioEstimada}
+                      cupoEquipos={bloque.torneo.cupoEquipos}
+                      inscriptosAprobados={bloque.torneo.inscriptosAprobados}
+                      organizacionNombre={bloque.torneo.organizacionNombre}
+                      organizacionVerificada={bloque.torneo.organizacionVerificada}
+                    />
+                  </Link>
+                ) : (
+                  <TarjetaCertamenDescubrimiento
+                    certamenNombre={bloque.certamenNombre}
+                    imagenUrl={bloque.torneos[0]!.imagenUrl}
                     ciudad={ciudadActual?.nombre ?? ''}
-                    modalidad={torneo.modalidad}
-                    categoriaGenero={torneo.categoriaGenero}
-                    categoriaEdad={torneo.categoriaEdad}
-                    estado={torneo.estado}
-                    fechaInicioEstimada={torneo.fechaInicioEstimada}
-                    cupoEquipos={torneo.cupoEquipos}
-                    inscriptosAprobados={torneo.inscriptosAprobados}
-                    organizacionNombre={torneo.organizacionNombre}
-                    organizacionVerificada={torneo.organizacionVerificada}
+                    modalidad={bloque.torneos[0]!.modalidad}
+                    categoriaGenero={bloque.torneos[0]!.categoriaGenero}
+                    categoriaEdad={bloque.torneos[0]!.categoriaEdad}
+                    fechaInicioEstimada={bloque.torneos[0]!.fechaInicioEstimada}
+                    organizacionNombre={bloque.torneos[0]!.organizacionNombre}
+                    organizacionVerificada={bloque.torneos[0]!.organizacionVerificada}
+                    divisiones={bloque.torneos.map((torneo) => ({
+                      torneoId: torneo.id,
+                      division: torneo.division ?? '',
+                      estado: torneo.estado,
+                      cupoEquipos: torneo.cupoEquipos,
+                      inscriptosAprobados: torneo.inscriptosAprobados,
+                    }))}
                   />
-                </Link>
+                )}
                 {/* Publicidad (T24, `06` D-63): dentro del listado, en su propio contenedor (D-75) para que nunca se confunda con una tarjeta. */}
                 {indice === INDICE_PUBLICIDAD_EN_LISTA && <ContenedorPublicidad />}
               </Fragment>

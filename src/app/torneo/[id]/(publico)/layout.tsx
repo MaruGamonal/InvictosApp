@@ -32,6 +32,11 @@ export default async function LayoutTorneo({
           <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={80} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{ficha.nombre}</h1>
+            {ficha.certamenNombre && (
+              <p className={styles.certamen}>
+                {ficha.certamenNombre} · División {ficha.division}
+              </p>
+            )}
             <p className={styles.metaLinea}>
               {formatearCantidadSeguidores(ficha.seguidores)} · {ficha.ciudad.nombre} ·{' '}
               {obtenerEtiqueta('torneo.modalidad', ficha.modalidad).etiqueta}

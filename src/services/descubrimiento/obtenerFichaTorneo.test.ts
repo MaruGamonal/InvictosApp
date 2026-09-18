@@ -43,6 +43,9 @@ function filaTorneoBase(over: Partial<Record<string, unknown>> = {}) {
     organizacion_nombre: 'Liga Sur',
     organizacion_logo_url: 'https://cdn.example.com/liga-sur.png',
     organizacion_nivel_verificacion: 'basic',
+    certamen_id: null,
+    certamen_nombre: null,
+    division: null,
     ...over,
   };
 }
@@ -418,6 +421,30 @@ describe('obtenerFichaTorneo', () => {
     const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
     const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
     expect(ficha.seguidores).toBe(0);
+  });
+
+  it('un torneo sin certamen trae certamenId/certamenNombre/division en null (caso normal, D-103)', async () => {
+    mockearDb({});
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.certamenId).toBeNull();
+    expect(ficha.certamenNombre).toBeNull();
+    expect(ficha.division).toBeNull();
+  });
+
+  it('una división de un certamen trae certamenId/certamenNombre/division (`06`, D-107)', async () => {
+    mockearDb({
+      torneo: filaTorneoBase({
+        certamen_id: 'cert-1',
+        certamen_nombre: 'Apertura 2026',
+        division: 'A',
+      }),
+    });
+    const { obtenerFichaTorneo } = await import('./obtenerFichaTorneo');
+    const ficha = await obtenerFichaTorneo({ torneoId: TORNEO }, VISITANTE);
+    expect(ficha.certamenId).toBe('cert-1');
+    expect(ficha.certamenNombre).toBe('Apertura 2026');
+    expect(ficha.division).toBe('A');
   });
 
   it('torneo inexistente, NO_ENCONTRADO', async () => {

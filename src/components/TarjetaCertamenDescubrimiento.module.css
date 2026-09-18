@@ -1,0 +1,36 @@
+.divisiones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--fondo-sutil);
+  padding-top: 12px;
+}
+
+.filaDivision {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--borde-sutil);
+  border-radius: var(--radio-boton);
+  text-decoration: none;
+  color: inherit;
+}
+
+.etiquetaDivision {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cupoDivision {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-texto);
+}

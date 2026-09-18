@@ -39,6 +39,13 @@
   color: var(--gris-claro-sobre-oscuro);
 }
 
+.certamen {
+  margin: 0;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gris-claro-sobre-oscuro);
+}
+
 .nav {
   display: flex;
   gap: 4px;
