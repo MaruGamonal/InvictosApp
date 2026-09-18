@@ -168,6 +168,7 @@ const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
     no_show: { etiqueta: 'No se presentó', color: 'neutro' },
     roster_incomplete: { etiqueta: 'No completó el plantel', color: 'neutro' },
     disciplinary: { etiqueta: 'Sanción', color: 'neutro' },
+    wrong_division: { etiqueta: 'División equivocada', color: 'informacion' },
     other: { etiqueta: 'Otro', color: 'neutro' },
   },
   'partido.estado': {

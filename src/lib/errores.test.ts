@@ -22,7 +22,9 @@ describe('CODIGOS_ERROR', () => {
     // cerrar una fase para generar la siguiente exige resultados
     // confirmed, regla que un torneo relámpago hace visible pero que
     // siempre fue correcta.
-    expect(codigos).toHaveLength(30);
+    // Más DIVISION_DUPLICADA (revisión 17, `06` D-104): dos divisiones
+    // del mismo certamen no pueden llevar la misma etiqueta.
+    expect(codigos).toHaveLength(31);
   });
 
   it.each(codigos)(

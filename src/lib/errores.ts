@@ -103,6 +103,10 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'No podés bajar el cupo por debajo de la cantidad de equipos ya aprobados.',
   },
+  DIVISION_DUPLICADA: {
+    httpStatus: 409,
+    mensaje: 'Ya existe una división con esa etiqueta en este certamen.',
+  },
   TRANSICION_NO_PERMITIDA: {
     httpStatus: 409,
     mensaje: 'El torneo no puede pasar a ese estado desde donde está ahora.',
