@@ -44,6 +44,7 @@ const EXCEPCIONES = new Set<string>([
   'organizadores/asignarColaborador.ts', // T8 — crea/reactiva el vínculo de colaborador de un torneo
   'organizadores/quitarColaborador.ts', // T8 — da de baja lógica el vínculo de colaborador
   'organizadores/listarColaboradoresTorneo.ts', // Pantalla de gestión del torneo — lista los colaboradores de este torneo puntual; es el propio dato que gestiona, no una decisión de permiso
+  'torneos/agregarDivision.ts', // T9 (revisión 17, D-105) — copia las filas activas de colaborador_torneo del torneo de origen a la nueva división; no decide un permiso
   'torneos/_notificarCambio.ts', // T10 — resuelve destinatarios (capitán/delegados) para notificar; no decide un permiso
   'inscripciones/resolverInscripcion.ts', // T12 — resuelve destinatarios (capitán/delegados del equipo) para notificar; no decide un permiso
   'inscripciones/solicitarInscripcion.ts', // T20 — sigue automáticamente al torneo desde cada integrante activo del plantel; no decide un permiso

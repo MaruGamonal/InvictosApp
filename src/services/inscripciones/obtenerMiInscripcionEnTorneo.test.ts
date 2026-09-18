@@ -17,6 +17,7 @@ function mockearDb(opciones: {
     equipo_nombre: string;
     estado: string;
     advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
   }>;
 }) {
   vi.doMock('@/db/cliente', () => ({
@@ -87,6 +88,7 @@ describe('obtenerMiInscripcionEnTorneo', () => {
           equipo_nombre: 'Los Pibes',
           estado: 'pending',
           advertencia_categoria: false,
+          advertencia_multiples_divisiones: true,
         },
       ],
     });
@@ -101,6 +103,7 @@ describe('obtenerMiInscripcionEnTorneo', () => {
         equipoNombre: 'Los Pibes',
         estado: 'pending',
         advertenciaCategoria: false,
+        advertenciaMultiplesDivisiones: true,
       },
     ]);
   });

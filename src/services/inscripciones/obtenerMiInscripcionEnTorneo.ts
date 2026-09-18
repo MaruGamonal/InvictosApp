@@ -12,6 +12,7 @@ export interface MiInscripcionTorneo {
   equipoNombre: string;
   estado: 'pending' | 'approved' | 'rejected' | 'withdrawn' | 'excluded' | 'waitlisted';
   advertenciaCategoria: boolean;
+  advertenciaMultiplesDivisiones: boolean;
 }
 
 /**
@@ -46,8 +47,10 @@ export const obtenerMiInscripcionEnTorneo: Servicio<
     equipo_nombre: string;
     estado: MiInscripcionTorneo['estado'];
     advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
   }>(
-    `SELECT i.equipo_id, e.nombre AS equipo_nombre, i.estado, i.advertencia_categoria
+    `SELECT i.equipo_id, e.nombre AS equipo_nombre, i.estado, i.advertencia_categoria,
+            i.advertencia_multiples_divisiones
      FROM inscripcion i
      JOIN equipo e ON e.id = i.equipo_id
      WHERE i.torneo_id = $1 AND i.equipo_id = ANY($2)`,
@@ -59,5 +62,6 @@ export const obtenerMiInscripcionEnTorneo: Servicio<
     equipoNombre: fila.equipo_nombre,
     estado: fila.estado,
     advertenciaCategoria: fila.advertencia_categoria,
+    advertenciaMultiplesDivisiones: fila.advertencia_multiples_divisiones,
   }));
 };

@@ -16,6 +16,14 @@ import { cerrarTorneoSiCupoCompleto } from './_cupo';
  * Es una de las cuatro operaciones transaccionales del MVP (`10`, 2.5):
  * aprobar y cerrar el torneo al completarse el cupo pasan juntos, en la
  * misma transacción.
+ *
+ * `wrong_division` (`06`, D-108) es el único motivo de rechazo con un
+ * comportamiento distinto: no existe `reasignarInscripcion` —la
+ * identidad de `inscripcion` es `(torneo_id, equipo_id)`— así que se
+ * rechaza señalando el `torneoId` de la división que corresponde en
+ * `motivoDetalle`, y la notificación al capitán enlaza directo a esa
+ * ficha para que se inscriba ahí. La división sugerida tiene que ser
+ * otro torneo del mismo certamen — nunca uno de otro evento.
  */
 
 const esquemaEntrada = z
@@ -24,7 +32,7 @@ const esquemaEntrada = z
     equipoId: z.string().uuid(),
     decision: z.enum(['approved', 'rejected']),
     motivo: z
-      .enum(['withdrew', 'no_show', 'roster_incomplete', 'disciplinary', 'other'])
+      .enum(['withdrew', 'no_show', 'roster_incomplete', 'disciplinary', 'wrong_division', 'other'])
       .optional(),
     motivoDetalle: z.string().trim().min(1).optional(),
   })
@@ -35,7 +43,14 @@ const esquemaEntrada = z
   .refine((d) => d.motivo !== 'other' || Boolean(d.motivoDetalle), {
     message: 'Con motivo "other" hace falta el texto libre.',
     path: ['motivoDetalle'],
-  });
+  })
+  .refine(
+    (d) => d.motivo !== 'wrong_division' || z.string().uuid().safeParse(d.motivoDetalle).success,
+    {
+      message: 'Con motivo "wrong_division" hace falta el torneoId de la división sugerida.',
+      path: ['motivoDetalle'],
+    },
+  );
 export type ResolverInscripcionInput = z.infer<typeof esquemaEntrada>;
 
 export const resolverInscripcion: Servicio<
@@ -47,6 +62,26 @@ export const resolverInscripcion: Servicio<
   await verificarPermisoTorneo(contexto, datos.torneoId, 'resolver_inscripciones');
 
   const pool = obtenerPool();
+
+  let torneoIdParaNotificar = datos.torneoId;
+  if (datos.motivo === 'wrong_division') {
+    const { rows: sugeridaRows } = await pool.query(
+      `SELECT ts.id FROM torneo ts
+       JOIN torneo torigen ON torigen.certamen_id = ts.certamen_id
+       WHERE ts.id = $1 AND torigen.id = $2 AND ts.certamen_id IS NOT NULL`,
+      [datos.motivoDetalle, datos.torneoId],
+    );
+    if (!sugeridaRows[0]) {
+      throw crearError('DATOS_INVALIDOS', [
+        {
+          campo: 'motivoDetalle',
+          problema: 'La división sugerida tiene que ser otro torneo del mismo certamen.',
+        },
+      ]);
+    }
+    torneoIdParaNotificar = datos.motivoDetalle!;
+  }
+
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
@@ -88,7 +123,7 @@ export const resolverInscripcion: Servicio<
         {
           tipo: 'registration_resolved',
           entidadOrigenTipo: 'torneo',
-          entidadOrigenId: datos.torneoId,
+          entidadOrigenId: torneoIdParaNotificar,
           destinatarios: { usuarioIds },
         },
         contexto,

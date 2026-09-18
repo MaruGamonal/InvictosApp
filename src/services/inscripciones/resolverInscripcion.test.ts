@@ -25,6 +25,7 @@ function mockearDb(opciones: {
   rowCountUpdate?: number;
   cupoCompleto?: boolean;
   gestores?: string[];
+  divisionSugeridaValida?: boolean;
 }) {
   const consultasCliente: string[] = [];
   vi.doMock('@/db/cliente', () => ({
@@ -38,6 +39,9 @@ function mockearDb(opciones: {
         }
         if (texto.includes('FROM colaborador_torneo')) {
           return { rows: opciones.esColaborador ? [{}] : [] };
+        }
+        if (texto.includes('FROM torneo ts\n       JOIN torneo torigen')) {
+          return { rows: opciones.divisionSugeridaValida ? [{ id: 'torneo-sugerido' }] : [] };
         }
         if (texto.includes('pd.usuario_id')) {
           return { rows: (opciones.gestores ?? []).map((usuario_id) => ({ usuario_id })) };
@@ -122,6 +126,70 @@ describe('resolverInscripcion', () => {
         contextoCon('usuario-titular'),
       ),
     ).resolves.toEqual({ estado: 'rejected' });
+  });
+
+  const TORNEO_SUGERIDO = '55555555-5555-5555-5555-555555555555';
+
+  it('rechaza por división equivocada y notifica con el enlace a la división sugerida', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      gestores: ['usuario-cap'],
+      divisionSugeridaValida: true,
+    });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+
+    const resultado = await resolverInscripcion(
+      {
+        torneoId: TORNEO,
+        equipoId: EQUIPO,
+        decision: 'rejected',
+        motivo: 'wrong_division',
+        motivoDetalle: TORNEO_SUGERIDO,
+      },
+      contextoCon('usuario-titular'),
+    );
+
+    expect(resultado).toEqual({ estado: 'rejected' });
+    expect(notificarMock).toHaveBeenCalledWith(
+      expect.objectContaining({ entidadOrigenId: TORNEO_SUGERIDO }),
+      expect.anything(),
+    );
+  });
+
+  it('wrong_division con motivoDetalle que no es un torneo del mismo certamen, DATOS_INVALIDOS', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', divisionSugeridaValida: false });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+
+    await expect(
+      resolverInscripcion(
+        {
+          torneoId: TORNEO,
+          equipoId: EQUIPO,
+          decision: 'rejected',
+          motivo: 'wrong_division',
+          motivoDetalle: TORNEO_SUGERIDO,
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('wrong_division con motivoDetalle que no es un uuid, DATOS_INVALIDOS', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner' });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+
+    await expect(
+      resolverInscripcion(
+        {
+          torneoId: TORNEO,
+          equipoId: EQUIPO,
+          decision: 'rejected',
+          motivo: 'wrong_division',
+          motivoDetalle: 'la B',
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
   });
 
   it('sin inscripción pendiente/en espera, NO_ENCONTRADO', async () => {

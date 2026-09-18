@@ -20,6 +20,14 @@ import { verificarPermisoEquipo } from '@/lib/permisos';
  * inscripción se crea igual y la bandera se calcula y guarda al crear,
  * no se deriva después — si el equipo cambia de categoría más tarde,
  * el organizador sigue viendo la advertencia con la que aprobó.
+ *
+ * `advertencia_multiples_divisiones` (`06`, D-109) sigue el mismo
+ * criterio: si el equipo ya tiene una inscripción vigente en **otra
+ * división del mismo certamen** (`06`, D-103), no se bloquea — se
+ * avisa, tanto al capitán como al organizador. La unicidad de
+ * `inscripcion` es por torneo, no por certamen, así que estar en dos
+ * divisiones es estructuralmente posible; esto solo hace visible que
+ * pasó.
  */
 
 const esquemaEntrada = z.object({
@@ -32,6 +40,7 @@ export type SolicitarInscripcionInput = z.infer<typeof esquemaEntrada>;
 export interface SolicitarInscripcionResultado {
   estado: 'pending' | 'waitlisted' | 'approved';
   advertenciaCategoria: boolean;
+  advertenciaMultiplesDivisiones: boolean;
 }
 
 const ESTADOS_VIGENTES = ['pending', 'approved', 'waitlisted'];
@@ -56,8 +65,10 @@ export const solicitarInscripcion: Servicio<
     categoria_genero: string;
     cupo_equipos: number;
     admite_lista_espera: boolean;
+    certamen_id: string | null;
   }>(
-    'SELECT estado, categoria_genero, cupo_equipos, admite_lista_espera FROM torneo WHERE id = $1',
+    `SELECT estado, categoria_genero, cupo_equipos, admite_lista_espera, certamen_id
+     FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
   const torneo = torneoRows[0];
@@ -67,8 +78,10 @@ export const solicitarInscripcion: Servicio<
   const { rows: existenteRows } = await pool.query<{
     estado: string;
     advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
   }>(
-    'SELECT estado, advertencia_categoria FROM inscripcion WHERE torneo_id = $1 AND equipo_id = $2',
+    `SELECT estado, advertencia_categoria, advertencia_multiples_divisiones
+     FROM inscripcion WHERE torneo_id = $1 AND equipo_id = $2`,
     [datos.torneoId, datos.equipoId],
   );
   const existente = existenteRows[0];
@@ -76,6 +89,7 @@ export const solicitarInscripcion: Servicio<
     return {
       estado: existente.estado as SolicitarInscripcionResultado['estado'],
       advertenciaCategoria: existente.advertencia_categoria,
+      advertenciaMultiplesDivisiones: existente.advertencia_multiples_divisiones,
     };
   }
 
@@ -97,6 +111,19 @@ export const solicitarInscripcion: Servicio<
   const advertenciaCategoria =
     torneo.categoria_genero !== 'mixed' && equipo.categoria_genero !== torneo.categoria_genero;
 
+  let advertenciaMultiplesDivisiones = false;
+  if (torneo.certamen_id) {
+    const { rows: otrasDivisionesRows } = await pool.query(
+      `SELECT 1 FROM inscripcion i
+       JOIN torneo t ON t.id = i.torneo_id
+       WHERE i.equipo_id = $1 AND t.certamen_id = $2 AND t.id != $3
+         AND i.estado IN ('pending', 'approved', 'waitlisted')
+       LIMIT 1`,
+      [datos.equipoId, torneo.certamen_id, datos.torneoId],
+    );
+    advertenciaMultiplesDivisiones = otrasDivisionesRows.length > 0;
+  }
+
   const { rows: aprobadosRows } = await pool.query<{ count: string }>(
     `SELECT count(*) FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved'`,
     [datos.torneoId],
@@ -113,12 +140,13 @@ export const solicitarInscripcion: Servicio<
 
     await cliente.query(
       `INSERT INTO inscripcion
-         (torneo_id, equipo_id, estado, advertencia_categoria, solicitada_por_usuario_id,
-          reglamento_version_aceptada, fecha_aceptacion_reglamento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+         (torneo_id, equipo_id, estado, advertencia_categoria, advertencia_multiples_divisiones,
+          solicitada_por_usuario_id, reglamento_version_aceptada, fecha_aceptacion_reglamento)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (torneo_id, equipo_id) DO UPDATE SET
          estado = EXCLUDED.estado,
          advertencia_categoria = EXCLUDED.advertencia_categoria,
+         advertencia_multiples_divisiones = EXCLUDED.advertencia_multiples_divisiones,
          solicitada_por_usuario_id = EXCLUDED.solicitada_por_usuario_id,
          reglamento_version_aceptada = EXCLUDED.reglamento_version_aceptada,
          fecha_aceptacion_reglamento = EXCLUDED.fecha_aceptacion_reglamento,
@@ -132,6 +160,7 @@ export const solicitarInscripcion: Servicio<
         datos.equipoId,
         estado,
         advertenciaCategoria,
+        advertenciaMultiplesDivisiones,
         contexto.usuarioId,
         reglamentoVigente?.numero_version ?? null,
         reglamentoVigente ? new Date() : null,
@@ -155,7 +184,7 @@ export const solicitarInscripcion: Servicio<
     }
 
     await cliente.query('COMMIT');
-    return { estado, advertenciaCategoria };
+    return { estado, advertenciaCategoria, advertenciaMultiplesDivisiones };
   } catch (error) {
     await cliente.query('ROLLBACK');
     throw error;

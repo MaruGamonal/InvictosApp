@@ -32,6 +32,7 @@ type Paso =
       tipo: 'enviado';
       estado: 'pending' | 'waitlisted' | 'approved';
       advertenciaCategoria: boolean;
+      advertenciaMultiplesDivisiones: boolean;
       equipoId: string;
     }
   | { tipo: 'error'; equipos: EquipoGestionable[]; equipoId: string; mensaje: string };
@@ -72,6 +73,7 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
         const inscripciones: Array<{
           estado: string;
           advertenciaCategoria: boolean;
+          advertenciaMultiplesDivisiones: boolean;
           equipoId: string;
         }> = cuerpo?.data ?? [];
         const vigente = inscripciones.find((i) => esEstadoVigente(i.estado));
@@ -80,6 +82,7 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
             tipo: 'enviado',
             estado: vigente.estado,
             advertenciaCategoria: vigente.advertenciaCategoria,
+            advertenciaMultiplesDivisiones: vigente.advertenciaMultiplesDivisiones,
             equipoId: vigente.equipoId,
           });
         }
@@ -142,6 +145,7 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
         tipo: 'enviado',
         estado: cuerpo.data.estado,
         advertenciaCategoria: cuerpo.data.advertenciaCategoria,
+        advertenciaMultiplesDivisiones: cuerpo.data.advertenciaMultiplesDivisiones,
         equipoId,
       });
     } catch {
@@ -186,6 +190,12 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
           <p className={styles.advertencia}>
             La categoría de tu equipo no coincide con la de este torneo — el organizador lo va a ver
             así al resolver la solicitud.
+          </p>
+        )}
+        {paso.advertenciaMultiplesDivisiones && (
+          <p className={styles.advertencia}>
+            Tu equipo ya está inscripto en otra división de este mismo certamen — el organizador lo
+            va a ver así al resolver la solicitud.
           </p>
         )}
         {paso.estado === 'approved' && (

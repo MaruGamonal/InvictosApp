@@ -22,7 +22,13 @@ function mockearDb(opciones: {
   aprobados?: number;
   cupoEquipos?: number;
   reglamentoVigente?: number;
-  inscripcionExistente?: { estado: string; advertencia_categoria: boolean };
+  certamenId?: string | null;
+  otraDivisionInscripta?: boolean;
+  inscripcionExistente?: {
+    estado: string;
+    advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
+  };
   integrantes?: string[];
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
@@ -37,9 +43,7 @@ function mockearDb(opciones: {
             rows: (opciones.rolesEnEquipo ?? ['captain']).map((rol_equipo) => ({ rol_equipo })),
           };
         }
-        if (
-          texto.startsWith('SELECT estado, categoria_genero, cupo_equipos, admite_lista_espera')
-        ) {
+        if (texto.includes('SELECT estado, categoria_genero, cupo_equipos, admite_lista_espera')) {
           return {
             rows: [
               {
@@ -47,11 +51,14 @@ function mockearDb(opciones: {
                 categoria_genero: opciones.categoriaTorneo ?? 'male',
                 cupo_equipos: opciones.cupoEquipos ?? 8,
                 admite_lista_espera: opciones.admiteListaEspera ?? true,
+                certamen_id: opciones.certamenId ?? null,
               },
             ],
           };
         }
-        if (texto.startsWith('SELECT estado, advertencia_categoria FROM inscripcion')) {
+        if (
+          texto.startsWith('SELECT estado, advertencia_categoria, advertencia_multiples_divisiones')
+        ) {
           return { rows: opciones.inscripcionExistente ? [opciones.inscripcionExistente] : [] };
         }
         if (texto.includes("estado = 'current'")) {
@@ -63,6 +70,9 @@ function mockearDb(opciones: {
         }
         if (texto.startsWith('SELECT categoria_genero FROM equipo')) {
           return { rows: [{ categoria_genero: opciones.categoriaEquipo ?? 'male' }] };
+        }
+        if (texto.includes('FROM inscripcion i\n       JOIN torneo t')) {
+          return { rows: opciones.otraDivisionInscripta ? [{ '?column?': 1 }] : [] };
         }
         if (texto.includes("estado = 'approved'")) {
           return { rows: [{ count: String(opciones.aprobados ?? 0) }] };
@@ -94,7 +104,11 @@ describe('solicitarInscripcion', () => {
       { torneoId: TORNEO, equipoId: EQUIPO },
       contextoCon('usuario-1'),
     );
-    expect(resultado).toEqual({ estado: 'pending', advertenciaCategoria: false });
+    expect(resultado).toEqual({
+      estado: 'pending',
+      advertenciaCategoria: false,
+      advertenciaMultiplesDivisiones: false,
+    });
   });
 
   it('con reglamento vigente y sin aceptarlo, REGLAMENTO_NO_ACEPTADO', async () => {
@@ -113,7 +127,11 @@ describe('solicitarInscripcion', () => {
         { torneoId: TORNEO, equipoId: EQUIPO, aceptoReglamentoVersion: 2 },
         contextoCon('usuario-1'),
       ),
-    ).resolves.toEqual({ estado: 'pending', advertenciaCategoria: false });
+    ).resolves.toEqual({
+      estado: 'pending',
+      advertenciaCategoria: false,
+      advertenciaMultiplesDivisiones: false,
+    });
   });
 
   it('con el torneo cerrado, INSCRIPCIONES_CERRADAS', async () => {
@@ -127,12 +145,20 @@ describe('solicitarInscripcion', () => {
   it('con una inscripción vigente ya existente, devuelve la existente', async () => {
     mockearDb({
       perfilId: 'perfil-1',
-      inscripcionExistente: { estado: 'approved', advertencia_categoria: false },
+      inscripcionExistente: {
+        estado: 'approved',
+        advertencia_categoria: false,
+        advertencia_multiples_divisiones: true,
+      },
     });
     const { solicitarInscripcion } = await import('./solicitarInscripcion');
     await expect(
       solicitarInscripcion({ torneoId: TORNEO, equipoId: EQUIPO }, contextoCon('usuario-1')),
-    ).resolves.toEqual({ estado: 'approved', advertenciaCategoria: false });
+    ).resolves.toEqual({
+      estado: 'approved',
+      advertenciaCategoria: false,
+      advertenciaMultiplesDivisiones: true,
+    });
   });
 
   it('con el cupo lleno y lista de espera habilitada, queda waitlisted', async () => {
@@ -140,7 +166,11 @@ describe('solicitarInscripcion', () => {
     const { solicitarInscripcion } = await import('./solicitarInscripcion');
     await expect(
       solicitarInscripcion({ torneoId: TORNEO, equipoId: EQUIPO }, contextoCon('usuario-1')),
-    ).resolves.toEqual({ estado: 'waitlisted', advertenciaCategoria: false });
+    ).resolves.toEqual({
+      estado: 'waitlisted',
+      advertenciaCategoria: false,
+      advertenciaMultiplesDivisiones: false,
+    });
   });
 
   it('con el cupo lleno y sin lista de espera, CUPO_COMPLETO', async () => {
@@ -169,6 +199,27 @@ describe('solicitarInscripcion', () => {
       contextoCon('usuario-1'),
     );
     expect(resultado.advertenciaCategoria).toBe(false);
+  });
+
+  it('avisa (no bloquea) si el equipo ya está inscripto en otra división del mismo certamen', async () => {
+    mockearDb({ perfilId: 'perfil-1', certamenId: 'certamen-1', otraDivisionInscripta: true });
+    const { solicitarInscripcion } = await import('./solicitarInscripcion');
+    const resultado = await solicitarInscripcion(
+      { torneoId: TORNEO, equipoId: EQUIPO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.estado).toBe('pending');
+    expect(resultado.advertenciaMultiplesDivisiones).toBe(true);
+  });
+
+  it('un torneo sin certamen nunca avisa por múltiples divisiones', async () => {
+    mockearDb({ perfilId: 'perfil-1', certamenId: null });
+    const { solicitarInscripcion } = await import('./solicitarInscripcion');
+    const resultado = await solicitarInscripcion(
+      { torneoId: TORNEO, equipoId: EQUIPO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.advertenciaMultiplesDivisiones).toBe(false);
   });
 
   it('un jugador sin más roles no puede inscribir al equipo', async () => {
