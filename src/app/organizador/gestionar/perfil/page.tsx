@@ -1,0 +1,82 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { Badge } from '@/components/Badge';
+import { EstadoVacio } from '@/components/EstadoVacio';
+import { conNombreProducto } from '@/lib/nombreProducto';
+import { obtenerPerfilOrganizador } from '@/services/organizadores/obtenerPerfilOrganizador';
+import { obtenerContextoCacheado, obtenerOrganizacionActivaCacheada } from '../_datos';
+import { SubidaLogoOrganizacion } from './SubidaLogoOrganizacion';
+import styles from './pagina.module.css';
+
+export const metadata: Metadata = { title: conNombreProducto('Perfil público') };
+
+/**
+ * UC-08 — Vista del propio perfil público desde el panel de
+ * Organizador: mismos datos que `/organizador/[id]` (visible para
+ * cualquiera), con el agregado de poder subir el logo desde acá.
+ */
+export default async function PaginaPerfilPublicoOrganizador() {
+  const organizacion = await obtenerOrganizacionActivaCacheada();
+  if (!organizacion) redirect('/organizador/gestionar/crear');
+
+  const contexto = await obtenerContextoCacheado();
+  const perfil = await obtenerPerfilOrganizador(
+    { organizacionId: organizacion.organizacionId },
+    contexto,
+  );
+
+  return (
+    <div className={styles.contenidoPagina}>
+      <SubidaLogoOrganizacion
+        organizacionId={perfil.id}
+        nombre={perfil.nombre}
+        logoUrl={perfil.logoUrl}
+      />
+
+      <div className={styles.filaNombre}>
+        <h1 className={`fuente-display ${styles.nombre}`}>{perfil.nombre}</h1>
+        <Badge campo="organizacion.nivelVerificacion" valor={perfil.nivelVerificacion} />
+      </div>
+      {perfil.ciudad && <p className={styles.ciudad}>{perfil.ciudad.nombre}</p>}
+
+      <Link href={`/organizador/${perfil.id}`} className={styles.enlacePublico}>
+        Ver como lo ve el público →
+      </Link>
+
+      {perfil.descripcion && <p className={styles.descripcion}>{perfil.descripcion}</p>}
+
+      <div className={styles.gridStats}>
+        <div className={styles.stat}>
+          <span className={`${styles.statValor} fuente-display`}>{perfil.trayectoria.length}</span>
+          <span className={styles.statEtiqueta}>Organizados</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={`${styles.statValor} fuente-display`}>
+            {perfil.trayectoria.filter((t) => t.estado === 'finished').length}
+          </span>
+          <span className={styles.statEtiqueta}>Finalizados</span>
+        </div>
+      </div>
+
+      <section>
+        <h2 className={styles.tituloSeccion}>Trayectoria</h2>
+        {perfil.trayectoria.length === 0 ? (
+          <EstadoVacio mensaje="Todavía no tiene torneos publicados." />
+        ) : (
+          <div className={styles.lista}>
+            {perfil.trayectoria.map((torneo) => (
+              <Link key={torneo.id} href={`/torneo/${torneo.id}`} className={styles.filaTorneo}>
+                <span className={styles.nombreTorneo}>{torneo.nombre}</span>
+                <div className={styles.badgesTorneo}>
+                  <Badge campo="torneo.modalidad" valor={torneo.modalidad} />
+                  <Badge campo="torneo.estado" valor={torneo.estado} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}

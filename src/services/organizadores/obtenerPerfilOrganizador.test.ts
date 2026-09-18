@@ -58,7 +58,7 @@ describe('obtenerPerfilOrganizador', () => {
     expect(perfil.trayectoria).toEqual([]);
   });
 
-  it('solo pide torneos finalizados para la trayectoria', async () => {
+  it('pide torneos con inscripciones abiertas, en curso o finalizados', async () => {
     const consultas = mockearDb({ torneos: [] });
     const { obtenerPerfilOrganizador } = await import('./obtenerPerfilOrganizador');
 
@@ -67,7 +67,9 @@ describe('obtenerPerfilOrganizador', () => {
     const consultaTorneos = consultas.find((c) =>
       c.texto.startsWith('SELECT id, nombre, modalidad'),
     );
-    expect(consultaTorneos!.texto).toContain("estado = 'finished'");
+    expect(consultaTorneos!.texto).toContain(
+      "estado IN ('registration_open', 'in_progress', 'finished')",
+    );
   });
 
   it('una organización inactive no tiene perfil público: NO_ENCONTRADO', async () => {
@@ -90,7 +92,7 @@ describe('obtenerPerfilOrganizador', () => {
     });
   });
 
-  it('muestra la trayectoria de torneos finalizados', async () => {
+  it('muestra la trayectoria con torneos publicados de cualquier estado no cancelado', async () => {
     mockearDb({
       torneos: [
         {
@@ -98,6 +100,7 @@ describe('obtenerPerfilOrganizador', () => {
           nombre: 'Copa Vieja',
           modalidad: 'f5',
           categoria_edad: 'open',
+          estado: 'finished',
           fecha_inicio_estimada: new Date('2025-01-01T00:00:00Z'),
           fecha_fin_estimada: new Date('2025-03-01T00:00:00Z'),
         },
@@ -113,9 +116,24 @@ describe('obtenerPerfilOrganizador', () => {
         nombre: 'Copa Vieja',
         modalidad: 'f5',
         categoriaEdad: 'open',
+        estado: 'finished',
         fechaInicioEstimada: '2025-01-01T00:00:00.000Z',
         fechaFinEstimada: '2025-03-01T00:00:00.000Z',
       },
     ]);
+  });
+
+  it('la consulta ordena primero inscripciones abiertas, luego en curso, luego finalizados', async () => {
+    const consultas = mockearDb({ torneos: [] });
+    const { obtenerPerfilOrganizador } = await import('./obtenerPerfilOrganizador');
+
+    await obtenerPerfilOrganizador({ organizacionId: ORG }, VISITANTE);
+
+    const consultaTorneos = consultas.find((c) =>
+      c.texto.startsWith('SELECT id, nombre, modalidad'),
+    );
+    expect(consultaTorneos!.texto).toMatch(
+      /WHEN 'registration_open' THEN 0[\s\S]*WHEN 'in_progress' THEN 1/,
+    );
   });
 });

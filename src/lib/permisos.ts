@@ -90,6 +90,33 @@ export async function obtenerRolEnOrganizacion(
   return rows.find((r) => r.rol === 'owner')?.rol ?? rows[0]?.rol ?? null;
 }
 
+export interface OrganizacionVinculada {
+  organizacionId: string;
+  rol: 'owner' | 'admin';
+}
+
+/**
+ * Organizaciones activas donde la persona es Titular o Administrador,
+ * Titular primero — alimenta `resolverOrganizacionActiva` (panel de
+ * Organizador, `/organizador/gestionar`), que necesita saber a cuál
+ * organización entrar sin decidirlo consultando `miembro_organizacion`
+ * por su cuenta.
+ */
+export async function listarOrganizacionesVinculadas(
+  usuarioId: string,
+): Promise<OrganizacionVinculada[]> {
+  const pool = obtenerPool();
+  const { rows } = await pool.query<{ organizacion_id: string; rol: 'owner' | 'admin' }>(
+    `SELECT mo.organizacion_id, mo.rol
+     FROM miembro_organizacion mo
+     JOIN organizacion o ON o.id = mo.organizacion_id
+     WHERE mo.usuario_id = $1 AND o.estado = 'active'
+     ORDER BY (mo.rol = 'owner') DESC, mo.organizacion_id`,
+    [usuarioId],
+  );
+  return rows.map((fila) => ({ organizacionId: fila.organizacion_id, rol: fila.rol }));
+}
+
 /** Si una persona es colaboradora activa de un torneo puntual. */
 export async function esColaboradorActivo(usuarioId: string, torneoId: string): Promise<boolean> {
   const pool = obtenerPool();

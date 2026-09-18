@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server';
 import { comoRespuestaHttp } from '@/lib/respuesta';
 import { construirContexto } from '@/lib/contexto';
-import { actualizarModoInicio } from '@/services/inicio/actualizarModoInicio';
+import { crearOrganizacion } from '@/services/organizadores/crearOrganizacion';
 
-/** Preferencia de modo (Jugador/Organizador) en Inicio. Pide sesión real. */
+/** UC-06 — Crear una organización propia desde el panel de Organizador. */
 export async function POST(request: NextRequest) {
   return comoRespuestaHttp(async () => {
     const body = await request.json();
     const contexto = await construirContexto();
-    return actualizarModoInicio(body, contexto);
+    return crearOrganizacion(body, contexto);
   });
 }

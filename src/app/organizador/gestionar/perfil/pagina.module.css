@@ -1,0 +1,140 @@
+.contenidoPagina {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filaLogo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.columnaLogo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.enlaceLogo {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font: 700 13px/1 var(--fuente-texto);
+  color: var(--acento-oscuro);
+  cursor: pointer;
+}
+
+.enlaceLogo:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.errorLogo {
+  font-size: 12px;
+  color: var(--error-texto);
+}
+
+.filaNombre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nombre {
+  font-size: 22px;
+  line-height: 1.15;
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+.ciudad {
+  margin: -8px 0 0;
+  font-size: 14px;
+  color: var(--color-texto-secundario);
+}
+
+.enlacePublico {
+  align-self: flex-start;
+  font: 700 13px/1 var(--fuente-texto);
+  color: var(--acento-oscuro);
+  text-decoration: none;
+}
+
+.descripcion {
+  margin: 0;
+  color: var(--color-texto);
+  line-height: 1.5;
+}
+
+.gridStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+}
+
+.statValor {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.statEtiqueta {
+  font-size: 11px;
+  color: var(--color-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tituloSeccion {
+  font: 600 11px/1 var(--fuente-texto);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+  margin: 0 0 10px;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filaTorneo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  text-decoration: none;
+  color: inherit;
+}
+
+.nombreTorneo {
+  font: 700 14px/1.2 var(--fuente-texto);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgesTorneo {
+  flex: none;
+  display: flex;
+  gap: 6px;
+}

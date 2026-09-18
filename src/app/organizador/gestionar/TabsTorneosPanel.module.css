@@ -1,0 +1,29 @@
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.pestana,
+.pestanaActiva {
+  padding: 8px 12px;
+  font: 700 12px/1 var(--fuente-texto);
+  white-space: nowrap;
+  border: none;
+  border-radius: var(--radio-pill);
+  background: var(--fondo-sutil);
+  color: var(--color-texto-secundario);
+  cursor: pointer;
+}
+
+.pestanaActiva {
+  background: var(--acento);
+  color: var(--ink-900);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

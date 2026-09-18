@@ -1,17 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerInicio } from '@/services/inicio/obtenerInicio';
 import { obtenerActividad } from '@/services/inicio/obtenerActividad';
-import { NOMBRE_COOKIE_MODO_INICIO, comoModoInicio, type ModoInicio } from '@/lib/modoInicio';
 import { NavInferior } from '@/components/NavInferior';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { TarjetaTorneoResumen } from '@/components/TarjetaTorneoResumen';
 import { TarjetaActividad } from '@/components/TarjetaActividad';
 import { EstadoVacio } from '@/components/EstadoVacio';
-import { SelectorModoInicio } from './SelectorModoInicio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import styles from './pagina.module.css';
@@ -77,11 +74,7 @@ function torneosEnCurso(...listas: TorneoConEstado[][]): TorneoActivo[] {
  * (que ya está inmediatamente debajo — nada queda oculto, solo no se
  * duplica).
  */
-export default async function PaginaInicio({
-  searchParams,
-}: {
-  searchParams: Promise<{ modo?: string }>;
-}) {
+export default async function PaginaInicio() {
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
 
@@ -89,40 +82,19 @@ export default async function PaginaInicio({
     obtenerInicio(undefined, contexto),
     obtenerActividad({}, contexto),
   ]);
-  const parametros = await searchParams;
 
-  const mostrarSwitch = inicio.esJugador && inicio.esOrganizador;
-
-  function resolverModo(candidato: ModoInicio | null): ModoInicio | null {
-    if (candidato === 'jugador' && inicio.esJugador) return 'jugador';
-    if (candidato === 'organizador' && inicio.esOrganizador) return 'organizador';
-    return null;
-  }
-
-  const cookieStore = await cookies();
-  const modoPreferido = comoModoInicio(cookieStore.get(NOMBRE_COOKIE_MODO_INICIO)?.value);
-
-  // Inicio siempre arranca en modo Jugador por defecto (`SelectorModoInicio`
-  // ofrece pasar a Organizador de forma discreta) — ?modo= manda para el
-  // enlace recién clickeado, y si no viene, la preferencia guardada decide
-  // qué mostrar en las visitas siguientes.
-  const modo: ModoInicio =
-    resolverModo(comoModoInicio(parametros.modo)) ??
-    resolverModo(modoPreferido) ??
-    (inicio.esJugador ? 'jugador' : 'organizador');
+  // Quien solo organiza (sin plantel propio) ya no tiene nada que ver acá:
+  // su Inicio es directamente el panel de Organizador (`/organizador/gestionar`,
+  // "Ver como administrador" en el header lo lleva ahí a quien tiene los dos roles).
+  if (!inicio.esJugador && inicio.esOrganizador) redirect('/organizador/gestionar');
 
   const activos =
-    !inicio.esRecienLlegado && modo === 'jugador' && inicio.jugador
+    !inicio.esRecienLlegado && inicio.jugador
       ? torneosEnCurso(
           inicio.jugador.torneos.map((torneo) => ({ ...torneo, id: torneo.torneoId })),
           inicio.jugador.torneosSeguidos,
         )
-      : !inicio.esRecienLlegado && modo === 'organizador' && inicio.organizador
-        ? torneosEnCurso(
-            inicio.organizador.torneosAdministrados,
-            inicio.organizador.torneosSeguidos,
-          )
-        : [];
+      : [];
 
   const bloqueAhoraActividad = (
     <>
@@ -175,9 +147,7 @@ export default async function PaginaInicio({
           <div className={styles.filaUsuarioTexto}>
             <div className={styles.saludo}>Hola, {inicio.nombreUsuario}</div>
             <div className={`fuente-display ${styles.titulo}`}>
-              {modo === 'jugador' && inicio.jugador?.equipos[0]
-                ? inicio.jugador.equipos[0].nombre
-                : 'Inicio'}
+              {inicio.jugador?.equipos[0] ? inicio.jugador.equipos[0].nombre : 'Inicio'}
             </div>
           </div>
           <Link
@@ -201,7 +171,11 @@ export default async function PaginaInicio({
           </Link>
         </div>
 
-        {mostrarSwitch && <SelectorModoInicio modoActual={modo} />}
+        {inicio.esOrganizador && (
+          <Link href="/organizador/gestionar" className={styles.selectorModo}>
+            Ver como administrador
+          </Link>
+        )}
       </header>
 
       <div className={styles.contenido}>
@@ -234,7 +208,7 @@ export default async function PaginaInicio({
           </>
         )}
 
-        {!inicio.esRecienLlegado && modo === 'jugador' && inicio.jugador && (
+        {!inicio.esRecienLlegado && inicio.jugador && (
           <>
             {inicio.jugador.proximoPartido ? (
               <section>
@@ -380,94 +354,6 @@ export default async function PaginaInicio({
                 <span>¿Vas a organizar un torneo?</span>
                 <span className={styles.tarjetaAccionEnlace}>Empezar ›</span>
               </Link>
-            )}
-          </>
-        )}
-
-        {!inicio.esRecienLlegado && modo === 'organizador' && inicio.organizador && (
-          <>
-            {inicio.organizador.inscripcionesPendientes > 0 && (
-              <div className={styles.avisoPendiente}>
-                {inicio.organizador.inscripcionesPendientes === 1
-                  ? '1 inscripción pendiente de resolver.'
-                  : `${inicio.organizador.inscripcionesPendientes} inscripciones pendientes de resolver.`}{' '}
-                Entrá al torneo, abajo, para aprobarla o rechazarla.
-              </div>
-            )}
-            {inicio.organizador.resultadosSinCargar > 0 && (
-              <div className={styles.avisoPendiente}>
-                {inicio.organizador.resultadosSinCargar === 1
-                  ? '1 resultado sin cargar.'
-                  : `${inicio.organizador.resultadosSinCargar} resultados sin cargar.`}{' '}
-                Entrá al torneo, abajo, para cargarlo.
-              </div>
-            )}
-
-            {bloqueAhoraActividad}
-
-            <section className={styles.seccion}>
-              <div className={styles.filaTituloSeccion}>
-                <h2 className={styles.tituloSeccion}>Mis torneos</h2>
-                <Link href="/torneo/crear" className={styles.enlaceCrear}>
-                  + Crear torneo
-                </Link>
-              </div>
-              {inicio.organizador.torneosAdministrados.length > 0 ? (
-                <div className={styles.lista}>
-                  {inicio.organizador.torneosAdministrados.map((torneo) => (
-                    <TarjetaTorneoResumen
-                      key={torneo.id}
-                      torneoId={torneo.id}
-                      nombre={torneo.nombre}
-                      categoriaGenero={torneo.categoriaGenero}
-                      modalidad={torneo.modalidad}
-                      imagenUrl={torneo.imagenUrl}
-                      estado={torneo.estado}
-                      inscriptos={torneo.inscriptos}
-                      cupoEquipos={torneo.cupoEquipos}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.textoVacio}>Todavía no organizaste ningún torneo.</p>
-              )}
-            </section>
-
-            {inicio.organizador.torneosSeguidos.length > 0 && (
-              <section className={styles.seccion}>
-                <h2 className={styles.tituloSeccion}>Torneos que sigo</h2>
-                <div className={styles.lista}>
-                  {inicio.organizador.torneosSeguidos.map((torneo) => (
-                    <TarjetaTorneoResumen
-                      key={torneo.id}
-                      torneoId={torneo.id}
-                      nombre={torneo.nombre}
-                      categoriaGenero={torneo.categoriaGenero}
-                      modalidad={torneo.modalidad}
-                      imagenUrl={torneo.imagenUrl}
-                      etiquetaDerecha="Siguiendo"
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {inicio.organizador.equiposSeguidos.length > 0 && (
-              <section className={styles.seccion}>
-                <h2 className={styles.tituloSeccion}>Equipos que sigo</h2>
-                <div className={styles.lista}>
-                  {inicio.organizador.equiposSeguidos.map((equipo) => (
-                    <TarjetaEquipoResumen
-                      key={equipo.id}
-                      id={equipo.id}
-                      nombre={equipo.nombre}
-                      categoriaGenero={equipo.categoriaGenero}
-                      escudoUrl={equipo.escudoUrl}
-                      etiquetaDerecha="Siguiendo"
-                    />
-                  ))}
-                </div>
-              </section>
             )}
           </>
         )}

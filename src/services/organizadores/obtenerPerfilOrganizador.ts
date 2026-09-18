@@ -8,12 +8,14 @@ import { validarEntrada } from '@/lib/validacion';
  * UC-08 — Perfil público del organizador (`10`, sección 5): lo que un
  * capitán mira antes de confiarle su equipo a alguien que no conoce.
  *
- * **Solo trayectoria factual** (`06`, D-03b): torneos **finalizados**.
- * Ni los que todavía no terminaron —no hay nada que mostrar de un
- * resultado que no existe— ni los cancelados: en el MVP, sin volumen
+ * **Todo torneo publicado** (override explícito de `06`, D-03b, pedido
+ * en vivo): con inscripciones abiertas, en curso o finalizado — nunca
+ * `draft` (no publicado) ni `cancelled` (en el MVP, sin volumen
  * todavía, una cancelación se leería como una condena pública en vez de
- * en contexto. El distintivo `trusted` se muestra si existe aunque en
- * el MVP no se otorgue: el campo ya está listo para cuando exista.
+ * en contexto). Orden de prioridad: primero con inscripciones abiertas
+ * (lo más accionable para quien mira), después en curso, y al final lo
+ * finalizado. El distintivo `trusted` se muestra si existe aunque en el
+ * MVP no se otorgue: el campo ya está listo para cuando exista.
  *
  * Una organización `inactive` no tiene perfil público — mismo criterio
  * que un torneo `draft`: `NO_ENCONTRADO`, no un perfil vacío.
@@ -27,6 +29,7 @@ export interface TorneoDeTrayectoria {
   nombre: string;
   modalidad: string;
   categoriaEdad: string;
+  estado: 'registration_open' | 'in_progress' | 'finished';
   fechaInicioEstimada: string | null;
   fechaFinEstimada: string | null;
 }
@@ -75,13 +78,20 @@ export const obtenerPerfilOrganizador: Servicio<
     nombre: string;
     modalidad: string;
     categoria_edad: string;
+    estado: 'registration_open' | 'in_progress' | 'finished';
     fecha_inicio_estimada: Date | null;
     fecha_fin_estimada: Date | null;
   }>(
-    `SELECT id, nombre, modalidad, categoria_edad, fecha_inicio_estimada, fecha_fin_estimada
+    `SELECT id, nombre, modalidad, categoria_edad, estado, fecha_inicio_estimada, fecha_fin_estimada
      FROM torneo
-     WHERE organizacion_id = $1 AND estado = 'finished'
-     ORDER BY fecha_fin_estimada DESC NULLS LAST`,
+     WHERE organizacion_id = $1 AND estado IN ('registration_open', 'in_progress', 'finished')
+     ORDER BY CASE estado
+                WHEN 'registration_open' THEN 0
+                WHEN 'in_progress' THEN 1
+                ELSE 2
+              END,
+              fecha_fin_estimada DESC NULLS LAST,
+              fecha_inicio_estimada DESC NULLS LAST`,
     [datos.organizacionId],
   );
 
@@ -100,6 +110,7 @@ export const obtenerPerfilOrganizador: Servicio<
       nombre: t.nombre,
       modalidad: t.modalidad,
       categoriaEdad: t.categoria_edad,
+      estado: t.estado,
       fechaInicioEstimada: t.fecha_inicio_estimada?.toISOString() ?? null,
       fechaFinEstimada: t.fecha_fin_estimada?.toISOString() ?? null,
     })),

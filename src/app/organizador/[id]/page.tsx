@@ -16,9 +16,10 @@ import {
 import styles from './pagina.module.css';
 
 /**
- * UC-08 — Perfil público del organizador (`10`, sección 5). Solo
- * trayectoria factual: torneos finalizados (`06`, D-03b) — el servicio
- * ya excluye los cancelados y los que no terminaron.
+ * UC-08 — Perfil público del organizador (`10`, sección 5). Trayectoria
+ * factual: todo torneo publicado (con inscripciones abiertas, en curso
+ * o finalizado), priorizado en ese orden — override explícito de `06`,
+ * D-03b pedido en vivo. El servicio ya excluye `draft` y `cancelled`.
  */
 
 // Mismo criterio que /jugador/[id]: `cache()` deduplica generateMetadata
@@ -98,6 +99,12 @@ export default async function PaginaPerfilOrganizador({
             <span className={`${styles.statValor} fuente-display`}>
               {perfil.trayectoria.length}
             </span>
+            <span className={styles.statEtiqueta}>Organizados</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={`${styles.statValor} fuente-display`}>
+              {perfil.trayectoria.filter((t) => t.estado === 'finished').length}
+            </span>
             <span className={styles.statEtiqueta}>Finalizados</span>
           </div>
           <div className={styles.stat}>
@@ -115,7 +122,7 @@ export default async function PaginaPerfilOrganizador({
         <section>
           <h2 className={styles.tituloSeccion}>Trayectoria</h2>
           {perfil.trayectoria.length === 0 ? (
-            <EstadoVacio mensaje="Todavía no finalizó ningún torneo." />
+            <EstadoVacio mensaje="Todavía no tiene torneos publicados." />
           ) : (
             <div className={styles.listaTrayectoria}>
               {perfil.trayectoria.map((torneo) => (
@@ -128,6 +135,7 @@ export default async function PaginaPerfilOrganizador({
                     <span>
                       {obtenerEtiqueta('torneo.categoriaEdad', torneo.categoriaEdad).etiqueta}
                     </span>
+                    <Badge campo="torneo.estado" valor={torneo.estado} />
                   </div>
                 </Link>
               ))}
