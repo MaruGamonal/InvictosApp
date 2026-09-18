@@ -97,4 +97,26 @@ describe('FormularioCrearEquipo', () => {
     await waitFor(() => expect(getByText('Nombre inválido.')).toBeTruthy());
     expect(assign).not.toHaveBeenCalled();
   });
+
+  it('con la cuenta sin confirmar, muestra el aviso de reenviar enlace en vez del error genérico', async () => {
+    vi.stubGlobal('location', { assign });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({
+        ok: false,
+        error: { codigo: 'CUENTA_NO_CONFIRMADA', mensaje: 'Confirmá tu cuenta para hacer esto.' },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByLabelText, getByRole, getByText } = render(
+      <FormularioCrearEquipo provincias={[]} />,
+    );
+    completarCampos(getByLabelText, getByRole);
+    fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
+
+    await waitFor(() => expect(getByText('Confirmá tu cuenta para hacer esto.')).toBeTruthy());
+    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
+    expect(assign).not.toHaveBeenCalled();
+  });
 });

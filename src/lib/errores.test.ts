@@ -24,7 +24,10 @@ describe('CODIGOS_ERROR', () => {
     // siempre fue correcta.
     // Más DIVISION_DUPLICADA (revisión 17, `06` D-104): dos divisiones
     // del mismo certamen no pueden llevar la misma etiqueta.
-    expect(codigos).toHaveLength(31);
+    // Más CUENTA_NO_CONFIRMADA: reportado en vivo, pedir sumarse a un
+    // equipo, crear un equipo o crear un torneo exigen la cuenta
+    // confirmada.
+    expect(codigos).toHaveLength(32);
   });
 
   it.each(codigos)(

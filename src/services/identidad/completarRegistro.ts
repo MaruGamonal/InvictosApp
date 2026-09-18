@@ -63,9 +63,14 @@ export const completarRegistro: Servicio<
     } else {
       yaExistia = false;
 
+      // `email_confirmado = false`: recién se pone en `true` cuando la
+      // persona vuelve del enlace de email (`auth/callback`) — es
+      // exactamente la prueba de que controla esa casilla. Lo que
+      // exige confirmarlo antes de pedir sumarse a un equipo, crear un
+      // equipo o crear un torneo vive en `verificarCuentaConfirmada`.
       await cliente.query(
-        `INSERT INTO usuario (id, email, nombre_completo)
-         VALUES ($1, $2, $3)`,
+        `INSERT INTO usuario (id, email, nombre_completo, email_confirmado)
+         VALUES ($1, $2, $3, false)`,
         [datos.usuarioId, datos.email, datos.nombreVisible],
       );
 

@@ -9,11 +9,18 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 
 beforeEach(() => vi.resetModules());
 
-function mockearDb(opciones: { perfilId?: string | null; duplicado?: boolean }) {
+function mockearDb(opciones: {
+  perfilId?: string | null;
+  duplicado?: boolean;
+  cuentaConfirmada?: boolean;
+}) {
   const consultasCliente: string[] = [];
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
+        if (texto.includes('SELECT email_confirmado FROM usuario')) {
+          return { rows: [{ email_confirmado: opciones.cuentaConfirmada ?? true }] };
+        }
         if (texto.includes('FROM perfil_deportivo')) {
           return { rows: opciones.perfilId ? [{ id: opciones.perfilId }] : [] };
         }
@@ -84,5 +91,13 @@ describe('crearEquipo', () => {
     await expect(
       crearEquipo({ nombre: 'Los Pibes FC', categoriaGenero: 'male' }, contextoCon(null)),
     ).rejects.toMatchObject({ codigo: 'NO_AUTENTICADO' });
+  });
+
+  it('con la cuenta sin confirmar, CUENTA_NO_CONFIRMADA', async () => {
+    mockearDb({ perfilId: '21111111-1111-1111-1111-111111111111', cuentaConfirmada: false });
+    const { crearEquipo } = await import('./crearEquipo');
+    await expect(
+      crearEquipo({ nombre: 'Los Pibes FC', categoriaGenero: 'male' }, contextoCon('usuario-1')),
+    ).rejects.toMatchObject({ codigo: 'CUENTA_NO_CONFIRMADA' });
   });
 });

@@ -107,6 +107,11 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'Ya existe una división con esa etiqueta en este certamen.',
   },
+  CUENTA_NO_CONFIRMADA: {
+    httpStatus: 403,
+    mensaje:
+      'Confirmá tu cuenta para hacer esto — revisá tu correo o pedí que te reenviemos el enlace.',
+  },
   TRANSICION_NO_PERMITIDA: {
     httpStatus: 409,
     mensaje: 'El torneo no puede pasar a ese estado desde donde está ahora.',

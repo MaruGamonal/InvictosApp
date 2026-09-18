@@ -3,6 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
+import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
 
 /**
  * UC-10 — Crear un equipo: entidad permanente y transversal a los
@@ -13,6 +14,8 @@ import { validarEntrada } from '@/lib/validacion';
  * `categoriaGenero` es obligatoria y sin valor por defecto (`06`,
  * D-81): preseleccionar algo dejaría cargados como masculinos a la
  * mitad de los equipos femeninos.
+ *
+ * Reportado en vivo: exige la cuenta confirmada (`verificarCuentaConfirmada`).
  */
 
 const esquemaEntrada = z.object({
@@ -37,6 +40,7 @@ export const crearEquipo: Servicio<CrearEquipoInput, CrearEquipoResultado> = asy
   contexto,
 ) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
+  await verificarCuentaConfirmada(contexto);
   const datos = validarEntrada(esquemaEntrada, input);
 
   const pool = obtenerPool();

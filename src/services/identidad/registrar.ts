@@ -7,6 +7,7 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { obtenerClienteAdmin } from '@/lib/supabase/admin';
 import { contextoDeSistema } from '@/lib/contexto';
 import { completarRegistro } from './completarRegistro';
+import { enviarEmailConfirmacion } from './_enviarEmailConfirmacion';
 
 /**
  * UC-01 — Registrarse. Pide identificador de acceso (email), nombre
@@ -15,18 +16,22 @@ import { completarRegistro } from './completarRegistro';
  * La cuenta queda lista al toque, sin esperar a que confirmen el correo:
  * `FLOWS.md` (Flujo 1, pasos 2-3) es explícito — "No se pide validar el
  * correo acá" — y D-90 ya había establecido que ni siquiera la ciudad se
- * pide en el registro. Confirmar el correo sigue existiendo, pero como
- * un paso posterior y opcional, ligado a `solicitarVerificacionBasica`
- * (D-76: verificar la organización, no la cuenta, es lo que habilita
- * publicar en el descubrimiento) — nunca bloquea usar la app.
+ * pide en el registro. **Reportado en vivo, esto se ajustó**: pedir
+ * sumarse a un equipo, crear un equipo o crear un torneo sí exigen
+ * ahora la cuenta confirmada (`verificarCuentaConfirmada`) — todo lo
+ * demás (mirar, seguir, iniciar sesión) sigue sin bloquear.
  *
  * Por eso esto usa el Admin API (`auth.admin.createUser` con
  * `email_confirm: true`) en vez de `auth.signUp`: crea la cuenta ya
- * confirmada del lado de Supabase Auth, completa `usuario` +
- * `perfil_deportivo` en el mismo movimiento (reusa `completarRegistro`,
- * la misma lógica que antes corría recién al volver del enlace de
- * email) y después inicia sesión con el cliente atado a la request para
- * que la cookie quede puesta antes de responder.
+ * confirmada **del lado de Supabase Auth** (para que el inicio de
+ * sesión de acá abajo nunca dependa de si Supabase exige confirmar
+ * antes de dejar entrar), completa `usuario` + `perfil_deportivo` en el
+ * mismo movimiento (reusa `completarRegistro`, que inserta
+ * `email_confirmado = false` — nuestra propia bandera, no la de
+ * Supabase) y después inicia sesión con el cliente atado a la request
+ * para que la cookie quede puesta antes de responder. El enlace que
+ * confirma esa bandera propia se manda aparte, sin bloquear la
+ * respuesta si el envío falla — se puede reenviar después.
  */
 
 const esquemaEntrada = z.object({
@@ -92,6 +97,13 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
     throw crearError('ERROR_INTERNO', {
       motivo: 'la cuenta se creó pero no se pudo iniciar sesión',
     });
+  }
+
+  try {
+    await enviarEmailConfirmacion(datos.identificadorAcceso);
+  } catch {
+    // La cuenta ya se creó y la sesión ya quedó puesta — el enlace se
+    // puede reenviar después desde el aviso de "cuenta no confirmada".
   }
 
   return { cuentaCreada: true };

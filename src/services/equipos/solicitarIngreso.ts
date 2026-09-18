@@ -5,6 +5,7 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { notificar } from '@/services/notificaciones/notificar';
 import { obtenerRolesEnEquipo } from '@/lib/permisos';
+import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
 import { upsertVinculo } from './_vinculo';
 
 /**
@@ -14,6 +15,8 @@ import { upsertVinculo } from './_vinculo';
  *
  * Notifica `team_join_requested` a Capitán y Delegados (nuevo en este
  * ticket, `04`, 4.12).
+ *
+ * Reportado en vivo: exige la cuenta confirmada (`verificarCuentaConfirmada`).
  */
 
 const esquemaEntrada = z.object({ equipoId: z.string().uuid() });
@@ -24,6 +27,7 @@ export const solicitarIngreso: Servicio<
   { estado: 'requested' | 'active' }
 > = async (input, contexto) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
+  await verificarCuentaConfirmada(contexto);
   const datos = validarEntrada(esquemaEntrada, input);
 
   const pool = obtenerPool();

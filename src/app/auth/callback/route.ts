@@ -2,15 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { construirContexto } from '@/lib/contexto';
 import { completarRegistro } from '@/services/identidad/completarRegistro';
+import { confirmarEmailCuenta } from '@/services/identidad/confirmarEmailCuenta';
 import { confirmarVerificacionBasica } from '@/services/organizadores/confirmarVerificacionBasica';
 
 /**
  * Adonde vuelve la persona después de tocar cualquier enlace de acceso
- * que le mandamos por email — el de `iniciarRegistro` (UC-01) o el de
- * `solicitarVerificacionBasica` (UC-06). Los dos reutilizan el mismo
- * mecanismo: un enlace que, al abrirse, prueba que la persona controla
- * esa casilla. La metadata del enlace (`accion`) dice qué hacer una vez
- * que la sesión ya existe.
+ * que le mandamos por email — el de `iniciarRegistro` (UC-01), el de
+ * `solicitarVerificacionBasica` (UC-06) o el de
+ * `enviarEmailConfirmacion`. Los tres reutilizan el mismo mecanismo: un
+ * enlace que, al abrirse, prueba que la persona controla esa casilla.
+ * La metadata del enlace (`accion`) dice qué hacer una vez que la
+ * sesión ya existe.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
 
       if (!error && data.user) {
         const metadata = data.user.user_metadata as {
-          accion?: 'verificar_organizacion';
+          accion?: 'verificar_organizacion' | 'confirmar_cuenta';
           organizacion_id?: string;
           nombre_visible?: string;
           accion_pendiente?: { tipo: string; datos: Record<string, unknown> } | null;
@@ -33,6 +35,11 @@ export async function GET(request: NextRequest) {
 
         if (metadata.accion === 'verificar_organizacion' && metadata.organizacion_id) {
           await confirmarVerificacionBasica({ organizacionId: metadata.organizacion_id }, contexto);
+          return NextResponse.redirect(`${origin}${siguiente}`);
+        }
+
+        if (metadata.accion === 'confirmar_cuenta') {
+          await confirmarEmailCuenta({ usuarioId: data.user.id }, contexto);
           return NextResponse.redirect(`${origin}${siguiente}`);
         }
 

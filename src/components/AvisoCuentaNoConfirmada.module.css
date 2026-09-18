@@ -1,0 +1,46 @@
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--error-fondo);
+  border: 1px solid var(--error-borde);
+  border-radius: var(--radio-boton);
+  padding: 12px 14px;
+}
+
+.mensaje {
+  margin: 0;
+  color: var(--error-texto);
+  font-size: 14px;
+}
+
+.boton {
+  align-self: flex-start;
+  background: none;
+  color: var(--error-texto);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--error-texto);
+  border-radius: var(--radio-pill);
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.confirmacion {
+  margin: 0;
+  color: var(--error-texto);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.error {
+  margin: 0;
+  color: var(--error-texto);
+  font-size: 13px;
+}

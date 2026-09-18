@@ -4,6 +4,7 @@ import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
+import { AvisoCuentaNoConfirmada } from '@/components/AvisoCuentaNoConfirmada';
 import styles from '../../ingresar/pagina.module.css';
 
 interface Props {
@@ -30,6 +31,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   const [ciudadId, setCiudadId] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cuentaNoConfirmada, setCuentaNoConfirmada] = useState<string | null>(null);
   const formularioValido = nombre.trim() !== '' && categoriaGenero !== '';
 
   const inputEscudoRef = useRef<HTMLInputElement>(null);
@@ -48,6 +50,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
     evento.preventDefault();
     setEnviando(true);
     setError(null);
+    setCuentaNoConfirmada(null);
 
     try {
       const respuesta = await fetch('/api/equipos', {
@@ -62,7 +65,11 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       const cuerpo = await respuesta.json();
 
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.');
+        if (cuerpo?.error?.codigo === 'CUENTA_NO_CONFIRMADA') {
+          setCuentaNoConfirmada(cuerpo.error.mensaje);
+        } else {
+          setError(cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.');
+        }
         setEnviando(false);
         return;
       }
@@ -92,6 +99,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
       <p className={styles.texto}>Podés inscribirlo con el plantel vacío y sumar gente después.</p>
 
+      {cuentaNoConfirmada && <AvisoCuentaNoConfirmada mensaje={cuentaNoConfirmada} />}
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.campo}>

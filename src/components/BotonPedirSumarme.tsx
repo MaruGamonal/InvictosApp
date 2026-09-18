@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AvisoCuentaNoConfirmada } from './AvisoCuentaNoConfirmada';
 import styles from './BotonSeguir.module.css';
 
 export interface BotonPedirSumarmeProps {
@@ -27,7 +28,8 @@ type Estado =
   | { paso: 'enviando' }
   | { paso: 'enviado' }
   | { paso: 'ya-soy-miembro' }
-  | { paso: 'error'; mensaje: string };
+  | { paso: 'error'; mensaje: string }
+  | { paso: 'cuenta-no-confirmada'; mensaje: string };
 
 export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
   const router = useRouter();
@@ -65,6 +67,10 @@ export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
         return;
       }
       if (!respuesta.ok) {
+        if (cuerpo?.error?.codigo === 'CUENTA_NO_CONFIRMADA') {
+          setEstado({ paso: 'cuenta-no-confirmada', mensaje: cuerpo.error.mensaje });
+          return;
+        }
         setEstado({
           paso: 'error',
           mensaje: cuerpo?.error?.mensaje ?? 'No pudimos enviar el pedido. Probá de nuevo.',
@@ -78,6 +84,10 @@ export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
   }
 
   if (estado.paso === 'ya-soy-miembro') return null;
+
+  if (estado.paso === 'cuenta-no-confirmada') {
+    return <AvisoCuentaNoConfirmada mensaje={estado.mensaje} />;
+  }
 
   return (
     <div className={styles.envoltorio}>

@@ -72,4 +72,23 @@ describe('BotonPedirSumarme', () => {
     await waitFor(() => expect(getByText('Ya sos parte de este equipo.')).toBeTruthy());
     expect(getByRole('button', { name: 'Pedir sumarme' })).not.toBeDisabled();
   });
+
+  it('con la cuenta sin confirmar, muestra el aviso de reenviar enlace en vez del botón', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        ok: false,
+        error: { codigo: 'CUENTA_NO_CONFIRMADA', mensaje: 'Confirmá tu cuenta para hacer esto.' },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByRole, getByText, queryByRole } = render(<BotonPedirSumarme equipoId="e-1" />);
+    fireEvent.click(getByRole('button', { name: 'Pedir sumarme' }));
+
+    await waitFor(() => expect(getByText('Confirmá tu cuenta para hacer esto.')).toBeTruthy());
+    expect(queryByRole('button', { name: 'Pedir sumarme' })).toBeNull();
+    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
+  });
 });

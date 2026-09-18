@@ -21,10 +21,14 @@ function mockearDb(opciones: {
   rolesEnEquipo?: string[];
   estadoVinculoExistente?: string;
   gestores?: Array<{ perfil_id: string; usuario_id: string | null }>;
+  cuentaConfirmada?: boolean;
 }) {
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
+        if (texto.includes('SELECT email_confirmado FROM usuario')) {
+          return { rows: [{ email_confirmado: opciones.cuentaConfirmada ?? true }] };
+        }
         if (texto.includes('SELECT estado FROM equipo')) {
           return { rows: opciones.estadoEquipo ? [{ estado: opciones.estadoEquipo }] : [] };
         }
@@ -158,5 +162,20 @@ describe('solicitarIngreso', () => {
     await expect(
       solicitarIngreso({ equipoId: '11111111-1111-1111-1111-111111111111' }, contextoCon(null)),
     ).rejects.toMatchObject({ codigo: 'NO_AUTENTICADO' });
+  });
+
+  it('con la cuenta sin confirmar, CUENTA_NO_CONFIRMADA', async () => {
+    mockearDb({
+      estadoEquipo: 'active',
+      perfilId: '21111111-1111-1111-1111-111111111111',
+      cuentaConfirmada: false,
+    });
+    const { solicitarIngreso } = await import('./solicitarIngreso');
+    await expect(
+      solicitarIngreso(
+        { equipoId: '11111111-1111-1111-1111-111111111111' },
+        contextoCon('usuario-1'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'CUENTA_NO_CONFIRMADA' });
   });
 });

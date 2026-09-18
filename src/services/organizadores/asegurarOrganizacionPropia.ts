@@ -1,6 +1,7 @@
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
+import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
 import { crearOrganizacion } from './crearOrganizacion';
 
 /**
@@ -17,6 +18,11 @@ import { crearOrganizacion } from './crearOrganizacion';
  * (`owner`), no cualquiera donde sea Administrador: crear un torneo
  * nuevo debería caer bajo la organización que la persona misma fundó,
  * no bajo una a la que la invitaron a colaborar.
+ *
+ * Reportado en vivo: exige la cuenta confirmada
+ * (`verificarCuentaConfirmada`) — se chequea acá, el verdadero punto de
+ * entrada de "Crear torneo", para no crear una organización huérfana
+ * si el paso de `crearTorneo` de después rechaza por esto.
  */
 
 export interface AsegurarOrganizacionPropiaResultado {
@@ -29,6 +35,7 @@ export const asegurarOrganizacionPropia: Servicio<
   AsegurarOrganizacionPropiaResultado
 > = async (_input, contexto) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
+  await verificarCuentaConfirmada(contexto);
 
   const pool = obtenerPool();
   const { rows } = await pool.query<{ organizacion_id: string }>(
