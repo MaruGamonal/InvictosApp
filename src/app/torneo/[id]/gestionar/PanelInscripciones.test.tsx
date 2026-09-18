@@ -22,9 +22,27 @@ describe('PanelInscripciones', () => {
         torneoId="t-1"
         cupoEquipos={16}
         inscripciones={[
-          { equipoId: 'e-1', nombreEquipo: 'A', estado: 'approved', advertenciaCategoria: false },
-          { equipoId: 'e-2', nombreEquipo: 'B', estado: 'approved', advertenciaCategoria: false },
-          { equipoId: 'e-3', nombreEquipo: 'C', estado: 'pending', advertenciaCategoria: false },
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'A',
+            estado: 'approved',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+          },
+          {
+            equipoId: 'e-2',
+            nombreEquipo: 'B',
+            estado: 'approved',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+          },
+          {
+            equipoId: 'e-3',
+            nombreEquipo: 'C',
+            estado: 'pending',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+          },
         ]}
       />,
     );
@@ -42,6 +60,7 @@ describe('PanelInscripciones', () => {
             nombreEquipo: 'La Gloria',
             estado: 'approved',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
         ]}
       />,
@@ -68,12 +87,14 @@ describe('PanelInscripciones', () => {
             nombreEquipo: 'Pendiente FC',
             estado: 'pending',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
           {
             equipoId: 'e-2',
             nombreEquipo: 'La Gloria',
             estado: 'approved',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
         ]}
       />,
@@ -96,12 +117,14 @@ describe('PanelInscripciones', () => {
             nombreEquipo: 'La Gloria',
             estado: 'approved',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
           {
             equipoId: 'e-2',
             nombreEquipo: 'Se Retiró FC',
             estado: 'rejected',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
         ]}
       />,
@@ -129,6 +152,7 @@ describe('PanelInscripciones', () => {
             nombreEquipo: 'Pendiente FC',
             estado: 'pending',
             advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
           },
         ]}
       />,
@@ -150,5 +174,72 @@ describe('PanelInscripciones', () => {
       ),
     );
     await waitFor(() => expect(refresh).toHaveBeenCalled());
+  });
+
+  it('rechazar por división equivocada manda motivoDetalle con la división elegida', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByText, getByLabelText } = render(
+      <PanelInscripciones
+        torneoId="t-1"
+        cupoEquipos={16}
+        inscripciones={[
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'Pendiente FC',
+            estado: 'pending',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+          },
+        ]}
+        divisionesDelCertamen={[
+          { id: 'torneo-b', division: 'B', estado: 'draft' },
+          { id: 'torneo-c', division: 'C', estado: 'registration_open' },
+        ]}
+      />,
+    );
+    fireEvent.click(getByText('Rechazar'));
+    fireEvent.change(getByText('El equipo se retiró').closest('select')!, {
+      target: { value: 'wrong_division' },
+    });
+    fireEvent.change(getByLabelText('División sugerida'), { target: { value: 'torneo-c' } });
+    fireEvent.click(getByText('Confirmar rechazo'));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/inscripciones/resolver',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            torneoId: 't-1',
+            equipoId: 'e-1',
+            decision: 'rejected',
+            motivo: 'wrong_division',
+            motivoDetalle: 'torneo-c',
+          }),
+        }),
+      ),
+    );
+  });
+
+  it('sin divisiones en el certamen, no ofrece el motivo "División equivocada"', () => {
+    const { getByText, queryByText } = render(
+      <PanelInscripciones
+        torneoId="t-1"
+        cupoEquipos={16}
+        inscripciones={[
+          {
+            equipoId: 'e-1',
+            nombreEquipo: 'Pendiente FC',
+            estado: 'pending',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+          },
+        ]}
+      />,
+    );
+    fireEvent.click(getByText('Rechazar'));
+    expect(queryByText('División equivocada')).not.toBeInTheDocument();
   });
 });

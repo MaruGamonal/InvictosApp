@@ -15,6 +15,7 @@ export default async function PaginaEquipos({ params }: { params: Promise<{ id: 
       torneoId={id}
       inscripciones={gestion.inscripciones}
       cupoEquipos={gestion.cupoEquipos}
+      divisionesDelCertamen={gestion.divisionesDelCertamen}
     />
   );
 }

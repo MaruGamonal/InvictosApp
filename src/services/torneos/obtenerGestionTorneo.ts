@@ -31,6 +31,7 @@ export interface InscripcionGestion {
   nombreEquipo: string;
   estado: string;
   advertenciaCategoria: boolean;
+  advertenciaMultiplesDivisiones: boolean;
   fechaSolicitud: string;
 }
 
@@ -57,6 +58,13 @@ export interface IntegranteElegible {
   rolEnTorneo: 'player' | 'coach';
 }
 
+/** Otra división (torneo) del mismo certamen (`06`, D-103) — para elegirla al agregar una división o al rechazar por `wrong_division`. */
+export interface DivisionDelCertamen {
+  id: string;
+  division: string;
+  estado: string;
+}
+
 export interface GestionTorneoResultado {
   id: string;
   organizacionId: string;
@@ -74,6 +82,11 @@ export interface GestionTorneoResultado {
   fechaFinEstimada: string | null;
   estado: string;
   formato: 'league' | 'knockout' | 'groups_knockout';
+  /** `06`, D-103 — null en el caso normal (torneo suelto, sin categorías competitivas). */
+  certamenId: string | null;
+  division: string | null;
+  /** Las demás divisiones del mismo certamen, sin incluir esta — `[]` si no pertenece a ninguno. */
+  divisionesDelCertamen: DivisionDelCertamen[];
   fases: FaseGestion[];
   inscripciones: InscripcionGestion[];
   partidos: PartidoGestion[];
@@ -104,9 +117,12 @@ export const obtenerGestionTorneo: Servicio<
     estado: string;
     formato: 'league' | 'knockout' | 'groups_knockout';
     organizacion_id: string;
+    certamen_id: string | null;
+    division: string | null;
   }>(
     `SELECT id, nombre, descripcion, imagen_url, direccion, ciudad_id, costo_inscripcion, costo_planilla,
-            cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id
+            cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id,
+            certamen_id, division
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
@@ -118,6 +134,19 @@ export const obtenerGestionTorneo: Servicio<
   const miRolEnOrganizacion = contexto.usuarioId
     ? await obtenerRolEnOrganizacion(contexto.usuarioId, torneo.organizacion_id)
     : null;
+
+  let divisionesDelCertamen: DivisionDelCertamen[] = [];
+  if (torneo.certamen_id) {
+    const { rows: divisiones } = await pool.query<{
+      id: string;
+      division: string;
+      estado: string;
+    }>(`SELECT id, division, estado FROM torneo WHERE certamen_id = $1 AND id != $2`, [
+      torneo.certamen_id,
+      torneo.id,
+    ]);
+    divisionesDelCertamen = divisiones;
+  }
 
   const { rows: fases } = await pool.query<{
     id: string;
@@ -139,9 +168,11 @@ export const obtenerGestionTorneo: Servicio<
     nombre: string;
     estado: string;
     advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
     fecha_solicitud: Date;
   }>(
-    `SELECT i.equipo_id, e.nombre, i.estado, i.advertencia_categoria, i.fecha_solicitud
+    `SELECT i.equipo_id, e.nombre, i.estado, i.advertencia_categoria,
+            i.advertencia_multiples_divisiones, i.fecha_solicitud
      FROM inscripcion i JOIN equipo e ON e.id = i.equipo_id
      WHERE i.torneo_id = $1
      ORDER BY i.fecha_solicitud ASC`,
@@ -215,6 +246,9 @@ export const obtenerGestionTorneo: Servicio<
     fechaFinEstimada: torneo.fecha_fin_estimada?.toISOString() ?? null,
     estado: torneo.estado,
     formato: torneo.formato,
+    certamenId: torneo.certamen_id,
+    division: torneo.division,
+    divisionesDelCertamen,
     fases: fases.map((fila) => ({
       id: fila.id,
       nombre: fila.nombre,
@@ -227,6 +261,7 @@ export const obtenerGestionTorneo: Servicio<
       nombreEquipo: fila.nombre,
       estado: fila.estado,
       advertenciaCategoria: fila.advertencia_categoria,
+      advertenciaMultiplesDivisiones: fila.advertencia_multiples_divisiones,
       fechaSolicitud: fila.fecha_solicitud.toISOString(),
     })),
     partidos: partidos.map((fila) => ({

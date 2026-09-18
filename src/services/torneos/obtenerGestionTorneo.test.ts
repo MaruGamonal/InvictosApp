@@ -28,7 +28,10 @@ function mockearDb(opciones: {
     cupo_equipos?: number;
     fecha_inicio_estimada?: Date | null;
     organizacion_id?: string;
+    certamen_id?: string | null;
+    division?: string | null;
   };
+  divisionesDelCertamen?: Array<{ id: string; division: string; estado: string }>;
   fases?: Array<{
     id: string;
     nombre: string;
@@ -41,6 +44,7 @@ function mockearDb(opciones: {
     nombre: string;
     estado: string;
     advertencia_categoria: boolean;
+    advertencia_multiples_divisiones: boolean;
     fecha_solicitud: Date;
   }>;
   partidos?: Array<{
@@ -91,6 +95,9 @@ function mockearDb(opciones: {
         if (texto.includes('FROM integrante_habilitado ih')) {
           return { rows: opciones.elegibles ?? [] };
         }
+        if (texto.includes('SELECT id, division, estado FROM torneo WHERE certamen_id')) {
+          return { rows: opciones.divisionesDelCertamen ?? [] };
+        }
         return { rows: [] };
       },
     }),
@@ -134,6 +141,7 @@ describe('obtenerGestionTorneo', () => {
           nombre: 'Los Pibes',
           estado: 'pending',
           advertencia_categoria: false,
+          advertencia_multiples_divisiones: false,
           fecha_solicitud: new Date('2026-01-01T00:00:00Z'),
         },
       ],
@@ -170,6 +178,7 @@ describe('obtenerGestionTorneo', () => {
         nombreEquipo: 'Los Pibes',
         estado: 'pending',
         advertenciaCategoria: false,
+        advertenciaMultiplesDivisiones: false,
         fechaSolicitud: '2026-01-01T00:00:00.000Z',
       },
     ]);
@@ -221,6 +230,57 @@ describe('obtenerGestionTorneo', () => {
     expect(resultado.costoPlanilla).toBe(1500);
     expect(resultado.cupoEquipos).toBe(16);
     expect(resultado.fechaInicioEstimada).toBe('2026-04-12T00:00:00.000Z');
+  });
+
+  it('un torneo con certamen trae división propia y las demás divisiones del certamen', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      torneo: {
+        id: TORNEO,
+        nombre: 'Apertura 2026 — A',
+        estado: 'registration_open',
+        formato: 'league',
+        certamen_id: 'certamen-1',
+        division: 'A',
+      },
+      divisionesDelCertamen: [
+        { id: 'torneo-b', division: 'B', estado: 'draft' },
+        { id: 'torneo-c', division: 'C', estado: 'registration_open' },
+      ],
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+
+    expect(resultado.certamenId).toBe('certamen-1');
+    expect(resultado.division).toBe('A');
+    expect(resultado.divisionesDelCertamen).toEqual([
+      { id: 'torneo-b', division: 'B', estado: 'draft' },
+      { id: 'torneo-c', division: 'C', estado: 'registration_open' },
+    ]);
+  });
+
+  it('un torneo suelto (sin certamen) no trae otras divisiones', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      torneo: {
+        id: TORNEO,
+        nombre: 'Copa Suelta',
+        estado: 'registration_open',
+        formato: 'league',
+        certamen_id: null,
+        division: null,
+      },
+    });
+    const { obtenerGestionTorneo } = await import('./obtenerGestionTorneo');
+
+    const resultado = await obtenerGestionTorneo({ torneoId: TORNEO }, contextoCon('usuario-1'));
+
+    expect(resultado.certamenId).toBeNull();
+    expect(resultado.division).toBeNull();
+    expect(resultado.divisionesDelCertamen).toEqual([]);
   });
 
   it('sin imagen cargada, imagenUrl es null (no undefined ni string vacío)', async () => {

@@ -9,6 +9,7 @@ import { AccionesEstadoTorneo } from '../AccionesEstadoTorneo';
 import { FormularioDefinirFormato } from '../FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganizador';
 import { PanelColaboradores } from '../PanelColaboradores';
+import { PanelDivisiones } from '../PanelDivisiones';
 import { PanelAdministradores } from '../PanelAdministradores';
 import { PanelCancelarTorneo } from '../PanelCancelarTorneo';
 import { SeccionAcordeon } from '../SeccionAcordeon';
@@ -79,6 +80,15 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
             ))}
           </div>
         )}
+      </SeccionAcordeon>
+
+      <SeccionAcordeon titulo="Divisiones">
+        <PanelDivisiones
+          torneoId={id}
+          certamenId={gestion.certamenId}
+          division={gestion.division}
+          divisionesDelCertamen={gestion.divisionesDelCertamen}
+        />
       </SeccionAcordeon>
 
       <SeccionAcordeon titulo="Reglamento">

@@ -51,6 +51,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [descripcion, setDescripcion] = useState('');
   const [cupoEquipos, setCupoEquipos] = useState('');
   const [fechaInicioEstimada, setFechaInicioEstimada] = useState('');
+  const [fechaFinEstimada, setFechaFinEstimada] = useState('');
   const [costoInscripcion, setCostoInscripcion] = useState('');
   const [costoPlanilla, setCostoPlanilla] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -93,6 +94,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
           fechaInicioEstimada: fechaInicioEstimada
             ? new Date(fechaInicioEstimada).toISOString()
             : undefined,
+          fechaFinEstimada: fechaFinEstimada ? new Date(fechaFinEstimada).toISOString() : undefined,
         }),
       });
       const cuerpo = await respuesta.json();
@@ -290,6 +292,20 @@ export function FormularioCrearTorneo({ provincias }: Props) {
         />
         <span className={styles.ayuda}>
           Se puede ajustar después, pero hace falta cargarla para publicar el torneo.
+        </span>
+      </div>
+
+      <div className={styles.campo}>
+        <label htmlFor="fechaFinEstimada">Fecha estimada de fin (opcional)</label>
+        <input
+          id="fechaFinEstimada"
+          type="date"
+          value={fechaFinEstimada}
+          onChange={(evento) => setFechaFinEstimada(evento.target.value)}
+        />
+        <span className={styles.ayuda}>
+          Con las dos fechas cargadas, un torneo de hasta 3 días se trata como relámpago: los plazos
+          se ajustan a esa duración en vez de a una fecha por semana.
         </span>
       </div>
 

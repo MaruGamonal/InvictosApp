@@ -11,12 +11,21 @@ export interface InscripcionGestion {
   nombreEquipo: string;
   estado: string;
   advertenciaCategoria: boolean;
+  advertenciaMultiplesDivisiones: boolean;
+}
+
+export interface DivisionDelCertamenProps {
+  id: string;
+  division: string;
+  estado: string;
 }
 
 export interface PanelInscripcionesProps {
   torneoId: string;
   inscripciones: InscripcionGestion[];
   cupoEquipos: number;
+  /** Otras divisiones del mismo certamen (`06`, D-103) — habilitan el rechazo por `wrong_division` (D-108). */
+  divisionesDelCertamen?: DivisionDelCertamenProps[];
 }
 
 const MOTIVOS = [
@@ -24,6 +33,7 @@ const MOTIVOS = [
   { valor: 'no_show', etiqueta: 'No se presentó' },
   { valor: 'roster_incomplete', etiqueta: 'No completó el plantel' },
   { valor: 'disciplinary', etiqueta: 'Sanción' },
+  { valor: 'wrong_division', etiqueta: 'División equivocada' },
   { valor: 'other', etiqueta: 'Otro' },
 ];
 
@@ -34,12 +44,19 @@ export function PanelInscripciones({
   torneoId,
   inscripciones,
   cupoEquipos,
+  divisionesDelCertamen = [],
 }: PanelInscripcionesProps) {
   const router = useRouter();
   const [rechazando, setRechazando] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('withdrew');
+  const [divisionSugerida, setDivisionSugerida] = useState(divisionesDelCertamen[0]?.id ?? '');
   const [enviando, setEnviando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const motivosDisponibles =
+    divisionesDelCertamen.length > 0
+      ? MOTIVOS
+      : MOTIVOS.filter((m) => m.valor !== 'wrong_division');
 
   async function resolver(equipoId: string, decision: 'approved' | 'rejected') {
     setEnviando(equipoId);
@@ -53,6 +70,8 @@ export function PanelInscripciones({
           equipoId,
           decision,
           motivo: decision === 'rejected' ? motivo : undefined,
+          motivoDetalle:
+            decision === 'rejected' && motivo === 'wrong_division' ? divisionSugerida : undefined,
         }),
       });
       const cuerpo = await respuesta.json();
@@ -98,16 +117,34 @@ export function PanelInscripciones({
                 La categoría del equipo no coincide con la del torneo.
               </p>
             )}
+            {inscripcion.advertenciaMultiplesDivisiones && (
+              <p className={styles.avisoChico}>
+                Este equipo ya está inscripto en otra división de este certamen.
+              </p>
+            )}
 
             {rechazando === inscripcion.equipoId ? (
               <div className={styles.filaAccion}>
                 <select value={motivo} onChange={(evento) => setMotivo(evento.target.value)}>
-                  {MOTIVOS.map((opcion) => (
+                  {motivosDisponibles.map((opcion) => (
                     <option key={opcion.valor} value={opcion.valor}>
                       {opcion.etiqueta}
                     </option>
                   ))}
                 </select>
+                {motivo === 'wrong_division' && (
+                  <select
+                    value={divisionSugerida}
+                    onChange={(evento) => setDivisionSugerida(evento.target.value)}
+                    aria-label="División sugerida"
+                  >
+                    {divisionesDelCertamen.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        División {d.division}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <button
                   type="button"
                   onClick={() => resolver(inscripcion.equipoId, 'rejected')}
