@@ -2,7 +2,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
-import { enviarEmailConfirmacion } from './_enviarEmailConfirmacion';
+import { enviarEmailConfirmacion } from '@/lib/emailConfirmacion';
 
 /**
  * El botón "Reenviar enlace" del aviso de cuenta no confirmada

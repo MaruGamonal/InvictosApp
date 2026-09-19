@@ -15,11 +15,18 @@ function mockearDb(opciones: {
   cuentaConfirmada?: boolean;
 }) {
   const consultasCliente: string[] = [];
+  vi.doMock('@/lib/supabase/admin', () => ({
+    obtenerClienteAdmin: () => ({ auth: { signInWithOtp: vi.fn(async () => ({ error: null })) } }),
+  }));
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
-        if (texto.includes('SELECT email_confirmado FROM usuario')) {
-          return { rows: [{ email_confirmado: opciones.cuentaConfirmada ?? true }] };
+        if (texto.includes('email_confirmado FROM usuario')) {
+          return {
+            rows: [
+              { email: 'usuario@example.com', email_confirmado: opciones.cuentaConfirmada ?? true },
+            ],
+          };
         }
         if (texto.includes('FROM perfil_deportivo')) {
           return { rows: opciones.perfilId ? [{ id: opciones.perfilId }] : [] };

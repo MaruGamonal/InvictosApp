@@ -6,8 +6,8 @@ import { verificarLimite } from '@/lib/limiteFrecuencia';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { obtenerClienteAdmin } from '@/lib/supabase/admin';
 import { contextoDeSistema } from '@/lib/contexto';
+import { enviarEmailConfirmacion } from '@/lib/emailConfirmacion';
 import { completarRegistro } from './completarRegistro';
-import { enviarEmailConfirmacion } from './_enviarEmailConfirmacion';
 
 /**
  * UC-01 — Registrarse. Pide identificador de acceso (email), nombre

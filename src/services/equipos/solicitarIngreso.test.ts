@@ -23,11 +23,18 @@ function mockearDb(opciones: {
   gestores?: Array<{ perfil_id: string; usuario_id: string | null }>;
   cuentaConfirmada?: boolean;
 }) {
+  vi.doMock('@/lib/supabase/admin', () => ({
+    obtenerClienteAdmin: () => ({ auth: { signInWithOtp: vi.fn(async () => ({ error: null })) } }),
+  }));
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
       query: async (texto: string) => {
-        if (texto.includes('SELECT email_confirmado FROM usuario')) {
-          return { rows: [{ email_confirmado: opciones.cuentaConfirmada ?? true }] };
+        if (texto.includes('email_confirmado FROM usuario')) {
+          return {
+            rows: [
+              { email: 'usuario@example.com', email_confirmado: opciones.cuentaConfirmada ?? true },
+            ],
+          };
         }
         if (texto.includes('SELECT estado FROM equipo')) {
           return { rows: opciones.estadoEquipo ? [{ estado: opciones.estadoEquipo }] : [] };

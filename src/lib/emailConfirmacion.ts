@@ -12,10 +12,14 @@ const URL_DEL_SITIO = () => process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhos
  * sesión): la confirmación que exige `verificarCuentaConfirmada` es
  * enteramente nuestra, en `usuario.email_confirmado`.
  *
- * Interno: lo llaman `registrar.ts` (al crear la cuenta) y
- * `reenviarConfirmacion.ts` (el botón "Reenviar enlace"), no expuesto
- * como servicio propio porque no valida nada por su cuenta — el
- * rate-limit y el permiso de quién puede pedirlo viven en el llamador.
+ * Vive en `lib` (y no en `services/identidad`, donde nació) porque
+ * `verificarCuentaConfirmada` —el propio gate, `lib/cuentaConfirmada.ts`—
+ * necesita mandarlo al bloquear una acción, y `lib` no puede importar de
+ * `services` (`boundaries/dependencies`). Lo siguen llamando
+ * `registrar.ts` (al crear la cuenta) y `reenviarConfirmacion.ts` (el
+ * botón "Reenviar enlace") además del propio gate — no es un `Servicio`
+ * porque no valida nada por su cuenta: el rate-limit y el permiso de
+ * quién puede pedirlo viven en cada llamador.
  */
 export async function enviarEmailConfirmacion(email: string): Promise<void> {
   const supabase = obtenerClienteAdmin();
