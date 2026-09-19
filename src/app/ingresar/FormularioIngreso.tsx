@@ -43,6 +43,15 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
   const [password, setPassword] = useState('');
   const [recordarme, setRecordarme] = useState(true);
 
+  // Reportado en vivo: con menos de 8 caracteres el botón seguía mostrándose
+  // habilitado — el `minLength` del input alcanza para el envío nativo del
+  // form, pero no avisaba nada mientras se escribía. Server-side ya lo
+  // exige (`registrar.ts`, D-52); esto es solo la señal visual que faltaba.
+  const passwordCorta = esCrear && password.length > 0 && password.length < 8;
+  const formularioValido = esCrear
+    ? nombreVisible.trim() !== '' && identificadorAcceso.trim() !== '' && password.length >= 8
+    : identificadorAcceso.trim() !== '' && password.trim() !== '';
+
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEstado({ paso: 'enviando' });
@@ -161,7 +170,11 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
           onChange={setPassword}
           autoComplete={esCrear ? 'new-password' : 'current-password'}
         />
-        {esCrear && <span className={styles.ayuda}>Al menos 8 caracteres.</span>}
+        {esCrear && (
+          <span className={passwordCorta ? styles.ayudaAdvertencia : styles.ayuda}>
+            {passwordCorta ? 'Todavía le faltan caracteres — mínimo 8.' : 'Al menos 8 caracteres.'}
+          </span>
+        )}
       </div>
 
       {!esCrear && (
@@ -175,7 +188,11 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
         </label>
       )}
 
-      <button type="submit" className={styles.boton} disabled={estado.paso === 'enviando'}>
+      <button
+        type="submit"
+        className={styles.boton}
+        disabled={estado.paso === 'enviando' || !formularioValido}
+      >
         {estado.paso === 'enviando' ? 'Enviando…' : esCrear ? 'Crear cuenta' : 'Ingresar'}
       </button>
 

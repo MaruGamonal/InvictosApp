@@ -38,4 +38,33 @@ describe('FormularioIngreso', () => {
     const cuerpo = JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string);
     expect(cuerpo.recordarme).toBe(false);
   });
+
+  it('en modo crear cuenta, con menos de 8 caracteres el botón queda deshabilitado', () => {
+    const { getByLabelText, getByRole, getByText } = render(
+      <FormularioIngreso modoInicial="crear" />,
+    );
+    fireEvent.change(getByLabelText('Nombre visible'), { target: { value: 'Vale' } });
+    fireEvent.change(getByLabelText('Correo'), { target: { value: 'vos@example.com' } });
+    fireEvent.change(getByLabelText('Contraseña'), { target: { value: '1234567' } });
+
+    expect(getByRole('button', { name: 'Crear cuenta' })).toBeDisabled();
+    expect(getByText('Todavía le faltan caracteres — mínimo 8.')).toBeTruthy();
+  });
+
+  it('en modo crear cuenta, con 8 caracteres o más el botón se habilita', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal('fetch', fetchMock);
+    vi.spyOn(window.location, 'assign').mockImplementation(assign);
+
+    const { getByLabelText, getByRole } = render(<FormularioIngreso modoInicial="crear" />);
+    fireEvent.change(getByLabelText('Nombre visible'), { target: { value: 'Vale' } });
+    fireEvent.change(getByLabelText('Correo'), { target: { value: 'vos@example.com' } });
+    fireEvent.change(getByLabelText('Contraseña'), { target: { value: 'contraseñaSegura123' } });
+
+    const boton = getByRole('button', { name: 'Crear cuenta' });
+    expect(boton).not.toBeDisabled();
+    fireEvent.click(boton);
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+  });
 });
