@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
 import { obtenerContextoCacheado, obtenerOrganizacionActivaCacheada } from './_datos';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
 import styles from './layout.module.css';
@@ -18,6 +19,16 @@ import styles from './layout.module.css';
  * sí necesita una organización (Home, Equipo de trabajo, Invitar
  * Administrador, Perfil público) redirige a Crear organización por su
  * cuenta.
+ *
+ * Reportado en vivo — dos bugs reales de esta cabecera:
+ * 1. "Volver a Inicio" enlazaba a `/inicio` liso, y `/inicio` redirige
+ *    de nuevo para acá cuando la cuenta organiza pero no juega (ver el
+ *    comentario en `app/inicio/page.tsx`) — un loop del que no se podía
+ *    salir. El enlace ahora manda `?volver=1`, que `/inicio` respeta
+ *    para no rebotar.
+ * 2. No había ninguna forma de cerrar sesión desde acá — la única
+ *    vivía en `/perfil` (Jugador), fuera del nav propio de Organizador.
+ *    Se agrega `BotonCerrarSesion` (compartido con `/perfil`) acá mismo.
  */
 export default async function LayoutOrganizadorGestionar({ children }: { children: ReactNode }) {
   const contexto = await obtenerContextoCacheado();
@@ -29,7 +40,11 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <div className={styles.filaSuperior}>
-          <Link href="/inicio" className={styles.enlaceVolver} aria-label="Volver a Inicio">
+          <Link
+            href="/inicio?volver=1"
+            className={styles.enlaceVolver}
+            aria-label="Volver a Inicio"
+          >
             <svg
               width="22"
               height="22"
@@ -44,6 +59,7 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
             </svg>
           </Link>
           <span className={styles.etiquetaModo}>Modo Organizador</span>
+          <BotonCerrarSesion variante="discreto" />
         </div>
         <h1 className={`fuente-display ${styles.titulo}`}>
           {organizacion?.nombre ?? 'Organizador'}

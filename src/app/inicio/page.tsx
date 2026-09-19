@@ -73,10 +73,22 @@ function torneosEnCurso(...listas: TorneoConEstado[][]): TorneoActivo[] {
  * sección se omite en vez de repetir el primer item de "ACTIVIDAD"
  * (que ya está inmediatamente debajo — nada queda oculto, solo no se
  * duplica).
+ *
+ * Reportado en vivo: el redirect de acá abajo (organiza pero no juega →
+ * directo al panel de Organizador) volvía inalcanzable el botón "Volver
+ * a Inicio" de ese panel — rebotaba para acá y de acá otra vez para
+ * allá, sin salida. `?volver=1` (que ese botón manda) lo desactiva: un
+ * click explícito en "volver" siempre aterriza acá de verdad.
  */
-export default async function PaginaInicio() {
+export default async function PaginaInicio({
+  searchParams,
+}: {
+  searchParams: Promise<{ volver?: string }>;
+}) {
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
+
+  const parametros = await searchParams;
 
   const [inicio, actividad] = await Promise.all([
     obtenerInicio(undefined, contexto),
@@ -86,7 +98,9 @@ export default async function PaginaInicio() {
   // Quien solo organiza (sin plantel propio) ya no tiene nada que ver acá:
   // su Inicio es directamente el panel de Organizador (`/organizador/gestionar`,
   // "Ver como administrador" en el header lo lleva ahí a quien tiene los dos roles).
-  if (!inicio.esJugador && inicio.esOrganizador) redirect('/organizador/gestionar');
+  if (!parametros.volver && !inicio.esJugador && inicio.esOrganizador) {
+    redirect('/organizador/gestionar');
+  }
 
   const activos =
     !inicio.esRecienLlegado && inicio.jugador
@@ -206,6 +220,18 @@ export default async function PaginaInicio() {
               <span className={styles.tarjetaAccionEnlace}>Empezar ›</span>
             </Link>
           </>
+        )}
+
+        {/* Organiza pero no juega, y llegó acá a propósito con "Volver" desde
+            el panel de Organizador (si no, `?volver` no está y ya redirigió
+            arriba): no hay nada de jugador que mostrar, pero la pantalla
+            tiene que decir algo en vez de quedar vacía. */}
+        {!inicio.esRecienLlegado && !inicio.jugador && (
+          <EstadoVacio
+            mensaje="Todavía no formás parte de ningún equipo."
+            textoAccion="Crear o sumarme a un equipo"
+            hrefAccion="/equipo/crear"
+          />
         )}
 
         {!inicio.esRecienLlegado && inicio.jugador && (

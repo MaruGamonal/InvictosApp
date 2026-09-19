@@ -124,19 +124,3 @@
   padding: 14px;
   border-radius: var(--radio-boton);
 }
-
-.botonCerrarSesion {
-  background: var(--error-fondo);
-  border: 1px solid var(--error-borde);
-  color: var(--error-texto);
-  font-weight: 700;
-  font-size: 15px;
-  padding: 14px;
-  border-radius: var(--radio-boton);
-  cursor: pointer;
-}
-
-.botonCerrarSesion:disabled {
-  opacity: 0.6;
-  cursor: default;
-}

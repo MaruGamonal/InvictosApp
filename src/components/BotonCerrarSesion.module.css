@@ -1,0 +1,32 @@
+.boton {
+  background: var(--error-fondo);
+  border: 1px solid var(--error-borde);
+  color: var(--error-texto);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px;
+  border-radius: var(--radio-boton);
+  cursor: pointer;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.botonDiscreto {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font: 700 12px/1 var(--fuente-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gris-claro-sobre-oscuro);
+  cursor: pointer;
+}
+
+.botonDiscreto:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

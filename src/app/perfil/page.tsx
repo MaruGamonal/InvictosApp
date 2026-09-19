@@ -8,8 +8,8 @@ import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { NavInferior } from '@/components/NavInferior';
 import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
+import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { BotonCerrarSesion } from './BotonCerrarSesion';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Mi perfil') };
