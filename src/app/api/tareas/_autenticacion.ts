@@ -22,7 +22,36 @@ export function verificarSecretoDeTarea(request: NextRequest): void {
   if (!secreto) throw crearError('SECRETO_DE_TAREA_NO_CONFIGURADO');
 
   const encabezado = request.headers.get('authorization');
-  if (encabezado !== `Bearer ${secreto}`) {
-    throw crearError('SIN_PERMISO');
-  }
+  if (encabezado === `Bearer ${secreto}`) return;
+
+  throw crearError('SIN_PERMISO', formaDeLaCabecera(encabezado, secreto));
+}
+
+/**
+ * Describe la cabecera que llegó, sin su contenido. Todo lo que devuelve
+ * es sobre lo que **mandó quien llama**, no sobre el secreto guardado:
+ * quien hizo el pedido ya sabe qué mandó, así que esto no le revela nada
+ * que no tuviera. El único dato que mira el secreto es un booleano de
+ * comparación, que es lo mismo que ya informa el 403.
+ *
+ * Existe porque un cliente que no es un navegador —`pg_net` llamando
+ * desde Postgres— no deja ver qué mandó: si la cabecera se pierde en el
+ * camino, llega recortada o trae un salto de línea pegado, desde afuera
+ * las tres se ven igual, como un 403 seco. Con esto, una sola llamada
+ * dice cuál de las tres es.
+ */
+function formaDeLaCabecera(encabezado: string | null, secreto: string) {
+  if (encabezado === null) return { llegoLaCabecera: false };
+
+  const prefijo = 'Bearer ';
+  const empiezaConBearer = encabezado.startsWith(prefijo);
+  const valor = empiezaConBearer ? encabezado.slice(prefijo.length) : encabezado;
+
+  return {
+    llegoLaCabecera: true,
+    empiezaConBearer,
+    largoDelValor: valor.length,
+    largoEsperado: secreto.length,
+    coincideAlRecortarEspacios: valor.trim() === secreto,
+  };
 }
