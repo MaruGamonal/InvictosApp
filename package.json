@@ -20,7 +20,11 @@
     "migrate:up": "dotenv -e .env -q -- node-pg-migrate up --migrations-dir db/migrations",
     "migrate:down": "dotenv -e .env -q -- node-pg-migrate down --migrations-dir db/migrations",
     "migrate:deploy": "node-pg-migrate up --migrations-dir db/migrations",
-    "verify": "npm run format && npm run lint && npm run typecheck && npm run test && npm run test:integracion"
+    "verify": "npm run format && npm run lint && npm run typecheck && npm run test && npm run test:integracion",
+    "demo:limpiar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/limpiar.ts -- --ejecutar",
+    "demo:sembrar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/sembrar.ts -- --ejecutar",
+    "demo:validar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/validar.ts -- --ejecutar",
+    "demo:reset": "npm run demo:limpiar -- --confirmar && npm run demo:sembrar && npm run demo:validar"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.73.0",
