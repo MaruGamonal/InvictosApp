@@ -249,27 +249,47 @@ async function resumen(): Promise<void> {
   for (const fila of rows) console.log(`  ${fila.etiqueta}: ${fila.valor}`);
 }
 
-export async function validarDemo(): Promise<number> {
+/**
+ * Qué chequeo falló y con qué filas. Se devuelve en vez de solo contar
+ * porque el script no es el único que llama acá: la ruta de API corre lo
+ * mismo desde el entorno desplegado, donde el `console.log` queda en los
+ * logs del servidor y quien disparó la corrida solo ve lo que vuelve en
+ * la respuesta. Un número suelto ahí no sirve para nada: dice que algo
+ * anda mal y no qué.
+ */
+export interface FallaDeValidacion {
+  nombre: string;
+  explicacion: string;
+  filas: number;
+  ejemplos: unknown[];
+}
+
+export async function validarDemo(): Promise<FallaDeValidacion[]> {
   const pool = obtenerPool();
   await resumen();
 
   console.log('\nChequeos (cada uno tiene que dar 0 filas):');
-  let fallas = 0;
+  const fallas: FallaDeValidacion[] = [];
   for (const chequeo of CHEQUEOS) {
     const { rows } = await pool.query(chequeo.sql);
     if (rows.length === 0) {
       console.log(`  ok   ${chequeo.nombre}`);
-    } else {
-      fallas += 1;
-      console.log(`  FALLA ${chequeo.nombre} → ${rows.length} fila(s): ${chequeo.explicacion}`);
-      console.log(`        ${JSON.stringify(rows.slice(0, 3))}`);
+      continue;
     }
+    fallas.push({
+      nombre: chequeo.nombre,
+      explicacion: chequeo.explicacion,
+      filas: rows.length,
+      ejemplos: rows.slice(0, 3),
+    });
+    console.log(`  FALLA ${chequeo.nombre} → ${rows.length} fila(s): ${chequeo.explicacion}`);
+    console.log(`        ${JSON.stringify(rows.slice(0, 3))}`);
   }
 
   console.log(
-    fallas === 0
+    fallas.length === 0
       ? `\n${CHEQUEOS.length} chequeos pasados: el dataset es consistente.`
-      : `\n${fallas} de ${CHEQUEOS.length} chequeos fallaron.`,
+      : `\n${fallas.length} de ${CHEQUEOS.length} chequeos fallaron.`,
   );
   return fallas;
 }
@@ -280,7 +300,7 @@ if (process.argv.includes('--ejecutar')) {
   validarDemo()
     .then(async (fallas) => {
       await obtenerPool().end();
-      process.exit(fallas === 0 ? 0 : 1);
+      process.exit(fallas.length === 0 ? 0 : 1);
     })
     .catch((error) => {
       console.error(error);

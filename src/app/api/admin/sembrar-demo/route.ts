@@ -40,9 +40,15 @@ export async function POST(request: NextRequest) {
     if (accion === 'limpiar' || accion === 'reset') await limpiarDemo();
     if (accion === 'sembrar' || accion === 'reset') await sembrarDemo();
 
-    const fallasDeValidacion =
-      accion === 'validar' || accion === 'reset' ? await validarDemo() : null;
+    const fallas = accion === 'validar' || accion === 'reset' ? await validarDemo() : null;
 
-    return { accion, fallasDeValidacion };
+    // El detalle, no solo el conteo: desde acá el `console.log` del
+    // script queda en los logs del servidor, así que lo que vuelve en la
+    // respuesta es lo único que ve quien disparó la corrida.
+    return {
+      accion,
+      fallasDeValidacion: fallas === null ? null : fallas.length,
+      fallas,
+    };
   });
 }
