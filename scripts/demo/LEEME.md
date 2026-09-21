@@ -14,6 +14,12 @@ npm run demo:validar                  # solo chequear consistencia
 Todos apuntan a la base de `DATABASE_URL`. `demo:reset` es idempotente:
 limpia lo que sembró la corrida anterior antes de volver a sembrar.
 
+**Usá `demo:reset`, no `demo:sembrar` a secas.** Sembrar encima de datos
+demy que ya están deja la base con dos juegos de todo —equipos repetidos,
+torneos repetidos, pantallas con estados imposibles—. El seed lo
+verifica antes de arrancar y se niega si encuentra rastros de una
+corrida anterior, pero el hábito correcto es `reset`.
+
 ## Cómo está hecho
 
 **Todo pasa por los servicios reales** (`crearEquipo`, `solicitarInscripcion`,
@@ -69,7 +75,7 @@ de relaciones reales, no de números puestos a mano.
 
 ## Validación
 
-`npm run demo:validar` corre 21 chequeos y falla (código 1) si alguno devuelve
+`npm run demo:validar` corre 24 chequeos y falla (código 1) si alguno devuelve
 filas: huérfanos, duplicados, partidos imposibles, la tabla contra los
 resultados, las estadísticas contra los eventos, y cobertura (por ejemplo, un
 torneo finalizado que quedaría sin campeón por empate en la cima). Mientras eso

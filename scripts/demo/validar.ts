@@ -61,6 +61,31 @@ const CHEQUEOS: Chequeo[] = [
     sql: `SELECT equipo_id, perfil_id, rol_equipo, count(*) FROM integrante_equipo
           GROUP BY 1, 2, 3 HAVING count(*) > 1`,
   },
+  /**
+   * Los 21 chequeos anteriores miraban relaciones, no identidades, así
+   * que una base con dos juegos completos de datos demo los pasaba
+   * todos: cada copia era internamente coherente. Lo que rompía la
+   * aplicación era ver dos veces el mismo equipo en el descubrimiento y
+   * en los perfiles.
+   */
+  {
+    nombre: 'duplicados: dos equipos demo con el mismo nombre',
+    explicacion: 'señal de que se sembró encima de una corrida anterior',
+    sql: `SELECT nombre, count(*) FROM equipo WHERE nombre LIKE '%[DEMO]%'
+          GROUP BY nombre HAVING count(*) > 1`,
+  },
+  {
+    nombre: 'duplicados: dos torneos demo con el mismo nombre y división',
+    explicacion: 'señal de que se sembró encima de una corrida anterior',
+    sql: `SELECT nombre, division, count(*) FROM torneo WHERE nombre LIKE '%[DEMO]%'
+          GROUP BY nombre, division HAVING count(*) > 1`,
+  },
+  {
+    nombre: 'duplicados: dos cuentas demo con el mismo correo',
+    explicacion: 'el alta de usuarios demo se corrió dos veces',
+    sql: `SELECT email, count(*) FROM usuario WHERE email LIKE '%@demo.invicta.com.ar'
+          GROUP BY email HAVING count(*) > 1`,
+  },
   {
     nombre: 'duplicados: mismo equipo dos veces en un torneo',
     explicacion: 'inscripciones repetidas',

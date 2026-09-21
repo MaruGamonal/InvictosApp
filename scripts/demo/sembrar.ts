@@ -20,6 +20,7 @@ import { cargarResultado, type EventoResultadoInput } from '@/services/competenc
 import { seguir } from '@/services/notificaciones/seguir';
 import {
   crearUsuarioDemo,
+  DOMINIO_DEMO,
   hayCredencialesDeAuth,
   PASSWORD_DEMO,
   type UsuarioDemo,
@@ -185,7 +186,7 @@ async function cargarResultados(
   faseId: string,
   organizador: Contexto,
   porEquipo: Map<string, EquipoDemo>,
-  plan: (indice: number) => ResultadoPlan | null,
+  plan: (indice: number, local: EquipoDemo, visitante: EquipoDemo) => ResultadoPlan | null,
 ): Promise<number> {
   const pool = obtenerPool();
   const { rows: partidos } = await pool.query<{
@@ -201,22 +202,22 @@ async function cargarResultados(
 
   let cargados = 0;
   for (let i = 0; i < partidos.length; i += 1) {
-    const marcador = plan(i);
-    if (!marcador) continue;
     const partido = partidos[i]!;
-    const local = porEquipo.get(partido.equipo_local_id);
-    const visitante = porEquipo.get(partido.equipo_visitante_id);
+    const local = porEquipo.get(partido.equipo_local_id)!;
+    const visitante = porEquipo.get(partido.equipo_visitante_id)!;
+    const marcador = plan(i, local, visitante);
+    if (!marcador) continue;
 
     // Un gol por cada tanto, repartido entre jugadores habilitados del equipo que anotó.
     const eventos: EventoResultadoInput[] = [
       ...Array.from({ length: marcador.golesLocal }, (_, g) => ({
-        perfilId: local!.perfilIds[g % local!.perfilIds.length]!,
+        perfilId: local.perfilIds[g % local.perfilIds.length]!,
         equipoId: partido.equipo_local_id,
         tipoEvento: 'goal' as const,
         minuto: 10 + g * 7,
       })),
       ...Array.from({ length: marcador.golesVisitante }, (_, g) => ({
-        perfilId: visitante!.perfilIds[g % visitante!.perfilIds.length]!,
+        perfilId: visitante.perfilIds[g % visitante.perfilIds.length]!,
         equipoId: partido.equipo_visitante_id,
         tipoEvento: 'goal' as const,
         minuto: 15 + g * 9,
@@ -225,7 +226,7 @@ async function cargarResultados(
     // Una amarilla cada tres partidos, para que las estadísticas no sean solo goles.
     if (i % 3 === 0) {
       eventos.push({
-        perfilId: visitante!.perfilIds[0]!,
+        perfilId: visitante.perfilIds[0]!,
         equipoId: partido.equipo_visitante_id,
         tipoEvento: 'yellow_card',
         minuto: 63,
@@ -233,7 +234,7 @@ async function cargarResultados(
     }
 
     // Jugador del partido: del equipo que ganó (o el local si empataron).
-    const ganador = marcador.golesLocal >= marcador.golesVisitante ? local! : visitante!;
+    const ganador = marcador.golesLocal >= marcador.golesVisitante ? local : visitante;
 
     await cargarResultado(
       {
@@ -259,8 +260,37 @@ async function ponerImagenTorneo(torneoId: string, semilla: string): Promise<voi
   ]);
 }
 
+/**
+ * Sembrar sobre datos demo que ya están es lo que deja la base con dos
+ * juegos de todo: equipos repetidos, torneos repetidos, y pantallas que
+ * muestran estados imposibles. No es un caso raro — basta con llamar a
+ * `sembrar` en vez de a `reset`, o con que una corrida anterior se haya
+ * cortado a la mitad y el paso de limpieza no se haya vuelto a correr.
+ *
+ * Antes esto se confiaba al orden de los pasos. Ahora se verifica: si
+ * hay rastro de una corrida previa, el seed no arranca y dice qué
+ * correr. Perder una siembra es barato; limpiar a mano una base
+ * duplicada, no.
+ */
+async function verificarQueNoHayaDatosDemo(): Promise<void> {
+  const { rows } = await obtenerPool().query<{ entidad: string; cantidad: string }>(`
+    SELECT 'usuarios' AS entidad, count(*)::text AS cantidad FROM usuario WHERE email LIKE '%@${DOMINIO_DEMO}'
+    UNION ALL SELECT 'equipos', count(*)::text FROM equipo WHERE nombre LIKE '%[DEMO]%'
+    UNION ALL SELECT 'torneos', count(*)::text FROM torneo WHERE nombre LIKE '%[DEMO]%'
+  `);
+  const restos = rows.filter((fila) => Number(fila.cantidad) > 0);
+  if (restos.length === 0) return;
+
+  const detalle = restos.map((fila) => `${fila.cantidad} ${fila.entidad}`).join(', ');
+  throw new Error(
+    `Ya hay datos demo en esta base (${detalle}). Sembrar encima los duplicaría. ` +
+      'Corré la limpieza primero: `npm run demo:reset`, o la acción "reset" de la ruta de API.',
+  );
+}
+
 export async function sembrarDemo(): Promise<void> {
   const pool = obtenerPool();
+  await verificarQueNoHayaDatosDemo();
   console.log(
     hayCredencialesDeAuth()
       ? 'Modo con Supabase Auth: las cuentas demo van a poder iniciar sesión.\n'
@@ -695,12 +725,24 @@ export async function sembrarDemo(): Promise<void> {
     await confirmarPlantelDemo(finalizado.id, equipo);
   }
   const faseFinalizado = await ponerEnCurso(finalizado.id, organizador.contexto);
+  // El resultado sale de un orden fijo entre los equipos, no del número
+  // de partido. `generarFixture` arma el calendario a partir de los ids,
+  // que cambian en cada siembra, así que un marcador atado al índice
+  // repartía las victorias distinto cada vez y a veces dejaba la cima
+  // empatada — un torneo finalizado sin campeón, que es exactamente lo
+  // que el chequeo de cobertura no deja pasar. Con todos contra todos y
+  // un orden estricto, el primero gana todos sus partidos, el segundo
+  // todos menos ese, y así: los puntos quedan estrictamente escalonados
+  // y el campeón es siempre el mismo.
+  const ordenDeMerito = new Map(equiposFinalizado.map((equipo, puesto) => [equipo.id, puesto]));
   await cargarResultados(
     faseFinalizado,
     organizador.contexto,
     new Map(equiposFinalizado.map((e) => [e.id, e])),
-    // Todos jugados, y el primer equipo gana siempre que es local: hay campeón sin empate en la cima.
-    (i) => ({ golesLocal: i % 2 === 0 ? 3 : 1, golesVisitante: i % 2 === 0 ? 1 : 2 }),
+    (_i, local, visitante) =>
+      ordenDeMerito.get(local.id)! < ordenDeMerito.get(visitante.id)!
+        ? { golesLocal: 3, golesVisitante: 1 }
+        : { golesLocal: 1, golesVisitante: 2 },
   );
   await avanzarEstado({ torneoId: finalizado.id, estadoDestino: 'finished' }, organizador.contexto);
   torneosCreados.push({ nombre: '[DEMO] Liga Masculina Norte F11', estado: 'finished' });
