@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 describe('solicitarVerificacionBasica', () => {
-  it('el Titular puede solicitarla, y se manda el enlace con la metadata correcta', async () => {
+  it('el Titular puede solicitarla, y el enlace vuelve con la organización en la ruta', async () => {
     mockearDb('owner');
     const signInWithOtp = vi.fn().mockResolvedValue({ error: null });
     vi.doMock('@/lib/supabase/admin', () => ({
@@ -48,7 +48,9 @@ describe('solicitarVerificacionBasica', () => {
         email: 'titular@example.com',
         options: expect.objectContaining({
           shouldCreateUser: false,
-          data: { accion: 'verificar_organizacion', organizacion_id: ORG },
+          // En la URL y no en `data`: `signInWithOtp` solo aplica `data`
+          // al crear la cuenta, y acá la cuenta ya existe.
+          emailRedirectTo: expect.stringContaining(`/acceso/confirmar/organizacion/${ORG}`),
         }),
       }),
     );

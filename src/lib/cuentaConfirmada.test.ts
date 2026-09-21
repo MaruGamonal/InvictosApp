@@ -76,7 +76,9 @@ describe('verificarCuentaConfirmada', () => {
       email: 'vale@example.com',
       options: expect.objectContaining({
         shouldCreateUser: false,
-        data: { accion: 'confirmar_cuenta' },
+        // En la URL de vuelta y no en `data`: `signInWithOtp` solo aplica
+        // `data` cuando crea la cuenta, y acá la cuenta ya existe.
+        emailRedirectTo: expect.stringContaining('/acceso/confirmar'),
       }),
     });
   });

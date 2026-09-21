@@ -7,7 +7,11 @@ const completarAcceso = vi.fn();
 vi.mock('@/lib/supabase/servidor', () => ({
   crearClienteServidor: async () => ({ auth: { verifyOtp } }),
 }));
-vi.mock('../../../auth/_completarAcceso', () => ({ completarAcceso }));
+vi.mock('../../../auth/_completarAcceso', () => ({
+  completarAcceso,
+  leerIntencion: (segmentos?: string[]) =>
+    segmentos?.[0] === 'organizacion' ? { organizacionId: segmentos[1] } : {},
+}));
 
 const { POST } = await import('./route');
 
@@ -31,12 +35,28 @@ describe('confirmar un enlace de acceso', () => {
   it('canjea el token y ejecuta la acción del enlace', async () => {
     const respuesta = await POST(pedidoCon({ token_hash: 'abc', type: 'magiclink' }));
     expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'abc', type: 'magiclink' });
-    expect(completarAcceso).toHaveBeenCalledWith({ id: 'u1', user_metadata: {} });
+    expect(completarAcceso).toHaveBeenCalledWith({ id: 'u1', user_metadata: {} }, {});
     expect(adondeFue(respuesta).pathname).toBe('/inicio');
     expect(respuesta.status).toBe(303);
   });
 
   /** Un `type` de afuera no se reenvía tal cual al proveedor. */
+  /**
+   * Para qué se mandó el enlace viaja en la ruta. Antes iba en la
+   * metadata del usuario, que en estos enlaces no llega nunca.
+   */
+  it('pasa la intención que venía en la ruta', async () => {
+    await POST(
+      pedidoCon({
+        token_hash: 'abc',
+        intencion: 'organizacion/11111111-1111-1111-1111-111111111111',
+      }),
+    );
+    expect(completarAcceso).toHaveBeenCalledWith(expect.anything(), {
+      organizacionId: '11111111-1111-1111-1111-111111111111',
+    });
+  });
+
   it('ignora un tipo que no emitimos', async () => {
     await POST(pedidoCon({ token_hash: 'abc', type: 'recovery_de_mentira' }));
     expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'abc', type: 'magiclink' });

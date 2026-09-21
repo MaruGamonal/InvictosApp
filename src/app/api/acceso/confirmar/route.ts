@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
-import { completarAcceso } from '../../../auth/_completarAcceso';
+import { completarAcceso, leerIntencion } from '../../../auth/_completarAcceso';
 
 /** Los únicos tipos que emitimos; cualquier otro valor no se reenvía al proveedor. */
 const TIPOS: EmailOtpType[] = ['magiclink', 'signup', 'email', 'invite'];
@@ -36,7 +36,11 @@ export async function POST(request: NextRequest) {
     if (error) return alError(error.code ?? error.name);
     if (!data.user) return alError('sin-usuario');
 
-    await completarAcceso(data.user);
+    const intencion = formulario.get('intencion');
+    await completarAcceso(
+      data.user,
+      leerIntencion(typeof intencion === 'string' && intencion ? intencion.split('/') : undefined),
+    );
 
     // 303 para que el navegador siga el redirect con GET: con 302,
     // recargar reenvía el POST y reintenta un token ya usado.

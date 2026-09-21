@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const accion: Accion = cuerpo.accion ?? 'reset';
 
     if (accion === 'limpiar' || accion === 'reset') await limpiarDemo();
-    if (accion === 'sembrar' || accion === 'reset') await sembrarDemo();
+    const siembra = accion === 'sembrar' || accion === 'reset' ? await sembrarDemo() : null;
 
     const fallas = accion === 'validar' || accion === 'reset' ? await validarDemo() : null;
 
@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
     // respuesta es lo único que ve quien disparó la corrida.
     return {
       accion,
+      // `cuentasEnAuth: false` es la respuesta a "entro con una cuenta
+      // demo y me dice credenciales inválidas": se sembraron las filas
+      // pero no las cuentas del proveedor.
+      siembra,
       fallasDeValidacion: fallas === null ? null : fallas.length,
       fallas,
     };

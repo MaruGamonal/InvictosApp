@@ -288,7 +288,21 @@ async function verificarQueNoHayaDatosDemo(): Promise<void> {
   );
 }
 
-export async function sembrarDemo(): Promise<void> {
+/**
+ * `cuentasEnAuth` en falso explica de antemano el "credenciales
+ * inválidas" que da entrar con una cuenta demo: sin
+ * `SUPABASE_SERVICE_ROLE_KEY` el seed crea las filas de la base pero no
+ * las cuentas del proveedor, así que los datos se ven y nadie puede
+ * entrar. El script lo avisa por consola, pero desde la ruta de API esa
+ * consola queda en los logs del servidor: quien dispara la siembra ve
+ * solo lo que vuelve en la respuesta.
+ */
+export interface ResumenSiembra {
+  cuentasEnAuth: boolean;
+  torneos: number;
+}
+
+export async function sembrarDemo(): Promise<ResumenSiembra> {
   const pool = obtenerPool();
   await verificarQueNoHayaDatosDemo();
   console.log(
@@ -902,6 +916,8 @@ export async function sembrarDemo(): Promise<void> {
     console.log('  seguidor    → demo.seguidor@demo.invicta.com.ar');
     console.log('  sin confirmar → demo.sinconfirmar@demo.invicta.com.ar');
   }
+
+  return { cuentasEnAuth: hayCredencialesDeAuth(), torneos: torneosCreados.length };
 }
 
 // `--ejecutar` lo pone el script de npm. Sin ese flag el módulo solo

@@ -54,8 +54,14 @@ export const solicitarVerificacionBasica: Servicio<
     email: fila.email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback`,
-      data: { accion: 'verificar_organizacion', organizacion_id: datos.organizacionId },
+      // Qué organización verificar va en la URL de vuelta, no en `data`:
+      // `signInWithOtp` solo aplica `data` al **crear** la cuenta, y acá
+      // va con `shouldCreateUser: false` sobre una que ya existe, así que
+      // no llegaba y la verificación no hacía nada. Que el id sea visible
+      // no alcanza para verificar una organización ajena:
+      // `confirmarVerificacionBasica` comprueba que quien vuelve sea el
+      // titular.
+      emailRedirectTo: `${URL_DEL_SITIO()}/acceso/confirmar/organizacion/${datos.organizacionId}`,
     },
   });
   if (error)

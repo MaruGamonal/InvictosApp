@@ -27,8 +27,12 @@ export async function enviarEmailConfirmacion(email: string): Promise<void> {
     email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${URL_DEL_SITIO()}/auth/callback`,
-      data: { accion: 'confirmar_cuenta' },
+      // La intención va en la URL de vuelta, no en `data`:
+      // `signInWithOtp` solo aplica `data` cuando **crea** la cuenta, y
+      // acá va con `shouldCreateUser: false` sobre una que ya existe, así
+      // que nunca llegaba. La cuenta quedaba sin confirmar después de que
+      // la persona confirmara.
+      emailRedirectTo: `${URL_DEL_SITIO()}/acceso/confirmar`,
     },
   });
   if (error) throw error;

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import styles from '../../ingresar/pagina.module.css';
+import styles from '../../../ingresar/pagina.module.css';
 
 export const metadata: Metadata = {
   title: conNombreProducto('Confirmar el enlace'),
@@ -21,11 +21,14 @@ export const metadata: Metadata = {
  * cookies — esa cookie no existía nunca.
  */
 export default async function PaginaConfirmarAcceso({
+  params,
   searchParams,
 }: {
+  params: Promise<{ intencion?: string[] }>;
   searchParams: Promise<{ token_hash?: string; type?: string }>;
 }) {
   const { token_hash: token, type } = await searchParams;
+  const { intencion } = await params;
 
   if (!token) {
     return (
@@ -47,6 +50,8 @@ export default async function PaginaConfirmarAcceso({
         <p className={styles.texto}>Tocá el botón para entrar. El enlace sirve una sola vez.</p>
         <input type="hidden" name="token_hash" value={token} />
         <input type="hidden" name="type" value={type ?? 'magiclink'} />
+        {/* La ruta dice para qué se mandó el enlace; el POST la necesita. */}
+        <input type="hidden" name="intencion" value={(intencion ?? []).join('/')} />
         <button type="submit" className={styles.boton}>
           Continuar
         </button>
