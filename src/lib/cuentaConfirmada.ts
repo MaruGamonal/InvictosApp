@@ -33,7 +33,15 @@ export async function verificarCuentaConfirmada(contexto: Contexto): Promise<voi
     [contexto.usuarioId],
   );
   const usuario = rows[0];
-  if (!usuario || usuario.email_confirmado) return;
+
+  // Sin fila no se deja pasar. Antes este caso caía junto con "ya está
+  // confirmada" en un mismo `return`, así que una sesión cuya cuenta no
+  // existe en la base —un registro que se cortó entre crear la cuenta en
+  // el proveedor y crear la fila— se saltaba el bloqueo entero. Un
+  // control que no puede comprobar lo que controla tiene que negar, no
+  // permitir.
+  if (!usuario) throw crearError('NO_AUTENTICADO');
+  if (usuario.email_confirmado) return;
 
   if (verificarLimite(`reenviar-confirmacion:${contexto.usuarioId}`, LIMITE_REENVIO_AUTOMATICO)) {
     try {

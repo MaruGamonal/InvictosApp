@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { obtenerClienteAdmin } from './supabase/admin';
 import { crearError } from './errores';
 
@@ -35,7 +36,13 @@ async function subirArchivoPublico(
     upsert: false,
   });
   if (error) {
-    throw crearError('ERROR_INTERNO', [{ campo: 'archivo', problema: error.message }]);
+    // El mensaje del proveedor se manda a Sentry, no al navegador:
+    // describe el bucket, la ruta y la política que falló, que no le
+    // sirve a quien sube una foto y sí a quien quiera mapear cómo está
+    // armado el almacenamiento. `comoRespuestaHttp` incluye `detalle`
+    // en la respuesta, así que ponerlo ahí lo publicaba.
+    Sentry.captureException(error, { tags: { origen: 'almacenamiento' }, extra: { carpeta } });
+    throw crearError('ERROR_INTERNO');
   }
 
   const { data } = admin.storage.from(BUCKET).getPublicUrl(ruta);

@@ -5,6 +5,8 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
 import { crearClienteServidor, NOMBRE_COOKIE_RECORDAR } from '@/lib/supabase/servidor';
+import { contextoDeSistema } from '@/lib/contexto';
+import { completarRegistro } from './completarRegistro';
 
 /** Mismo tope que usa `@supabase/ssr` para sus propias cookies de sesión (400 días, el máximo de Chrome). */
 const DURACION_RECORDAR_SEGUNDOS = 400 * 24 * 60 * 60;
@@ -52,14 +54,32 @@ export const iniciarSesion: Servicio<IniciarSesionInput, IniciarSesionResultado>
   }
 
   const supabase = await crearClienteServidor({ recordarSesion: datos.recordarme });
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: datos.identificadorAcceso,
     password: datos.password,
   });
 
-  if (error) {
+  if (error || !data.user) {
     throw crearError('CREDENCIALES_INVALIDAS');
   }
+
+  // El alta son dos pasos —crear la cuenta en el proveedor y crear la
+  // fila acá— y entre uno y otro se puede cortar: queda una cuenta con
+  // la que se puede entrar y que la aplicación no conoce. Esa sesión
+  // rompía cosas más adelante, cuando algo buscaba la fila y no la
+  // encontraba. `completarRegistro` es idempotente, así que en el caso
+  // normal esto no hace nada, y en el roto lo repara al entrar.
+  await completarRegistro(
+    {
+      usuarioId: data.user.id,
+      email: data.user.email ?? datos.identificadorAcceso,
+      nombreVisible:
+        (data.user.user_metadata as { nombre_visible?: string })?.nombre_visible ??
+        data.user.email ??
+        datos.identificadorAcceso,
+    },
+    contextoDeSistema(),
+  );
 
   const cookieStore = await cookies();
   cookieStore.set(NOMBRE_COOKIE_RECORDAR, datos.recordarme ? '1' : '0', {

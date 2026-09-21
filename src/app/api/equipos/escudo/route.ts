@@ -3,6 +3,7 @@ import { comoRespuestaHttp } from '@/lib/respuesta';
 import { construirContexto } from '@/lib/contexto';
 import { crearError } from '@/lib/errores';
 import { subirImagenPublica } from '@/lib/almacenamiento';
+import { verificarPuedeSubirAlEquipo } from '../../_permisoDeSubida';
 import { actualizarEquipo } from '@/services/equipos/actualizarEquipo';
 
 /** UC-10 — Subir el escudo del equipo. Capitán o Delegado. */
@@ -19,6 +20,10 @@ export async function POST(request: NextRequest) {
         { campo: 'archivo/equipoId', problema: 'Falta el archivo o el equipo.' },
       ]);
     }
+
+    // Antes de escribir en el bucket: si no, un rechazo posterior deja
+    // igual el archivo subido y accesible.
+    await verificarPuedeSubirAlEquipo(contexto, equipoId);
 
     const escudoUrl = await subirImagenPublica(`equipos/${equipoId}`, archivo);
     await actualizarEquipo({ equipoId, escudoUrl }, contexto);

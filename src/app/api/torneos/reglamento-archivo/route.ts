@@ -3,6 +3,7 @@ import { comoRespuestaHttp } from '@/lib/respuesta';
 import { construirContexto } from '@/lib/contexto';
 import { crearError } from '@/lib/errores';
 import { subirDocumentoPublico } from '@/lib/almacenamiento';
+import { verificarPermisoTorneo } from '@/lib/permisos';
 
 /**
  * UC-51 — Solo sube el PDF del reglamento y devuelve su URL; publicar
@@ -23,6 +24,12 @@ export async function POST(request: NextRequest) {
         { campo: 'archivo/torneoId', problema: 'Falta el archivo o el torneo.' },
       ]);
     }
+
+    // Esta ruta devuelve la URL y no pasa por ningún servicio después,
+    // así que era la única escritura al bucket sin ninguna comprobación
+    // de permiso: alcanzaba con tener sesión para subir un PDF a nombre
+    // de cualquier torneo.
+    await verificarPermisoTorneo(contexto, torneoId, 'configurar_torneo');
 
     const archivoUrl = await subirDocumentoPublico(`torneos/${torneoId}/reglamento`, archivo);
     return { archivoUrl };

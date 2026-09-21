@@ -83,6 +83,21 @@ describe('verificarCuentaConfirmada', () => {
     });
   });
 
+  /**
+   * Una sesión cuya cuenta no existe en la base: pasa si el registro se
+   * cortó entre crear la cuenta en el proveedor y crear la fila. Antes
+   * caía en el mismo `return` que "ya confirmada" y se saltaba el
+   * bloqueo.
+   */
+  it('no deja pasar una sesión sin fila de usuario', async () => {
+    // Sin `emailConfirmado`, el mock devuelve cero filas.
+    mockearDb({});
+    const { verificarCuentaConfirmada } = await import('./cuentaConfirmada');
+    await expect(verificarCuentaConfirmada(contextoCon('fantasma'))).rejects.toMatchObject({
+      codigo: 'NO_AUTENTICADO',
+    });
+  });
+
   it('si el envío del correo falla, igual bloquea (no rompe el gate por eso)', async () => {
     mockearDb({
       emailConfirmado: false,

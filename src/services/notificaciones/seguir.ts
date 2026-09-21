@@ -28,6 +28,15 @@ export const seguir: Servicio<SeguirInput, { siguiendo: true }> = async (input, 
   const datos = validarEntrada(esquemaEntrada, input);
 
   const pool = obtenerPool();
+
+  // `seguimiento` apunta a un equipo o a un torneo según `tipo_seguido`,
+  // así que no hay clave foránea que lo sostenga: sin esta comprobación,
+  // cualquier id inventado entraba y quedaba una fila que no lleva a
+  // ningún lado, que después aparece en el feed y en los conteos.
+  const tabla = datos.tipoSeguido === 'team' ? 'equipo' : 'torneo';
+  const { rowCount } = await pool.query(`SELECT 1 FROM ${tabla} WHERE id = $1`, [datos.entidadId]);
+  if (!rowCount) throw crearError('NO_ENCONTRADO');
+
   await pool.query(
     `INSERT INTO seguimiento (usuario_id, tipo_seguido, entidad_seguida_id, origen)
      VALUES ($1, $2, $3, 'manual')

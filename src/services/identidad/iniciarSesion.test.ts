@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { reiniciarLimitesDeFrecuencia } from '@/lib/limiteFrecuencia';
 
-const signInWithPassword = vi.fn().mockResolvedValue({ error: null });
+const USUARIO = {
+  id: '11111111-1111-1111-1111-111111111111',
+  email: 'capitan@example.com',
+  user_metadata: { nombre_visible: 'Capitán' },
+};
+const signInWithPassword = vi.fn().mockResolvedValue({ data: { user: USUARIO }, error: null });
+const completarRegistro = vi.fn().mockResolvedValue({});
+
+vi.mock('./completarRegistro', () => ({ completarRegistro }));
 const crearClienteServidor = vi.fn(async (_opciones?: { recordarSesion?: boolean }) => ({
   auth: { signInWithPassword },
 }));
@@ -19,12 +27,43 @@ vi.mock('next/headers', () => ({
 beforeEach(() => {
   reiniciarLimitesDeFrecuencia();
   signInWithPassword.mockClear();
-  signInWithPassword.mockResolvedValue({ error: null });
+  signInWithPassword.mockResolvedValue({ data: { user: USUARIO }, error: null });
+  completarRegistro.mockClear();
   crearClienteServidor.mockClear();
   cookieSet.mockClear();
 });
 
 describe('iniciarSesion', () => {
+  /**
+   * El alta son dos pasos y puede cortarse en el medio, dejando una
+   * cuenta con la que se entra y que la aplicación no conoce. Entrar
+   * repara esa fila en vez de arrastrar la sesión rota.
+   */
+  it('asegura la fila de la cuenta al entrar', async () => {
+    const { iniciarSesion } = await import('./iniciarSesion');
+    await iniciarSesion(
+      { identificadorAcceso: 'capitan@example.com', password: 'contraseñaSegura123' },
+      { usuarioId: null, permisos: {}, esSistema: true },
+    );
+
+    expect(completarRegistro).toHaveBeenCalledWith(
+      expect.objectContaining({ usuarioId: USUARIO.id, email: 'capitan@example.com' }),
+      expect.anything(),
+    );
+  });
+
+  it('no repara nada si las credenciales fallan', async () => {
+    signInWithPassword.mockResolvedValue({ data: {}, error: new Error('mal') });
+    const { iniciarSesion } = await import('./iniciarSesion');
+    await expect(
+      iniciarSesion(
+        { identificadorAcceso: 'capitan@example.com', password: 'mala' },
+        { usuarioId: null, permisos: {}, esSistema: true },
+      ),
+    ).rejects.toMatchObject({ codigo: 'CREDENCIALES_INVALIDAS' });
+    expect(completarRegistro).not.toHaveBeenCalled();
+  });
+
   it('ingresa con correo y contraseña correctos', async () => {
     const { iniciarSesion } = await import('./iniciarSesion');
     const resultado = await iniciarSesion(
