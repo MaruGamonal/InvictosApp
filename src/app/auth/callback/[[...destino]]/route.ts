@@ -1,9 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { crearClienteServidor } from '@/lib/supabase/servidor';
-import { construirContexto } from '@/lib/contexto';
-import { completarRegistro } from '@/services/identidad/completarRegistro';
-import { confirmarEmailCuenta } from '@/services/identidad/confirmarEmailCuenta';
-import { confirmarVerificacionBasica } from '@/services/organizadores/confirmarVerificacionBasica';
+import { completarAcceso } from '../../_completarAcceso';
 
 /**
  * Adonde vuelve la persona después de tocar cualquier enlace de acceso
@@ -61,33 +58,7 @@ export async function GET(
     if (error) return alError(error.code ?? error.name);
     if (!data.user) return alError('sin-usuario');
 
-    const metadata = data.user.user_metadata as {
-      accion?: 'verificar_organizacion' | 'confirmar_cuenta';
-      organizacion_id?: string;
-      nombre_visible?: string;
-      accion_pendiente?: { tipo: string; datos: Record<string, unknown> } | null;
-    };
-    const contexto = await construirContexto();
-
-    if (metadata.accion === 'verificar_organizacion' && metadata.organizacion_id) {
-      await confirmarVerificacionBasica({ organizacionId: metadata.organizacion_id }, contexto);
-      return NextResponse.redirect(`${origin}${siguiente}`);
-    }
-
-    if (metadata.accion === 'confirmar_cuenta') {
-      await confirmarEmailCuenta({ usuarioId: data.user.id }, contexto);
-      return NextResponse.redirect(`${origin}${siguiente}`);
-    }
-
-    await completarRegistro(
-      {
-        usuarioId: data.user.id,
-        email: data.user.email ?? '',
-        nombreVisible: metadata.nombre_visible ?? '',
-        accionPendiente: metadata.accion_pendiente ?? undefined,
-      },
-      contexto,
-    );
+    await completarAcceso(data.user);
 
     return NextResponse.redirect(`${origin}${siguiente}`);
   } catch {
