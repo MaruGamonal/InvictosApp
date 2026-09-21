@@ -63,8 +63,13 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 | `SUPABASE_SERVICE_ROLE_KEY` | Paso 1 — **solo en el servidor**, nunca con prefijo `NEXT_PUBLIC_` |
 | `SENTRY_DSN` | Paso 4 |
 | `CRON_SECRET` | La generás vos: una cadena larga al azar. La usa la tarea horaria para probar que es ella |
+| `NEXT_PUBLIC_SITE_URL` | La URL que esté sirviendo el sitio ahora mismo (`https://invicta.com.ar` una vez apuntado el dominio, o el `*.vercel.app` mientras tanto) — **sin `/` al final** |
 
 > **Ninguna de estas va al repositorio.** Es la regla que T28 ya pedía: variables gestionadas fuera del código.
+
+> ⚠️ **`NEXT_PUBLIC_SITE_URL` faltaba de esta lista y causó un bug real en producción**: sin ella, todo el código cae a `http://localhost:3000` (los mails de confirmación de cuenta, verificación de organización, invitaciones y recuperación de contraseña arman el enlace con esa base) — el enlace del mail termina apuntando a la máquina de quien desarrolló, no al sitio real. **Después de cargarla hay que redesplegar**: una variable nueva no se aplica a un deploy ya hecho.
+>
+> **Además, en el panel de Supabase** (Authentication → URL Configuration) hay que fijar el mismo valor: **Site URL** a esa misma URL, y agregar `<esa URL>/auth/callback` a **Redirect URLs**. Supabase solo respeta el `emailRedirectTo` que le manda la app si esa URL está en la lista de Redirect URLs — si no, la ignora y usa el Site URL del panel (que en un proyecto nuevo suele quedar en localhost por default).
 
 ### Paso 6 — *(ya no aplica)*
 
