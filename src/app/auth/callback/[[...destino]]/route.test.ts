@@ -88,3 +88,42 @@ describe('el callback de los enlaces por correo', () => {
     expect(adondeFue(respuesta)).toBe('/auth/error');
   });
 });
+
+/**
+ * Sin el motivo, "el enlace venció" y "el navegador no tiene el dato que
+ * lo abre" se ven iguales desde la pantalla de error, y se arreglan en
+ * lugares distintos.
+ */
+describe('el error dice por qué falló', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const motivo = (respuesta: Response) =>
+    new URL(respuesta.headers.get('location') ?? '').searchParams.get('motivo');
+
+  it('pasa el código de error del canje', async () => {
+    exchangeCodeForSession.mockResolvedValue({
+      data: {},
+      error: Object.assign(new Error('x'), { code: 'flow_state_not_found' }),
+    });
+    const respuesta = await GET(pedido('https://sitio.test/auth/callback?code=abc'), {
+      params: destino(),
+    });
+    expect(motivo(respuesta)).toBe('flow_state_not_found');
+  });
+
+  it('pasa el error que manda el proveedor cuando ni siquiera hay código', async () => {
+    const respuesta = await GET(
+      pedido('https://sitio.test/auth/callback?error=access_denied&error_code=otp_expired'),
+      { params: destino() },
+    );
+    expect(motivo(respuesta)).toBe('otp_expired');
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+  });
+
+  it('distingue una llegada sin código de un canje fallido', async () => {
+    const respuesta = await GET(pedido('https://sitio.test/auth/callback'), {
+      params: destino(),
+    });
+    expect(motivo(respuesta)).toBe('sin-codigo');
+  });
+});

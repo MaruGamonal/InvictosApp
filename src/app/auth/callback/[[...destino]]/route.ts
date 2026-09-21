@@ -41,50 +41,56 @@ export async function GET(
   { params }: { params: Promise<{ destino?: string[] }> },
 ) {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
   const { destino } = await params;
   const siguiente = destinoDelEnlace(destino, searchParams.get('next'));
+  const alError = (motivo: string) =>
+    NextResponse.redirect(`${origin}/auth/error?motivo=${encodeURIComponent(motivo)}`);
 
-  if (code) {
-    try {
-      const supabase = await crearClienteServidor();
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  // Cuando el proveedor rechaza el enlace antes de mandarlo para acá
+  // (vencido, ya usado) no manda código sino su propio error.
+  const errorDelProveedor = searchParams.get('error_code') ?? searchParams.get('error');
+  if (errorDelProveedor) return alError(errorDelProveedor);
 
-      if (!error && data.user) {
-        const metadata = data.user.user_metadata as {
-          accion?: 'verificar_organizacion' | 'confirmar_cuenta';
-          organizacion_id?: string;
-          nombre_visible?: string;
-          accion_pendiente?: { tipo: string; datos: Record<string, unknown> } | null;
-        };
-        const contexto = await construirContexto();
+  const code = searchParams.get('code');
+  if (!code) return alError('sin-codigo');
 
-        if (metadata.accion === 'verificar_organizacion' && metadata.organizacion_id) {
-          await confirmarVerificacionBasica({ organizacionId: metadata.organizacion_id }, contexto);
-          return NextResponse.redirect(`${origin}${siguiente}`);
-        }
+  try {
+    const supabase = await crearClienteServidor();
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-        if (metadata.accion === 'confirmar_cuenta') {
-          await confirmarEmailCuenta({ usuarioId: data.user.id }, contexto);
-          return NextResponse.redirect(`${origin}${siguiente}`);
-        }
+    if (error) return alError(error.code ?? error.name);
+    if (!data.user) return alError('sin-usuario');
 
-        await completarRegistro(
-          {
-            usuarioId: data.user.id,
-            email: data.user.email ?? '',
-            nombreVisible: metadata.nombre_visible ?? '',
-            accionPendiente: metadata.accion_pendiente ?? undefined,
-          },
-          contexto,
-        );
+    const metadata = data.user.user_metadata as {
+      accion?: 'verificar_organizacion' | 'confirmar_cuenta';
+      organizacion_id?: string;
+      nombre_visible?: string;
+      accion_pendiente?: { tipo: string; datos: Record<string, unknown> } | null;
+    };
+    const contexto = await construirContexto();
 
-        return NextResponse.redirect(`${origin}${siguiente}`);
-      }
-    } catch {
-      // cae al redirect de error de abajo
+    if (metadata.accion === 'verificar_organizacion' && metadata.organizacion_id) {
+      await confirmarVerificacionBasica({ organizacionId: metadata.organizacion_id }, contexto);
+      return NextResponse.redirect(`${origin}${siguiente}`);
     }
-  }
 
-  return NextResponse.redirect(`${origin}/auth/error`);
+    if (metadata.accion === 'confirmar_cuenta') {
+      await confirmarEmailCuenta({ usuarioId: data.user.id }, contexto);
+      return NextResponse.redirect(`${origin}${siguiente}`);
+    }
+
+    await completarRegistro(
+      {
+        usuarioId: data.user.id,
+        email: data.user.email ?? '',
+        nombreVisible: metadata.nombre_visible ?? '',
+        accionPendiente: metadata.accion_pendiente ?? undefined,
+      },
+      contexto,
+    );
+
+    return NextResponse.redirect(`${origin}${siguiente}`);
+  } catch {
+    return alError('excepcion');
+  }
 }
