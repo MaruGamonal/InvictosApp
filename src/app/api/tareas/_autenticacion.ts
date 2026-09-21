@@ -24,7 +24,7 @@ export function verificarSecretoDeTarea(request: NextRequest): void {
   const encabezado = request.headers.get('authorization');
   if (encabezado === `Bearer ${secreto}`) return;
 
-  throw crearError('SIN_PERMISO', formaDeLaCabecera(encabezado, secreto));
+  throw crearError('SIN_PERMISO', formaDeLaCabecera(request, encabezado, secreto));
 }
 
 /**
@@ -40,8 +40,22 @@ export function verificarSecretoDeTarea(request: NextRequest): void {
  * las tres se ven igual, como un 403 seco. Con esto, una sola llamada
  * dice cuál de las tres es.
  */
-function formaDeLaCabecera(encabezado: string | null, secreto: string) {
-  if (encabezado === null) return { llegoLaCabecera: false };
+function formaDeLaCabecera(request: NextRequest, encabezado: string | null, secreto: string) {
+  if (encabezado === null) {
+    return {
+      llegoLaCabecera: false,
+      // Solo los nombres, nunca los valores: entre las cabeceras viajan
+      // cookies de sesión. Los nombres alcanzan para distinguir las dos
+      // causas de que falte `authorization`: si llegaron las otras que
+      // mandó quien llama, la cabecera se perdió en el camino —lo que
+      // pasa al seguir una redirección que cambia de host, donde se
+      // descarta por seguridad—; si no llegó ninguna, el cliente no las
+      // está mandando. El `host` dice a qué nombre terminó entrando el
+      // pedido, que es lo que confirma la redirección.
+      cabecerasRecibidas: [...request.headers.keys()].sort(),
+      host: request.headers.get('host'),
+    };
+  }
 
   const prefijo = 'Bearer ';
   const empiezaConBearer = encabezado.startsWith(prefijo);

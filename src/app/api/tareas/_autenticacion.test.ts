@@ -3,10 +3,16 @@ import type { NextRequest } from 'next/server';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { verificarSecretoDeTarea } from './_autenticacion';
 
-const pedidoCon = (autorizacion: string | null) =>
-  ({
-    headers: { get: (nombre: string) => (nombre === 'authorization' ? autorizacion : null) },
-  }) as unknown as NextRequest;
+const pedidoCon = (autorizacion: string | null, otras: Record<string, string> = {}) => {
+  const todas = new Map(Object.entries(otras).map(([k, v]) => [k.toLowerCase(), v]));
+  if (autorizacion !== null) todas.set('authorization', autorizacion);
+  return {
+    headers: {
+      get: (nombre: string) => todas.get(nombre.toLowerCase()) ?? null,
+      keys: () => todas.keys(),
+    },
+  } as unknown as NextRequest;
+};
 
 /** Devuelve el error lanzado, o falla si la llamada no lanzó nada. */
 const errorDe = (pedido: NextRequest) => {
@@ -74,9 +80,36 @@ describe('el detalle del rechazo describe la cabecera recibida', () => {
     else process.env.CRON_SECRET = original;
   });
 
-  it('avisa cuando no llegó ninguna cabecera', () => {
+  it('avisa cuando no llegó la cabecera, y con qué otras sí llegó', () => {
     process.env.CRON_SECRET = 'un-secreto';
-    expect(errorDe(pedidoCon(null)).detalle).toEqual({ llegoLaCabecera: false });
+    expect(
+      errorDe(pedidoCon(null, { 'Content-Type': 'application/json', Host: 'invicta.test' }))
+        .detalle,
+    ).toEqual({
+      llegoLaCabecera: false,
+      cabecerasRecibidas: ['content-type', 'host'],
+      host: 'invicta.test',
+    });
+  });
+
+  /**
+   * La firma de una redirección que cambia de host: libcurl conserva las
+   * demás cabeceras y descarta `Authorization`. Distinguirlo de "el
+   * cliente no manda ninguna" es lo que dice dónde está el arreglo.
+   */
+  it('deja ver que llegaron otras cabeceras aunque falte la de autorización', () => {
+    process.env.CRON_SECRET = 'un-secreto';
+    const detalle = errorDe(pedidoCon(null, { 'Content-Type': 'application/json' })).detalle as {
+      cabecerasRecibidas: string[];
+    };
+    expect(detalle.cabecerasRecibidas).toContain('content-type');
+    expect(detalle.cabecerasRecibidas).not.toContain('authorization');
+  });
+
+  it('no incluye el valor de ninguna cabecera', () => {
+    process.env.CRON_SECRET = 'un-secreto';
+    const detalle = errorDe(pedidoCon(null, { Cookie: 'sesion=secreta' })).detalle;
+    expect(JSON.stringify(detalle)).not.toContain('secreta');
   });
 
   it('distingue una cabecera sin el prefijo Bearer', () => {
