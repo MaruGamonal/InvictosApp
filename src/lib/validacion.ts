@@ -20,3 +20,21 @@ function formatearErroresDeValidacion(error: ZodError) {
     problema: issue.message,
   }));
 }
+
+/**
+ * Si un segmento de URL tiene forma de identificador. Los ids del
+ * producto son UUID y viajan en la URL, así que cualquiera puede pedir
+ * `/equipo/cualquier-cosa`: eso llegaba hasta Postgres, que rechaza el
+ * texto por no ser un UUID, y la página moría con un 500 en vez de
+ * mostrar su 404. Además llenaba el registro de errores con URLs que
+ * solo prueba un buscador.
+ *
+ * Va acá y no en un esquema de servicio porque el que tiene que decidir
+ * es el borde: para una página, un id con forma inválida no es un dato
+ * mal formado sino una dirección que no existe.
+ */
+const FORMA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function esIdentificador(valor: string): boolean {
+  return FORMA_UUID.test(valor);
+}

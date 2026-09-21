@@ -14,6 +14,7 @@ import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
 import { cachearLecturaDeEquipo } from '@/lib/cache';
+import { esIdentificador } from '@/lib/validacion';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import { obtenerEquipoPublico, type EquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
@@ -40,6 +41,11 @@ function formatearFecha(iso: string | null): string | undefined {
  */
 
 async function obtenerEquipoCacheado(equipoId: string): Promise<EquipoPublico | null> {
+  // Un id con forma inválida ni se consulta: el texto de la URL llegaba
+  // hasta Postgres, que lo rechaza por no ser un UUID, y la página moría
+  // con un 500 en vez de mostrar su 404.
+  if (!esIdentificador(equipoId)) return null;
+
   try {
     // La caché de datos de Next es persistente entre deploys (no expira
     // por versión de código): cada vez que cambia el shape de lo que

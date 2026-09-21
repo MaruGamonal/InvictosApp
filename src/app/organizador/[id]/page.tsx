@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
+import { esIdentificador } from '@/lib/validacion';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
@@ -29,6 +30,10 @@ const obtenerPerfilCacheado = cache((organizacionId: string) =>
 );
 
 async function obtenerPerfilOFallar(organizacionId: string): Promise<PerfilOrganizador> {
+  // Un id con forma inválida ni se consulta: el texto llegaba hasta
+  // Postgres, que lo rechaza por no ser un UUID, y la página moría con
+  // un 500 en vez de mostrar su 404.
+  if (!esIdentificador(organizacionId)) notFound();
   try {
     return await obtenerPerfilCacheado(organizacionId);
   } catch (error) {

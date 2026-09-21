@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
 import { cachearLecturaDeTorneo } from '@/lib/cache';
 import { esErrorDeAplicacion } from '@/lib/errores';
+import { esIdentificador } from '@/lib/validacion';
 import { obtenerFichaTorneo, type FichaTorneo } from '@/services/descubrimiento/obtenerFichaTorneo';
 import {
   obtenerFixturePublico,
@@ -34,11 +35,23 @@ async function comoNoEncontradoEsNull<T>(promesa: Promise<T>): Promise<T | null>
   }
 }
 
+/**
+ * Un id con forma inválida ni se consulta. Sin esto el texto de la URL
+ * viajaba hasta Postgres, que lo rechaza por no ser un UUID, y las cinco
+ * páginas del torneo respondían 500 en vez de su 404 — cualquiera podía
+ * provocarlo escribiendo `/torneo/abc`.
+ */
+async function siEsTorneo<T>(torneoId: string, leer: () => Promise<T | null>): Promise<T | null> {
+  return esIdentificador(torneoId) ? leer() : null;
+}
+
 export async function obtenerFichaCacheada(torneoId: string): Promise<FichaTorneo | null> {
-  return comoNoEncontradoEsNull(
-    cachearLecturaDeTorneo('ficha-torneo', torneoId, () =>
-      obtenerFichaTorneo({ torneoId }, CONTEXTO_PUBLICO),
-    )(),
+  return siEsTorneo(torneoId, () =>
+    comoNoEncontradoEsNull(
+      cachearLecturaDeTorneo('ficha-torneo', torneoId, () =>
+        obtenerFichaTorneo({ torneoId }, CONTEXTO_PUBLICO),
+      )(),
+    ),
   );
 }
 
@@ -50,37 +63,45 @@ export async function obtenerFichaOFallar(torneoId: string): Promise<FichaTorneo
 }
 
 export async function obtenerFixtureCacheado(torneoId: string): Promise<FixturePublico | null> {
-  return comoNoEncontradoEsNull(
-    cachearLecturaDeTorneo('fixture-torneo', torneoId, () =>
-      obtenerFixturePublico({ torneoId }, CONTEXTO_PUBLICO),
-    )(),
+  return siEsTorneo(torneoId, () =>
+    comoNoEncontradoEsNull(
+      cachearLecturaDeTorneo('fixture-torneo', torneoId, () =>
+        obtenerFixturePublico({ torneoId }, CONTEXTO_PUBLICO),
+      )(),
+    ),
   );
 }
 
 export async function obtenerTablaCacheada(torneoId: string): Promise<TablaDeGrupo[] | null> {
-  return comoNoEncontradoEsNull(
-    cachearLecturaDeTorneo('tabla-torneo', torneoId, () =>
-      obtenerTablaTorneo({ torneoId }, CONTEXTO_PUBLICO),
-    )(),
+  return siEsTorneo(torneoId, () =>
+    comoNoEncontradoEsNull(
+      cachearLecturaDeTorneo('tabla-torneo', torneoId, () =>
+        obtenerTablaTorneo({ torneoId }, CONTEXTO_PUBLICO),
+      )(),
+    ),
   );
 }
 
 export async function obtenerEstadisticasCacheadas(
   torneoId: string,
 ): Promise<EstadisticasTorneo | null> {
-  return comoNoEncontradoEsNull(
-    cachearLecturaDeTorneo('estadisticas-torneo', torneoId, () =>
-      obtenerEstadisticasTorneo({ torneoId }, CONTEXTO_PUBLICO),
-    )(),
+  return siEsTorneo(torneoId, () =>
+    comoNoEncontradoEsNull(
+      cachearLecturaDeTorneo('estadisticas-torneo', torneoId, () =>
+        obtenerEstadisticasTorneo({ torneoId }, CONTEXTO_PUBLICO),
+      )(),
+    ),
   );
 }
 
 export async function obtenerReglamentosCacheados(
   torneoId: string,
 ): Promise<ReglamentoListado[] | null> {
-  return comoNoEncontradoEsNull(
-    cachearLecturaDeTorneo('reglamentos-torneo', torneoId, () =>
-      listarReglamentos({ torneoId }, CONTEXTO_PUBLICO),
-    )(),
+  return siEsTorneo(torneoId, () =>
+    comoNoEncontradoEsNull(
+      cachearLecturaDeTorneo('reglamentos-torneo', torneoId, () =>
+        listarReglamentos({ torneoId }, CONTEXTO_PUBLICO),
+      )(),
+    ),
   );
 }
