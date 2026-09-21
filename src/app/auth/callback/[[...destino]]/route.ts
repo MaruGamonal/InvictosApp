@@ -13,11 +13,37 @@ import { confirmarVerificacionBasica } from '@/services/organizadores/confirmarV
  * enlace que, al abrirse, prueba que la persona controla esa casilla.
  * La metadata del enlace (`accion`) dice qué hacer una vez que la
  * sesión ya existe.
+ *
+ * El destino final viaja en la **ruta**, no en la query
+ * (`/auth/callback/restablecer-password`). Con `?next=` no llegaba: el
+ * proveedor arma el enlace de vuelta agregándole sus propios parámetros
+ * a la URL que le pasamos, y una URL que ya traía query se mezcla con
+ * eso de formas que dependen del flujo. Un segmento de ruta no se mezcla
+ * con nada y sobrevive el viaje de ida y vuelta entero.
  */
-export async function GET(request: NextRequest) {
+
+/**
+ * `next` se sigue aceptando por los enlaces que ya salieron por correo
+ * con la forma vieja, y se limita a rutas internas: un valor que empiece
+ * con `//` lo lee el navegador como otro sitio, así que sería una puerta
+ * para mandar gente a cualquier lado desde un enlace nuestro.
+ */
+function destinoDelEnlace(segmentos: string[] | undefined, next: string | null): string {
+  if (segmentos && segmentos.length > 0) {
+    return `/${segmentos.map(encodeURIComponent).join('/')}`;
+  }
+  if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+  return '/';
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ destino?: string[] }> },
+) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const siguiente = searchParams.get('next') ?? '/';
+  const { destino } = await params;
+  const siguiente = destinoDelEnlace(destino, searchParams.get('next'));
 
   if (code) {
     try {

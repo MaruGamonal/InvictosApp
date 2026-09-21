@@ -42,7 +42,11 @@ export const solicitarRecuperacionPassword: Servicio<
 
   const supabase = await crearClienteServidor();
   await supabase.auth.resetPasswordForEmail(datos.identificadorAcceso, {
-    redirectTo: `${URL_DEL_SITIO()}/auth/callback?next=/restablecer-password`,
+    // El destino va en la ruta y no en la query: el proveedor le agrega
+    // sus propios parámetros a esta URL para armar el enlace de vuelta,
+    // y un `?next=` se perdía en esa mezcla — la persona terminaba en el
+    // inicio en vez de en la pantalla de cambiar la contraseña.
+    redirectTo: `${URL_DEL_SITIO()}/auth/callback/restablecer-password`,
   });
 
   return { enviado: true };

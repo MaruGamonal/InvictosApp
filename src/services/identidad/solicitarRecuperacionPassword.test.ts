@@ -24,7 +24,7 @@ describe('solicitarRecuperacionPassword', () => {
     expect(resetPasswordForEmail).toHaveBeenCalledWith(
       'capitan@example.com',
       expect.objectContaining({
-        redirectTo: expect.stringContaining('/auth/callback?next=/restablecer-password'),
+        redirectTo: expect.stringContaining('/auth/callback/restablecer-password'),
       }),
     );
   });
