@@ -63,7 +63,7 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 | `SUPABASE_SERVICE_ROLE_KEY` | Paso 1 — **solo en el servidor**, nunca con prefijo `NEXT_PUBLIC_` |
 | `SENTRY_DSN` | Paso 4 |
 | `CRON_SECRET` | La generás vos: una cadena larga al azar. La usa la tarea horaria para probar que es ella |
-| `NEXT_PUBLIC_SITE_URL` | La URL que esté sirviendo el sitio ahora mismo (`https://invicta.com.ar` una vez apuntado el dominio, o el `*.vercel.app` mientras tanto) — **sin `/` al final** |
+| `NEXT_PUBLIC_SITE_URL` | **El host canónico**, el mismo que devuelve `location.origin` en el navegador (hoy `https://www.invicta.com.ar`) — **sin `/` al final**. Si acá va el host que redirige en vez del de destino, los enlaces de correo llegan a una redirección: las cookies quedan en el otro host y el enlace se ve como vencido |
 
 > **Ninguna de estas va al repositorio.** Es la regla que T28 ya pedía: variables gestionadas fuera del código.
 
