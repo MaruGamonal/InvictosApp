@@ -27,7 +27,11 @@ describe('CODIGOS_ERROR', () => {
     // Más CUENTA_NO_CONFIRMADA: reportado en vivo, pedir sumarse a un
     // equipo, crear un equipo o crear un torneo exigen la cuenta
     // confirmada.
-    expect(codigos).toHaveLength(32);
+    // Más SECRETO_DE_TAREA_NO_CONFIGURADO: una tarea programada que
+    // llega sin que el despliegue tenga el secreto cargado no es un
+    // problema de permisos, y confundirla con uno manda a buscar el
+    // arreglo al lado equivocado.
+    expect(codigos).toHaveLength(33);
   });
 
   it.each(codigos)(

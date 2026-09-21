@@ -112,6 +112,19 @@ export const CODIGOS_ERROR = {
     mensaje:
       'Confirmá tu cuenta para hacer esto — revisá tu correo o pedí que te reenviemos el enlace.',
   },
+  /**
+   * No es un problema de quien llama: es el despliegue el que no tiene
+   * cargado el secreto de las tareas programadas. Va aparte de
+   * `SIN_PERMISO` porque son dos fallas con arreglos opuestos —
+   * "el secreto no coincide" se corrige donde se guarda el valor;
+   * "no hay secreto" se corrige cargando la variable en el hosting y
+   * volviendo a desplegar. Sin esta distinción, las dos se ven iguales
+   * desde afuera y la única forma de saber cuál es era adivinar.
+   */
+  SECRETO_DE_TAREA_NO_CONFIGURADO: {
+    httpStatus: 500,
+    mensaje: 'Algo salió mal de nuestro lado. Probá de nuevo en un momento.',
+  },
   TRANSICION_NO_PERMITIDA: {
     httpStatus: 409,
     mensaje: 'El torneo no puede pasar a ese estado desde donde está ahora.',
