@@ -51,11 +51,28 @@ interface FilaFase {
   clasifican_por_grupo: number | null;
 }
 
+/**
+ * Con menos de dos equipos aprobados no hay ningún partido que armar, y
+ * antes eso no se decía: la generación devolvía una propuesta vacía
+ * —`generarRoundRobin` de un solo equipo lo cruza contra el BYE y
+ * descarta el par—, el organizador veía un fixture en blanco, y al
+ * confirmarlo le llegaba "hay datos que faltan o que no tienen el
+ * formato esperado", que no explica nada. El problema no es el formato
+ * de lo que mandó: es que todavía no tiene rivales.
+ */
 async function obtenerEquiposAprobados(pool: ReturnType<typeof obtenerPool>, torneoId: string) {
   const { rows } = await pool.query<{ equipo_id: string }>(
     `SELECT equipo_id FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved' ORDER BY fecha_solicitud ASC`,
     [torneoId],
   );
+  if (rows.length < 2) {
+    throw crearError('DATOS_INVALIDOS', [
+      {
+        campo: 'equipos',
+        problema: 'Hacen falta al menos dos equipos aprobados para armar el fixture.',
+      },
+    ]);
+  }
   return rows.map((r) => r.equipo_id);
 }
 

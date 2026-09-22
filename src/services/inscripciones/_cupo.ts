@@ -1,4 +1,38 @@
 import type { PoolClient } from 'pg';
+import { crearError } from '@/lib/errores';
+
+/**
+ * Falla si el torneo ya tiene el cupo lleno de equipos aprobados.
+ *
+ * El `FOR UPDATE` sobre la fila del torneo es la parte que importa:
+ * serializa a quien esté aprobando en paralelo. Contar aprobados fuera
+ * de la transacción no alcanza —dos aprobaciones simultáneas leen las
+ * dos el mismo número libre y las dos entran—, y era justamente el
+ * camino por el que el cupo se podía superar.
+ *
+ * Aprobar por encima del cupo no es una decisión que el producto ofrezca:
+ * para sumar un equipo más hay que subir el cupo, y bajarlo por debajo de
+ * los aprobados ya está prohibido (`CUPO_MENOR_A_INSCRIPTOS`). Las dos
+ * reglas sostienen el mismo invariante —aprobados ≤ cupo— y este lado
+ * faltaba.
+ */
+export async function verificarCupoDisponible(
+  cliente: PoolClient,
+  torneoId: string,
+): Promise<void> {
+  const { rows } = await cliente.query<{ cupo_equipos: number }>(
+    'SELECT cupo_equipos FROM torneo WHERE id = $1 FOR UPDATE',
+    [torneoId],
+  );
+  const torneo = rows[0];
+  if (!torneo) throw crearError('NO_ENCONTRADO');
+
+  const { rows: aprobados } = await cliente.query<{ count: string }>(
+    `SELECT count(*) FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved'`,
+    [torneoId],
+  );
+  if (Number(aprobados[0]!.count) >= torneo.cupo_equipos) throw crearError('CUPO_COMPLETO');
+}
 
 /**
  * Cierra automáticamente las inscripciones al alcanzarse el cupo, en la

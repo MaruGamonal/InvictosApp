@@ -6,7 +6,7 @@ import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
-import { cerrarTorneoSiCupoCompleto } from './_cupo';
+import { cerrarTorneoSiCupoCompleto, verificarCupoDisponible } from './_cupo';
 
 /**
  * UC-25 — Aprobar o rechazar una inscripción. El organizador **siempre**
@@ -85,6 +85,15 @@ export const resolverInscripcion: Servicio<
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
+
+    // Aprobar no comprobaba el cupo: con el torneo lleno y solicitudes
+    // todavía pendientes, aprobar una más entraba igual y dejaba más
+    // equipos aprobados que cupo. Va adentro de la transacción y con la
+    // fila del torneo tomada, así que dos organizadores aprobando a la
+    // vez no pueden pasarse del cupo entre los dos.
+    if (datos.decision === 'approved') {
+      await verificarCupoDisponible(cliente, datos.torneoId);
+    }
 
     const { rowCount } = await cliente.query(
       `UPDATE inscripcion

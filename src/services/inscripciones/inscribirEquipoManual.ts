@@ -5,7 +5,7 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
-import { cerrarTorneoSiCupoCompleto } from './_cupo';
+import { cerrarTorneoSiCupoCompleto, verificarCupoDisponible } from './_cupo';
 
 /**
  * UC-26 — Cargar un equipo a mano, la funcionalidad que `07` declara
@@ -59,15 +59,14 @@ export const inscribirEquipoManual: Servicio<
   if (!torneo) throw crearError('NO_ENCONTRADO');
   if (torneo.estado !== 'registration_open') throw crearError('INSCRIPCIONES_CERRADAS');
 
-  const { rows: aprobados } = await pool.query<{ count: string }>(
-    `SELECT count(*) FROM inscripcion WHERE torneo_id = $1 AND estado = 'approved'`,
-    [datos.torneoId],
-  );
-  if (Number(aprobados[0]!.count) >= torneo.cupo_equipos) throw crearError('CUPO_COMPLETO');
-
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
+
+    // El cupo se comprobaba antes de abrir la transacción: dos altas
+    // simultáneas leían las dos el mismo lugar libre y entraban las dos.
+    // Adentro, y con la fila del torneo tomada, se serializan.
+    await verificarCupoDisponible(cliente, datos.torneoId);
 
     let equipoId: string;
     let categoriaGeneroEquipo: string;

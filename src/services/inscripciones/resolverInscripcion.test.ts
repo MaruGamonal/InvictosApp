@@ -23,7 +23,10 @@ function mockearDb(opciones: {
   rolEnOrganizacion?: 'owner' | 'admin';
   esColaborador?: boolean;
   rowCountUpdate?: number;
+  /** Queda una sola vacante: aprobar la ocupa y cierra el torneo. */
   cupoCompleto?: boolean;
+  /** Ya no queda ninguna: aprobar tiene que rechazarse. */
+  yaLleno?: boolean;
   gestores?: string[];
   divisionSugeridaValida?: boolean;
 }) {
@@ -56,6 +59,18 @@ function mockearDb(opciones: {
           }
           if (texto.includes('SELECT t.cupo_equipos')) {
             return { rows: [{ cupo_equipos: 8, aprobados: opciones.cupoCompleto ? '8' : '3' }] };
+          }
+          // Aprobar ahora comprueba el cupo adentro de la transacción,
+          // con la fila del torneo tomada (`FOR UPDATE`). Esta cuenta es
+          // la de **antes** de aprobar, a diferencia de la de
+          // `cerrarTorneoSiCupoCompleto`, que corre después.
+          if (texto.includes('cupo_equipos FROM torneo')) {
+            return { rows: [{ cupo_equipos: 8 }] };
+          }
+          if (texto.trim().startsWith('SELECT count(*) FROM inscripcion')) {
+            return {
+              rows: [{ count: opciones.yaLleno ? '8' : opciones.cupoCompleto ? '7' : '3' }],
+            };
           }
           return { rows: [] };
         },
@@ -93,6 +108,50 @@ describe('resolverInscripcion', () => {
     );
 
     expect(consultas.some((c) => c.startsWith('UPDATE torneo'))).toBe(true);
+  });
+
+  /**
+   * Aprobar no comprobaba el cupo: con el torneo lleno y solicitudes
+   * todavía pendientes, aprobar una más entraba igual y dejaba más
+   * equipos aprobados que cupo.
+   */
+  it('con el cupo ya lleno, aprobar se rechaza con CUPO_COMPLETO', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', yaLleno: true });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+
+    await expect(
+      resolverInscripcion(
+        { torneoId: TORNEO, equipoId: EQUIPO, decision: 'approved' },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'CUPO_COMPLETO' });
+
+    expect(consultas.some((c) => c.startsWith('UPDATE inscripcion'))).toBe(false);
+    expect(consultas.some((c) => c.startsWith('ROLLBACK'))).toBe(true);
+  });
+
+  /** La comprobación toma la fila del torneo: es lo que serializa a dos organizadores a la vez. */
+  it('toma la fila del torneo antes de aprobar', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+    await resolverInscripcion(
+      { torneoId: TORNEO, equipoId: EQUIPO, decision: 'approved' },
+      contextoCon('usuario-titular'),
+    );
+    expect(
+      consultas.some((c) => c.includes('cupo_equipos FROM torneo') && c.includes('FOR UPDATE')),
+    ).toBe(true);
+  });
+
+  /** Rechazar no consume cupo, así que no tiene por qué comprobarlo. */
+  it('rechazar no comprueba el cupo', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner', yaLleno: true });
+    const { resolverInscripcion } = await import('./resolverInscripcion');
+    await resolverInscripcion(
+      { torneoId: TORNEO, equipoId: EQUIPO, decision: 'rejected', motivo: 'roster_incomplete' },
+      contextoCon('usuario-titular'),
+    );
+    expect(consultas.some((c) => c.includes('FOR UPDATE'))).toBe(false);
   });
 
   it('rechazar sin motivo, DATOS_INVALIDOS', async () => {

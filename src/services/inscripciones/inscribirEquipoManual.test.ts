@@ -54,6 +54,14 @@ function mockearDb(opciones: {
       connect: async () => ({
         query: async (texto: string) => {
           consultasCliente.push(texto.trim());
+          // El cupo ahora se comprueba adentro de la transacción, con la
+          // fila del torneo tomada (`FOR UPDATE`).
+          if (texto.includes('cupo_equipos FROM torneo')) {
+            return { rows: [{ cupo_equipos: opciones.cupoEquipos ?? 8 }] };
+          }
+          if (texto.trim().startsWith('SELECT count(*) FROM inscripcion')) {
+            return { rows: [{ count: String(opciones.aprobados ?? 0) }] };
+          }
           if (texto.includes('SELECT id, categoria_genero FROM equipo')) {
             return { rows: opciones.equipoExistente ? [opciones.equipoExistente] : [] };
           }

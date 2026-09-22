@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { PoolClient } from 'pg';
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
@@ -38,6 +39,67 @@ const esquemaEntrada = z.object({
 });
 export type ConfirmarFixtureInput = z.infer<typeof esquemaEntrada>;
 
+/**
+ * La propuesta llega desde el cliente, así que los equipos y los grupos
+ * que trae son entrada sin validar. Sin esto, quien puede configurar
+ * **su** torneo podía crear partidos con cualquier equipo de la
+ * plataforma —que aparecía después en la tabla del torneo y en el perfil
+ * público de ese equipo, sin que su capitán hubiera inscripto nada—,
+ * partidos de un equipo contra sí mismo, y partidos apuntando al grupo
+ * de otro torneo, que corrompe la tabla de ese otro.
+ *
+ * Son los mismos tres estados imposibles que el validador del dataset
+ * busca después de los hechos: acá se impiden antes.
+ */
+async function verificarPropuesta(
+  cliente: PoolClient,
+  torneoId: string,
+  faseId: string,
+  datos: ConfirmarFixtureInput,
+): Promise<void> {
+  const invalido = (campo: string, problema: string) =>
+    crearError('DATOS_INVALIDOS', [{ campo, problema }]);
+
+  for (const p of datos.partidos) {
+    if (p.equipoLocalId === p.equipoVisitanteId) {
+      throw invalido('partidos', 'Un partido no puede ser de un equipo contra sí mismo.');
+    }
+  }
+
+  const equipos = new Set<string>();
+  for (const p of datos.partidos) {
+    equipos.add(p.equipoLocalId);
+    equipos.add(p.equipoVisitanteId);
+  }
+  for (const a of datos.asignacionesGrupo ?? []) equipos.add(a.equipoId);
+
+  const { rows: inscriptos } = await cliente.query<{ equipo_id: string }>(
+    `SELECT equipo_id FROM inscripcion
+     WHERE torneo_id = $1 AND equipo_id = ANY($2) AND estado = 'approved'`,
+    [torneoId, [...equipos]],
+  );
+  if (inscriptos.length !== equipos.size) {
+    throw invalido(
+      'partidos',
+      'Hay equipos en el fixture que no están inscriptos y aprobados en este torneo.',
+    );
+  }
+
+  const grupos = new Set<string>();
+  for (const p of datos.partidos) if (p.grupoId) grupos.add(p.grupoId);
+  for (const a of datos.asignacionesGrupo ?? []) grupos.add(a.grupoId);
+
+  if (grupos.size > 0) {
+    const { rows: propios } = await cliente.query<{ id: string }>(
+      'SELECT id FROM grupo WHERE id = ANY($1) AND fase_id = $2',
+      [[...grupos], faseId],
+    );
+    if (propios.length !== grupos.size) {
+      throw invalido('partidos', 'Hay zonas que no pertenecen a esta fase del torneo.');
+    }
+  }
+}
+
 export const confirmarFixture: Servicio<
   ConfirmarFixtureInput,
   { partidosCreados: number }
@@ -65,6 +127,10 @@ export const confirmarFixture: Servicio<
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
+
+    // Antes de los borrados: una propuesta inválida no tiene que
+    // destruir el fixture que ya estaba.
+    await verificarPropuesta(cliente, fase.torneo_id, datos.faseId, datos);
 
     await cliente.query(
       `DELETE FROM evento_partido WHERE partido_id IN (SELECT id FROM partido WHERE fase_id = $1)`,

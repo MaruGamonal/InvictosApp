@@ -16,7 +16,14 @@ const GRUPO = '66666666-6666-6666-6666-666666666666';
 
 beforeEach(() => vi.resetModules());
 
-function mockearDb(opciones: { rolEnOrganizacion?: 'owner' | 'admin'; partidosJugados?: number }) {
+function mockearDb(opciones: {
+  rolEnOrganizacion?: 'owner' | 'admin';
+  partidosJugados?: number;
+  /** Equipos que la base reconoce como inscriptos y aprobados en el torneo. */
+  inscriptos?: string[];
+  /** Zonas que la base reconoce como pertenecientes a esta fase. */
+  gruposDeLaFase?: string[];
+}) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
   vi.doMock('@/db/cliente', () => ({
     obtenerPool: () => ({
@@ -41,6 +48,22 @@ function mockearDb(opciones: { rolEnOrganizacion?: 'owner' | 'admin'; partidosJu
       connect: async () => ({
         query: async (texto: string, valores: unknown[] = []) => {
           consultasCliente.push({ texto: texto.trim(), valores });
+          // La propuesta se valida contra la base antes de escribir:
+          // equipos aprobados en el torneo y zonas de esta fase.
+          if (texto.includes('equipo_id FROM inscripcion')) {
+            const pedidos = (valores[1] ?? []) as string[];
+            const aprobados = opciones.inscriptos ?? [EQUIPO_A, EQUIPO_B];
+            return {
+              rows: pedidos
+                .filter((id) => aprobados.includes(id))
+                .map((equipo_id) => ({ equipo_id })),
+            };
+          }
+          if (texto.includes('FROM grupo WHERE id = ANY')) {
+            const pedidos = (valores[0] ?? []) as string[];
+            const propias = opciones.gruposDeLaFase ?? [GRUPO];
+            return { rows: pedidos.filter((id) => propias.includes(id)).map((id) => ({ id })) };
+          }
           return { rows: [] };
         },
         release: () => {},
@@ -129,5 +152,101 @@ describe('confirmarFixture', () => {
     await expect(
       confirmarFixture({ faseId: FASE, partidos: UN_PARTIDO }, contextoCon('usuario-1')),
     ).rejects.toMatchObject({ codigo: 'NO_ENCONTRADO' });
+  });
+});
+
+/**
+ * La propuesta llega del cliente: sin validarla, quien configura su
+ * torneo podía crear partidos con cualquier equipo de la plataforma, de
+ * un equipo contra sí mismo, o apuntando a la zona de otro torneo.
+ */
+describe('confirmarFixture valida la propuesta antes de escribir', () => {
+  const EQUIPO_AJENO = '77777777-7777-7777-7777-777777777777';
+  const GRUPO_AJENO = '88888888-8888-8888-8888-888888888888';
+
+  it('rechaza un equipo que no está inscripto', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { confirmarFixture } = await import('./confirmarFixture');
+
+    await expect(
+      confirmarFixture(
+        {
+          faseId: FASE,
+          partidos: [
+            {
+              numeroFecha: 1,
+              equipoLocalId: EQUIPO_A,
+              equipoVisitanteId: EQUIPO_AJENO,
+              grupoId: GRUPO,
+            },
+          ],
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+
+    // Y no destruyó el fixture anterior.
+    expect(consultas.some((c) => c.texto.startsWith('DELETE FROM partido'))).toBe(false);
+    expect(consultas.some((c) => c.texto.startsWith('ROLLBACK'))).toBe(true);
+  });
+
+  it('rechaza un equipo contra sí mismo', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner' });
+    const { confirmarFixture } = await import('./confirmarFixture');
+
+    await expect(
+      confirmarFixture(
+        {
+          faseId: FASE,
+          partidos: [
+            {
+              numeroFecha: 1,
+              equipoLocalId: EQUIPO_A,
+              equipoVisitanteId: EQUIPO_A,
+              grupoId: GRUPO,
+            },
+          ],
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('rechaza una zona de otra fase', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner' });
+    const { confirmarFixture } = await import('./confirmarFixture');
+
+    await expect(
+      confirmarFixture(
+        {
+          faseId: FASE,
+          partidos: [
+            {
+              numeroFecha: 1,
+              equipoLocalId: EQUIPO_A,
+              equipoVisitanteId: EQUIPO_B,
+              grupoId: GRUPO_AJENO,
+            },
+          ],
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('también valida los equipos de las asignaciones de zona', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner' });
+    const { confirmarFixture } = await import('./confirmarFixture');
+
+    await expect(
+      confirmarFixture(
+        {
+          faseId: FASE,
+          partidos: UN_PARTIDO,
+          asignacionesGrupo: [{ equipoId: EQUIPO_AJENO, grupoId: GRUPO }],
+        },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
   });
 });
