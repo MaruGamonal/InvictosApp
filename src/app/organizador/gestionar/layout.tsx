@@ -8,7 +8,7 @@ import styles from './layout.module.css';
 
 /**
  * Cabecera y bottom nav compartidos por el panel de Organizador
- * ("Ver como administrador" en Inicio): Home, Crear organización,
+ * ("Ver como organizador" en Inicio): Home, Crear organización,
  * Equipo de trabajo, Invitar Administrador y Perfil público —
  * "Transferir" queda deliberadamente afuera de esta tanda.
  *

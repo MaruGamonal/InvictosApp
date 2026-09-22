@@ -102,7 +102,7 @@ export default async function PaginaInicio({
 
   // Quien solo organiza (sin plantel propio) ya no tiene nada que ver acá:
   // su Inicio es directamente el panel de Organizador (`/organizador/gestionar`,
-  // "Ver como administrador" en el header lo lleva ahí a quien tiene los dos roles).
+  // "Ver como organizador" en el header lo lleva ahí a quien tiene los dos roles).
   if (!parametros.volver && !inicio.esJugador && inicio.esOrganizador) {
     redirect('/organizador/gestionar');
   }
@@ -194,7 +194,7 @@ export default async function PaginaInicio({
 
         {inicio.esOrganizador && (
           <Link href="/organizador/gestionar" className={styles.selectorModo}>
-            Ver como administrador
+            Ver como organizador
           </Link>
         )}
       </header>
