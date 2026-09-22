@@ -7,6 +7,12 @@ import styles from './BotonSeguir.module.css';
 
 export interface BotonPedirSumarmeProps {
   equipoId: string;
+  /**
+   * Un equipo archivado ya no recibe pedidos para sumarse. El botón
+   * queda a la vista pero sin acción: esconderlo dejaría la pantalla sin
+   * explicar por qué no se puede.
+   */
+  deshabilitado?: boolean;
 }
 
 /**
@@ -31,7 +37,7 @@ type Estado =
   | { paso: 'error'; mensaje: string }
   | { paso: 'cuenta-no-confirmada'; mensaje: string };
 
-export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
+export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedirSumarmeProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<Estado>({ paso: 'inicial' });
 
@@ -94,7 +100,7 @@ export function BotonPedirSumarme({ equipoId }: BotonPedirSumarmeProps) {
       <button
         type="button"
         onClick={alTocar}
-        disabled={estado.paso === 'enviando' || estado.paso === 'enviado'}
+        disabled={estado.paso === 'enviando' || estado.paso === 'enviado' || deshabilitado}
         className={styles.botonActivo}
       >
         {estado.paso === 'enviado'

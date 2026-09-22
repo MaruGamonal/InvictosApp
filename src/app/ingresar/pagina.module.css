@@ -89,6 +89,18 @@
   resize: vertical;
 }
 
+/*
+ * Los puntos de la contraseña en el mismo tinte que el texto normal se
+ * leían como un campo ya resuelto: reportado en vivo, cuesta distinguir
+ * de un vistazo si se escribió algo o no. En un gris más claro se ven
+ * como lo que son, una marca de que hay caracteres, sin competir con el
+ * texto que sí se lee.
+ */
+.campo input[type='password'] {
+  color: var(--color-texto-secundario);
+  letter-spacing: 0.12em;
+}
+
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus {

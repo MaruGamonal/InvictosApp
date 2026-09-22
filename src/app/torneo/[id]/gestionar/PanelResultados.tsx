@@ -1,4 +1,5 @@
 'use client';
+import { GOLES_MAXIMOS_POR_EQUIPO } from '@/services/competencia/cargarResultado';
 
 import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -199,6 +200,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
               <input
                 type="number"
                 min={0}
+                max={GOLES_MAXIMOS_POR_EQUIPO}
                 inputMode="numeric"
                 aria-label={`Goles de ${partido.equipoLocalNombre}`}
                 value={valores.local}
@@ -208,6 +210,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
               <input
                 type="number"
                 min={0}
+                max={GOLES_MAXIMOS_POR_EQUIPO}
                 inputMode="numeric"
                 aria-label={`Goles de ${partido.equipoVisitanteNombre}`}
                 value={valores.visitante}

@@ -92,6 +92,11 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
   const { id } = await params;
   const equipo = await obtenerEquipoCacheado(id);
   if (!equipo) notFound();
+  // Archivado sigue teniendo ficha pública —los resultados que jugó no
+  // dejan de haber pasado— pero ya no admite seguidores ni pedidos para
+  // sumarse, y el chip lo dice en vez de que la pantalla se vea igual
+  // que la de un equipo activo.
+  const estaArchivado = equipo.estado === 'archived';
   const urlDelSitio = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
   return (
@@ -101,6 +106,11 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
           <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={80} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{equipo.nombre}</h1>
+            {estaArchivado && (
+              <p className={styles.metaLinea}>
+                <Badge campo="equipo.estado" valor={equipo.estado} />
+              </p>
+            )}
             <p className={styles.metaLinea}>{formatearCantidadSeguidores(equipo.seguidores)}</p>
             <p className={styles.metaLinea}>
               {obtenerEtiqueta('torneo.categoriaGenero', equipo.categoriaGenero).etiqueta}
@@ -122,8 +132,9 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
             entidadId={id}
             cantidadSeguidoresInicial={equipo.seguidores}
             mostrarCantidad={false}
+            deshabilitado={estaArchivado}
           />
-          <BotonPedirSumarme equipoId={id} />
+          <BotonPedirSumarme equipoId={id} deshabilitado={estaArchivado} />
           <CompartirBoton titulo={equipo.nombre} url={`${urlDelSitio}/equipo/${id}`} />
         </div>
         {/*

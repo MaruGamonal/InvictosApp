@@ -28,6 +28,8 @@ interface TorneoActivo {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /** Sin la división, dos divisiones del mismo certamen se ven como la misma fila repetida. */
+  division: string | null;
   imagenUrl: string | null;
 }
 
@@ -36,6 +38,7 @@ interface TorneoConEstado {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  division: string | null;
   imagenUrl: string | null;
   estado: string;
 }
@@ -51,6 +54,7 @@ function torneosEnCurso(...listas: TorneoConEstado[][]): TorneoActivo[] {
           nombre: torneo.nombre,
           categoriaGenero: torneo.categoriaGenero,
           modalidad: torneo.modalidad,
+          division: torneo.division,
           imagenUrl: torneo.imagenUrl,
         });
       }
@@ -123,6 +127,7 @@ export default async function PaginaInicio({
                 nombre={torneo.nombre}
                 categoriaGenero={torneo.categoriaGenero}
                 modalidad={torneo.modalidad}
+                division={torneo.division}
                 imagenUrl={torneo.imagenUrl}
                 etiquetaDerecha="En curso"
               />
@@ -329,6 +334,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      division={torneo.division}
                       imagenUrl={torneo.imagenUrl}
                       miEquipoNombre={torneo.miEquipoNombre}
                       posicionActual={torneo.posicionActual}
@@ -349,6 +355,7 @@ export default async function PaginaInicio({
                       nombre={torneo.nombre}
                       categoriaGenero={torneo.categoriaGenero}
                       modalidad={torneo.modalidad}
+                      division={torneo.division}
                       imagenUrl={torneo.imagenUrl}
                       etiquetaDerecha="Siguiendo"
                     />

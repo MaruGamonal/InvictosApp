@@ -14,6 +14,12 @@ export interface BotonSeguirProps {
   mostrarCantidad?: boolean;
   /** Se llama con la cantidad ya ajustada, para que quien la muestre aparte quede sincronizado. */
   onCambioCantidad?: (cantidad: number) => void;
+  /**
+   * Un equipo archivado ya no recibe seguidores ni pedidos para sumarse.
+   * El botón queda a la vista pero sin acción: esconderlo dejaría la
+   * pantalla sin explicar por qué no se puede.
+   */
+  deshabilitado?: boolean;
 }
 
 /**
@@ -41,6 +47,7 @@ export function BotonSeguir({
   cantidadSeguidoresInicial = 0,
   mostrarCantidad = true,
   onCambioCantidad,
+  deshabilitado = false,
 }: BotonSeguirProps) {
   const router = useRouter();
   const [estado, setEstado] = useState<'inicial' | 'enviando' | 'siguiendo'>('inicial');
@@ -102,7 +109,7 @@ export function BotonSeguir({
       <button
         type="button"
         onClick={alTocar}
-        disabled={estado === 'enviando'}
+        disabled={estado === 'enviando' || deshabilitado}
         className={estado === 'siguiendo' ? styles.botonActivo : styles.boton}
       >
         {estado === 'siguiendo' ? 'Siguiendo ✓' : 'Seguir'}

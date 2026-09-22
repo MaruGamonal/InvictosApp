@@ -8,6 +8,12 @@ export interface TarjetaTorneoResumenProps {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /**
+   * Etiqueta de la división cuando el torneo pertenece a un certamen
+   * (`06`, D-103). Sin esto, dos divisiones del mismo certamen se ven
+   * como la misma fila repetida en "Torneos que sigo".
+   */
+  division?: string | null;
   /** Logo de la organización que lo organiza — el torneo en sí no tiene escudo propio. */
   imagenUrl?: string | null;
   /** Mi equipo en este torneo — solo tiene sentido en el bloque de jugador. */
@@ -27,6 +33,7 @@ export function TarjetaTorneoResumen({
   nombre,
   categoriaGenero,
   modalidad,
+  division,
   imagenUrl,
   miEquipoNombre,
   posicionActual,
@@ -48,6 +55,7 @@ export function TarjetaTorneoResumen({
         <span className={styles.meta}>
           {obtenerEtiqueta('torneo.categoriaGenero', categoriaGenero).etiqueta} ·{' '}
           {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
+          {division ? ` · División ${division}` : ''}
         </span>
         {miEquipoNombre && <span className={styles.miEquipo}>Jugás con {miEquipoNombre}</span>}
         {estado && (

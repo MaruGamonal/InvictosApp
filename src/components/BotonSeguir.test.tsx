@@ -121,3 +121,24 @@ describe('BotonSeguir', () => {
     expect(getByText('12.345 seguidores')).toBeTruthy();
   });
 });
+
+/**
+ * Un equipo archivado ya no recibe seguidores. El botón queda a la vista
+ * pero sin acción: esconderlo dejaría la pantalla sin explicar por qué
+ * no se puede.
+ */
+describe('BotonSeguir deshabilitado', () => {
+  afterEach(cleanup);
+
+  it('no deja seguir un equipo archivado', () => {
+    const { getByRole } = render(
+      <BotonSeguir tipoSeguido="team" entidadId="equipo-1" deshabilitado />,
+    );
+    expect(getByRole('button')).toHaveProperty('disabled', true);
+  });
+
+  it('sin la bandera, el botón sigue activo', () => {
+    const { getByRole } = render(<BotonSeguir tipoSeguido="team" entidadId="equipo-1" />);
+    expect(getByRole('button')).toHaveProperty('disabled', false);
+  });
+});

@@ -42,6 +42,8 @@ export interface MiTorneo {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /** La etiqueta de la división cuando el torneo pertenece a un certamen (`06`, D-103). */
+  division: string | null;
   imagenUrl: string | null;
   estado: string;
   miEquipoId: string;
@@ -61,6 +63,8 @@ export interface TorneoSeguido {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /** La etiqueta de la división cuando el torneo pertenece a un certamen (`06`, D-103). */
+  division: string | null;
   imagenUrl: string | null;
   estado: string;
 }
@@ -70,6 +74,8 @@ export interface TorneoAdministrado {
   nombre: string;
   categoriaGenero: string;
   modalidad: string;
+  /** La etiqueta de la división cuando el torneo pertenece a un certamen (`06`, D-103). */
+  division: string | null;
   imagenUrl: string | null;
   estado: string;
   fechaInicioEstimada: string | null;
@@ -216,6 +222,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      division: string | null;
       imagen_url: string | null;
       organizacion_logo_url: string | null;
       estado: string;
@@ -223,7 +230,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       equipo_nombre: string;
       posicion_actual: number | null;
     }>(
-      `SELECT t.id AS torneo_id, t.nombre, t.categoria_genero, t.modalidad,
+      `SELECT t.id AS torneo_id, t.nombre, t.categoria_genero, t.modalidad, t.division,
               t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado,
               i.equipo_id, e.nombre AS equipo_nombre, pos.posicion_actual
        FROM inscripcion i
@@ -247,7 +254,10 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       `SELECT e.id, e.nombre, e.categoria_genero, e.escudo_url
        FROM seguimiento sg
        JOIN equipo e ON e.id = sg.entidad_seguida_id
-       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team'
+       -- Un equipo archivado deja de aparecer en Inicio: su ficha sigue
+       -- existiendo, pero ya no es algo que la persona esté siguiendo
+       -- activamente.
+       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team' AND e.estado = 'active'
        ORDER BY sg.fecha_alta DESC
        LIMIT 5`,
       [contexto.usuarioId],
@@ -258,11 +268,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      division: string | null;
       imagen_url: string | null;
       organizacion_logo_url: string | null;
       estado: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad,
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.division,
               t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
@@ -290,6 +301,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        division: fila.division,
         imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
         estado: fila.estado,
         miEquipoId: fila.equipo_id,
@@ -301,6 +313,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        division: fila.division,
         imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
         estado: fila.estado,
       })),
@@ -321,6 +334,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      division: string | null;
       imagen_url: string | null;
       organizacion_logo_url: string | null;
       estado: string;
@@ -328,7 +342,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       cupo_equipos: number;
       inscriptos: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.imagen_url, o.logo_url AS organizacion_logo_url,
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.division, t.imagen_url, o.logo_url AS organizacion_logo_url,
               t.estado, t.fecha_inicio_estimada, t.cupo_equipos,
               (SELECT count(*) FROM inscripcion i WHERE i.torneo_id = t.id AND i.estado = 'approved') AS inscriptos
        FROM torneo t
@@ -348,7 +362,10 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       `SELECT e.id, e.nombre, e.categoria_genero, e.escudo_url
        FROM seguimiento sg
        JOIN equipo e ON e.id = sg.entidad_seguida_id
-       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team'
+       -- Un equipo archivado deja de aparecer en Inicio: su ficha sigue
+       -- existiendo, pero ya no es algo que la persona esté siguiendo
+       -- activamente.
+       WHERE sg.usuario_id = $1 AND sg.tipo_seguido = 'team' AND e.estado = 'active'
        ORDER BY sg.fecha_alta DESC
        LIMIT 5`,
       [contexto.usuarioId],
@@ -359,11 +376,12 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       nombre: string;
       categoria_genero: string;
       modalidad: string;
+      division: string | null;
       imagen_url: string | null;
       organizacion_logo_url: string | null;
       estado: string;
     }>(
-      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad,
+      `SELECT t.id, t.nombre, t.categoria_genero, t.modalidad, t.division,
               t.imagen_url, o.logo_url AS organizacion_logo_url, t.estado
        FROM seguimiento sg
        JOIN torneo t ON t.id = sg.entidad_seguida_id
@@ -395,6 +413,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        division: fila.division,
         imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
         estado: fila.estado,
         fechaInicioEstimada: fila.fecha_inicio_estimada?.toISOString() ?? null,
@@ -412,6 +431,7 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         nombre: fila.nombre,
         categoriaGenero: fila.categoria_genero,
         modalidad: fila.modalidad,
+        division: fila.division,
         imagenUrl: fila.imagen_url ?? fila.organizacion_logo_url,
         estado: fila.estado,
       })),

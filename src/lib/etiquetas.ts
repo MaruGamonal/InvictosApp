@@ -31,6 +31,7 @@ type Campo =
   | 'colaboradorTorneo.estado'
   | 'organizacion.nivelVerificacion'
   | 'torneo.estado'
+  | 'equipo.estado'
   | 'torneo.formato'
   | 'torneo.categoriaEdad'
   | 'torneo.categoriaGenero'
@@ -108,6 +109,10 @@ const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
     unverified: { etiqueta: 'Sin verificar', color: 'neutro' },
     basic: { etiqueta: 'Verificado', color: 'exito' },
     trusted: { etiqueta: 'Verificado con distintivo', color: 'exito' },
+  },
+  'equipo.estado': {
+    active: { etiqueta: 'Activo', color: 'exito' },
+    archived: { etiqueta: 'Archivado', color: 'neutro' },
   },
   'torneo.estado': {
     draft: { etiqueta: 'Borrador', color: 'neutro' },
