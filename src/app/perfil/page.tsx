@@ -6,6 +6,7 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { NavInferior } from '@/components/NavInferior';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
@@ -30,6 +31,7 @@ export default async function PaginaPerfil() {
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta conEnlaceIngresar={false} />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Perfil</h1>
       </header>
 

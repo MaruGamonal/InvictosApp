@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import { obtenerFichaOFallar } from '../_datos';
@@ -28,6 +29,7 @@ export default async function LayoutTorneo({
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta />
         <div className={styles.heroContenido}>
           <Escudo src={ficha.imagenUrl} nombre={ficha.nombre} tamano={80} />
           <div className={styles.heroTexto}>

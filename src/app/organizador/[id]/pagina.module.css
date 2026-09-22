@@ -7,7 +7,10 @@
 .hero {
   background: var(--ink-900);
   color: var(--blanco);
-  padding: 28px var(--espacio-pantalla-x) 22px;
+  padding: 18px var(--espacio-pantalla-x) 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .heroContenido {

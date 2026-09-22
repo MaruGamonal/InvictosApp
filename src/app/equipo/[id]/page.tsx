@@ -10,6 +10,7 @@ import { BotonPedirSumarme } from '@/components/BotonPedirSumarme';
 import { EnlaceGestionarEquipo } from '@/components/EnlaceGestionarEquipo';
 import { FilaPartido } from '@/components/FilaPartido';
 import { NavInferior } from '@/components/NavInferior';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
@@ -102,6 +103,7 @@ export default async function PaginaEquipoPublico({ params }: { params: Promise<
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta />
         <div className={styles.heroContenido}>
           <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={80} />
           <div className={styles.heroTexto}>

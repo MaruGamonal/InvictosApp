@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { listarNotificaciones } from '@/services/notificaciones/listarNotificaciones';
 import { NavInferior } from '@/components/NavInferior';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { ListaNotificaciones } from './ListaNotificaciones';
 import styles from './pagina.module.css';
@@ -19,6 +20,7 @@ export default async function PaginaNotificaciones() {
 
   return (
     <div className={styles.pagina}>
+      <MarcaInvicta conEnlaceIngresar={false} />
       <div className={styles.filaTitulo}>
         <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
         <Link

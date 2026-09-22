@@ -11,8 +11,11 @@
 .hero {
   background: var(--ink-900);
   color: var(--blanco);
-  padding: 20px var(--espacio-pantalla-x) 18px;
+  padding: 18px var(--espacio-pantalla-x) 18px;
   flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .tituloHero {

@@ -5,6 +5,7 @@ import { construirContexto } from '@/lib/contexto';
 import { obtenerInicio } from '@/services/inicio/obtenerInicio';
 import { obtenerActividad } from '@/services/inicio/obtenerActividad';
 import { NavInferior } from '@/components/NavInferior';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { TarjetaTorneoResumen } from '@/components/TarjetaTorneoResumen';
 import { TarjetaActividad } from '@/components/TarjetaActividad';
@@ -158,6 +159,7 @@ export default async function PaginaInicio({
   return (
     <div className={styles.pagina}>
       <header className={styles.encabezado}>
+        <MarcaInvicta conEnlaceIngresar={false} />
         {inicio.ciudadNombre && <div className={styles.ciudad}>{inicio.ciudadNombre}</div>}
         <div className={styles.filaUsuario}>
           <div className={styles.avatar} aria-hidden>

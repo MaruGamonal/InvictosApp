@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import styles from './pagina.module.css';
+import styles from './MarcaInvicta.module.css';
 
 /**
- * `/torneos` es una página cacheada con `CONTEXTO_PUBLICO` (`06`,
- * D-90): el servidor arma la misma respuesta para cualquiera, sin
- * saber si quien mira tiene sesión — por eso "Ingresar" no puede
- * resolverse ahí. Se pregunta en el cliente, mismo patrón que
- * `NavInferior` (`GET /api/mi-usuario`).
+ * El descubrimiento se cachea con `CONTEXTO_PUBLICO` (`06`, D-90): el
+ * servidor arma la misma respuesta para cualquiera, sin saber si quien
+ * mira tiene sesión — por eso "Ingresar" no puede resolverse ahí. Se
+ * pregunta en el cliente, mismo patrón que `NavInferior`
+ * (`GET /api/mi-usuario`).
  *
  * Reportado en vivo: un usuario logueado veía igual el link.
  */

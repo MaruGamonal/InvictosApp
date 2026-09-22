@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { CONTEXTO_PUBLICO } from '@/lib/contexto';
@@ -84,6 +85,7 @@ export default async function PaginaPerfilOrganizador({
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta />
         <div className={styles.heroContenido}>
           <Escudo src={perfil.logoUrl} nombre={perfil.nombre} tamano={64} />
           <div className={styles.heroTexto}>

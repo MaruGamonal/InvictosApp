@@ -18,11 +18,11 @@ import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { agruparCertamenesContiguos } from './_agruparCertamenes';
 import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
-import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
+import { BarraDescubrimiento } from '@/components/descubrimiento/BarraDescubrimiento';
 import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
 import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplegables';
 import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
-import { EnlaceIngresar } from './EnlaceIngresar';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
@@ -77,13 +77,7 @@ export default async function PaginaDescubrimiento({
     return (
       <div className={styles.pagina}>
         <header className={styles.hero}>
-          <div className={styles.filaMarca}>
-            <div className={styles.marca}>
-              <span className={styles.puntoMarca} aria-hidden />
-              Invicta
-            </div>
-            <EnlaceIngresar />
-          </div>
+          <MarcaInvicta />
           <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
         </header>
         <div className={styles.contenido}>
@@ -125,16 +119,7 @@ export default async function PaginaDescubrimiento({
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
-        <div className={styles.filaMarca}>
-          <div className={styles.marca}>
-            <span className={styles.puntoMarca} aria-hidden />
-            Invicta
-          </div>
-          <div className={styles.accionesMarca}>
-            <SelectorDeCategoriaGenero categoriaActual={categoriaGenero} />
-            <EnlaceIngresar />
-          </div>
-        </div>
+        <MarcaInvicta acciones={<SelectorDeCategoriaGenero categoriaActual={categoriaGenero} />} />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
         <CampoBusqueda
           accion="/torneos"
@@ -151,74 +136,84 @@ export default async function PaginaDescubrimiento({
       </header>
 
       <div className={styles.contenido}>
-        <FilaUbicacion ciudad={ciudadActual?.nombre ?? null}>
-          <SelectorDeCiudad
-            provincias={provincias}
-            ciudadActualId={ciudadId}
-            alElegirCiudad={elegirCiudad}
-          />
-        </FilaUbicacion>
-
-        <FiltrosRapidos
-          accion="/torneos"
-          parametrosActuales={{
-            q: parametros.q,
-            duracion: parametros.duracion,
-            modalidad: parametros.modalidad,
-            categoriaEdad: parametros.categoriaEdad,
-            abiertas: parametros.abiertas,
-          }}
-          filas={[
-            {
-              etiqueta: 'Filtrar por duración e inscripciones',
-              parametros: [
-                {
-                  nombre: 'duracion',
-                  activo: duracion ?? '',
-                  opciones: VALORES_DURACION_TORNEO.map((valor) => ({
-                    valor,
-                    etiqueta: etiquetaDuracionTorneo(valor),
-                  })),
-                },
-                {
-                  nombre: 'abiertas',
-                  activo: parametros.abiertas === '1' ? '1' : '',
-                  opciones: [{ valor: '1', etiqueta: 'Inscripciones abiertas' }],
-                },
-              ],
-            },
-          ]}
-        />
-
-        <FiltrosDesplegables
-          accion="/torneos"
-          parametrosActuales={{
-            q: parametros.q,
-            duracion: parametros.duracion,
-            abiertas: parametros.abiertas,
-          }}
-          desplegables={[
-            {
-              nombre: 'modalidad',
-              etiqueta: 'Filtrar por modalidad',
-              sinFiltrar: 'Cualquier modalidad',
-              activo: parametros.modalidad ?? '',
-              opciones: MODALIDADES.map((modalidad) => ({
-                valor: modalidad,
-                etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
-              })),
-            },
-            {
-              nombre: 'categoriaEdad',
-              etiqueta: 'Filtrar por categoría',
-              sinFiltrar: 'Cualquier categoría',
-              activo: parametros.categoriaEdad ?? '',
-              opciones: CATEGORIAS_EDAD.map((categoria) => ({
-                valor: categoria,
-                etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
-              })),
-            },
-          ]}
+        <BarraDescubrimiento
+          ciudad={ciudadActual?.nombre ?? null}
+          filtrosActivos={
+            [duracion, parametros.modalidad, parametros.categoriaEdad, parametros.abiertas].filter(
+              Boolean,
+            ).length
+          }
+          selectorDeCiudad={
+            <SelectorDeCiudad
+              provincias={provincias}
+              ciudadActualId={ciudadId}
+              alElegirCiudad={elegirCiudad}
+            />
+          }
+          filtros={
+            <>
+              <FiltrosRapidos
+                accion="/torneos"
+                parametrosActuales={{
+                  q: parametros.q,
+                  duracion: parametros.duracion,
+                  modalidad: parametros.modalidad,
+                  categoriaEdad: parametros.categoriaEdad,
+                  abiertas: parametros.abiertas,
+                }}
+                filas={[
+                  {
+                    etiqueta: 'Filtrar por duración e inscripciones',
+                    parametros: [
+                      {
+                        nombre: 'duracion',
+                        activo: duracion ?? '',
+                        opciones: VALORES_DURACION_TORNEO.map((valor) => ({
+                          valor,
+                          etiqueta: etiquetaDuracionTorneo(valor),
+                        })),
+                      },
+                      {
+                        nombre: 'abiertas',
+                        activo: parametros.abiertas === '1' ? '1' : '',
+                        opciones: [{ valor: '1', etiqueta: 'Inscripciones abiertas' }],
+                      },
+                    ],
+                  },
+                ]}
+              />
+              <FiltrosDesplegables
+                accion="/torneos"
+                parametrosActuales={{
+                  q: parametros.q,
+                  duracion: parametros.duracion,
+                  abiertas: parametros.abiertas,
+                }}
+                desplegables={[
+                  {
+                    nombre: 'modalidad',
+                    etiqueta: 'Filtrar por modalidad',
+                    sinFiltrar: 'Cualquier modalidad',
+                    activo: parametros.modalidad ?? '',
+                    opciones: MODALIDADES.map((modalidad) => ({
+                      valor: modalidad,
+                      etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+                    })),
+                  },
+                  {
+                    nombre: 'categoriaEdad',
+                    etiqueta: 'Filtrar por categoría',
+                    sinFiltrar: 'Cualquier categoría',
+                    activo: parametros.categoriaEdad ?? '',
+                    opciones: CATEGORIAS_EDAD.map((categoria) => ({
+                      valor: categoria,
+                      etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
+                    })),
+                  },
+                ]}
+              />
+            </>
+          }
         />
 
         {resultado.torneos.length === 0 ? (

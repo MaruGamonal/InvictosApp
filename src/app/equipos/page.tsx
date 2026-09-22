@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { NavInferior } from '@/components/NavInferior';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
-import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
+import { BarraDescubrimiento } from '@/components/descubrimiento/BarraDescubrimiento';
 import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplegables';
 import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
@@ -79,6 +80,7 @@ export default async function PaginaBuscarEquipos({
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Equipos</h1>
         <CampoBusqueda
           accion="/equipos"
@@ -93,39 +95,44 @@ export default async function PaginaBuscarEquipos({
       </header>
 
       <div className={styles.contenido}>
-        <FilaUbicacion ciudad={ciudadActual?.nombre ?? null}>
-          <SelectorDeCiudad
-            provincias={provincias}
-            ciudadActualId={ciudadId}
-            alElegirCiudad={elegirCiudadEnEquipos}
-          />
-        </FilaUbicacion>
-
-        <FiltrosDesplegables
-          accion="/equipos"
-          parametrosActuales={{ q: parametros.q }}
-          desplegables={[
-            {
-              nombre: 'modalidad',
-              etiqueta: 'Filtrar por modalidad',
-              sinFiltrar: 'Cualquier modalidad',
-              activo: parametros.modalidad ?? '',
-              opciones: MODALIDADES.map((modalidad) => ({
-                valor: modalidad,
-                etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
-              })),
-            },
-            {
-              nombre: 'categoriaGenero',
-              etiqueta: 'Filtrar por categoría',
-              sinFiltrar: 'Cualquier categoría',
-              activo: parametros.categoriaGenero ?? '',
-              opciones: CATEGORIAS_GENERO.map((categoria) => ({
-                valor: categoria,
-                etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
-              })),
-            },
-          ]}
+        <BarraDescubrimiento
+          ciudad={ciudadActual?.nombre ?? null}
+          filtrosActivos={[parametros.modalidad, parametros.categoriaGenero].filter(Boolean).length}
+          selectorDeCiudad={
+            <SelectorDeCiudad
+              provincias={provincias}
+              ciudadActualId={ciudadId}
+              alElegirCiudad={elegirCiudadEnEquipos}
+            />
+          }
+          filtros={
+            <FiltrosDesplegables
+              accion="/equipos"
+              parametrosActuales={{ q: parametros.q }}
+              desplegables={[
+                {
+                  nombre: 'modalidad',
+                  etiqueta: 'Filtrar por modalidad',
+                  sinFiltrar: 'Cualquier modalidad',
+                  activo: parametros.modalidad ?? '',
+                  opciones: MODALIDADES.map((modalidad) => ({
+                    valor: modalidad,
+                    etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+                  })),
+                },
+                {
+                  nombre: 'categoriaGenero',
+                  etiqueta: 'Filtrar por categoría',
+                  sinFiltrar: 'Cualquier categoría',
+                  activo: parametros.categoriaGenero ?? '',
+                  opciones: CATEGORIAS_GENERO.map((categoria) => ({
+                    valor: categoria,
+                    etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
+                  })),
+                },
+              ]}
+            />
+          }
         />
 
         {resultado.equipos.length === 0 ? (
