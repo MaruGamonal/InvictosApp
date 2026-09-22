@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { GOLES_MAXIMOS_POR_EQUIPO } from '@/lib/marcador';
 import type { Contexto } from '@/lib/contexto';
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
@@ -54,17 +55,6 @@ import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosi
 
 const TIPOS_EVENTO = ['goal', 'own_goal', 'yellow_card', 'red_card'] as const;
 type TipoEvento = (typeof TIPOS_EVENTO)[number];
-
-/**
- * Tope por equipo en un partido. No había ninguno: un dedo de más
- * cargaba 999 goles y eso entraba a la tabla, a los goleadores y a la
- * ficha pública sin que nada lo frenara.
- *
- * Es un límite de producto, no técnico: la idea es que pase a depender
- * del plan del organizador, así que vive en una constante propia y no
- * suelto dentro del esquema.
- */
-export const GOLES_MAXIMOS_POR_EQUIPO = 99;
 
 const esquemaEvento = z.object({
   perfilId: z.string().uuid(),

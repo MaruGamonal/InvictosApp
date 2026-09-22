@@ -1,9 +1,9 @@
 'use client';
-import { GOLES_MAXIMOS_POR_EQUIPO } from '@/services/competencia/cargarResultado';
 
 import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { GOLES_MAXIMOS_POR_EQUIPO } from '@/lib/marcador';
 import styles from './pagina.module.css';
 
 export interface IntegranteElegible {

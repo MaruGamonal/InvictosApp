@@ -31,7 +31,10 @@ describe('CODIGOS_ERROR', () => {
     // llega sin que el despliegue tenga el secreto cargado no es un
     // problema de permisos, y confundirla con uno manda a buscar el
     // arreglo al lado equivocado.
-    expect(codigos).toHaveLength(33);
+    // Más SIN_ORGANIZACION: crear un torneo exige una organización
+    // propia, y antes se creaba sola con un nombre de arranque que nadie
+    // eligió.
+    expect(codigos).toHaveLength(34);
   });
 
   it.each(codigos)(

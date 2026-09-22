@@ -66,14 +66,21 @@ describe('asegurarOrganizacionPropia', () => {
     expect(consultas).toHaveLength(0);
   });
 
-  it('crea una organización de arranque cuando la persona no tiene ninguna', async () => {
+  /**
+   * Antes creaba una organización sola, con un nombre de arranque que
+   * nadie eligió y que después había que descubrir y corregir desde otra
+   * pantalla. Ahora es un paso explícito del producto.
+   */
+  it('sin organización propia, SIN_ORGANIZACION y no crea ninguna', async () => {
     const consultas = mockearDb({ organizacionPropiaId: null, nombreVisible: 'Marce' });
     const { asegurarOrganizacionPropia } = await import('./asegurarOrganizacionPropia');
 
-    const resultado = await asegurarOrganizacionPropia(undefined, contextoCon('usuario-1'));
-
-    expect(resultado).toEqual({ organizacionId: 'org-nueva', creada: true });
-    expect(consultas.some((c) => c.startsWith('INSERT INTO ORGANIZACION'))).toBe(true);
+    await expect(
+      asegurarOrganizacionPropia(undefined, contextoCon('usuario-1')),
+    ).rejects.toMatchObject({ codigo: 'SIN_ORGANIZACION' });
+    expect(consultas.some((c) => c.toUpperCase().startsWith('INSERT INTO ORGANIZACION'))).toBe(
+      false,
+    );
   });
 
   it('sin sesión, NO_AUTENTICADO', async () => {

@@ -114,19 +114,28 @@
   margin-bottom: 10px;
 }
 
+/* Reportado en vivo: los filtros se comían la pantalla antes del primer
+   torneo. Los dos formularios viven en un mismo bloque para que entre
+   ellos haya un respiro chico y no el hueco entre secciones. */
+.bloqueFiltros {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* D-102: el filtro de duración merece más peso que los demás — se ve
-   sin desplegar nada, como chips grandes en vez de un <select>. */
+   sin desplegar nada, como chips en vez de un <select>. */
 .filtrosDuracion {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chipDuracion {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 14px;
+  padding: 7px 12px;
   border-radius: var(--radio-pill);
   border: 1.5px solid var(--borde-neutro);
   background: var(--color-superficie);
@@ -146,12 +155,14 @@
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   align-items: center;
 }
 
 .filtros select {
-  padding: 8px 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 9px;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-boton);
   font-family: var(--fuente-texto);
@@ -170,7 +181,7 @@
   color: var(--blanco);
   font-weight: 700;
   font-size: 13px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border: none;
   border-radius: var(--radio-boton);
   cursor: pointer;

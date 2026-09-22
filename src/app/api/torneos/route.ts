@@ -5,9 +5,9 @@ import { asegurarOrganizacionPropia } from '@/services/organizadores/asegurarOrg
 import { construirContexto } from '@/lib/contexto';
 
 /**
- * UC-16 — Crear torneo. El Flujo 3 del paquete de diseño arranca directo
- * acá, sin pasar por "Crear organización" (`asegurarOrganizacionPropia`
- * la resuelve sola). Pide sesión real.
+ * UC-16 — Crear torneo. `asegurarOrganizacionPropia` resuelve bajo qué
+ * organización nace, y falla con `SIN_ORGANIZACION` si la persona no
+ * tiene ninguna: la organización ya no se crea sola. Pide sesión real.
  */
 export async function POST(request: NextRequest) {
   return comoRespuestaHttp(async () => {

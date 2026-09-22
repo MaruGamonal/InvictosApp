@@ -159,9 +159,6 @@ export function FormularioEditarTorneo({
 
   return (
     <form className={styles.formularioChico} onSubmit={enviar}>
-      {error && <p className={styles.errorChico}>{error}</p>}
-      {guardado && !error && <p className={styles.avisoChico}>Guardado.</p>}
-
       <div className={styles.filaImagen}>
         <button
           type="button"
@@ -308,6 +305,18 @@ export function FormularioEditarTorneo({
       </label>
       <span className={styles.avisoNotifica}>Este cambio notifica a inscriptos y seguidores.</span>
 
+      {/*
+        Junto al botón y no arriba del formulario: este formulario es
+        largo, el botón queda al final, y una confirmación a ciento
+        cincuenta líneas de distancia no se ve — reportado en vivo como
+        que guardar no daba ninguna señal.
+      */}
+      {error && <p className={styles.errorChico}>{error}</p>}
+      {guardado && !error && (
+        <p className={styles.avisoChico} role="status">
+          Guardado.
+        </p>
+      )}
       <button type="submit" disabled={enviando}>
         {enviando ? 'Guardando…' : 'Guardar cambios'}
       </button>

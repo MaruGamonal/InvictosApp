@@ -2,17 +2,19 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
-import { crearOrganizacion } from './crearOrganizacion';
 
 /**
  * Punto de entrada de "Crear torneo" (Flujo 3 del paquete de diseño):
- * el prototipo arranca directo en el formulario del torneo, sin un paso
- * previo de "Crear organización" (ese es un flujo propio, D2). Como
- * `crearTorneo` sí exige un `organizacionId` (`03`, 3.7), acá se
- * resuelve solo: si la persona ya tiene una organización propia, la usa;
- * si no, la crea al toque —titular automático, igual que
- * `crearOrganizacion`— con un nombre de arranque que se puede cambiar
- * después desde el perfil del organizador.
+ * resuelve la organización bajo la que nace el torneo, porque
+ * `crearTorneo` sí exige un `organizacionId` (`03`, 3.7).
+ *
+ * Antes la creaba sola cuando no había ninguna, con un nombre de
+ * arranque ("Torneos de <nombre>"). Reportado en vivo: eso dejaba
+ * organizaciones que nadie eligió tener, con un nombre que después había
+ * que descubrir y corregir desde otra pantalla, y hacía invisible un
+ * paso que el producto sí quiere explícito. Ahora falla con
+ * `SIN_ORGANIZACION` y la pantalla de "Crear torneo" manda a crearla
+ * antes de mostrar el formulario.
  *
  * "Propia" es deliberadamente la primera donde figura como Titular
  * (`owner`), no cualquiera donde sea Administrador: crear un torneo
@@ -45,14 +47,7 @@ export const asegurarOrganizacionPropia: Servicio<
     [contexto.usuarioId],
   );
   const existente = rows[0]?.organizacion_id;
-  if (existente) return { organizacionId: existente, creada: false };
+  if (!existente) throw crearError('SIN_ORGANIZACION');
 
-  const { rows: perfilRows } = await pool.query<{ nombre_visible: string }>(
-    `SELECT nombre_visible FROM perfil_deportivo WHERE usuario_id = $1`,
-    [contexto.usuarioId],
-  );
-  const nombreVisible = perfilRows[0]?.nombre_visible ?? 'Organizador';
-
-  const creada = await crearOrganizacion({ nombre: `Torneos de ${nombreVisible}` }, contexto);
-  return { organizacionId: creada.id, creada: true };
+  return { organizacionId: existente, creada: false };
 };

@@ -161,78 +161,75 @@ export default async function PaginaDescubrimiento({
           <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />
         </details>
 
-        <form method="get" className={styles.filtrosDuracion} aria-label="Filtrar por duración">
-          {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
-          {parametros.modalidad && (
-            <input type="hidden" name="modalidad" value={parametros.modalidad} />
-          )}
-          {parametros.categoriaEdad && (
-            <input type="hidden" name="categoriaEdad" value={parametros.categoriaEdad} />
-          )}
-          {parametros.abiertas && (
-            <input type="hidden" name="abiertas" value={parametros.abiertas} />
-          )}
-          <button
-            type="submit"
-            name="duracion"
-            value=""
-            className={
-              !duracion
-                ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
-                : styles.chipDuracion
-            }
-          >
-            Cualquier duración
-          </button>
-          {VALORES_DURACION_TORNEO.map((valor) => (
-            <button
-              key={valor}
-              type="submit"
-              name="duracion"
-              value={valor}
-              className={
-                duracion === valor
-                  ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
-                  : styles.chipDuracion
-              }
-            >
-              {etiquetaDuracionTorneo(valor)}
-            </button>
-          ))}
-        </form>
+        <div className={styles.bloqueFiltros}>
+          <form method="get" className={styles.filtrosDuracion} aria-label="Filtrar por duración">
+            {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
+            {parametros.modalidad && (
+              <input type="hidden" name="modalidad" value={parametros.modalidad} />
+            )}
+            {parametros.categoriaEdad && (
+              <input type="hidden" name="categoriaEdad" value={parametros.categoriaEdad} />
+            )}
+            {parametros.abiertas && (
+              <input type="hidden" name="abiertas" value={parametros.abiertas} />
+            )}
+            {VALORES_DURACION_TORNEO.map((valor) => {
+              const activo = duracion === valor;
+              return (
+                <button
+                  key={valor}
+                  type="submit"
+                  name="duracion"
+                  /* Sin chip encendido el filtro no se aplica, así que tocar el
+                     chip activo manda `""` y lo apaga: el chip "Cualquier
+                     duración" era una fila entera para decir eso mismo. */
+                  value={activo ? '' : valor}
+                  aria-pressed={activo}
+                  className={
+                    activo
+                      ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
+                      : styles.chipDuracion
+                  }
+                >
+                  {etiquetaDuracionTorneo(valor)}
+                </button>
+              );
+            })}
+          </form>
 
-        <form method="get" className={styles.filtros}>
-          {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
-          {duracion && <input type="hidden" name="duracion" value={duracion} />}
-          <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
-            <option value="">Cualquier modalidad</option>
-            {MODALIDADES.map((modalidad) => (
-              <option key={modalidad} value={modalidad}>
-                {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
-              </option>
-            ))}
-          </select>
-          <select name="categoriaEdad" defaultValue={parametros.categoriaEdad ?? ''}>
-            <option value="">Cualquier categoría</option>
-            {CATEGORIAS_EDAD.map((categoria) => (
-              <option key={categoria} value={categoria}>
-                {obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta}
-              </option>
-            ))}
-          </select>
-          <label className={styles.checkbox}>
-            <input
-              type="checkbox"
-              name="abiertas"
-              value="1"
-              defaultChecked={parametros.abiertas === '1'}
-            />
-            Solo inscripciones abiertas
-          </label>
-          <button type="submit" className={styles.botonFiltrar}>
-            Filtrar
-          </button>
-        </form>
+          <form method="get" className={styles.filtros}>
+            {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
+            {duracion && <input type="hidden" name="duracion" value={duracion} />}
+            <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
+              <option value="">Cualquier modalidad</option>
+              {MODALIDADES.map((modalidad) => (
+                <option key={modalidad} value={modalidad}>
+                  {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
+                </option>
+              ))}
+            </select>
+            <select name="categoriaEdad" defaultValue={parametros.categoriaEdad ?? ''}>
+              <option value="">Cualquier categoría</option>
+              {CATEGORIAS_EDAD.map((categoria) => (
+                <option key={categoria} value={categoria}>
+                  {obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta}
+                </option>
+              ))}
+            </select>
+            <label className={styles.checkbox}>
+              <input
+                type="checkbox"
+                name="abiertas"
+                value="1"
+                defaultChecked={parametros.abiertas === '1'}
+              />
+              Solo inscripciones abiertas
+            </label>
+            <button type="submit" className={styles.botonFiltrar}>
+              Filtrar
+            </button>
+          </form>
+        </div>
 
         {resultado.torneos.length === 0 ? (
           <>

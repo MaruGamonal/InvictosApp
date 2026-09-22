@@ -121,6 +121,16 @@ export const CODIGOS_ERROR = {
    * volviendo a desplegar. Sin esta distinción, las dos se ven iguales
    * desde afuera y la única forma de saber cuál es era adivinar.
    */
+  /**
+   * Crear un torneo exige una organización propia. Antes se creaba sola
+   * con un nombre de arranque ("Torneos de <nombre>"), y eso dejaba
+   * organizaciones que nadie eligió tener, con un nombre que después
+   * había que descubrir y corregir desde otra pantalla.
+   */
+  SIN_ORGANIZACION: {
+    httpStatus: 409,
+    mensaje: 'Para organizar torneos primero tenés que crear tu organización.',
+  },
   SECRETO_DE_TAREA_NO_CONFIGURADO: {
     httpStatus: 500,
     mensaje: 'Algo salió mal de nuestro lado. Probá de nuevo en un momento.',
