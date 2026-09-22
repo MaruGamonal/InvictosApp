@@ -1,5 +1,5 @@
 'use client';
-import { validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
@@ -59,6 +59,9 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cuentaNoConfirmada, setCuentaNoConfirmada] = useState<string | null>(null);
+  const [imagenFallida, setImagenFallida] = useState<{ torneoId: string; mensaje: string } | null>(
+    null,
+  );
 
   const inputImagenRef = useRef<HTMLInputElement>(null);
   const [archivoImagen, setArchivoImagen] = useState<File | null>(null);
@@ -127,13 +130,16 @@ export function FormularioCrearTorneo({ provincias }: Props) {
       const torneoId = cuerpo.data.id;
 
       if (archivoImagen) {
-        try {
-          const datosFormulario = new FormData();
-          datosFormulario.append('torneoId', torneoId);
-          datosFormulario.append('archivo', archivoImagen);
-          await fetch('/api/torneos/imagen', { method: 'POST', body: datosFormulario });
-        } catch {
-          // El torneo ya se creó — la imagen se puede volver a intentar desde "Configuración".
+        // Un `fetch` pelado no lanza con un 4xx/5xx: el rechazo del
+        // servidor se perdía y el torneo quedaba sin imagen en silencio.
+        const datosFormulario = new FormData();
+        datosFormulario.append('torneoId', torneoId);
+        datosFormulario.append('archivo', archivoImagen);
+        const subida = await subirArchivo('/api/torneos/imagen', datosFormulario);
+        if (!subida.ok) {
+          setImagenFallida({ torneoId, mensaje: subida.mensaje });
+          setEnviando(false);
+          return;
         }
       }
 
@@ -142,6 +148,23 @@ export function FormularioCrearTorneo({ provincias }: Props) {
       setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
     }
+  }
+
+  // El torneo ya existe: volver a mostrar el formulario invitaría a
+  // crearlo de nuevo. Se explica qué pasó y se sigue con el alta.
+  if (imagenFallida) {
+    return (
+      <div className={styles.tarjeta}>
+        <h1 className={`fuente-display ${styles.titulo}`}>Torneo creado</h1>
+        <p className={styles.error}>{imagenFallida.mensaje}</p>
+        <p className={styles.texto}>
+          El torneo quedó creado sin imagen. Podés subirla cuando quieras desde Configuración.
+        </p>
+        <a className={styles.boton} href={`/torneo/${imagenFallida.torneoId}/crear/reglamento`}>
+          Seguir con el reglamento
+        </a>
+      </div>
+    );
   }
 
   return (

@@ -1,7 +1,8 @@
 'use client';
-import { validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import Link from 'next/link';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
@@ -23,6 +24,7 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
   const [descripcion, setDescripcion] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoFallido, setLogoFallido] = useState<string | null>(null);
 
   const inputLogoRef = useRef<HTMLInputElement>(null);
   const [archivoLogo, setArchivoLogo] = useState<File | null>(null);
@@ -73,13 +75,17 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
       const organizacionId = cuerpo.data.id;
 
       if (archivoLogo) {
-        try {
-          const datosFormulario = new FormData();
-          datosFormulario.append('organizacionId', organizacionId);
-          datosFormulario.append('archivo', archivoLogo);
-          await fetch('/api/organizaciones/logo', { method: 'POST', body: datosFormulario });
-        } catch {
-          // La organización ya se creó — el logo se puede subir después desde Perfil público.
+        // Un `fetch` pelado no lanza con un 4xx/5xx: el rechazo del
+        // servidor se perdía y la organización quedaba sin logo en
+        // silencio.
+        const datosFormulario = new FormData();
+        datosFormulario.append('organizacionId', organizacionId);
+        datosFormulario.append('archivo', archivoLogo);
+        const subida = await subirArchivo('/api/organizaciones/logo', datosFormulario);
+        if (!subida.ok) {
+          setLogoFallido(subida.mensaje);
+          setEnviando(false);
+          return;
         }
       }
 
@@ -88,6 +94,23 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
       setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
     }
+  }
+
+  // La organización ya existe: volver a mostrar el formulario invitaría
+  // a crearla de nuevo. Se explica qué pasó y se sigue hacia adelante.
+  if (logoFallido) {
+    return (
+      <div className={styles.tarjeta}>
+        <h1 className={`fuente-display ${styles.titulo}`}>Organización creada</h1>
+        <p className={styles.error}>{logoFallido}</p>
+        <p className={styles.texto}>
+          La organización quedó creada sin logo. Podés subirlo cuando quieras desde Perfil público.
+        </p>
+        <Link className={styles.boton} href="/organizador/gestionar">
+          Ir al panel
+        </Link>
+      </div>
+    );
   }
 
   return (

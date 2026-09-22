@@ -1,5 +1,5 @@
 'use client';
-import { validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
@@ -22,9 +22,18 @@ const CATEGORIAS_GENERO = [
  * UC-10 — cliente de `POST /api/equipos`. `categoriaGenero` no tiene
  * default (D-81). El escudo se elige acá pero se sube después de crear
  * el equipo (`POST /api/equipos/escudo` necesita el `equipoId`, que no
- * existe todavía) — si la subida falla, el equipo ya quedó creado, así
- * que igual se entra a su ficha; el escudo se puede reintentar desde
- * "Gestionar equipo".
+ * existe todavía).
+ *
+ * Reportado en vivo — "la carga de imágenes falla y después no se ven en
+ * el perfil": la subida iba con un `fetch` pelado dentro de un `try`, y
+ * `fetch` no lanza con un 4xx/5xx, solo con una caída de red. Un rechazo
+ * del servidor (bucket, permiso, tamaño) no entraba al `catch`, no se
+ * mostraba en ningún lado y la pantalla redirigía igual: el equipo
+ * quedaba sin escudo y nadie se enteraba de por qué.
+ *
+ * Ahora la subida pasa por `subirArchivo`, que sí distingue el rechazo,
+ * y si falla no se redirige a ciegas: el equipo ya está creado, así que
+ * la pantalla lo dice, ofrece entrar igual y explica dónde reintentar.
  */
 export function FormularioCrearEquipo({ provincias }: Props) {
   const [nombre, setNombre] = useState('');
@@ -33,6 +42,9 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cuentaNoConfirmada, setCuentaNoConfirmada] = useState<string | null>(null);
+  const [escudoFallido, setEscudoFallido] = useState<{ equipoId: string; mensaje: string } | null>(
+    null,
+  );
   const formularioValido = nombre.trim() !== '' && categoriaGenero !== '';
 
   const inputEscudoRef = useRef<HTMLInputElement>(null);
@@ -89,13 +101,14 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       const equipoId = cuerpo.data.id;
 
       if (archivoEscudo) {
-        try {
-          const datosFormulario = new FormData();
-          datosFormulario.append('equipoId', equipoId);
-          datosFormulario.append('archivo', archivoEscudo);
-          await fetch('/api/equipos/escudo', { method: 'POST', body: datosFormulario });
-        } catch {
-          // El equipo ya se creó — el escudo se puede volver a intentar desde "Gestionar equipo".
+        const datosFormulario = new FormData();
+        datosFormulario.append('equipoId', equipoId);
+        datosFormulario.append('archivo', archivoEscudo);
+        const subida = await subirArchivo('/api/equipos/escudo', datosFormulario);
+        if (!subida.ok) {
+          setEscudoFallido({ equipoId, mensaje: subida.mensaje });
+          setEnviando(false);
+          return;
         }
       }
 
@@ -104,6 +117,23 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
     }
+  }
+
+  // El equipo ya existe: volver a mostrar el formulario invitaría a
+  // crearlo de nuevo. Se explica qué pasó y se sigue hacia adelante.
+  if (escudoFallido) {
+    return (
+      <div className={styles.tarjeta}>
+        <h1 className={`fuente-display ${styles.titulo}`}>Equipo creado</h1>
+        <p className={styles.error}>{escudoFallido.mensaje}</p>
+        <p className={styles.texto}>
+          El equipo quedó creado sin escudo. Podés subirlo cuando quieras desde Gestionar equipo.
+        </p>
+        <a className={styles.boton} href={`/equipo/${escudoFallido.equipoId}`}>
+          Ir al equipo
+        </a>
+      </div>
+    );
   }
 
   return (

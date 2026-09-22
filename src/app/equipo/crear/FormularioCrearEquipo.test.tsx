@@ -119,4 +119,71 @@ describe('FormularioCrearEquipo', () => {
     expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
     expect(assign).not.toHaveBeenCalled();
   });
+
+  /**
+   * Reportado en vivo: "la carga de imágenes falla y después no se ven
+   * en el perfil". La subida del escudo iba con un `fetch` pelado, que
+   * no lanza con un 4xx/5xx, así que el rechazo del servidor no se veía
+   * en ningún lado y la pantalla navegaba igual.
+   */
+  it('si el escudo se rechaza, lo dice, no navega solo y ofrece entrar al equipo ya creado', async () => {
+    vi.stubGlobal('location', { assign });
+    vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:preview') });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, data: { id: 'eq-nuevo' } }),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ ok: false, error: { mensaje: 'No pudimos guardar la imagen.' } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByLabelText, getByRole, getByText, container } = render(
+      <FormularioCrearEquipo provincias={[]} />,
+    );
+    completarCampos(getByLabelText, getByRole);
+
+    const archivo = new File(['x'], 'escudo.png', { type: 'image/png' });
+    const inputArchivo = container.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(inputArchivo, { target: { files: [archivo] } });
+    fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
+
+    await waitFor(() => expect(getByText('No pudimos guardar la imagen.')).toBeTruthy());
+    expect(getByText('Equipo creado')).toBeTruthy();
+    expect(getByRole('link', { name: 'Ir al equipo' })).toHaveProperty(
+      'href',
+      expect.stringContaining('/equipo/eq-nuevo'),
+    );
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('si la conexión se cae subiendo el escudo, tampoco navega en silencio', async () => {
+    vi.stubGlobal('location', { assign });
+    vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:preview') });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, data: { id: 'eq-nuevo' } }),
+      })
+      .mockRejectedValueOnce(new Error('sin red'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByLabelText, getByRole, getByText, container } = render(
+      <FormularioCrearEquipo provincias={[]} />,
+    );
+    completarCampos(getByLabelText, getByRole);
+
+    const archivo = new File(['x'], 'escudo.png', { type: 'image/png' });
+    const inputArchivo = container.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(inputArchivo, { target: { files: [archivo] } });
+    fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
+
+    await waitFor(() => expect(getByText('No pudimos conectar. Probá de nuevo.')).toBeTruthy());
+    expect(assign).not.toHaveBeenCalled();
+  });
 });
