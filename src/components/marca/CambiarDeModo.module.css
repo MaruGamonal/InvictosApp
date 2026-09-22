@@ -1,0 +1,20 @@
+.cambiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radio-pill);
+  font: 700 12px/1 var(--fuente-texto);
+  text-decoration: none;
+  /* Sobre el hero oscuro de los dos modos. */
+  color: var(--gris-claro-sobre-oscuro);
+  white-space: nowrap;
+}
+
+.cambiar:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

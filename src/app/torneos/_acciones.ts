@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
 
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 
@@ -37,25 +37,4 @@ async function guardarCiudad(ciudadId: string): Promise<void> {
     path: '/',
     sameSite: 'lax',
   });
-}
-
-/**
- * Preferencia de categoría a mostrar en el descubrimiento — mismo
- * criterio que la ciudad (D-90): se elige en pantalla, se recuerda en
- * cookie, nunca se infiere. Sin preferencia (`valor` vacío) se ven
- * todas las categorías; el propio `buscarTorneos` ya trata un torneo
- * mixto como válido para cualquier preferencia.
- */
-export async function elegirCategoriaGenero(valor: string): Promise<void> {
-  const store = await cookies();
-  if (!valor) {
-    store.delete(NOMBRE_COOKIE_CATEGORIA_GENERO);
-  } else {
-    store.set(NOMBRE_COOKIE_CATEGORIA_GENERO, valor, {
-      maxAge: UN_ANIO_EN_SEGUNDOS,
-      path: '/',
-      sameSite: 'lax',
-    });
-  }
-  redirect('/torneos');
 }

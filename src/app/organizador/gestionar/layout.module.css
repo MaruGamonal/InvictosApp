@@ -3,29 +3,26 @@
   background: var(--color-fondo);
 }
 
+/* Mismo alto que las cabeceras del modo jugador: la marca arriba, la
+   fila de modo, el título. Antes cada modo tenía su propio ritmo y el
+   salto se notaba al cambiar. */
 .hero {
   background: var(--ink-900);
   color: var(--blanco);
-  padding: 16px var(--espacio-pantalla-x) 20px;
+  padding: 18px var(--espacio-pantalla-x) 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .filaSuperior {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
-}
-
-.enlaceVolver {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-left: -6px;
-  color: inherit;
-  flex: none;
 }
 
 .etiquetaModo {
@@ -37,7 +34,8 @@
 
 .titulo {
   max-width: 640px;
-  margin: 10px auto 0;
+  width: 100%;
+  margin: 0 auto;
   font-size: 24px;
   line-height: 1.15;
   text-transform: uppercase;

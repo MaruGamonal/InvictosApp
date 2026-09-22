@@ -12,7 +12,7 @@ import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { VALORES_DURACION_TORNEO, etiquetaDuracionTorneo } from '@/lib/duracionTorneo';
-import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
 import { elegirCiudad } from './_acciones';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { agruparCertamenesContiguos } from './_agruparCertamenes';
@@ -21,7 +21,6 @@ import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
 import { BarraDescubrimiento } from '@/components/descubrimiento/BarraDescubrimiento';
 import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
 import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplegables';
-import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
 import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import styles from './pagina.module.css';
 
@@ -41,6 +40,7 @@ interface SearchParams {
   q?: string;
   modalidad?: string;
   categoriaEdad?: string;
+  categoriaGenero?: string;
   abiertas?: string;
   duracion?: string;
   cursor?: string;
@@ -64,11 +64,10 @@ export default async function PaginaDescubrimiento({
   const parametros = await searchParams;
   const cookieStore = await cookies();
   const ciudadId = cookieStore.get(NOMBRE_COOKIE_CIUDAD)?.value;
-  const categoriaGeneroCookie = cookieStore.get(NOMBRE_COOKIE_CATEGORIA_GENERO)?.value;
   const categoriaGenero = CATEGORIAS_GENERO.includes(
-    categoriaGeneroCookie as (typeof CATEGORIAS_GENERO)[number],
+    parametros.categoriaGenero as (typeof CATEGORIAS_GENERO)[number],
   )
-    ? (categoriaGeneroCookie as (typeof CATEGORIAS_GENERO)[number])
+    ? (parametros.categoriaGenero as (typeof CATEGORIAS_GENERO)[number])
     : undefined;
 
   const provincias = await listarCiudadesCacheado();
@@ -119,7 +118,7 @@ export default async function PaginaDescubrimiento({
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
-        <MarcaInvicta acciones={<SelectorDeCategoriaGenero categoriaActual={categoriaGenero} />} />
+        <MarcaInvicta />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
         <CampoBusqueda
           accion="/torneos"
@@ -130,6 +129,7 @@ export default async function PaginaDescubrimiento({
             duracion: parametros.duracion,
             modalidad: parametros.modalidad,
             categoriaEdad: parametros.categoriaEdad,
+            categoriaGenero: parametros.categoriaGenero,
             abiertas: parametros.abiertas,
           }}
         />
@@ -139,9 +139,13 @@ export default async function PaginaDescubrimiento({
         <BarraDescubrimiento
           ciudad={ciudadActual?.nombre ?? null}
           filtrosActivos={
-            [duracion, parametros.modalidad, parametros.categoriaEdad, parametros.abiertas].filter(
-              Boolean,
-            ).length
+            [
+              duracion,
+              parametros.modalidad,
+              parametros.categoriaEdad,
+              categoriaGenero,
+              parametros.abiertas,
+            ].filter(Boolean).length
           }
           selectorDeCiudad={
             <SelectorDeCiudad
@@ -159,11 +163,12 @@ export default async function PaginaDescubrimiento({
                   duracion: parametros.duracion,
                   modalidad: parametros.modalidad,
                   categoriaEdad: parametros.categoriaEdad,
+                  categoriaGenero: parametros.categoriaGenero,
                   abiertas: parametros.abiertas,
                 }}
                 filas={[
                   {
-                    etiqueta: 'Filtrar por duración e inscripciones',
+                    etiqueta: 'Filtrar por duración',
                     parametros: [
                       {
                         nombre: 'duracion',
@@ -172,11 +177,6 @@ export default async function PaginaDescubrimiento({
                           valor,
                           etiqueta: etiquetaDuracionTorneo(valor),
                         })),
-                      },
-                      {
-                        nombre: 'abiertas',
-                        activo: parametros.abiertas === '1' ? '1' : '',
-                        opciones: [{ valor: '1', etiqueta: 'Inscripciones abiertas' }],
                       },
                     ],
                   },
@@ -187,7 +187,6 @@ export default async function PaginaDescubrimiento({
                 parametrosActuales={{
                   q: parametros.q,
                   duracion: parametros.duracion,
-                  abiertas: parametros.abiertas,
                 }}
                 desplegables={[
                   {
@@ -202,15 +201,30 @@ export default async function PaginaDescubrimiento({
                   },
                   {
                     nombre: 'categoriaEdad',
-                    etiqueta: 'Filtrar por categoría',
-                    sinFiltrar: 'Cualquier categoría',
+                    etiqueta: 'Filtrar por categoría de edad',
+                    sinFiltrar: 'Cualquier edad',
                     activo: parametros.categoriaEdad ?? '',
                     opciones: CATEGORIAS_EDAD.map((categoria) => ({
                       valor: categoria,
                       etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
                     })),
                   },
+                  {
+                    nombre: 'categoriaGenero',
+                    etiqueta: 'Filtrar por categoría de género',
+                    sinFiltrar: 'Cualquier género',
+                    activo: categoriaGenero ?? '',
+                    opciones: CATEGORIAS_GENERO.map((categoria) => ({
+                      valor: categoria,
+                      etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
+                    })),
+                  },
                 ]}
+                toggle={{
+                  nombre: 'abiertas',
+                  etiqueta: 'Solo inscripciones abiertas',
+                  activo: parametros.abiertas === '1',
+                }}
               />
             </>
           }

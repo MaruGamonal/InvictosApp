@@ -7,18 +7,8 @@ import styles from './NavInferiorOrganizador.module.css';
 const PESTANAS = [
   {
     segmento: '',
-    etiqueta: 'Home',
+    etiqueta: 'Inicio',
     icono: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />,
-  },
-  {
-    segmento: 'crear',
-    etiqueta: 'Crear org.',
-    icono: (
-      <>
-        <rect x="4" y="10" width="16" height="10" rx="1" />
-        <path d="M9 20v-5h6v5M9 10V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" />
-      </>
-    ),
   },
   {
     segmento: 'equipo',
@@ -33,13 +23,13 @@ const PESTANAS = [
     ),
   },
   {
-    segmento: 'invitar',
-    etiqueta: 'Invitar admin',
+    segmento: 'torneos',
+    etiqueta: 'Torneos',
     icono: (
       <>
-        <circle cx="9" cy="9" r="3.5" />
-        <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-        <path d="M18 8v6M15 11h6" />
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4" />
+        <path d="m8.5 8.5 7 7M15.5 8.5l-7 7" />
       </>
     ),
   },
@@ -57,8 +47,17 @@ const PESTANAS = [
 
 /**
  * Bottom nav propio del panel de Organizador (`/organizador/gestionar`),
- * separado de `NavInferior` (Jugador): cinco secciones fijas —
- * "Transferir" queda deliberadamente afuera (sin mockup, sin backend,
+ * separado de `NavInferior` (Jugador): Inicio · Equipo · Torneos ·
+ * Perfil.
+ *
+ * Tenía cinco pestañas, y dos de ellas —"Crear org." e "Invitar
+ * admin"— no eran lugares sino acciones: un menú se navega, una acción
+ * se ejecuta una vez. Reportado en vivo. Las dos rutas siguen
+ * existiendo, pero se llega por su llamada a la acción, desde donde
+ * tienen sentido: crear la organización, cuando todavía no hay ninguna;
+ * invitar a un Administrador, desde Equipo de trabajo.
+ *
+ * "Transferir" sigue deliberadamente afuera (sin mockup, sin backend,
  * confirmado explícitamente con quien pidió la pantalla).
  */
 export function NavInferiorOrganizador() {

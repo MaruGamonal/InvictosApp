@@ -20,7 +20,7 @@ export default async function PaginaNotificaciones() {
 
   return (
     <div className={styles.pagina}>
-      <MarcaInvicta conEnlaceIngresar={false} />
+      <MarcaInvicta conEnlaceIngresar={false} conCampana={false} />
       <div className={styles.filaTitulo}>
         <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
         <Link

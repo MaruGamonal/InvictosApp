@@ -4,15 +4,18 @@ import { redirect } from 'next/navigation';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerOrganizacionActivaCacheada, obtenerPanelCacheado } from './_datos';
 import { TarjetaTorneoPanel } from './TarjetaTorneoPanel';
-import { TabsTorneosPanel } from './TabsTorneosPanel';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Panel de Organizador') };
 
 /**
- * Home del panel de Organizador: stats de un vistazo, lo que necesita
- * atención primero, y el resto agrupado en pestañas — el layout ya
- * resolvió el guard de sesión.
+ * Inicio del panel de Organizador: las estadísticas de un vistazo y lo
+ * que necesita atención primero — el layout ya resolvió el guard de
+ * sesión.
+ *
+ * El listado completo de torneos se mudó a su propia sección del nav
+ * (`/organizador/gestionar/torneos`): acá quedaba compitiendo con lo
+ * urgente, que es lo único que esta pantalla tiene que responder.
  */
 export default async function PaginaHomeOrganizador() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
@@ -40,16 +43,14 @@ export default async function PaginaHomeOrganizador() {
 
       <section className={styles.seccion}>
         <div className={styles.filaTituloSeccion}>
-          <h2 className={styles.tituloSeccion}>Mis torneos</h2>
-          <Link href="/torneo/crear" className={styles.enlaceCrear}>
-            + Crear torneo
+          <h2 className={styles.tituloSeccion}>Torneos</h2>
+          <Link href="/organizador/gestionar/torneos" className={styles.enlaceCrear}>
+            Ver todos →
           </Link>
         </div>
-        <TabsTorneosPanel
-          activos={panel.activos}
-          proximos={panel.proximos}
-          finalizados={panel.finalizados}
-        />
+        <Link href="/torneo/crear" className={styles.botonCrearTorneo}>
+          + Crear torneo
+        </Link>
       </section>
     </div>
   );

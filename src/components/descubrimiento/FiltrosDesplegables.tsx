@@ -14,11 +14,22 @@ export interface DesplegableDeFiltro {
   opciones: OpcionDesplegable[];
 }
 
+/**
+ * Un filtro que solo está o no está. Es un checkbox y no un chip: un
+ * chip parece una opción entre varias, y esto es un sí/no.
+ */
+export interface ToggleDeFiltro {
+  nombre: string;
+  etiqueta: string;
+  activo: boolean;
+}
+
 export interface FiltrosDesplegablesProps {
   accion: string;
   /** Parámetros vigentes que hay que conservar; los propios se excluyen solos. */
   parametrosActuales: Record<string, string | undefined>;
   desplegables: DesplegableDeFiltro[];
+  toggle?: ToggleDeFiltro;
 }
 
 /**
@@ -42,35 +53,59 @@ export function FiltrosDesplegables({
   accion,
   parametrosActuales,
   desplegables,
+  toggle,
 }: FiltrosDesplegablesProps) {
   const propios = new Set(desplegables.map((desplegable) => desplegable.nombre));
+  if (toggle) propios.add(toggle.nombre);
 
   return (
-    <form method="get" action={accion} className={styles.fila} aria-label="Filtrar resultados">
+    <form
+      method="get"
+      action={accion}
+      className={styles.formulario}
+      aria-label="Filtrar resultados"
+    >
       {Object.entries(parametrosActuales).map(([nombre, valor]) =>
         valor && !propios.has(nombre) && nombre !== 'cursor' ? (
           <input key={nombre} type="hidden" name={nombre} value={valor} />
         ) : null,
       )}
-      {desplegables.map((desplegable) => (
-        <select
-          key={desplegable.nombre}
-          name={desplegable.nombre}
-          aria-label={desplegable.etiqueta}
-          defaultValue={desplegable.activo}
-          className={desplegable.activo ? `${styles.select} ${styles.selectActivo}` : styles.select}
-        >
-          <option value="">{desplegable.sinFiltrar}</option>
-          {desplegable.opciones.map((opcion) => (
-            <option key={opcion.valor} value={opcion.valor}>
-              {opcion.etiqueta}
-            </option>
-          ))}
-        </select>
-      ))}
-      <button type="submit" className={styles.boton}>
-        Filtrar
-      </button>
+      <div className={styles.fila}>
+        {desplegables.map((desplegable) => (
+          <select
+            key={desplegable.nombre}
+            name={desplegable.nombre}
+            aria-label={desplegable.etiqueta}
+            defaultValue={desplegable.activo}
+            className={
+              desplegable.activo ? `${styles.select} ${styles.selectActivo}` : styles.select
+            }
+          >
+            <option value="">{desplegable.sinFiltrar}</option>
+            {desplegable.opciones.map((opcion) => (
+              <option key={opcion.valor} value={opcion.valor}>
+                {opcion.etiqueta}
+              </option>
+            ))}
+          </select>
+        ))}
+        <button type="submit" className={styles.boton}>
+          Filtrar
+        </button>
+      </div>
+
+      {toggle && (
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            name={toggle.nombre}
+            value="1"
+            defaultChecked={toggle.activo}
+            className={styles.casilla}
+          />
+          {toggle.etiqueta}
+        </label>
+      )}
     </form>
   );
 }

@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
+import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
+import { CambiarDeModo } from '@/components/marca/CambiarDeModo';
 import { obtenerContextoCacheado, obtenerOrganizacionActivaCacheada } from './_datos';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
 import styles from './layout.module.css';
@@ -39,27 +41,13 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
   return (
     <div className={styles.pagina}>
       <header className={styles.hero}>
+        <MarcaInvicta
+          conEnlaceIngresar={false}
+          acciones={<BotonCerrarSesion variante="discreto" />}
+        />
         <div className={styles.filaSuperior}>
-          <Link
-            href="/inicio?volver=1"
-            className={styles.enlaceVolver}
-            aria-label="Volver a Inicio"
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m15 5-7 7 7 7" />
-            </svg>
-          </Link>
           <span className={styles.etiquetaModo}>Modo Organizador</span>
-          <BotonCerrarSesion variante="discreto" />
+          <CambiarDeModo modoActual="organizador" />
         </div>
         <h1 className={`fuente-display ${styles.titulo}`}>
           {organizacion?.nombre ?? 'Organizador'}

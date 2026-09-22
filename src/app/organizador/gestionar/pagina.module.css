@@ -41,3 +41,18 @@
   flex-direction: column;
   gap: 10px;
 }
+
+/* CTA, no una entrada de menú: crear un torneo se hace una vez, no se
+   navega. Antes vivía en el nav inferior. */
+.botonCrearTorneo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radio-boton);
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font: 700 14px/1 var(--fuente-texto);
+  text-decoration: none;
+}

@@ -1,16 +1,25 @@
-/* Sin `wrap`: con una base de 120px los dos desplegables y el botón no
-   entraban a 360px y «Filtrar» se iba a una línea propia, que es
-   justamente el alto que este cambio venía a recuperar. */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Con `wrap`, porque esto vive dentro del panel desplegable y no en la
+   pantalla: ahí el alto sale barato. Los desplegables tienen base 0 y
+   se reparten lo que queda, así que dos entran con el botón en una
+   línea y el tercero baja solo. */
 .fila {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
 
 .select {
-  /* Base 0: se reparten lo que queda después del botón, en vez de pedir
-     un ancho propio que empuje al botón fuera de la fila. */
-  flex: 1 1 0;
+  /* Dos por fila: con tres repartiéndose el ancho a 360px, «Cualquier
+     modalidad» quedaba cortado en «Cual…» y no se leía cuál era cuál.
+     El tercero baja y comparte la segunda fila con el botón. */
+  flex: 1 1 calc(50% - 4px);
   min-width: 0;
   /* Mismo alto que los chips y que el buscador (`08`, sección 10). */
   min-height: 44px;
@@ -44,4 +53,24 @@
 .boton:focus-visible {
   outline: 2px solid var(--acento-oscuro);
   outline-offset: 2px;
+}
+
+/* Un sí/no es un checkbox, no un chip: un chip parece una opción entre
+   varias. Volvió a serlo a pedido, después de haber pasado por chip. */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font: 500 13px/1.2 var(--fuente-texto);
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.casilla {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--acento);
+  cursor: pointer;
 }

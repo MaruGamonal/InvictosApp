@@ -77,6 +77,11 @@
   padding: 12px;
   max-height: 60vh;
   overflow-y: auto;
+  /* Los chips y los desplegables son dos grupos distintos: pegados se
+     leían como una sola maraña de controles. */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   background: var(--color-superficie);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-tarjeta);
