@@ -1,4 +1,5 @@
 'use client';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
@@ -41,26 +42,24 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
     evento.target.value = '';
     if (!archivo) return;
 
+    const problema = validarArchivo(archivo, TIPOS_IMAGEN);
+    if (problema) {
+      setErrorFoto(problema);
+      return;
+    }
+
     setSubiendoFoto(true);
     setErrorFoto(null);
-    try {
-      const datosFormulario = new FormData();
-      datosFormulario.append('archivo', archivo);
-      const respuesta = await fetch('/api/mi-perfil/foto', {
-        method: 'POST',
-        body: datosFormulario,
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        setErrorFoto(cuerpo?.error?.mensaje ?? 'No se pudo subir la foto. Probá de nuevo.');
-        return;
-      }
-      setFotoUrl(cuerpo.data.fotoUrl);
-    } catch {
-      setErrorFoto('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setSubiendoFoto(false);
+    const datosFormulario = new FormData();
+    datosFormulario.append('archivo', archivo);
+
+    const resultado = await subirArchivo('/api/mi-perfil/foto', datosFormulario);
+    setSubiendoFoto(false);
+    if (!resultado.ok) {
+      setErrorFoto(resultado.mensaje);
+      return;
     }
+    setFotoUrl(resultado.data.fotoUrl ?? null);
   }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {

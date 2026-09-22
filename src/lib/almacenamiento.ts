@@ -3,7 +3,10 @@ import { obtenerClienteAdmin } from './supabase/admin';
 import { crearError } from './errores';
 
 const BUCKET = 'media';
-const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
+// Alineado con `TAMANO_MAXIMO_SUBIDA_BYTES` del cliente: por encima de
+// esto la plataforma corta el cuerpo antes de que llegue acá, y el
+// rechazo no puede explicarse.
+const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024;
 const TIPOS_IMAGEN: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -25,7 +28,7 @@ async function subirArchivoPublico(
   }
   if (archivo.size > TAMANO_MAXIMO_BYTES) {
     throw crearError('DATOS_INVALIDOS', [
-      { campo: 'archivo', problema: 'El archivo pesa más de 5 MB.' },
+      { campo: 'archivo', problema: 'El archivo pesa más de 4 MB.' },
     ]);
   }
 

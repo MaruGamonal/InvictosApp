@@ -1,4 +1,5 @@
 'use client';
+import { validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
@@ -67,6 +68,17 @@ export function FormularioCrearTorneo({ provincias }: Props) {
     const archivo = evento.target.files?.[0];
     evento.target.value = '';
     if (!archivo) return;
+
+    // Al elegirlo, no al enviar el formulario: enterarse de que la
+    // imagen no sirve después de completar todo y crear la entidad deja
+    // a la persona sin nada que hacer en esa pantalla.
+    const problema = validarArchivo(archivo, TIPOS_IMAGEN);
+    if (problema) {
+      setError(problema);
+      return;
+    }
+
+    setError(null);
     setArchivoImagen(archivo);
     setPrevisualizacionImagen(URL.createObjectURL(archivo));
   }

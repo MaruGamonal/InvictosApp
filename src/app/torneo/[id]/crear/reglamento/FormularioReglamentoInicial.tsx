@@ -1,4 +1,5 @@
 'use client';
+import { subirArchivo, validarArchivo, TIPOS_DOCUMENTO } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -24,28 +25,26 @@ export function FormularioReglamentoInicial({ torneoId }: Props) {
     evento.target.value = '';
     if (!archivo) return;
 
+    const problema = validarArchivo(archivo, TIPOS_DOCUMENTO);
+    if (problema) {
+      setError(problema);
+      return;
+    }
+
     setSubiendo(true);
     setError(null);
-    try {
-      const datosFormulario = new FormData();
-      datosFormulario.append('torneoId', torneoId);
-      datosFormulario.append('archivo', archivo);
-      const respuesta = await fetch('/api/torneos/reglamento-archivo', {
-        method: 'POST',
-        body: datosFormulario,
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo subir el archivo.');
-        return;
-      }
-      setArchivoUrl(cuerpo.data.archivoUrl);
-      setNombreArchivo(archivo.name);
-    } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setSubiendo(false);
+    const datosFormulario = new FormData();
+    datosFormulario.append('torneoId', torneoId);
+    datosFormulario.append('archivo', archivo);
+
+    const resultado = await subirArchivo('/api/torneos/reglamento-archivo', datosFormulario);
+    setSubiendo(false);
+    if (!resultado.ok) {
+      setError(resultado.mensaje);
+      return;
     }
+    setArchivoUrl(resultado.data.archivoUrl ?? null);
+    setNombreArchivo(archivo.name);
   }
 
   async function continuar() {

@@ -17,6 +17,9 @@ function mockearDb(opciones: {
   equiposAprobados?: number;
   rowCountUpdate?: number;
   estadoTorneo?: string;
+  /** Las fechas ya guardadas: el orden se valida contra el par efectivo. */
+  fechaInicioGuardada?: Date | null;
+  fechaFinGuardada?: Date | null;
 }) {
   const update = vi.fn(async (_texto: string, _valores: unknown[]) => ({
     rowCount: opciones.rowCountUpdate ?? 1,
@@ -27,8 +30,16 @@ function mockearDb(opciones: {
         if (texto.includes('organizacion_id FROM torneo')) {
           return { rows: [{ organizacion_id: ORG }] };
         }
-        if (texto.startsWith('SELECT estado FROM torneo')) {
-          return { rows: [{ estado: opciones.estadoTorneo ?? 'draft' }] };
+        if (texto.startsWith('SELECT estado, fecha_inicio_estimada')) {
+          return {
+            rows: [
+              {
+                estado: opciones.estadoTorneo ?? 'draft',
+                fecha_inicio_estimada: opciones.fechaInicioGuardada ?? null,
+                fecha_fin_estimada: opciones.fechaFinGuardada ?? null,
+              },
+            ],
+          };
         }
         if (texto.includes('FROM miembro_organizacion')) {
           return { rows: opciones.rolEnOrganizacion ? [{ rol: opciones.rolEnOrganizacion }] : [] };
@@ -61,6 +72,38 @@ describe('actualizarTorneo', () => {
     const { actualizarTorneo } = await import('./actualizarTorneo');
     await expect(
       actualizarTorneo({ torneoId: TORNEO, nombre: 'Nueva Copa' }, contextoCon('usuario-1')),
+    ).resolves.toEqual({ id: TORNEO });
+  });
+
+  /**
+   * Al modificar puede venir una sola de las dos fechas: la que falta es
+   * la que ya está guardada, y el orden se valida contra ese par.
+   */
+  it('rechaza una fecha de fin anterior a la de inicio ya guardada', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      fechaInicioGuardada: new Date('2026-09-30T00:00:00.000Z'),
+    });
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+    await expect(
+      actualizarTorneo(
+        { torneoId: TORNEO, fechaFinEstimada: '2026-09-22T00:00:00.000Z' },
+        contextoCon('usuario-titular'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('acepta mover el fin a una fecha posterior al inicio guardado', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      fechaInicioGuardada: new Date('2026-09-30T00:00:00.000Z'),
+    });
+    const { actualizarTorneo } = await import('./actualizarTorneo');
+    await expect(
+      actualizarTorneo(
+        { torneoId: TORNEO, fechaFinEstimada: '2026-10-05T00:00:00.000Z' },
+        contextoCon('usuario-titular'),
+      ),
     ).resolves.toEqual({ id: TORNEO });
   });
 

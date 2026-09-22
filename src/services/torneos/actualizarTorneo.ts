@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
+import { verificarOrdenDeFechas } from './_fechas';
 import { invalidarCacheTorneo } from '@/lib/cache';
 import { notificarCambioDeTorneo } from './_notificarCambio';
 
@@ -95,12 +96,22 @@ export const actualizarTorneo: Servicio<ActualizarTorneoInput, { id: string }> =
 
   const pool = obtenerPool();
 
-  const { rows: torneoActual } = await pool.query<{ estado: string }>(
-    'SELECT estado FROM torneo WHERE id = $1',
-    [datos.torneoId],
-  );
+  const { rows: torneoActual } = await pool.query<{
+    estado: string;
+    fecha_inicio_estimada: Date | null;
+    fecha_fin_estimada: Date | null;
+  }>('SELECT estado, fecha_inicio_estimada, fecha_fin_estimada FROM torneo WHERE id = $1', [
+    datos.torneoId,
+  ]);
   if (!torneoActual[0]) throw crearError('NO_ENCONTRADO');
   const estaPublicado = torneoActual[0].estado !== 'draft';
+
+  // El par efectivo: puede venir una sola de las dos fechas, y la que
+  // falta es la que ya está guardada.
+  verificarOrdenDeFechas(
+    datos.fechaInicioEstimada ?? torneoActual[0].fecha_inicio_estimada,
+    datos.fechaFinEstimada ?? torneoActual[0].fecha_fin_estimada,
+  );
 
   if (datos.cupoEquipos !== undefined) {
     const { rows } = await pool.query<{ count: string }>(

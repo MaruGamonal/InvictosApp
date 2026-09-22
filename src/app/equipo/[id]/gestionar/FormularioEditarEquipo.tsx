@@ -1,4 +1,5 @@
 'use client';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -60,28 +61,29 @@ export function FormularioEditarEquipo({
     evento.target.value = '';
     if (!archivo) return;
 
+    // Antes de mandar nada: un archivo demasiado grande lo corta la
+    // plataforma con una respuesta que no es JSON, y eso se reportaba
+    // como un problema de conexión que no existía.
+    const problema = validarArchivo(archivo, TIPOS_IMAGEN);
+    if (problema) {
+      setErrorEscudo(problema);
+      return;
+    }
+
     setSubiendoEscudo(true);
     setErrorEscudo(null);
-    try {
-      const datosFormulario = new FormData();
-      datosFormulario.append('equipoId', equipoId);
-      datosFormulario.append('archivo', archivo);
-      const respuesta = await fetch('/api/equipos/escudo', {
-        method: 'POST',
-        body: datosFormulario,
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        setErrorEscudo(cuerpo?.error?.mensaje ?? 'No se pudo subir el escudo. Probá de nuevo.');
-        return;
-      }
-      setEscudoUrl(cuerpo.data.escudoUrl);
-      router.refresh();
-    } catch {
-      setErrorEscudo('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setSubiendoEscudo(false);
+    const datosFormulario = new FormData();
+    datosFormulario.append('equipoId', equipoId);
+    datosFormulario.append('archivo', archivo);
+
+    const resultado = await subirArchivo('/api/equipos/escudo', datosFormulario);
+    setSubiendoEscudo(false);
+    if (!resultado.ok) {
+      setErrorEscudo(resultado.mensaje);
+      return;
     }
+    setEscudoUrl(resultado.data.escudoUrl ?? null);
+    router.refresh();
   }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {

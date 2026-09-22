@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoOrganizacion } from '@/lib/permisos';
+import { verificarOrdenDeFechas } from './_fechas';
 
 /**
  * UC-16 — Crear un torneo, siempre en `draft` y visible solo para la
@@ -89,6 +90,7 @@ export const crearTorneo: Servicio<CrearTorneoInput, CrearTorneoResultado> = asy
   contexto,
 ) => {
   const datos = validarEntrada(esquemaEntrada, input);
+  verificarOrdenDeFechas(datos.fechaInicioEstimada, datos.fechaFinEstimada);
   await verificarPermisoOrganizacion(contexto, datos.organizacionId, 'gestionar_torneos');
 
   const columnas = [

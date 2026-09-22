@@ -1,4 +1,5 @@
 'use client';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,29 +30,29 @@ export function SubidaLogoOrganizacion({ organizacionId, nombre, logoUrl }: Prop
     evento.target.value = '';
     if (!archivo) return;
 
+    const problema = validarArchivo(archivo, TIPOS_IMAGEN);
+    if (problema) {
+      setError(problema);
+      return;
+    }
+
     setPrevisualizacion(URL.createObjectURL(archivo));
     setSubiendo(true);
     setError(null);
 
-    try {
-      const datosFormulario = new FormData();
-      datosFormulario.append('organizacionId', organizacionId);
-      datosFormulario.append('archivo', archivo);
-      const respuesta = await fetch('/api/organizaciones/logo', {
-        method: 'POST',
-        body: datosFormulario,
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No pudimos subir el logo.');
-        return;
-      }
-      router.refresh();
-    } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setSubiendo(false);
+    const datosFormulario = new FormData();
+    datosFormulario.append('organizacionId', organizacionId);
+    datosFormulario.append('archivo', archivo);
+
+    const resultado = await subirArchivo('/api/organizaciones/logo', datosFormulario);
+    setSubiendo(false);
+    if (!resultado.ok) {
+      // Sin logo nuevo guardado, la previsualización mentiría.
+      setPrevisualizacion(null);
+      setError(resultado.mensaje);
+      return;
     }
+    router.refresh();
   }
 
   return (

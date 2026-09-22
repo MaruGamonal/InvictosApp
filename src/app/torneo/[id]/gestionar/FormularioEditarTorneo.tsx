@@ -1,4 +1,5 @@
 'use client';
+import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente';
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -53,28 +54,26 @@ export function FormularioEditarTorneo({
     evento.target.value = '';
     if (!archivo) return;
 
+    const problema = validarArchivo(archivo, TIPOS_IMAGEN);
+    if (problema) {
+      setErrorImagen(problema);
+      return;
+    }
+
     setSubiendoImagen(true);
     setErrorImagen(null);
-    try {
-      const datosFormulario = new FormData();
-      datosFormulario.append('torneoId', torneoId);
-      datosFormulario.append('archivo', archivo);
-      const respuesta = await fetch('/api/torneos/imagen', {
-        method: 'POST',
-        body: datosFormulario,
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        setErrorImagen(cuerpo?.error?.mensaje ?? 'No se pudo subir la imagen. Probá de nuevo.');
-        return;
-      }
-      setImagenUrl(cuerpo.data.imagenUrl);
-      router.refresh();
-    } catch {
-      setErrorImagen('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setSubiendoImagen(false);
+    const datosFormulario = new FormData();
+    datosFormulario.append('torneoId', torneoId);
+    datosFormulario.append('archivo', archivo);
+
+    const resultado = await subirArchivo('/api/torneos/imagen', datosFormulario);
+    setSubiendoImagen(false);
+    if (!resultado.ok) {
+      setErrorImagen(resultado.mensaje);
+      return;
     }
+    setImagenUrl(resultado.data.imagenUrl ?? null);
+    router.refresh();
   }
 
   async function quitarImagen() {
