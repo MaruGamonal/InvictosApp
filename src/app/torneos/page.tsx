@@ -20,6 +20,7 @@ import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
 import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
 import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
+import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplegables';
 import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
 import { EnlaceIngresar } from './EnlaceIngresar';
 import styles from './pagina.module.css';
@@ -186,31 +187,36 @@ export default async function PaginaDescubrimiento({
                 },
               ],
             },
+          ]}
+        />
+
+        <FiltrosDesplegables
+          accion="/torneos"
+          parametrosActuales={{
+            q: parametros.q,
+            duracion: parametros.duracion,
+            abiertas: parametros.abiertas,
+          }}
+          desplegables={[
             {
+              nombre: 'modalidad',
               etiqueta: 'Filtrar por modalidad',
-              parametros: [
-                {
-                  nombre: 'modalidad',
-                  activo: parametros.modalidad ?? '',
-                  opciones: MODALIDADES.map((modalidad) => ({
-                    valor: modalidad,
-                    etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
-                  })),
-                },
-              ],
+              sinFiltrar: 'Cualquier modalidad',
+              activo: parametros.modalidad ?? '',
+              opciones: MODALIDADES.map((modalidad) => ({
+                valor: modalidad,
+                etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+              })),
             },
             {
+              nombre: 'categoriaEdad',
               etiqueta: 'Filtrar por categoría',
-              parametros: [
-                {
-                  nombre: 'categoriaEdad',
-                  activo: parametros.categoriaEdad ?? '',
-                  opciones: CATEGORIAS_EDAD.map((categoria) => ({
-                    valor: categoria,
-                    etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
-                  })),
-                },
-              ],
+              sinFiltrar: 'Cualquier categoría',
+              activo: parametros.categoriaEdad ?? '',
+              opciones: CATEGORIAS_EDAD.map((categoria) => ({
+                valor: categoria,
+                etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
+              })),
             },
           ]}
         />

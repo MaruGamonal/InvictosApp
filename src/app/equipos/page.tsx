@@ -7,7 +7,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { NavInferior } from '@/components/NavInferior';
 import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
 import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
-import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
+import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplegables';
 import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
@@ -101,39 +101,29 @@ export default async function PaginaBuscarEquipos({
           />
         </FilaUbicacion>
 
-        <FiltrosRapidos
+        <FiltrosDesplegables
           accion="/equipos"
-          parametrosActuales={{
-            q: parametros.q,
-            modalidad: parametros.modalidad,
-            categoriaGenero: parametros.categoriaGenero,
-          }}
-          filas={[
+          parametrosActuales={{ q: parametros.q }}
+          desplegables={[
             {
+              nombre: 'modalidad',
               etiqueta: 'Filtrar por modalidad',
-              parametros: [
-                {
-                  nombre: 'modalidad',
-                  activo: parametros.modalidad ?? '',
-                  opciones: MODALIDADES.map((modalidad) => ({
-                    valor: modalidad,
-                    etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
-                  })),
-                },
-              ],
+              sinFiltrar: 'Cualquier modalidad',
+              activo: parametros.modalidad ?? '',
+              opciones: MODALIDADES.map((modalidad) => ({
+                valor: modalidad,
+                etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+              })),
             },
             {
+              nombre: 'categoriaGenero',
               etiqueta: 'Filtrar por categoría',
-              parametros: [
-                {
-                  nombre: 'categoriaGenero',
-                  activo: parametros.categoriaGenero ?? '',
-                  opciones: CATEGORIAS_GENERO.map((categoria) => ({
-                    valor: categoria,
-                    etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
-                  })),
-                },
-              ],
+              sinFiltrar: 'Cualquier categoría',
+              activo: parametros.categoriaGenero ?? '',
+              opciones: CATEGORIAS_GENERO.map((categoria) => ({
+                valor: categoria,
+                etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
+              })),
             },
           ]}
         />

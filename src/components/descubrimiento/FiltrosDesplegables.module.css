@@ -1,0 +1,47 @@
+/* Sin `wrap`: con una base de 120px los dos desplegables y el botón no
+   entraban a 360px y «Filtrar» se iba a una línea propia, que es
+   justamente el alto que este cambio venía a recuperar. */
+.fila {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.select {
+  /* Base 0: se reparten lo que queda después del botón, en vez de pedir
+     un ancho propio que empuje al botón fuera de la fila. */
+  flex: 1 1 0;
+  min-width: 0;
+  /* Mismo alto que los chips y que el buscador (`08`, sección 10). */
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1.5px solid var(--borde-neutro);
+  border-radius: var(--radio-boton);
+  background: var(--color-superficie);
+  font: 600 13px/1 var(--fuente-texto);
+  color: var(--color-texto);
+}
+
+/* Con un filtro puesto se distingue del que está sin tocar, igual que un
+   chip activo — y además el propio texto dice cuál es, así que no
+   depende solo del color (`08`, 11.10). */
+.selectActivo {
+  border-color: var(--acento);
+}
+
+.boton {
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--radio-boton);
+  background: var(--ink-900);
+  color: var(--blanco);
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--acento-oscuro);
+  outline-offset: 2px;
+}
