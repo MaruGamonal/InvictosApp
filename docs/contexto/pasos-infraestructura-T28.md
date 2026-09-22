@@ -71,7 +71,37 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 >
 > **Además, en el panel de Supabase** (Authentication → URL Configuration) hay que fijar el mismo valor: **Site URL** a esa misma URL, y agregar `<esa URL>/auth/callback` a **Redirect URLs**. Supabase solo respeta el `emailRedirectTo` que le manda la app si esa URL está en la lista de Redirect URLs — si no, la ignora y usa el Site URL del panel (que en un proyecto nuevo suele quedar en localhost por default).
 
-### Paso 6 — *(ya no aplica)*
+### Paso 6 — Crear el bucket `media` y dejarlo **público**
+
+En el panel de Supabase, **Storage → New bucket**, nombre `media`, con **Public bucket** activado. O desde el SQL Editor:
+
+```sql
+insert into storage.buckets (id, name, public) values ('media', 'media', true);
+```
+
+Ahí van **escudos de equipo, portadas de torneo, logos de organización, fotos de perfil y el PDF del reglamento**. Sin el bucket, cada subida falla con `ERROR_INTERNO`; con el bucket privado, la subida funciona y la imagen no se ve nunca, que es el síntoma más confuso de los dos.
+
+Este paso faltaba de esta lista y costó una tanda de bugs reportados en vivo como "la carga de imágenes falla y después no se visualiza en el perfil".
+
+**Cómo verificarlo**, de lo rápido a lo concluyente:
+
+```sql
+-- 1. existe y es público
+select id, name, public from storage.buckets;
+
+-- 2. si ya se intentó subir algo, ¿llegó a escribirse?
+select name, created_at from storage.objects
+where bucket_id = 'media' order by created_at desc limit 10;
+
+-- 3. una URL real para abrir en el navegador
+select nombre, escudo_url from equipo where escudo_url is not null limit 5;
+```
+
+La URL del paso 3 se abre **en una ventana de incógnito** — con la sesión del panel abierta se ve igual aunque el bucket sea privado, y la prueba no dice nada. `Bucket not found` es que no existe; un 403 es que no es público.
+
+No hace falta crear políticas RLS de escritura: la aplicación sube con `SUPABASE_SERVICE_ROLE_KEY`, que las saltea. Lo único que habilita la lectura pública es `public = true`.
+
+### Paso 7 — *(ya no aplica)*
 
 La búsqueda en INPI **ya se hizo**: hay una `I INVICTA` viva en clase 9 con cobertura amplia, así que el nombre no es registrable (`06`, D-97). No queda nada pendiente de tu lado.
 
@@ -122,6 +152,8 @@ Todo esto entra en **T28**, y conviene pedírselo como un solo trabajo. Lo listo
 ### 3.7 Almacenamiento de imágenes (`06`, D-96)
 
 - **Límite de tamaño y compresión al subir**, desde el primer archivo. El plan gratuito da 1 GB y los escudos crecen con cada equipo; poner el límite ahora es mucho más barato que migrar después.
+- El tope del cliente y el del servidor son **4 MB**, deliberadamente por debajo del corte de la plataforma (~4,5 MB): por encima de eso Vercel corta el cuerpo antes de que llegue a la aplicación y responde algo que no es JSON, así que el rechazo no se puede explicar.
+- **El bucket `media` no lo crea el código** — lo creás vos, una vez, en el Paso 6. La aplicación escribe con el cliente admin y asume que ya existe y que es público.
 
 ---
 
@@ -140,8 +172,9 @@ Vale escribirlo para que nadie lo agregue por las dudas.
 
 ## 5. Cómo saber que quedó bien
 
-Cinco verificaciones, en el orden en que conviene hacerlas:
+Seis verificaciones, en el orden en que conviene hacerlas:
 
+0. **Una imagen subida se ve.** Subí un escudo desde "Crear equipo" y entrá al perfil del equipo. Si no se ve, empezá por el bucket `media` (Paso 6): es la causa más probable.
 1. **El resumen del despliegue dice São Paulo** en la región de las funciones.
 2. **La tarea horaria aparece en Sentry** con su *check-in*, y un resultado cargado hace más de 72 horas pasa a confirmado solo.
 3. **Un error provocado a propósito** llega a Sentry con contexto, y el usuario ve `ERROR_INTERNO` y nada más.
