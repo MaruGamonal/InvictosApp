@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -27,10 +28,10 @@ const ROLES = [
  */
 export function FormularioInvitarIntegrante({ equipoId }: Props) {
   const router = useRouter();
+  const avisos = useAvisos();
   const [nombreVisible, setNombreVisible] = useState('');
   const [rol, setRol] = useState('');
   const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const formularioValido = nombreVisible.trim() !== '' && rol !== '';
 
@@ -38,8 +39,8 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
     evento.preventDefault();
     if (!formularioValido) return;
     setEnviando(true);
-    setError(null);
     setAviso(null);
+    const enCurso = avisos.cargando('Enviando invitación…');
 
     try {
       const respuesta = await fetch('/api/equipos/invitar', {
@@ -49,25 +50,29 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo invitar. Probá de nuevo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo enviar la invitación.', enCurso);
         setEnviando(false);
         return;
       }
       if (cuerpo.data?.advertenciaNombreDuplicado) {
+        // Esta advertencia se queda en la pantalla a propósito: no es
+        // una confirmación de que algo salió bien, es algo que hay que
+        // mirar antes de seguir, y un aviso que se va solo la perdería.
+        avisos.cerrar(enCurso);
         setAviso('Ya había un perfil con ese nombre — revisá que no sea la misma persona.');
         setEnviando(false);
         return;
       }
+      avisos.exito('Invitación enviada', enCurso);
       router.push(`/equipo/${equipoId}/gestionar`);
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
       setEnviando(false);
     }
   }
 
   return (
     <form className={styles.formulario} onSubmit={enviar}>
-      {error && <p className={styles.errorChico}>{error}</p>}
       {aviso && <p className={styles.avisoChico}>{aviso}</p>}
 
       <div className={styles.campo}>

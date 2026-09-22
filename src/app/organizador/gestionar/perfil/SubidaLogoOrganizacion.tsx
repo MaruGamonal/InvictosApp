@@ -4,6 +4,7 @@ import { subirArchivo, validarArchivo, TIPOS_IMAGEN } from '@/lib/subidaCliente'
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Escudo } from '@/components/Escudo';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -20,10 +21,10 @@ interface Props {
  */
 export function SubidaLogoOrganizacion({ organizacionId, nombre, logoUrl }: Props) {
   const router = useRouter();
+  const avisos = useAvisos();
   const inputRef = useRef<HTMLInputElement>(null);
   const [previsualizacion, setPrevisualizacion] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function elegirArchivo(evento: ChangeEvent<HTMLInputElement>) {
     const archivo = evento.target.files?.[0];
@@ -32,13 +33,13 @@ export function SubidaLogoOrganizacion({ organizacionId, nombre, logoUrl }: Prop
 
     const problema = validarArchivo(archivo, TIPOS_IMAGEN);
     if (problema) {
-      setError(problema);
+      avisos.error(problema);
       return;
     }
 
     setPrevisualizacion(URL.createObjectURL(archivo));
     setSubiendo(true);
-    setError(null);
+    const enCurso = avisos.cargando('Subiendo logo…');
 
     const datosFormulario = new FormData();
     datosFormulario.append('organizacionId', organizacionId);
@@ -49,9 +50,10 @@ export function SubidaLogoOrganizacion({ organizacionId, nombre, logoUrl }: Prop
     if (!resultado.ok) {
       // Sin logo nuevo guardado, la previsualización mentiría.
       setPrevisualizacion(null);
-      setError(resultado.mensaje);
+      avisos.error(resultado.mensaje, enCurso);
       return;
     }
+    avisos.exito('Logo actualizado', enCurso);
     router.refresh();
   }
 
@@ -67,7 +69,6 @@ export function SubidaLogoOrganizacion({ organizacionId, nombre, logoUrl }: Prop
         >
           {subiendo ? 'Subiendo…' : logoUrl || previsualizacion ? 'Cambiar logo' : 'Subir logo'}
         </button>
-        {error && <span className={styles.errorLogo}>{error}</span>}
       </div>
       <input
         ref={inputRef}

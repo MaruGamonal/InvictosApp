@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { FormularioInvitarIntegrante } from './FormularioInvitarIntegrante';
+import { ProveedorAvisos } from '@/components/avisos/Avisos';
 
 const push = vi.fn();
 
@@ -64,19 +65,26 @@ describe('FormularioInvitarIntegrante', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('si invitar falla, muestra el error', async () => {
+  // El error ya no vive dentro del formulario: lo muestra el aviso, que
+  // necesita su proveedor montado alrededor.
+  it('si invitar falla, el error sale por el aviso y no navega', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByText, getByLabelText } = render(<FormularioInvitarIntegrante equipoId="eq-1" />);
+    const { getByText, getByLabelText, container } = render(
+      <ProveedorAvisos>
+        <FormularioInvitarIntegrante equipoId="eq-1" />
+      </ProveedorAvisos>,
+    );
     fireEvent.change(getByLabelText('Nombre o correo'), { target: { value: 'Ana' } });
     fireEvent.click(getByText('Jugador'));
     fireEvent.click(getByText('Enviar invitación'));
 
     await waitFor(() => expect(getByText('No se pudo.')).toBeTruthy());
+    expect(container.querySelector('[role="alert"]')).toBeTruthy();
     expect(push).not.toHaveBeenCalled();
   });
 });

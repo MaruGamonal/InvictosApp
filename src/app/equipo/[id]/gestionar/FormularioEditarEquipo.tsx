@@ -5,6 +5,7 @@ import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { BuscadorCiudad, type ProvinciaConCiudades } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -43,18 +44,16 @@ export function FormularioEditarEquipo({
   provincias,
 }: Props) {
   const router = useRouter();
+  const avisos = useAvisos();
   const [nombre, setNombre] = useState(nombreInicial);
   const [categoriaGenero, setCategoriaGenero] = useState(categoriaGeneroInicial);
   const [modalidadHabitual, setModalidadHabitual] = useState(modalidadInicial ?? '');
   const [ciudadId, setCiudadId] = useState(ciudadIdInicial);
   const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [guardado, setGuardado] = useState(false);
 
   const inputEscudoRef = useRef<HTMLInputElement>(null);
   const [escudoUrl, setEscudoUrl] = useState(escudoUrlInicial);
   const [subiendoEscudo, setSubiendoEscudo] = useState(false);
-  const [errorEscudo, setErrorEscudo] = useState<string | null>(null);
 
   async function subirEscudo(evento: ChangeEvent<HTMLInputElement>) {
     const archivo = evento.target.files?.[0];
@@ -66,12 +65,12 @@ export function FormularioEditarEquipo({
     // como un problema de conexión que no existía.
     const problema = validarArchivo(archivo, TIPOS_IMAGEN);
     if (problema) {
-      setErrorEscudo(problema);
+      avisos.error(problema);
       return;
     }
 
     setSubiendoEscudo(true);
-    setErrorEscudo(null);
+    const enCurso = avisos.cargando('Subiendo escudo…');
     const datosFormulario = new FormData();
     datosFormulario.append('equipoId', equipoId);
     datosFormulario.append('archivo', archivo);
@@ -79,18 +78,18 @@ export function FormularioEditarEquipo({
     const resultado = await subirArchivo('/api/equipos/escudo', datosFormulario);
     setSubiendoEscudo(false);
     if (!resultado.ok) {
-      setErrorEscudo(resultado.mensaje);
+      avisos.error(resultado.mensaje, enCurso);
       return;
     }
     setEscudoUrl(resultado.data.escudoUrl ?? null);
+    avisos.exito('Escudo actualizado', enCurso);
     router.refresh();
   }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEnviando(true);
-    setError(null);
-    setGuardado(false);
+    const enCurso = avisos.cargando('Guardando…');
 
     try {
       const respuesta = await fetch('/api/equipos/actualizar', {
@@ -106,13 +105,13 @@ export function FormularioEditarEquipo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo guardar. Probá de nuevo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
         return;
       }
-      setGuardado(true);
+      avisos.exito('Equipo actualizado', enCurso);
       router.refresh();
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviando(false);
     }
@@ -120,9 +119,6 @@ export function FormularioEditarEquipo({
 
   return (
     <form className={styles.formularioChico} onSubmit={enviar}>
-      {error && <p className={styles.errorChico}>{error}</p>}
-      {guardado && !error && <p className={styles.avisoChico}>Guardado.</p>}
-
       <div className={styles.filaEscudo}>
         <button
           type="button"
@@ -149,7 +145,6 @@ export function FormularioEditarEquipo({
           >
             {subiendoEscudo ? 'Subiendo…' : 'Cambiar escudo'}
           </button>
-          {errorEscudo && <p className={styles.errorChico}>{errorEscudo}</p>}
         </div>
       </div>
 

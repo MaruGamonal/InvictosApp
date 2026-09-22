@@ -3,6 +3,7 @@
 import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { useAvisos } from '@/components/avisos/Avisos';
 import { GOLES_MAXIMOS_POR_EQUIPO } from '@/lib/marcador';
 import styles from './pagina.module.css';
 
@@ -52,7 +53,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
   const [jugadorDelPartido, setJugadorDelPartido] = useState<Record<string, string>>({});
   const [abiertoEventos, setAbiertoEventos] = useState<Record<string, boolean>>({});
   const [enviando, setEnviando] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const avisos = useAvisos();
   const idBase = useId();
 
   function actualizar(partidoId: string, campo: 'local' | 'visitante', valor: string) {
@@ -132,7 +133,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
     if (!valores || !Number.isInteger(golesLocal) || !Number.isInteger(golesVisitante)) return;
 
     setEnviando(partido.id);
-    setError(null);
+    const enCurso = avisos.cargando('Guardando resultado…');
     try {
       const eventosPartido = eventos[partido.id] ?? [];
       const elegidoJugadorDelPartido = jugadorDelPartido[partido.id];
@@ -160,12 +161,13 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No pudimos cargar el resultado.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos cargar el resultado.', enCurso);
         return;
       }
+      avisos.exito('Resultado cargado', enCurso);
       router.refresh();
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviando(null);
     }
@@ -177,7 +179,6 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
 
   return (
     <div className={styles.lista}>
-      {error && <p className={styles.errorChico}>{error}</p>}
       {partidos.map((partido) => {
         const valores = goles[partido.id] ?? { local: '', visitante: '' };
         const elegiblesLocal = elegiblesPorEquipo[partido.equipoLocalId] ?? [];

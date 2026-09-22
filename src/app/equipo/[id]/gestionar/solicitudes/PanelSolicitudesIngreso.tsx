@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { SolicitudPendiente } from '@/services/equipos/obtenerGestionEquipo';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -22,11 +23,11 @@ type Resultado = 'active' | 'declined';
 export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
   const [enviandoId, setEnviandoId] = useState<string | null>(null);
   const [resueltas, setResueltas] = useState<Record<string, Resultado>>({});
-  const [error, setError] = useState<string | null>(null);
+  const avisos = useAvisos();
 
   async function resolver(perfilId: string, aceptar: boolean) {
     setEnviandoId(perfilId);
-    setError(null);
+    const enCurso = avisos.cargando(aceptar ? 'Sumando al plantel…' : 'Rechazando…');
     try {
       const respuesta = await fetch('/api/equipos/resolver-solicitud', {
         method: 'POST',
@@ -35,13 +36,14 @@ export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo resolver. Probá de nuevo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo resolver la solicitud.', enCurso);
         setEnviandoId(null);
         return;
       }
       setResueltas((actuales) => ({ ...actuales, [perfilId]: aceptar ? 'active' : 'declined' }));
+      avisos.exito(aceptar ? 'Sumado al plantel' : 'Solicitud rechazada', enCurso);
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviandoId(null);
     }
@@ -49,8 +51,6 @@ export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
 
   return (
     <div className={styles.lista}>
-      {error && <p className={styles.errorChico}>{error}</p>}
-
       {solicitudes.map((solicitud) => {
         const resultado = resueltas[solicitud.perfilId];
         return (

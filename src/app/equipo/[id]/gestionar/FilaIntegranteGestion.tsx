@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/Badge';
+import { useAvisos } from '@/components/avisos/Avisos';
 import { Escudo } from '@/components/Escudo';
 import styles from './pagina.module.css';
 
@@ -42,13 +43,13 @@ export function FilaIntegranteGestion({
 }: Props) {
   const router = useRouter();
   const [enviando, setEnviando] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const avisos = useAvisos();
   const [masOpciones, setMasOpciones] = useState(false);
   const esCapitan = rolesEquipo.includes('captain');
 
-  async function llamar(clave: string, url: string, body: object) {
+  async function llamar(clave: string, url: string, body: object, mensajeExito: string) {
     setEnviando(clave);
-    setError(null);
+    const enCurso = avisos.cargando('Guardando…');
     try {
       const respuesta = await fetch(url, {
         method: 'POST',
@@ -57,13 +58,14 @@ export function FilaIntegranteGestion({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo aplicar. Probá de nuevo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
         setEnviando(null);
         return;
       }
+      avisos.exito(mensajeExito, enCurso);
       router.refresh();
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
       setEnviando(null);
     }
   }
@@ -71,35 +73,40 @@ export function FilaIntegranteGestion({
   function designar(rol: 'captain' | 'delegate' | 'coach', confirmar?: string) {
     if (enviando) return;
     if (confirmar && !window.confirm(confirmar)) return;
-    llamar(`${rol}:asignar`, '/api/equipos/cambiar-rol', {
-      equipoId,
-      perfilId,
-      rol,
-      accion: 'asignar',
-    });
+    llamar(
+      `${rol}:asignar`,
+      '/api/equipos/cambiar-rol',
+      { equipoId, perfilId, rol, accion: 'asignar' },
+      'Rol actualizado',
+    );
   }
 
   function quitarRol(rol: 'delegate' | 'coach') {
     if (enviando) return;
-    llamar(`${rol}:quitar`, '/api/equipos/cambiar-rol', {
-      equipoId,
-      perfilId,
-      rol,
-      accion: 'quitar',
-    });
+    llamar(
+      `${rol}:quitar`,
+      '/api/equipos/cambiar-rol',
+      { equipoId, perfilId, rol, accion: 'quitar' },
+      'Rol actualizado',
+    );
   }
 
   function quitarDelPlantel() {
     if (enviando) return;
     if (!window.confirm(`¿Quitar a ${nombreVisible} del plantel?`)) return;
-    llamar('fuera', '/api/equipos/quitar-integrante', { equipoId, perfilId });
+    llamar(
+      'fuera',
+      '/api/equipos/quitar-integrante',
+      { equipoId, perfilId },
+      `${nombreVisible} ya no está en el plantel`,
+    );
   }
 
   async function dejarEquipo() {
     if (enviando) return;
     if (!window.confirm('¿Dejar el equipo? Vas a perder tu lugar en el plantel.')) return;
     setEnviando('fuera');
-    setError(null);
+    const enCurso = avisos.cargando('Saliendo del equipo…');
 
     try {
       const respuesta = await fetch('/api/equipos/quitar-integrante', {
@@ -109,13 +116,16 @@ export function FilaIntegranteGestion({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo dejar el equipo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo dejar el equipo.', enCurso);
         setEnviando(null);
         return;
       }
+      // El proveedor vive en el layout raíz, así que el aviso sobrevive
+      // a esta navegación y se lee ya en la ficha del equipo.
+      avisos.exito('Dejaste el equipo', enCurso);
       router.push(`/equipo/${equipoId}`);
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
       setEnviando(null);
     }
   }
@@ -151,8 +161,6 @@ export function FilaIntegranteGestion({
           </button>
         )}
       </div>
-
-      {error && <p className={styles.errorChico}>{error}</p>}
 
       {!esUnoMismo && esCapitanViewer && (
         <>

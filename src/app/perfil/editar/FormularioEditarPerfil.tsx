@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { MiPerfil } from '@/services/identidad/obtenerMiPerfil';
 import { BuscadorCiudad, type ProvinciaConCiudades } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
 import propios from './FormularioEditarPerfil.module.css';
 
@@ -24,18 +25,16 @@ const POSICIONES = [
 
 /** UC-02/UC-04 — cliente de `POST /api/mi-perfil`. Todo opcional (D-52): nada acá bloquea nada. */
 export function FormularioEditarPerfil({ perfil, provincias }: Props) {
+  const avisos = useAvisos();
   const [nombreVisible, setNombreVisible] = useState(perfil.nombreVisible);
   const [posicion, setPosicion] = useState(perfil.posicion ?? 'unspecified');
   const [ciudadId, setCiudadId] = useState(perfil.ciudadId ?? '');
   const [visibilidad, setVisibilidad] = useState(perfil.visibilidad);
   const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [guardado, setGuardado] = useState(false);
 
   const inputFotoRef = useRef<HTMLInputElement>(null);
   const [fotoUrl, setFotoUrl] = useState(perfil.fotoUrl);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
-  const [errorFoto, setErrorFoto] = useState<string | null>(null);
 
   async function subirFoto(evento: ChangeEvent<HTMLInputElement>) {
     const archivo = evento.target.files?.[0];
@@ -44,29 +43,29 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
 
     const problema = validarArchivo(archivo, TIPOS_IMAGEN);
     if (problema) {
-      setErrorFoto(problema);
+      avisos.error(problema);
       return;
     }
 
     setSubiendoFoto(true);
-    setErrorFoto(null);
+    const enCurso = avisos.cargando('Subiendo foto…');
     const datosFormulario = new FormData();
     datosFormulario.append('archivo', archivo);
 
     const resultado = await subirArchivo('/api/mi-perfil/foto', datosFormulario);
     setSubiendoFoto(false);
     if (!resultado.ok) {
-      setErrorFoto(resultado.mensaje);
+      avisos.error(resultado.mensaje, enCurso);
       return;
     }
     setFotoUrl(resultado.data.fotoUrl ?? null);
+    avisos.exito('Foto actualizada', enCurso);
   }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEnviando(true);
-    setError(null);
-    setGuardado(false);
+    const enCurso = avisos.cargando('Guardando…');
 
     try {
       const respuesta = await fetch('/api/mi-perfil', {
@@ -82,12 +81,12 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
       const cuerpo = await respuesta.json();
 
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
         return;
       }
-      setGuardado(true);
+      avisos.exito('Perfil actualizado', enCurso);
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviando(false);
     }
@@ -102,17 +101,6 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
         </Link>
       </div>
       <p className={styles.texto}>Todo acá es opcional — nada de esto te bloquea nada.</p>
-
-      {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      )}
-      {guardado && !error && (
-        <p className={styles.ayuda} role="status">
-          Guardado.
-        </p>
-      )}
 
       <div className={propios.filaFoto}>
         <button
@@ -140,11 +128,6 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
           >
             {subiendoFoto ? 'Subiendo…' : 'Cambiar foto'}
           </button>
-          {errorFoto && (
-            <p className={styles.error} role="alert">
-              {errorFoto}
-            </p>
-          )}
         </div>
       </div>
 

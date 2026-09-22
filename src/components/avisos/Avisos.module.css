@@ -1,0 +1,121 @@
+/**
+ * Abajo, sobre el contenido, nunca dentro del flujo: el aviso no empuja
+ * nada al aparecer ni deja un hueco al irse.
+ *
+ * Abajo y no arriba porque en un teléfono el pulgar y la mirada están
+ * ahí, que es de donde viene el toque que disparó la acción. El
+ * `bottom` deja libre la barra de navegación inferior (78px con su
+ * espaciador) más el área segura del dispositivo.
+ */
+.contenedor {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.aviso {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--radio-tarjeta);
+  border: 1px solid transparent;
+  box-shadow: 0 6px 20px rgba(14, 23, 32, 0.16);
+  animation: entrar 180ms ease-out;
+}
+
+/* Quien pidió menos movimiento lo ve aparecer sin desplazamiento. */
+@media (prefers-reduced-motion: reduce) {
+  .aviso {
+    animation: none;
+  }
+  .giro {
+    animation: none;
+  }
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mensaje {
+  flex: 1;
+  margin: 0;
+  font: 600 14px/1.35 var(--fuente-texto);
+}
+
+.icono {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.giro {
+  transform-origin: 50% 50%;
+  animation: girar 900ms linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Los tres tonos salen de la semántica del sistema (`04`, sección 6). */
+.cargando {
+  background: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto-secundario);
+}
+
+.exito {
+  background: var(--exito-fondo);
+  border-color: var(--exito);
+  color: var(--exito-texto);
+}
+
+.error {
+  background: var(--error-fondo);
+  border-color: var(--error-borde);
+  color: var(--error-texto);
+}
+
+/* 44px de área táctil, aunque la cruz mida 14 (`08`, sección 10). */
+.cerrar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -12px -8px -12px 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+  border-radius: var(--radio-boton);
+}

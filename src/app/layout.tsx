@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { Barlow, Barlow_Condensed } from 'next/font/google';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
+import { ProveedorAvisos } from '@/components/avisos/Avisos';
 import './globals.css';
 
 const barlow = Barlow({
@@ -49,7 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable}`}>
       <body>
-        {children}
+        {/* Los avisos de una acción salen siempre del mismo lugar, en
+            cualquier pantalla, así que el proveedor vive acá arriba. */}
+        <ProveedorAvisos>{children}</ProveedorAvisos>
         <Analytics />
       </body>
     </html>

@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { PanelSolicitudesIngreso } from './PanelSolicitudesIngreso';
+import { ProveedorAvisos } from '@/components/avisos/Avisos';
 
 afterEach(() => {
   cleanup();
@@ -57,19 +58,24 @@ describe('PanelSolicitudesIngreso', () => {
     await waitFor(() => expect(getByText('Rechazada')).toBeTruthy());
   });
 
-  it('si la API falla, muestra el error y la fila sigue accionable', async () => {
+  // El error ya no vive dentro del panel: lo muestra el aviso, que
+  // necesita su proveedor montado alrededor.
+  it('si la API falla, el error sale por el aviso y la fila sigue accionable', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({ ok: false, error: { mensaje: 'No se pudo.' } }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByText, getAllByText } = render(
-      <PanelSolicitudesIngreso equipoId="eq-1" solicitudes={SOLICITUDES} />,
+    const { getByText, getAllByText, container } = render(
+      <ProveedorAvisos>
+        <PanelSolicitudesIngreso equipoId="eq-1" solicitudes={SOLICITUDES} />
+      </ProveedorAvisos>,
     );
     fireEvent.click(getAllByText('Aceptar')[0]!);
 
     await waitFor(() => expect(getByText('No se pudo.')).toBeTruthy());
+    expect(container.querySelector('[role="alert"]')).toBeTruthy();
     expect(getAllByText('Aceptar')).toHaveLength(2);
   });
 });
