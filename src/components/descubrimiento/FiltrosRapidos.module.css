@@ -1,0 +1,60 @@
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/**
+ * Una sola línea que se desplaza al costado, en vez de varias líneas que
+ * empujan los resultados hacia abajo. Reportado en vivo: los filtros se
+ * comían el alto de la pantalla antes del primer torneo.
+ *
+ * Los márgenes negativos sangran la fila hasta el borde del teléfono,
+ * así se ve que hay más chips del lado de afuera; el padding los vuelve
+ * a alinear con el resto del contenido.
+ */
+.fila {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(-1 * var(--espacio-pantalla-x));
+  padding: 0 var(--espacio-pantalla-x);
+}
+
+.fila::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  /* `flex: none` o el chip se comprime hasta cortar su texto. */
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radio-pill);
+  border: 1.5px solid var(--borde-neutro);
+  background: var(--color-superficie);
+  font: 700 13px/1 var(--fuente-texto);
+  color: var(--color-texto);
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* El activo no se distingue solo por el color: el borde cambia de grosor
+   aparente y `aria-pressed` lo dice en voz alta (`08`, 11.10). */
+.chipActivo {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--acento-oscuro);
+  outline-offset: 2px;
+}

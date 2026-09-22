@@ -1,11 +1,19 @@
 import type { Metadata } from 'next';
 import { Fragment } from 'react';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { NavInferior } from '@/components/NavInferior';
+import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
+import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
+import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
+import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { listarCiudadesCacheado } from '../torneos/_datos';
+import { elegirCiudadEnEquipos } from '../torneos/_acciones';
 import { buscarEquiposCacheado } from './_datos';
 import styles from './pagina.module.css';
 
@@ -28,9 +36,18 @@ interface SearchParams {
  * Buscador de equipos — el nav inferior tenía "Buscar" apuntando a
  * Descubrimiento (torneos), duplicando el tab "Torneos" sin agregar
  * nada; lo que faltaba era justamente esto, poder buscar equipos.
- * A diferencia de Descubrimiento (D-90), la ciudad acá no es un
- * contexto obligatorio: es un directorio por nombre, no una vista por
- * defecto de "lo mío".
+ *
+ * Misma estructura que `/torneos` —buscador, ubicación, chips,
+ * resultados— con los mismos componentes: pasar de una pantalla a la
+ * otra tiene que sentirse el mismo sistema de descubrimiento. Cambian
+ * el título, el placeholder y las opciones de los chips; no se agregó
+ * ningún criterio de filtrado que no existiera.
+ *
+ * La diferencia con Descubrimiento (D-90) se mantiene: acá la ciudad no
+ * es un contexto **obligatorio** —sin elegir ninguna se ven todos los
+ * equipos, porque esto es un directorio por nombre— pero cuando ya hay
+ * una elegida se respeta, y es la misma cookie, así que elegirla en una
+ * pantalla vale para la otra.
  */
 export default async function PaginaBuscarEquipos({
   searchParams,
@@ -38,7 +55,15 @@ export default async function PaginaBuscarEquipos({
   searchParams: Promise<SearchParams>;
 }) {
   const parametros = await searchParams;
+  const cookieStore = await cookies();
+  const ciudadId = cookieStore.get(NOMBRE_COOKIE_CIUDAD)?.value;
+  const provincias = await listarCiudadesCacheado();
+  const ciudadActual = provincias
+    .flatMap((provincia) => provincia.ciudades)
+    .find((ciudad) => ciudad.id === ciudadId);
+
   const resultado = await buscarEquiposCacheado({
+    ciudadId: ciudadActual?.id,
     texto: parametros.q?.trim() || undefined,
     modalidad: MODALIDADES.includes(parametros.modalidad as (typeof MODALIDADES)[number])
       ? (parametros.modalidad as (typeof MODALIDADES)[number])
@@ -55,50 +80,64 @@ export default async function PaginaBuscarEquipos({
     <div className={styles.pagina}>
       <header className={styles.hero}>
         <h1 className={`fuente-display ${styles.tituloHero}`}>Equipos</h1>
-        <form method="get">
-          <div className={styles.busqueda}>
-            <input
-              type="search"
-              name="q"
-              placeholder="Buscar por nombre…"
-              aria-label="Buscar equipo por nombre"
-              defaultValue={parametros.q ?? ''}
-              className={styles.campoBusqueda}
-            />
-          </div>
-          <div className={styles.filtros}>
-            <select
-              name="modalidad"
-              aria-label="Filtrar por modalidad"
-              defaultValue={parametros.modalidad ?? ''}
-            >
-              <option value="">Cualquier modalidad</option>
-              {MODALIDADES.map((modalidad) => (
-                <option key={modalidad} value={modalidad}>
-                  {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
-                </option>
-              ))}
-            </select>
-            <select
-              name="categoriaGenero"
-              aria-label="Filtrar por categoría"
-              defaultValue={parametros.categoriaGenero ?? ''}
-            >
-              <option value="">Cualquier categoría</option>
-              {CATEGORIAS_GENERO.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta}
-                </option>
-              ))}
-            </select>
-            <button type="submit" className={styles.botonFiltrar}>
-              Buscar
-            </button>
-          </div>
-        </form>
+        <CampoBusqueda
+          accion="/equipos"
+          placeholder="Nombre del equipo"
+          etiqueta="Buscar equipo por nombre"
+          valorInicial={parametros.q}
+          parametrosOcultos={{
+            modalidad: parametros.modalidad,
+            categoriaGenero: parametros.categoriaGenero,
+          }}
+        />
       </header>
 
       <div className={styles.contenido}>
+        <FilaUbicacion ciudad={ciudadActual?.nombre ?? null}>
+          <SelectorDeCiudad
+            provincias={provincias}
+            ciudadActualId={ciudadId}
+            alElegirCiudad={elegirCiudadEnEquipos}
+          />
+        </FilaUbicacion>
+
+        <FiltrosRapidos
+          accion="/equipos"
+          parametrosActuales={{
+            q: parametros.q,
+            modalidad: parametros.modalidad,
+            categoriaGenero: parametros.categoriaGenero,
+          }}
+          filas={[
+            {
+              etiqueta: 'Filtrar por modalidad',
+              parametros: [
+                {
+                  nombre: 'modalidad',
+                  activo: parametros.modalidad ?? '',
+                  opciones: MODALIDADES.map((modalidad) => ({
+                    valor: modalidad,
+                    etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+                  })),
+                },
+              ],
+            },
+            {
+              etiqueta: 'Filtrar por categoría',
+              parametros: [
+                {
+                  nombre: 'categoriaGenero',
+                  activo: parametros.categoriaGenero ?? '',
+                  opciones: CATEGORIAS_GENERO.map((categoria) => ({
+                    valor: categoria,
+                    etiqueta: obtenerEtiqueta('torneo.categoriaGenero', categoria).etiqueta,
+                  })),
+                },
+              ],
+            },
+          ]}
+        />
+
         {resultado.equipos.length === 0 ? (
           <EstadoVacio mensaje="No encontramos equipos con esos filtros." />
         ) : (

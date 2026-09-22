@@ -12,10 +12,14 @@ import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { VALORES_DURACION_TORNEO, etiquetaDuracionTorneo } from '@/lib/duracionTorneo';
-import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from './_constantes';
+import { NOMBRE_COOKIE_CATEGORIA_GENERO, NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { elegirCiudad } from './_acciones';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { agruparCertamenesContiguos } from './_agruparCertamenes';
-import { SelectorDeCiudad } from './SelectorDeCiudad';
+import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
+import { CampoBusqueda } from '@/components/descubrimiento/CampoBusqueda';
+import { FilaUbicacion } from '@/components/descubrimiento/FilaUbicacion';
+import { FiltrosRapidos } from '@/components/descubrimiento/FiltrosRapidos';
 import { SelectorDeCategoriaGenero } from './SelectorDeCategoriaGenero';
 import { EnlaceIngresar } from './EnlaceIngresar';
 import styles from './pagina.module.css';
@@ -83,7 +87,7 @@ export default async function PaginaDescubrimiento({
         </header>
         <div className={styles.contenido}>
           <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
-          <SelectorDeCiudad provincias={provincias} />
+          <SelectorDeCiudad provincias={provincias} alElegirCiudad={elegirCiudad} />
         </div>
         <NavInferior activo="torneos" />
       </div>
@@ -131,105 +135,85 @@ export default async function PaginaDescubrimiento({
           </div>
         </div>
         <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
-        <form method="get" className={styles.busqueda}>
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            aria-hidden
-          >
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <input
-            type="search"
-            name="q"
-            placeholder="Nombre del torneo"
-            defaultValue={parametros.q ?? ''}
-            className={styles.campoBusqueda}
-          />
-        </form>
+        <CampoBusqueda
+          accion="/torneos"
+          placeholder="Nombre del torneo"
+          etiqueta="Buscar torneo por nombre"
+          valorInicial={parametros.q}
+          parametrosOcultos={{
+            duracion: parametros.duracion,
+            modalidad: parametros.modalidad,
+            categoriaEdad: parametros.categoriaEdad,
+            abiertas: parametros.abiertas,
+          }}
+        />
       </header>
 
       <div className={styles.contenido}>
-        <details className={styles.cambiarCiudad}>
-          <summary>{ciudadActual?.nombre ?? 'Cambiar ciudad'}</summary>
-          <SelectorDeCiudad provincias={provincias} ciudadActualId={ciudadId} />
-        </details>
+        <FilaUbicacion ciudad={ciudadActual?.nombre ?? null}>
+          <SelectorDeCiudad
+            provincias={provincias}
+            ciudadActualId={ciudadId}
+            alElegirCiudad={elegirCiudad}
+          />
+        </FilaUbicacion>
 
-        <div className={styles.bloqueFiltros}>
-          <form method="get" className={styles.filtrosDuracion} aria-label="Filtrar por duración">
-            {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
-            {parametros.modalidad && (
-              <input type="hidden" name="modalidad" value={parametros.modalidad} />
-            )}
-            {parametros.categoriaEdad && (
-              <input type="hidden" name="categoriaEdad" value={parametros.categoriaEdad} />
-            )}
-            {parametros.abiertas && (
-              <input type="hidden" name="abiertas" value={parametros.abiertas} />
-            )}
-            {VALORES_DURACION_TORNEO.map((valor) => {
-              const activo = duracion === valor;
-              return (
-                <button
-                  key={valor}
-                  type="submit"
-                  name="duracion"
-                  /* Sin chip encendido el filtro no se aplica, así que tocar el
-                     chip activo manda `""` y lo apaga: el chip "Cualquier
-                     duración" era una fila entera para decir eso mismo. */
-                  value={activo ? '' : valor}
-                  aria-pressed={activo}
-                  className={
-                    activo
-                      ? `${styles.chipDuracion} ${styles.chipDuracionActivo}`
-                      : styles.chipDuracion
-                  }
-                >
-                  {etiquetaDuracionTorneo(valor)}
-                </button>
-              );
-            })}
-          </form>
-
-          <form method="get" className={styles.filtros}>
-            {parametros.q && <input type="hidden" name="q" value={parametros.q} />}
-            {duracion && <input type="hidden" name="duracion" value={duracion} />}
-            <select name="modalidad" defaultValue={parametros.modalidad ?? ''}>
-              <option value="">Cualquier modalidad</option>
-              {MODALIDADES.map((modalidad) => (
-                <option key={modalidad} value={modalidad}>
-                  {obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta}
-                </option>
-              ))}
-            </select>
-            <select name="categoriaEdad" defaultValue={parametros.categoriaEdad ?? ''}>
-              <option value="">Cualquier categoría</option>
-              {CATEGORIAS_EDAD.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta}
-                </option>
-              ))}
-            </select>
-            <label className={styles.checkbox}>
-              <input
-                type="checkbox"
-                name="abiertas"
-                value="1"
-                defaultChecked={parametros.abiertas === '1'}
-              />
-              Solo inscripciones abiertas
-            </label>
-            <button type="submit" className={styles.botonFiltrar}>
-              Filtrar
-            </button>
-          </form>
-        </div>
+        <FiltrosRapidos
+          accion="/torneos"
+          parametrosActuales={{
+            q: parametros.q,
+            duracion: parametros.duracion,
+            modalidad: parametros.modalidad,
+            categoriaEdad: parametros.categoriaEdad,
+            abiertas: parametros.abiertas,
+          }}
+          filas={[
+            {
+              etiqueta: 'Filtrar por duración e inscripciones',
+              parametros: [
+                {
+                  nombre: 'duracion',
+                  activo: duracion ?? '',
+                  opciones: VALORES_DURACION_TORNEO.map((valor) => ({
+                    valor,
+                    etiqueta: etiquetaDuracionTorneo(valor),
+                  })),
+                },
+                {
+                  nombre: 'abiertas',
+                  activo: parametros.abiertas === '1' ? '1' : '',
+                  opciones: [{ valor: '1', etiqueta: 'Inscripciones abiertas' }],
+                },
+              ],
+            },
+            {
+              etiqueta: 'Filtrar por modalidad',
+              parametros: [
+                {
+                  nombre: 'modalidad',
+                  activo: parametros.modalidad ?? '',
+                  opciones: MODALIDADES.map((modalidad) => ({
+                    valor: modalidad,
+                    etiqueta: obtenerEtiqueta('torneo.modalidad', modalidad).etiqueta,
+                  })),
+                },
+              ],
+            },
+            {
+              etiqueta: 'Filtrar por categoría',
+              parametros: [
+                {
+                  nombre: 'categoriaEdad',
+                  activo: parametros.categoriaEdad ?? '',
+                  opciones: CATEGORIAS_EDAD.map((categoria) => ({
+                    valor: categoria,
+                    etiqueta: obtenerEtiqueta('torneo.categoriaEdad', categoria).etiqueta,
+                  })),
+                },
+              ],
+            },
+          ]}
+        />
 
         {resultado.torneos.length === 0 ? (
           <>
@@ -248,7 +232,7 @@ export default async function PaginaDescubrimiento({
             <EstadoVacio
               mensaje={
                 resultado.sugerenciaProvincia
-                  ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — elegí otra ciudad de esa provincia en "Cambiar ciudad".`
+                  ? `Todavía no hay torneos en ${ciudadActual?.nombre}. La provincia de ${resultado.sugerenciaProvincia.nombre} tiene ${resultado.sugerenciaProvincia.cantidadTorneos} torneo${resultado.sugerenciaProvincia.cantidadTorneos === 1 ? '' : 's'} — tocá la ciudad acá arriba para elegir otra de esa provincia.`
                   : 'No encontramos torneos con esos filtros — probá sacar alguno.'
               }
             />

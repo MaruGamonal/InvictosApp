@@ -1,0 +1,36 @@
+/* Vive dentro del hero oscuro de las dos pantallas, así que es blanco
+   sobre el ink, no una superficie del cuerpo. */
+.busqueda {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--blanco);
+  border-radius: var(--radio-boton);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* 44px de alto mínimo, el mismo que los chips de abajo (`08`, 10). */
+  min-height: 44px;
+  color: var(--gris-terciario);
+}
+
+.lupa {
+  flex: none;
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  border: none;
+  outline: none;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-texto);
+  background: transparent;
+}
+
+.campo::placeholder {
+  color: var(--gris-claro-sobre-oscuro);
+}

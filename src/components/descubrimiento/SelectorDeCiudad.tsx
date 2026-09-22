@@ -1,13 +1,30 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { elegirCiudad } from './_acciones';
-import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import styles from './SelectorDeCiudad.module.css';
 
+/**
+ * Mismo shape que `ProvinciaListada` (`@/services/descubrimiento/listarCiudades`),
+ * declarado acá en vez de importado: un componente de `src/components/`
+ * no puede depender de `src/services/` (`boundaries/dependencies`).
+ * Mismo criterio que `BuscadorCiudad`.
+ */
+export interface ProvinciaConCiudadesYTorneos {
+  id: string;
+  nombre: string;
+  ciudades: Array<{ id: string; nombre: string; cantidadTorneos: number }>;
+}
+
 export interface SelectorDeCiudadProps {
-  provincias: ProvinciaListada[];
+  provincias: ProvinciaConCiudadesYTorneos[];
   ciudadActualId?: string;
+  /**
+   * Server Action que guarda la ciudad. Llega por prop y no se importa
+   * acá porque `/torneos` y `/equipos` vuelven cada una a su pantalla:
+   * antes el selector redirigía siempre a `/torneos`, que al compartirlo
+   * habría sacado de Equipos a quien solo quería cambiar de ciudad.
+   */
+  alElegirCiudad: (ciudadId: string) => Promise<void>;
 }
 
 /**
@@ -18,7 +35,11 @@ export interface SelectorDeCiudadProps {
  * reordena). Cada ciudad es un botón que dispara `elegirCiudad`, la
  * Server Action que guarda la cookie y vuelve a `/torneos` (`_acciones.ts`).
  */
-export function SelectorDeCiudad({ provincias, ciudadActualId }: SelectorDeCiudadProps) {
+export function SelectorDeCiudad({
+  provincias,
+  ciudadActualId,
+  alElegirCiudad,
+}: SelectorDeCiudadProps) {
   const [busqueda, setBusqueda] = useState('');
 
   const provinciasFiltradas = useMemo(() => {
@@ -56,7 +77,7 @@ export function SelectorDeCiudad({ provincias, ciudadActualId }: SelectorDeCiuda
                 <button
                   key={ciudad.id}
                   type="submit"
-                  formAction={elegirCiudad.bind(null, ciudad.id)}
+                  formAction={alElegirCiudad.bind(null, ciudad.id)}
                   className={
                     ciudad.id === ciudadActualId
                       ? `${styles.ciudad} ${styles.ciudadActual}`
