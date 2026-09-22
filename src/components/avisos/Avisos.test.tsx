@@ -129,4 +129,74 @@ describe('Avisos', () => {
     expect(() => avisador.exito('Equipo actualizado')).not.toThrow();
     expect(() => avisador.error('Algo falló')).not.toThrow();
   });
+
+  /**
+   * El bloqueo por cuenta sin confirmar: antes cada pantalla insertaba
+   * su propio bloque dentro del contenido y movía todo lo de abajo.
+   */
+  describe('cuentaNoConfirmada', () => {
+    it('avisa qué hacer y ofrece reenviar, sin irse solo', () => {
+      const { queryByText, getByRole } = montar();
+
+      act(() => avisador.cuentaNoConfirmada());
+      expect(queryByText(/Confirmá tu cuenta para continuar/)).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+
+      act(() => vi.advanceTimersByTime(60_000));
+      expect(queryByText(/Confirmá tu cuenta para continuar/)).toBeTruthy();
+    });
+
+    it('cada pantalla puede precisar el mensaje sin rearmar el aviso', () => {
+      const { queryByText, getByRole } = montar();
+      act(() => avisador.cuentaNoConfirmada('Confirmá tu cuenta para crear un equipo.'));
+      expect(queryByText('Confirmá tu cuenta para crear un equipo.')).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+    });
+
+    it('al reenviar pasa a «Reenviando…» y después a confirmado, en el mismo aviso', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const { queryByText, getByRole, container } = montar();
+      act(() => avisador.cuentaNoConfirmada());
+      act(() => {
+        fireEvent.click(getByRole('button', { name: 'Reenviar email' }));
+      });
+
+      expect(queryByText('Reenviando el enlace…')).toBeTruthy();
+      expect(container.querySelectorAll('[role="status"], [role="alert"]')).toHaveLength(1);
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(queryByText(/Te reenviamos el enlace/)).toBeTruthy();
+      expect(fetchMock).toHaveBeenCalledWith('/api/reenviar-confirmacion', { method: 'POST' });
+
+      vi.unstubAllGlobals();
+    });
+
+    it('si el reenvío falla, lo dice y deja volver a intentarlo', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+
+      const { queryByText, getByRole } = montar();
+      act(() => avisador.cuentaNoConfirmada());
+      act(() => {
+        fireEvent.click(getByRole('button', { name: 'Reenviar email' }));
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(queryByText('No pudimos reenviarlo. Probá de nuevo.')).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+
+      vi.unstubAllGlobals();
+    });
+
+    it('la advertencia trae su propio ícono: no se distingue solo por el color', () => {
+      const { container } = montar();
+      act(() => avisador.cuentaNoConfirmada());
+      expect(container.querySelector('svg')).toBeTruthy();
+    });
+  });
 });

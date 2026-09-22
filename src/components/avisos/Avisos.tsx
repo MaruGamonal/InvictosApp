@@ -34,12 +34,19 @@ import styles from './Avisos.module.css';
  * avisarlo, así que se cierra a mano, con un botón de 44px.
  */
 
-export type TonoAviso = 'cargando' | 'exito' | 'error';
+export type TonoAviso = 'cargando' | 'exito' | 'error' | 'advertencia';
+
+export interface AccionDeAviso {
+  etiqueta: string;
+  alTocar: () => void;
+}
 
 export interface Aviso {
   id: number;
   tono: TonoAviso;
   mensaje: string;
+  /** Botón secundario, para cuando avisar no alcanza y hay algo que hacer. */
+  accion?: AccionDeAviso;
 }
 
 /** Suficiente para leer «Equipo actualizado» sin quedarse en pantalla. */
@@ -54,6 +61,18 @@ export interface Avisador {
   cargando: (mensaje: string) => number;
   exito: (mensaje: string, reemplazaA?: number) => void;
   error: (mensaje: string, reemplazaA?: number) => void;
+  /**
+   * El bloqueo por cuenta sin confirmar, igual en toda la aplicación.
+   *
+   * Antes cada pantalla insertaba un bloque dentro del contenido: el
+   * botón «Pedir sumarme» directamente se reemplazaba por el aviso, y
+   * los formularios de alta lo metían entre los campos. En los dos
+   * casos la pantalla cambiaba de alto y lo de abajo se movía de lugar.
+   *
+   * Es una sola función y no un aviso armado en cada pantalla para que
+   * el texto, el tono y el botón de reenviar sean siempre los mismos.
+   */
+  cuentaNoConfirmada: (mensaje?: string) => void;
   cerrar: (id: number) => void;
 }
 
@@ -68,6 +87,7 @@ const AVISADOR_MUDO: Avisador = {
   cargando: () => 0,
   exito: () => {},
   error: () => {},
+  cuentaNoConfirmada: () => {},
   cerrar: () => {},
 };
 
@@ -99,7 +119,12 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
   }, []);
 
   const avisador = useMemo<Avisador>(() => {
-    function mostrar(tono: TonoAviso, mensaje: string, reemplazaA?: number): number {
+    function mostrar(
+      tono: TonoAviso,
+      mensaje: string,
+      reemplazaA?: number,
+      accion?: AccionDeAviso,
+    ): number {
       const id = siguienteId.current++;
 
       if (reemplazaA !== undefined) {
@@ -111,7 +136,7 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
       }
 
       setAvisos((actuales) => {
-        const nuevo: Aviso = { id, tono, mensaje };
+        const nuevo: Aviso = { id, tono, mensaje, accion };
         if (reemplazaA === undefined) return [...actuales, nuevo];
         // En el lugar del que reemplaza: el aviso no salta de posición
         // al pasar de «Guardando…» a «Equipo actualizado».
@@ -122,8 +147,8 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
         return siguiente;
       });
 
-      // «Guardando…» dura lo que dure la operación; el error, hasta que
-      // lo cierren. Solo el éxito se va solo.
+      // «Guardando…» dura lo que dure la operación; el error y la
+      // advertencia, hasta que los cierren. Solo el éxito se va solo.
       if (tono === 'exito') {
         temporizadores.current.set(
           id,
@@ -145,6 +170,37 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
       error: (mensaje, reemplazaA) => {
         mostrar('error', mensaje, reemplazaA);
       },
+      cuentaNoConfirmada: (mensaje) => {
+        const texto = mensaje ?? MENSAJE_CUENTA_NO_CONFIRMADA;
+
+        function pedirReenvio(idActual: number) {
+          const enCurso = mostrar('cargando', 'Reenviando el enlace…', idActual);
+          void fetch('/api/reenviar-confirmacion', { method: 'POST' })
+            .then((respuesta) => {
+              if (respuesta.ok) {
+                mostrar('exito', 'Te reenviamos el enlace — revisá tu correo.', enCurso);
+                return;
+              }
+              mostrar('error', 'No pudimos reenviarlo. Probá de nuevo.', enCurso, {
+                etiqueta: 'Reenviar email',
+                alTocar: () => pedirReenvio(enCurso),
+              });
+            })
+            .catch(() => {
+              mostrar('error', 'No pudimos conectar. Probá de nuevo.', enCurso, {
+                etiqueta: 'Reenviar email',
+                alTocar: () => pedirReenvio(enCurso),
+              });
+            });
+        }
+
+        const id = mostrar('advertencia', texto, undefined, {
+          etiqueta: 'Reenviar email',
+          // El id que reemplaza es el del aviso que se está mostrando,
+          // así el «Reenviando…» ocupa su lugar en vez de apilarse.
+          alTocar: () => pedirReenvio(id),
+        });
+      },
       cerrar,
     };
   }, [cerrar]);
@@ -157,14 +213,20 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
   );
 }
 
+/** Texto único del bloqueo: qué pasa y qué hacer para seguir. */
+const MENSAJE_CUENTA_NO_CONFIRMADA = 'Confirmá tu cuenta para continuar — revisá tu correo.';
+
 const CLASE_POR_TONO: Record<TonoAviso, string> = {
   cargando: styles.cargando!,
   exito: styles.exito!,
   error: styles.error!,
+  advertencia: styles.advertencia!,
 };
 
 function ListaDeAvisos({ avisos, cerrar }: { avisos: Aviso[]; cerrar: (id: number) => void }) {
   const hayError = avisos.some((aviso) => aviso.tono === 'error');
+  /** Un aviso que trae algo para hacer no se puede ir solo. */
+  const persistente = (tono: TonoAviso) => tono === 'error' || tono === 'advertencia';
 
   return (
     <div
@@ -183,7 +245,12 @@ function ListaDeAvisos({ avisos, cerrar }: { avisos: Aviso[]; cerrar: (id: numbe
         >
           <IconoDeTono tono={aviso.tono} />
           <p className={styles.mensaje}>{aviso.mensaje}</p>
-          {aviso.tono === 'error' && (
+          {aviso.accion && (
+            <button type="button" className={styles.accion} onClick={aviso.accion.alTocar}>
+              {aviso.accion.etiqueta}
+            </button>
+          )}
+          {persistente(aviso.tono) && (
             <button
               type="button"
               className={styles.cerrar}
@@ -207,10 +274,21 @@ function ListaDeAvisos({ avisos, cerrar }: { avisos: Aviso[]; cerrar: (id: numbe
 }
 
 /**
- * La forma, no solo el color. El tilde, el triángulo y el disco girando
- * se distinguen en escala de grises y con cualquier daltonismo.
+ * La forma, no solo el color. El tilde, el triángulo, el círculo con la
+ * "i" y el disco girando se distinguen en escala de grises y con
+ * cualquier daltonismo.
  */
 function IconoDeTono({ tono }: { tono: TonoAviso }) {
+  if (tono === 'advertencia') {
+    return (
+      <svg className={styles.icono} viewBox="0 0 16 16" aria-hidden focusable="false">
+        <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M8 4.6v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="8" cy="11.4" r="0.9" fill="currentColor" />
+      </svg>
+    );
+  }
+
   if (tono === 'cargando') {
     return (
       <svg className={styles.icono} viewBox="0 0 16 16" aria-hidden focusable="false">

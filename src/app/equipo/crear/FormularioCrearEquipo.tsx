@@ -5,7 +5,7 @@ import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades';
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
-import { AvisoCuentaNoConfirmada } from '@/components/AvisoCuentaNoConfirmada';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
 
 interface Props {
@@ -41,7 +41,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   const [ciudadId, setCiudadId] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cuentaNoConfirmada, setCuentaNoConfirmada] = useState<string | null>(null);
+  const avisos = useAvisos();
   const [escudoFallido, setEscudoFallido] = useState<{ equipoId: string; mensaje: string } | null>(
     null,
   );
@@ -74,7 +74,6 @@ export function FormularioCrearEquipo({ provincias }: Props) {
     evento.preventDefault();
     setEnviando(true);
     setError(null);
-    setCuentaNoConfirmada(null);
 
     try {
       const respuesta = await fetch('/api/equipos', {
@@ -90,7 +89,9 @@ export function FormularioCrearEquipo({ provincias }: Props) {
 
       if (!respuesta.ok || !cuerpo.ok) {
         if (cuerpo?.error?.codigo === 'CUENTA_NO_CONFIRMADA') {
-          setCuentaNoConfirmada(cuerpo.error.mensaje);
+          // Por aviso: insertarlo entre los campos movía de lugar todo
+          // lo que venía después, con el formulario ya completo.
+          avisos.cuentaNoConfirmada('Confirmá tu cuenta para crear un equipo — revisá tu correo.');
         } else {
           setError(cuerpo?.error?.mensaje ?? 'Algo salió mal. Probá de nuevo.');
         }
@@ -141,7 +142,6 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
       <p className={styles.texto}>Podés inscribirlo con el plantel vacío y sumar gente después.</p>
 
-      {cuentaNoConfirmada && <AvisoCuentaNoConfirmada mensaje={cuentaNoConfirmada} />}
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.campo}>

@@ -119,3 +119,30 @@
   outline-offset: -4px;
   border-radius: var(--radio-boton);
 }
+
+/* Ni error ni éxito: algo que falta hacer para poder seguir. */
+.advertencia {
+  background: var(--advertencia-fondo);
+  border-color: var(--advertencia);
+  color: var(--advertencia-texto);
+}
+
+/* 44px de alto, como cualquier acción táctil (`08`, sección 10). */
+.accion {
+  flex: none;
+  min-height: 44px;
+  padding: 0 12px;
+  margin: -12px 0;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radio-boton);
+  background: transparent;
+  color: inherit;
+  font: 700 13px/1 var(--fuente-texto);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.accion:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

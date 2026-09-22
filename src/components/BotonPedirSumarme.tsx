@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AvisoCuentaNoConfirmada } from './AvisoCuentaNoConfirmada';
+import { useAvisos } from './avisos/Avisos';
 import styles from './BotonSeguir.module.css';
 
 export interface BotonPedirSumarmeProps {
@@ -34,11 +34,11 @@ type Estado =
   | { paso: 'enviando' }
   | { paso: 'enviado' }
   | { paso: 'ya-soy-miembro' }
-  | { paso: 'error'; mensaje: string }
-  | { paso: 'cuenta-no-confirmada'; mensaje: string };
+  | { paso: 'error'; mensaje: string };
 
 export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedirSumarmeProps) {
   const router = useRouter();
+  const avisos = useAvisos();
   const [estado, setEstado] = useState<Estado>({ paso: 'inicial' });
 
   useEffect(() => {
@@ -74,7 +74,11 @@ export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedi
       }
       if (!respuesta.ok) {
         if (cuerpo?.error?.codigo === 'CUENTA_NO_CONFIRMADA') {
-          setEstado({ paso: 'cuenta-no-confirmada', mensaje: cuerpo.error.mensaje });
+          // Por aviso y no reemplazando el botón: la ficha del equipo
+          // queda exactamente como estaba, con «Pedir sumarme» a la
+          // vista para volver a intentarlo después de confirmar.
+          setEstado({ paso: 'inicial' });
+          avisos.cuentaNoConfirmada();
           return;
         }
         setEstado({
@@ -90,10 +94,6 @@ export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedi
   }
 
   if (estado.paso === 'ya-soy-miembro') return null;
-
-  if (estado.paso === 'cuenta-no-confirmada') {
-    return <AvisoCuentaNoConfirmada mensaje={estado.mensaje} />;
-  }
 
   return (
     <div className={styles.envoltorio}>

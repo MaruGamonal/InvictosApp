@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { BotonPedirSumarme } from './BotonPedirSumarme';
+import { ProveedorAvisos } from './avisos/Avisos';
 
 const push = vi.fn();
 
@@ -73,7 +74,12 @@ describe('BotonPedirSumarme', () => {
     expect(getByRole('button', { name: 'Pedir sumarme' })).not.toBeDisabled();
   });
 
-  it('con la cuenta sin confirmar, muestra el aviso de reenviar enlace en vez del botón', async () => {
+  /**
+   * Antes el aviso reemplazaba al botón: la ficha del equipo cambiaba de
+   * alto y lo de abajo se movía de lugar. Ahora sale por el aviso y la
+   * pantalla queda igual, con «Pedir sumarme» todavía a la vista.
+   */
+  it('con la cuenta sin confirmar avisa sin sacar el botón de la pantalla', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       status: 403,
@@ -84,11 +90,15 @@ describe('BotonPedirSumarme', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByRole, getByText, queryByRole } = render(<BotonPedirSumarme equipoId="e-1" />);
+    const { getByRole, getByText } = render(
+      <ProveedorAvisos>
+        <BotonPedirSumarme equipoId="e-1" />
+      </ProveedorAvisos>,
+    );
     fireEvent.click(getByRole('button', { name: 'Pedir sumarme' }));
 
-    await waitFor(() => expect(getByText('Confirmá tu cuenta para hacer esto.')).toBeTruthy());
-    expect(queryByRole('button', { name: 'Pedir sumarme' })).toBeNull();
-    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
+    await waitFor(() => expect(getByText(/Confirmá tu cuenta/)).toBeTruthy());
+    expect(getByRole('button', { name: 'Pedir sumarme' })).toBeTruthy();
+    expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
   });
 });

@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { FormularioCrearEquipo } from './FormularioCrearEquipo';
+import { ProveedorAvisos } from '@/components/avisos/Avisos';
 
 const assign = vi.fn();
 
@@ -98,7 +99,12 @@ describe('FormularioCrearEquipo', () => {
     expect(assign).not.toHaveBeenCalled();
   });
 
-  it('con la cuenta sin confirmar, muestra el aviso de reenviar enlace en vez del error genérico', async () => {
+  /**
+   * Antes el aviso se insertaba entre los campos y movía de lugar todo
+   * lo que venía después, con el formulario ya completo. Ahora sale por
+   * el aviso y el formulario queda como estaba.
+   */
+  it('con la cuenta sin confirmar avisa sin meter un bloque en el formulario', async () => {
     vi.stubGlobal('location', { assign });
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
@@ -109,14 +115,20 @@ describe('FormularioCrearEquipo', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByLabelText, getByRole, getByText } = render(
-      <FormularioCrearEquipo provincias={[]} />,
+    const { getByLabelText, getByRole, getByText, container } = render(
+      <ProveedorAvisos>
+        <FormularioCrearEquipo provincias={[]} />
+      </ProveedorAvisos>,
     );
     completarCampos(getByLabelText, getByRole);
+    const camposAntes = container.querySelectorAll('form .campo, form label').length;
     fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
 
-    await waitFor(() => expect(getByText('Confirmá tu cuenta para hacer esto.')).toBeTruthy());
-    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
+    await waitFor(() => expect(getByText(/Confirmá tu cuenta/)).toBeTruthy());
+    expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+    // El formulario no cambió: ni un nodo más adentro.
+    expect(container.querySelectorAll('form .campo, form label')).toHaveLength(camposAntes);
+    expect(getByRole('button', { name: 'Crear equipo' })).toBeTruthy();
     expect(assign).not.toHaveBeenCalled();
   });
 
