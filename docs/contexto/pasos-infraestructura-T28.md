@@ -59,6 +59,7 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 | Variable | De dónde sale |
 |---|---|
 | `DATABASE_URL` | Paso 1 — **la cadena del pooler en modo transacción, puerto `6543`**. Ver el aviso de acá abajo: el puerto importa |
+| `DATABASE_URL_MIGRACIONES` | Paso 1 — **la cadena de conexión directa** (`Direct connection`). Solo la usan las migraciones del despliegue, que no pueden ir por el pooler en modo transacción |
 | `NEXT_PUBLIC_SUPABASE_URL` | Paso 1 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Paso 1 |
 | `SUPABASE_SERVICE_ROLE_KEY` | Paso 1 — **solo en el servidor**, nunca con prefijo `NEXT_PUBLIC_` |
@@ -88,6 +89,12 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 > El síntoma engaña: la aplicación anda perfecta con una persona y se cae **solo cuando hay varias a la vez**, que es justo cuando no se está mirando el log. Si la aplicación arranca con una URL en modo sesión, ahora avisa sola en Sentry.
 >
 > **Después de cambiarla hay que redesplegar**: una variable nueva no se aplica a un deploy ya hecho.
+
+> ⚠️ **Las migraciones no pueden ir por el puerto `6543`.** Por eso son dos variables y no una.
+>
+> `node-pg-migrate` se protege de dos despliegues simultáneos con `pg_try_advisory_lock`, que es un lock **de sesión**: vale mientras viva la conexión que lo tomó. En modo transacción cada consulta puede caer en una conexión distinta, así que el lock se toma en una y se intenta liberar en otra. En el mejor caso no protege nada; en el peor **queda tomado en una conexión que nadie va a liberar y el despliegue siguiente se cuelga esperándolo**.
+>
+> Por eso `DATABASE_URL_MIGRACIONES` lleva la **conexión directa**. Corre una vez por despliegue, así que no hay problema de cupo. Si falta y `DATABASE_URL` está en modo transacción, el despliegue **falla de entrada con el motivo escrito**, en vez de dejar el lock colgado.
 
 > ⚠️ **`NEXT_PUBLIC_SITE_URL` faltaba de esta lista y causó un bug real en producción**: sin ella, todo el código cae a `http://localhost:3000` (los mails de confirmación de cuenta, verificación de organización, invitaciones y recuperación de contraseña arman el enlace con esa base) — el enlace del mail termina apuntando a la máquina de quien desarrolló, no al sitio real. **Después de cargarla hay que redesplegar**: una variable nueva no se aplica a un deploy ya hecho.
 >

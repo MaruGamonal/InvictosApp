@@ -19,11 +19,21 @@ export const shorthands = undefined;
  * corrida en el medio, que es exactamente el síntoma que se estaba
  * investigando (el aviso de arranque llega, el de fin no).
  *
- * Cambia solo el plazo: el resto del job queda igual que en
- * `secreto-de-cron-via-vault` (mismo nombre, así que `cron.schedule` lo
- * reemplaza), leyendo el secreto de Vault.
+ * **Cambia solo el plazo.** El resto del job queda igual que en
+ * `tarea-programada-al-host-canonico`, que es la última que lo tocó: el
+ * host **con `www`** —sin él, libcurl descarta la cabecera
+ * `Authorization` al seguir la redirección y la tarea vuelve a dar
+ * 403— y el `ORDER BY created_at DESC` sobre `vault.decrypted_secrets`,
+ * sin el cual el job elige cualquiera de los secretos cargados con ese
+ * nombre. Reescribir el job entero en cada migración es cómodo y
+ * peligroso: cualquier descuido acá deshace un arreglo anterior sin que
+ * nada lo señale.
+ *
+ * Igual que las anteriores, va dentro de un `IF EXISTS` porque `pg_cron`
+ * y Vault no existen en el Postgres local de desarrollo ni en el de CI.
  *
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
+ * @param run {() => void | undefined}
  * @returns {Promise<void> | void}
  */
 export const up = (pgm) => {
@@ -37,11 +47,12 @@ export const up = (pgm) => {
           '0 * * * *',
           $job$
           SELECT net.http_post(
-            url := 'https://invicta.com.ar/api/tareas/confirmar-resultados-vencidos',
+            url := 'https://www.invicta.com.ar/api/tareas/confirmar-resultados-vencidos',
             headers := jsonb_build_object(
               'Authorization', 'Bearer ' || (
                 SELECT decrypted_secret FROM vault.decrypted_secrets
                 WHERE name = 'cron_secret'
+                ORDER BY created_at DESC
                 LIMIT 1
               ),
               'Content-Type', 'application/json'
@@ -58,9 +69,11 @@ export const up = (pgm) => {
 };
 
 /**
- * Vuelve al plazo anterior (30 segundos), no desagenda la tarea.
+ * Vuelve al plazo de 30 segundos, conservando el host canónico y el
+ * orden del secreto. Deshace este cambio puntual, no desagenda la tarea.
  *
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
+ * @param run {() => void | undefined}
  * @returns {Promise<void> | void}
  */
 export const down = (pgm) => {
@@ -74,11 +87,12 @@ export const down = (pgm) => {
           '0 * * * *',
           $job$
           SELECT net.http_post(
-            url := 'https://invicta.com.ar/api/tareas/confirmar-resultados-vencidos',
+            url := 'https://www.invicta.com.ar/api/tareas/confirmar-resultados-vencidos',
             headers := jsonb_build_object(
               'Authorization', 'Bearer ' || (
                 SELECT decrypted_secret FROM vault.decrypted_secrets
                 WHERE name = 'cron_secret'
+                ORDER BY created_at DESC
                 LIMIT 1
               ),
               'Content-Type', 'application/json'
