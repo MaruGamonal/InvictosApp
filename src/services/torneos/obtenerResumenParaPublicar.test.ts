@@ -30,7 +30,14 @@ function mockearDb(opciones: {
         if (texto.includes('FROM torneo t')) {
           const fila =
             opciones.fila === undefined
-              ? { estado: 'draft', ciudad_nombre: 'San Isidro', nivel_verificacion: 'basic' }
+              ? {
+                  estado: 'draft',
+                  ciudad_nombre: 'San Isidro',
+                  organizacion_id: 'org-1',
+                  nivel_verificacion: 'basic',
+                  usuario_titular_id: 'usuario-1',
+                  publicados: '0',
+                }
               : opciones.fila;
           return { rows: fila ? [fila] : [] };
         }
@@ -67,7 +74,10 @@ describe('obtenerResumenParaPublicar', () => {
     expect(resultado).toEqual({
       torneoEstado: 'draft',
       ciudadNombre: 'San Isidro',
+      organizacionId: 'org-1',
       organizacionVerificada: true,
+      soyTitular: true,
+      limitePublicadosAlcanzado: false,
     });
   });
 
@@ -75,7 +85,14 @@ describe('obtenerResumenParaPublicar', () => {
     mockearDb({
       organizacionId: 'org-1',
       rolOrganizacion: 'owner',
-      fila: { estado: 'draft', ciudad_nombre: 'San Isidro', nivel_verificacion: 'unverified' },
+      fila: {
+        estado: 'draft',
+        ciudad_nombre: 'San Isidro',
+        organizacion_id: 'org-1',
+        nivel_verificacion: 'unverified',
+        usuario_titular_id: 'usuario-1',
+        publicados: '0',
+      },
     });
     const { obtenerResumenParaPublicar } = await import('./obtenerResumenParaPublicar');
     const resultado = await obtenerResumenParaPublicar(
@@ -83,5 +100,79 @@ describe('obtenerResumenParaPublicar', () => {
       contextoCon('usuario-1'),
     );
     expect(resultado.organizacionVerificada).toBe(false);
+  });
+
+  /**
+   * D-51 pide ofrecer la verificación en el mismo lugar donde se da la
+   * noticia, y quien la pide es el Titular (`10`, 4.2). Sin este dato,
+   * la pantalla le ofrecía el botón a un Administrador que iba a
+   * recibir SIN_PERMISO al tocarlo.
+   */
+  it('un Administrador que no es el Titular no figura como titular', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'admin',
+      fila: {
+        estado: 'draft',
+        ciudad_nombre: 'San Isidro',
+        organizacion_id: 'org-1',
+        nivel_verificacion: 'unverified',
+        usuario_titular_id: 'otra-persona',
+        publicados: '0',
+      },
+    });
+    const { obtenerResumenParaPublicar } = await import('./obtenerResumenParaPublicar');
+    const resultado = await obtenerResumenParaPublicar(
+      { torneoId: TORNEO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.soyTitular).toBe(false);
+  });
+
+  /**
+   * Avisar del límite **antes** de tocar el botón. `publicarTorneo` lo
+   * vuelve a comprobar: esto es lo que se muestra, no lo que decide.
+   */
+  it('sin verificar y con un torneo ya publicado, el límite figura alcanzado', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      fila: {
+        estado: 'draft',
+        ciudad_nombre: 'San Isidro',
+        organizacion_id: 'org-1',
+        nivel_verificacion: 'unverified',
+        usuario_titular_id: 'usuario-1',
+        publicados: '1',
+      },
+    });
+    const { obtenerResumenParaPublicar } = await import('./obtenerResumenParaPublicar');
+    const resultado = await obtenerResumenParaPublicar(
+      { torneoId: TORNEO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.limitePublicadosAlcanzado).toBe(true);
+  });
+
+  /** Verificada, el límite no existe: puede tener los que quiera. */
+  it('verificada con torneos publicados, el límite no aplica', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      fila: {
+        estado: 'draft',
+        ciudad_nombre: 'San Isidro',
+        organizacion_id: 'org-1',
+        nivel_verificacion: 'trusted',
+        usuario_titular_id: 'usuario-1',
+        publicados: '7',
+      },
+    });
+    const { obtenerResumenParaPublicar } = await import('./obtenerResumenParaPublicar');
+    const resultado = await obtenerResumenParaPublicar(
+      { torneoId: TORNEO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.limitePublicadosAlcanzado).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
 
 export interface AccionesEstadoTorneoProps {
@@ -14,7 +15,17 @@ export interface AccionesEstadoTorneoProps {
 type EstadoDestino =
   'registration_open' | 'registration_closed' | 'in_progress' | 'finished' | 'suspended';
 
-/** UC-18/UC-20 — Publicar y avanzar el estado del torneo (`10`, 4.4). */
+/**
+ * UC-18/UC-20 — Publicar y avanzar el estado del torneo (`10`, 4.4).
+ *
+ * El resultado va al avisador y no a un `<p>` acá arriba: este panel
+ * vive dentro de un acordeón, y un mensaje que aparece adentro corre
+ * hacia abajo todo lo que sigue justo cuando se acaba de tocar el
+ * botón. Publicar sin verificar no falla —el torneo nace no listado
+ * (`06`, D-51)—, así que eso se avisa como lo que es: una noticia, no
+ * un error. Qué hacer al respecto está en el bloque de visibilidad de
+ * esta misma pantalla, que no se va solo.
+ */
 export function AccionesEstadoTorneo({
   torneoId,
   estado,
@@ -22,12 +33,12 @@ export function AccionesEstadoTorneo({
   tienePartidos,
 }: AccionesEstadoTorneoProps) {
   const router = useRouter();
+  const avisos = useAvisos();
   const [enviando, setEnviando] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   async function publicar() {
     setEnviando('publicar');
-    setError(null);
+    const enCurso = avisos.cargando('Publicando el torneo…');
     try {
       const respuesta = await fetch('/api/torneos/publicar', {
         method: 'POST',
@@ -36,12 +47,18 @@ export function AccionesEstadoTorneo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No pudimos publicar el torneo.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos publicar el torneo.', enCurso);
         return;
       }
+      avisos.exito(
+        cuerpo.data?.motivoNoListado === 'organizacion_no_verificada'
+          ? 'Torneo publicado. Todavía no aparece en las búsquedas.'
+          : 'Torneo publicado.',
+        enCurso,
+      );
       router.refresh();
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviando(null);
     }
@@ -49,7 +66,7 @@ export function AccionesEstadoTorneo({
 
   async function avanzar(estadoDestino: EstadoDestino) {
     setEnviando(estadoDestino);
-    setError(null);
+    const enCurso = avisos.cargando('Cambiando el estado…');
     try {
       const respuesta = await fetch('/api/torneos/avanzar-estado', {
         method: 'POST',
@@ -58,12 +75,13 @@ export function AccionesEstadoTorneo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No pudimos cambiar el estado.');
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos cambiar el estado.', enCurso);
         return;
       }
+      avisos.exito('Estado actualizado.', enCurso);
       router.refresh();
     } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
     } finally {
       setEnviando(null);
     }
@@ -71,8 +89,6 @@ export function AccionesEstadoTorneo({
 
   return (
     <div className={styles.formularioChico}>
-      {error && <p className={styles.errorChico}>{error}</p>}
-
       {estado === 'draft' && (
         <>
           {!tieneFormatoDefinido && (

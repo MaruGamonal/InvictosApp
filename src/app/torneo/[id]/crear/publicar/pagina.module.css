@@ -29,3 +29,35 @@
   font-size: 13px;
   color: var(--error-texto);
 }
+
+/* El desenlace del alta cuando el torneo quedó no listado (D-51). */
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filaAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* 44px de área táctil, como cualquier acción (`08`, sección 10). */
+.enlaceSecundario {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 600 14px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+/* La noticia y la salida juntas, como pide D-51. */
+.bloqueVerificacion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}

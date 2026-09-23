@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
+import { BotonVerificarOrganizacion } from '@/components/BotonVerificarOrganizacion';
 import type { OrganizacionListada } from '@/services/organizadores/listarMisOrganizaciones';
 import { elegirOrganizacionActiva } from './_acciones';
 import styles from './ListaMisOrganizaciones.module.css';
@@ -53,6 +54,19 @@ export function ListaMisOrganizaciones({
                   </span>
                 </div>
               </div>
+
+              {/* Sin verificar, los torneos de esta organización no
+                  entran al descubrimiento (`06`, D-51). El badge ya lo
+                  dice; acá va la salida, que antes no existía en
+                  ninguna pantalla. */}
+              {organizacion.nivelVerificacion === 'unverified' && (
+                <BotonVerificarOrganizacion
+                  organizacionId={organizacion.organizacionId}
+                  soyTitular={organizacion.rol === 'owner'}
+                  etiqueta="Verificar"
+                  variante="secundaria"
+                />
+              )}
 
               {esActiva ? (
                 <span className={styles.gestionando}>Gestionando</span>

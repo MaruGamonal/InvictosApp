@@ -2,3 +2,22 @@
   display: flex;
   flex-direction: column;
 }
+
+/* D-51 — el estado de visibilidad y su salida, juntos y sin irse solos. */
+.bloqueVisibilidad {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--informacion);
+  border-radius: var(--radio-tarjeta);
+  background: var(--informacion-fondo);
+}
+
+.textoVisibilidad {
+  margin: 0;
+  font: 400 13px/1.5 var(--fuente-texto);
+  color: var(--informacion-texto);
+}
