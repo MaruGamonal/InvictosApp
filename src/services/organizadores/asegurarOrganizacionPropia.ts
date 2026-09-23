@@ -1,7 +1,7 @@
 import type { Servicio } from '@/lib/servicio';
-import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
+import { resolverOrganizacionActiva } from './resolverOrganizacionActiva';
 
 /**
  * Punto de entrada de "Crear torneo" (Flujo 3 del paquete de diseño):
@@ -16,10 +16,16 @@ import { verificarCuentaConfirmada } from '@/lib/cuentaConfirmada';
  * `SIN_ORGANIZACION` y la pantalla de "Crear torneo" manda a crearla
  * antes de mostrar el formulario.
  *
- * "Propia" es deliberadamente la primera donde figura como Titular
- * (`owner`), no cualquiera donde sea Administrador: crear un torneo
- * nuevo debería caer bajo la organización que la persona misma fundó,
- * no bajo una a la que la invitaron a colaborar.
+ * Resuelve **la organización activa**, la que la persona está
+ * gestionando en el panel, y no "la primera donde es Titular" como
+ * hacía antes. Dos razones: con varias organizaciones, crear un torneo
+ * tiene que caer en la que se está mirando, no en otra; y un
+ * Administrador invitado a una organización ajena sí puede crearle
+ * torneos —`gestionar_torneos` lo habilita— así que excluirlo era un
+ * bloqueo que el propio modelo de permisos no pedía.
+ *
+ * Con una sola organización no hay nada que elegir: es esa. Esa es la
+ * preselección.
  *
  * Reportado en vivo: exige la cuenta confirmada
  * (`verificarCuentaConfirmada`) — se chequea acá, el verdadero punto de
@@ -32,22 +38,23 @@ export interface AsegurarOrganizacionPropiaResultado {
   creada: boolean;
 }
 
+export interface AsegurarOrganizacionPropiaInput {
+  /** La organización que se está gestionando en el panel, si hay una elegida. */
+  organizacionIdPreferida?: string | undefined;
+}
+
 export const asegurarOrganizacionPropia: Servicio<
-  void,
+  AsegurarOrganizacionPropiaInput | void,
   AsegurarOrganizacionPropiaResultado
-> = async (_input, contexto) => {
+> = async (input, contexto) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
   await verificarCuentaConfirmada(contexto);
 
-  const pool = obtenerPool();
-  const { rows } = await pool.query<{ organizacion_id: string }>(
-    `SELECT organizacion_id FROM miembro_organizacion
-     WHERE usuario_id = $1 AND rol = 'owner'
-     ORDER BY organizacion_id LIMIT 1`,
-    [contexto.usuarioId],
+  const activa = await resolverOrganizacionActiva(
+    { organizacionIdPreferida: input?.organizacionIdPreferida },
+    contexto,
   );
-  const existente = rows[0]?.organizacion_id;
-  if (!existente) throw crearError('SIN_ORGANIZACION');
+  if (!activa) throw crearError('SIN_ORGANIZACION');
 
-  return { organizacionId: existente, creada: false };
+  return { organizacionId: activa.organizacionId, creada: false };
 };

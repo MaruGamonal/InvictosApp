@@ -12,7 +12,7 @@ import { EVENTOS_ANALITICA } from '@/lib/analitica';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { VALORES_DURACION_TORNEO, etiquetaDuracionTorneo } from '@/lib/duracionTorneo';
-import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookies';
 import { elegirCiudad } from './_acciones';
 import { buscarTorneosCacheado, listarCiudadesCacheado } from './_datos';
 import { agruparCertamenesContiguos } from './_agruparCertamenes';

@@ -24,7 +24,7 @@ export const metadata: Metadata = { title: conNombreProducto('Perfil público') 
  */
 export default async function PaginaPerfilPublicoOrganizador() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
-  if (!organizacion) redirect('/organizador/gestionar/crear');
+  if (!organizacion) redirect('/organizador/gestionar');
 
   const contexto = await obtenerContextoCacheado();
   const perfil = await obtenerPerfilOrganizador(

@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: conNombreProducto('Torneos de la orga
  */
 export default async function PaginaTorneosDeLaOrganizacion() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
-  if (!organizacion) redirect('/organizador/gestionar/crear');
+  if (!organizacion) redirect('/organizador/gestionar');
 
   const panel = await obtenerPanelCacheado(organizacion.organizacionId);
 

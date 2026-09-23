@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookies';
 
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 

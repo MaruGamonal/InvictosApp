@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: conNombreProducto('Equipo de trabajo'
 /** UC-07 — Equipo de trabajo de la organización: quién administra, además de vos. */
 export default async function PaginaEquipoDeTrabajo() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
-  if (!organizacion) redirect('/organizador/gestionar/crear');
+  if (!organizacion) redirect('/organizador/gestionar');
 
   const contexto = await obtenerContextoCacheado();
   const miembros = await listarMiembros({ organizacionId: organizacion.organizacionId }, contexto);

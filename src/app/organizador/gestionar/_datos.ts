@@ -1,8 +1,11 @@
 import { cache } from 'react';
+import { cookies } from 'next/headers';
 import { construirContexto } from '@/lib/contexto';
 import { resolverOrganizacionActiva } from '@/services/organizadores/resolverOrganizacionActiva';
 import { obtenerPanelOrganizador } from '@/services/organizadores/obtenerPanelOrganizador';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
+import { listarMisOrganizaciones } from '@/services/organizadores/listarMisOrganizaciones';
+import { NOMBRE_COOKIE_ORGANIZACION_ACTIVA } from '@/lib/cookies';
 
 /**
  * Lecturas compartidas por el layout y las páginas de
@@ -14,8 +17,16 @@ import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
 export const obtenerContextoCacheado = cache(() => construirContexto());
 
 export const obtenerOrganizacionActivaCacheada = cache(async () => {
+  const [contexto, cookieStore] = await Promise.all([obtenerContextoCacheado(), cookies()]);
+  return resolverOrganizacionActiva(
+    { organizacionIdPreferida: cookieStore.get(NOMBRE_COOKIE_ORGANIZACION_ACTIVA)?.value },
+    contexto,
+  );
+});
+
+export const obtenerMisOrganizacionesCacheadas = cache(async () => {
   const contexto = await obtenerContextoCacheado();
-  return resolverOrganizacionActiva(undefined, contexto);
+  return listarMisOrganizaciones(undefined, contexto);
 });
 
 export const obtenerPanelCacheado = cache(async (organizacionId: string) => {

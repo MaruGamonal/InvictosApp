@@ -64,4 +64,63 @@ describe('resolverOrganizacionActiva', () => {
       codigo: 'NO_AUTENTICADO',
     });
   });
+
+  /**
+   * La preferencia llega de una cookie, que el cliente controla. Si
+   * bastara con escribir ahí un id ajeno para gestionar esa
+   * organización, sería una escalada de privilegios de una línea.
+   */
+  describe('organización preferida', () => {
+    it('respeta la elegida cuando es una de las suyas', async () => {
+      mockearDb({
+        vinculadas: [
+          { organizacionId: 'org-1', rol: 'owner' },
+          { organizacionId: 'org-2', rol: 'admin' },
+        ],
+        nombre: 'Club del Sur',
+      });
+      const { resolverOrganizacionActiva } = await import('./resolverOrganizacionActiva');
+
+      const resultado = await resolverOrganizacionActiva(
+        { organizacionIdPreferida: 'org-2' },
+        contextoCon('usuario-1'),
+      );
+
+      expect(resultado?.organizacionId).toBe('org-2');
+      expect(resultado?.rol).toBe('admin');
+    });
+
+    it('ignora una organización ajena: la cookie no otorga acceso', async () => {
+      mockearDb({
+        vinculadas: [{ organizacionId: 'org-1', rol: 'owner' }],
+        nombre: 'Liga Palermo',
+      });
+      const { resolverOrganizacionActiva } = await import('./resolverOrganizacionActiva');
+
+      const resultado = await resolverOrganizacionActiva(
+        { organizacionIdPreferida: 'org-de-otra-persona' },
+        contextoCon('usuario-1'),
+      );
+
+      expect(resultado?.organizacionId).toBe('org-1');
+    });
+
+    it('una preferencia vieja no deja a nadie afuera de su propio panel', async () => {
+      // Dejó de ser miembro de la que tenía elegida: cae a la primera
+      // suya en vez de devolver null.
+      mockearDb({
+        vinculadas: [{ organizacionId: 'org-1', rol: 'owner' }],
+        nombre: 'Liga Palermo',
+      });
+      const { resolverOrganizacionActiva } = await import('./resolverOrganizacionActiva');
+
+      const resultado = await resolverOrganizacionActiva(
+        { organizacionIdPreferida: 'org-que-ya-no-administra' },
+        contextoCon('usuario-1'),
+      );
+
+      expect(resultado).not.toBeNull();
+      expect(resultado?.organizacionId).toBe('org-1');
+    });
+  });
 });

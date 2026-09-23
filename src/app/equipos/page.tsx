@@ -12,7 +12,7 @@ import { FiltrosDesplegables } from '@/components/descubrimiento/FiltrosDesplega
 import { SelectorDeCiudad } from '@/components/descubrimiento/SelectorDeCiudad';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookiesDescubrimiento';
+import { NOMBRE_COOKIE_CIUDAD } from '@/lib/cookies';
 import { listarCiudadesCacheado } from '../torneos/_datos';
 import { elegirCiudadEnEquipos } from '../torneos/_acciones';
 import { buscarEquiposCacheado } from './_datos';

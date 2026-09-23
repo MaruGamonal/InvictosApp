@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: conNombreProducto('Invitar Administra
 /** UC-07 — Sumar un Administrador al equipo de trabajo. Solo el Titular (`06`, D-64). */
 export default async function PaginaInvitarAdministrador() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
-  if (!organizacion) redirect('/organizador/gestionar/crear');
+  if (!organizacion) redirect('/organizador/gestionar');
 
   if (organizacion.rol !== 'owner') {
     return (

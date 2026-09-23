@@ -55,7 +55,6 @@ const EXCEPCIONES = new Set<string>([
   'equipos/obtenerEquipoPublico.ts', // T23 — lista el plantel y el cuerpo técnico del equipo; es la participación pública, no una decisión de permiso
   'equipos/obtenerGestionEquipo.ts', // Pantalla de gestión del plantel — lista invitaciones y solicitudes pendientes; es el propio dato que gestiona, no una decisión de permiso
   'inicio/obtenerInicio.ts', // Pantalla de Inicio — lista los equipos y organizaciones propias para armar el dashboard; es el propio dato de la persona, no una decisión de permiso
-  'organizadores/asegurarOrganizacionPropia.ts', // Punto de entrada de "Crear torneo" — busca la organización propia (o la crea) igual que crearOrganizacion; no decide un permiso
 ]);
 
 function listarArchivosTs(dir: string): string[] {
