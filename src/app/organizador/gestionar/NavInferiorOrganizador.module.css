@@ -9,10 +9,13 @@
   bottom: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  max-width: 560px;
+  /* Cuatro, como el nav de Jugador. Quedó en cinco cuando se sacaron
+     "Crear org." e "Invitar admin": la quinta columna seguía ahí,
+     vacía, y el menú no llegaba al borde de la pantalla. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 480px;
   margin: 0 auto;
-  padding: 8px 2px calc(14px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 4px calc(14px + env(safe-area-inset-bottom, 0px));
   background: var(--color-superficie);
   border-top: 1px solid var(--color-borde);
 }

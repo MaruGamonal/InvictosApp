@@ -7,61 +7,6 @@
   background: var(--color-fondo);
 }
 
-.encabezado {
-  background: var(--identidad-fondo);
-  color: var(--identidad-texto);
-  padding: 18px var(--espacio-pantalla-x) 22px;
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ciudad {
-  font: 600 11px/1 var(--fuente-texto);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--identidad-texto-secundario);
-  margin-bottom: 8px;
-}
-
-.filaUsuario {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filaUsuarioTexto {
-  flex: 1;
-}
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  flex: none;
-  border-radius: var(--radio-pill);
-  background: var(--ink-700);
-  color: var(--blanco);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--fuente-display);
-  font-weight: 700;
-  font-size: 17px;
-}
-
-.saludo {
-  font: 400 13px/1.2 var(--fuente-texto);
-  color: var(--identidad-texto-secundario);
-}
-
-.titulo {
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
 .contenido {
   flex: 1;
   padding: 16px var(--espacio-pantalla-x) 24px;

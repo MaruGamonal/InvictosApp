@@ -90,8 +90,9 @@ export default async function PaginaPerfilOrganizador({
           <Escudo src={perfil.logoUrl} nombre={perfil.nombre} tamano={64} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{perfil.nombre}</h1>
+            {/* Sin la ciudad, a pedido: lo que importa de una
+                organización es su nombre y si está verificada. */}
             <div className={styles.meta}>
-              {perfil.ciudad && <span>{perfil.ciudad.nombre}</span>}
               <Badge campo="organizacion.nivelVerificacion" valor={perfil.nivelVerificacion} />
             </div>
           </div>

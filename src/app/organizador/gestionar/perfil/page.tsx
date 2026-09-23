@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Badge } from '@/components/Badge';
+import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerPerfilOrganizador } from '@/services/organizadores/obtenerPerfilOrganizador';
@@ -15,6 +16,11 @@ export const metadata: Metadata = { title: conNombreProducto('Perfil público') 
  * UC-08 — Vista del propio perfil público desde el panel de
  * Organizador: mismos datos que `/organizador/[id]` (visible para
  * cualquiera), con el agregado de poder subir el logo desde acá.
+ *
+ * Cerrar sesión vive acá y no en la cabecera: es donde está en modo
+ * Jugador (`/perfil`) y donde se la busca. Pedido en vivo que esté en
+ * los dos modos; estarlo en el mismo lugar es lo que la hace
+ * encontrable sin pensar en qué modo se está.
  */
 export default async function PaginaPerfilPublicoOrganizador() {
   const organizacion = await obtenerOrganizacionActivaCacheada();
@@ -38,7 +44,6 @@ export default async function PaginaPerfilPublicoOrganizador() {
         <h1 className={`fuente-display ${styles.nombre}`}>{perfil.nombre}</h1>
         <Badge campo="organizacion.nivelVerificacion" valor={perfil.nivelVerificacion} />
       </div>
-      {perfil.ciudad && <p className={styles.ciudad}>{perfil.ciudad.nombre}</p>}
 
       <Link href={`/organizador/${perfil.id}`} className={styles.enlacePublico}>
         Ver como lo ve el público →
@@ -77,6 +82,8 @@ export default async function PaginaPerfilPublicoOrganizador() {
           </div>
         )}
       </section>
+
+      <BotonCerrarSesion />
     </div>
   );
 }

@@ -82,15 +82,14 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
           <Escudo src={perfil.fotoUrl} nombre={perfil.nombreVisible} tamano={64} />
           <div className={styles.heroTexto}>
             <h1 className={`${styles.nombre} fuente-display`}>{perfil.nombreVisible}</h1>
-            {(perfil.posicion || perfil.ciudadNombre) && (
+            {/* La ciudad se sacó de la cabecera a pedido: lo que
+                identifica a alguien acá es su nombre y su posición, y
+                dónde vive no cambia nada de lo que se ve abajo. Se
+                sigue guardando y sigue siendo lo que `restricted`
+                oculta. */}
+            {perfil.posicion && (
               <div className={styles.meta}>
-                {perfil.posicion && (
-                  <span>
-                    {obtenerEtiqueta('perfilDeportivo.posicion', perfil.posicion).etiqueta}
-                  </span>
-                )}
-                {perfil.posicion && perfil.ciudadNombre && <span aria-hidden>·</span>}
-                {perfil.ciudadNombre && <span>{perfil.ciudadNombre}</span>}
+                <span>{obtenerEtiqueta('perfilDeportivo.posicion', perfil.posicion).etiqueta}</span>
               </div>
             )}
             {perfil.vecesJugadorDelPartido > 0 && (

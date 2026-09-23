@@ -5,8 +5,7 @@ import { construirContexto } from '@/lib/contexto';
 import { obtenerInicio } from '@/services/inicio/obtenerInicio';
 import { obtenerActividad } from '@/services/inicio/obtenerActividad';
 import { NavInferior } from '@/components/NavInferior';
-import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
-import { CambiarDeModo } from '@/components/marca/CambiarDeModo';
+import { CabeceraDeModo } from '@/components/marca/CabeceraDeModo';
 import { TarjetaEquipoResumen } from '@/components/TarjetaEquipoResumen';
 import { TarjetaTorneoResumen } from '@/components/TarjetaTorneoResumen';
 import { TarjetaActividad } from '@/components/TarjetaActividad';
@@ -159,23 +158,12 @@ export default async function PaginaInicio({
 
   return (
     <div className={styles.pagina}>
-      <header className={styles.encabezado}>
-        <MarcaInvicta conEnlaceIngresar={false} />
-        {inicio.ciudadNombre && <div className={styles.ciudad}>{inicio.ciudadNombre}</div>}
-        <div className={styles.filaUsuario}>
-          <div className={styles.avatar} aria-hidden>
-            {inicio.nombreUsuario.trim().charAt(0).toUpperCase() || '?'}
-          </div>
-          <div className={styles.filaUsuarioTexto}>
-            <div className={styles.saludo}>Hola, {inicio.nombreUsuario}</div>
-            <div className={`fuente-display ${styles.titulo}`}>
-              {inicio.jugador?.equipos[0] ? inicio.jugador.equipos[0].nombre : 'Inicio'}
-            </div>
-          </div>
-        </div>
-
-        {inicio.esOrganizador && <CambiarDeModo modoActual="jugador" />}
-      </header>
+      <CabeceraDeModo
+        modo="jugador"
+        nombreUsuario={inicio.nombreUsuario}
+        titulo={inicio.jugador?.equipos[0] ? inicio.jugador.equipos[0].nombre : 'Inicio'}
+        puedeCambiarDeModo={inicio.esOrganizador}
+      />
 
       <div className={styles.contenido}>
         {inicio.esRecienLlegado && (

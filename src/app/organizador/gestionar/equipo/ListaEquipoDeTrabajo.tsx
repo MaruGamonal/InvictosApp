@@ -55,12 +55,28 @@ export function ListaEquipoDeTrabajo({
     <div className={styles.contenidoPagina}>
       <div className={styles.filaCabecera}>
         <h1 className={styles.titulo}>Equipo de trabajo</h1>
-        {esTitular && (
-          <Link href="/organizador/gestionar/invitar" className={styles.enlaceInvitar}>
-            + Invitar admin
-          </Link>
-        )}
       </div>
+
+      <p className={styles.ayuda}>
+        Quienes administran la organización con vos: pueden crear y gestionar sus torneos.
+      </p>
+
+      {/*
+        Reportado en vivo — "no tengo cómo invitar colaboradores al
+        equipo de trabajo". Era un enlace de 13px en un rincón de la
+        cabecera, y para quien no es Titular directamente no estaba, sin
+        decir por qué: esconder algo sin explicarlo se siente igual que
+        si no existiera.
+      */}
+      {esTitular ? (
+        <Link href="/organizador/gestionar/invitar" className={styles.botonInvitar}>
+          + Invitar Administrador
+        </Link>
+      ) : (
+        <p className={styles.ayudaSinPermiso}>
+          Solo el Titular de la organización puede sumar Administradores. Pedíselo a quien la creó.
+        </p>
+      )}
 
       {error && <p className={styles.error}>{error}</p>}
 

@@ -1,0 +1,42 @@
+/* Mismo ritmo vertical en los dos modos: antes cada uno tenía el suyo y
+   el salto se notaba al cambiar. */
+.cabecera {
+  background: var(--identidad-fondo);
+  color: var(--identidad-texto);
+  padding: 18px var(--espacio-pantalla-x) 20px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.filaUsuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.textoUsuario {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.saludo {
+  font: 500 13px/1.2 var(--fuente-texto);
+  color: var(--identidad-texto-secundario);
+}
+
+.titulo {
+  font-size: 22px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

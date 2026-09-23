@@ -19,12 +19,6 @@
   margin: 0;
 }
 
-.enlaceInvitar {
-  font: 600 13px/1 var(--fuente-texto);
-  color: var(--acento-oscuro);
-  text-decoration: none;
-}
-
 .lista {
   display: flex;
   flex-direction: column;
@@ -90,5 +84,37 @@
 .aviso {
   margin: 0;
   font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.ayuda {
+  margin: 0;
+  font: 400 13px/1.45 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+/* CTA de verdad, no un enlace de 13px en un rincón: es la acción
+   principal de esta pantalla. 44px (`08`, sección 10). */
+.botonInvitar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radio-boton);
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font: 700 14px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+/* A quien no puede, se le dice por qué: esconderlo sin explicar se
+   siente igual que si la función no existiera. */
+.ayudaSinPermiso {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--neutro-fondo);
+  font: 400 13px/1.45 var(--fuente-texto);
   color: var(--color-texto-secundario);
 }

@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
-import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
-import { CambiarDeModo } from '@/components/marca/CambiarDeModo';
-import { obtenerContextoCacheado, obtenerOrganizacionActivaCacheada } from './_datos';
+import { CabeceraDeModo } from '@/components/marca/CabeceraDeModo';
+import {
+  obtenerContextoCacheado,
+  obtenerNombreDeQuienMiraCacheado,
+  obtenerOrganizacionActivaCacheada,
+} from './_datos';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
 import styles from './layout.module.css';
 
@@ -30,29 +32,30 @@ import styles from './layout.module.css';
  *    para no rebotar.
  * 2. No había ninguna forma de cerrar sesión desde acá — la única
  *    vivía en `/perfil` (Jugador), fuera del nav propio de Organizador.
- *    Se agrega `BotonCerrarSesion` (compartido con `/perfil`) acá mismo.
+ *    Vive ahora en el Perfil de cada modo, que es donde se la busca y
+ *    donde está en los dos por igual.
+ *
+ * La cabecera es `CabeceraDeModo`, la misma que Inicio: lo único que
+ * cambia entre los dos modos es el título —el equipo o la
+ * organización—, pedido en vivo.
  */
 export default async function LayoutOrganizadorGestionar({ children }: { children: ReactNode }) {
   const contexto = await obtenerContextoCacheado();
   if (!contexto.usuarioId) redirect('/ingresar');
 
-  const organizacion = await obtenerOrganizacionActivaCacheada();
+  const [organizacion, nombreUsuario] = await Promise.all([
+    obtenerOrganizacionActivaCacheada(),
+    obtenerNombreDeQuienMiraCacheado(),
+  ]);
 
   return (
     <div className={styles.pagina}>
-      <header className={styles.hero}>
-        <MarcaInvicta
-          conEnlaceIngresar={false}
-          acciones={<BotonCerrarSesion variante="discreto" />}
-        />
-        <div className={styles.filaSuperior}>
-          <span className={styles.etiquetaModo}>Modo Organizador</span>
-          <CambiarDeModo modoActual="organizador" />
-        </div>
-        <h1 className={`fuente-display ${styles.titulo}`}>
-          {organizacion?.nombre ?? 'Organizador'}
-        </h1>
-      </header>
+      <CabeceraDeModo
+        modo="organizador"
+        nombreUsuario={nombreUsuario}
+        titulo={organizacion?.nombre ?? 'Organizador'}
+        puedeCambiarDeModo
+      />
 
       <main className={styles.contenido}>{children}</main>
 
