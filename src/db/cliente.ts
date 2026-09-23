@@ -8,17 +8,61 @@ import * as Sentry from '@sentry/nextjs';
 let pool: Pool | undefined;
 
 /**
+ * Cómo se está conectando la aplicación, deducido de la URL.
+ *
+ * No es un detalle de infraestructura: **cambia cuántas conexiones se
+ * pueden abrir**, y por lo tanto cuántas puede abrir cada instancia sin
+ * tumbar a las demás.
+ *
+ * - `sesion`: el pooler de Supabase en modo sesión (puerto 5432). Cada
+ *   conexión se queda con un lugar del pooler **mientras viva**, aunque
+ *   no esté haciendo nada. El cupo es chico (15 en el plan gratuito) y
+ *   se reparte entre todas las instancias vivas a la vez.
+ * - `transaccion`: el mismo pooler en modo transacción (puerto 6543).
+ *   El lugar se ocupa **solo mientras dura una consulta**, así que el
+ *   mismo cupo alcanza para muchísimas más instancias. Es el modo
+ *   pensado para funciones sin servidor.
+ * - `directa`: sin pooler. Sirve para migraciones y para desarrollo.
+ */
+type ModoDeConexion = 'sesion' | 'transaccion' | 'directa';
+
+const PUERTO_MODO_TRANSACCION = '6543';
+
+export function detectarModoDeConexion(connectionString: string): ModoDeConexion {
+  let url: URL;
+  try {
+    url = new URL(connectionString);
+  } catch {
+    return 'directa';
+  }
+  if (!url.hostname.includes('pooler.supabase.com')) return 'directa';
+  return url.port === PUERTO_MODO_TRANSACCION ? 'transaccion' : 'sesion';
+}
+
+/**
  * Tope de conexiones **por instancia**, no del proyecto entero.
  *
  * Sin `max`, `pg` usa 10. En Vercel cada función corre en su propia
  * instancia y cada una levanta su propio pool, así que el total contra
- * Supabase es 10 × instancias vivas — y Supabase corta bastante antes
- * de eso en los planes chicos. Un número bajo acá no hace más lenta a
- * la aplicación: las páginas hacen unas pocas consultas cortas, y lo
- * que se gana es que una ráfaga espere unos milisegundos en vez de que
- * la base rechace la conexión.
+ * Supabase es `max` × instancias vivas.
+ *
+ * Por eso el número sale del modo de conexión y no es uno fijo. En modo
+ * sesión el cupo del pooler es 15 y cada conexión se queda con un lugar
+ * mientras viva: con 5 por instancia alcanza con tres instancias
+ * simultáneas para agotarlo, y la cuarta persona que entra recibe un
+ * error en vez de una página. Reportado en vivo, exactamente así:
+ * `EMAXCONNSESSION: max clients reached in session mode`.
+ *
+ * Bajarlo a 2 no arregla el modo sesión —solo corre el límite de tres
+ * instancias a siete—, pero hace que el techo se note mucho más tarde
+ * mientras la URL se cambia a modo transacción, que es el arreglo de
+ * verdad.
  */
-const CONEXIONES_MAXIMAS = 5;
+const CONEXIONES_MAXIMAS: Record<ModoDeConexion, number> = {
+  sesion: 2,
+  transaccion: 5,
+  directa: 5,
+};
 
 /** Una conexión ociosa devuelta rápido es una que otra instancia puede usar. */
 const MILISEGUNDOS_OCIOSA = 10_000;
@@ -33,9 +77,27 @@ export function obtenerPool(): Pool {
       throw new Error('DATABASE_URL no está configurada');
     }
 
+    const modo = detectarModoDeConexion(connectionString);
+
+    /**
+     * El modo sesión sobre el pooler es una configuración equivocada
+     * para este hosting, no una preferencia. Se avisa una vez, al
+     * crear el pool, porque el síntoma —páginas que fallan de a
+     * ratos, cuando hay varias personas a la vez— no se parece en nada
+     * a su causa, y perseguirlo desde el error cuesta horas.
+     *
+     * Nunca se manda la URL: lleva la contraseña adentro.
+     */
+    if (modo === 'sesion') {
+      Sentry.captureMessage(
+        'DATABASE_URL apunta al pooler en modo sesión: cambiar al puerto 6543 (modo transacción)',
+        { level: 'warning', tags: { origen: 'pool-postgres' } },
+      );
+    }
+
     pool = new Pool({
       connectionString,
-      max: CONEXIONES_MAXIMAS,
+      max: CONEXIONES_MAXIMAS[modo],
       idleTimeoutMillis: MILISEGUNDOS_OCIOSA,
       connectionTimeoutMillis: MILISEGUNDOS_PARA_CONECTAR,
     });

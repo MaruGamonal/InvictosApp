@@ -58,6 +58,7 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 
 | Variable | De dónde sale |
 |---|---|
+| `DATABASE_URL` | Paso 1 — **la cadena del pooler en modo transacción, puerto `6543`**. Ver el aviso de acá abajo: el puerto importa |
 | `NEXT_PUBLIC_SUPABASE_URL` | Paso 1 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Paso 1 |
 | `SUPABASE_SERVICE_ROLE_KEY` | Paso 1 — **solo en el servidor**, nunca con prefijo `NEXT_PUBLIC_` |
@@ -66,6 +67,27 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 | `NEXT_PUBLIC_SITE_URL` | **El host canónico**, el mismo que devuelve `location.origin` en el navegador (hoy `https://www.invicta.com.ar`) — **sin `/` al final**. Si acá va el host que redirige en vez del de destino, los enlaces de correo llegan a una redirección: las cookies quedan en el otro host y el enlace se ve como vencido |
 
 > **Ninguna de estas va al repositorio.** Es la regla que T28 ya pedía: variables gestionadas fuera del código.
+
+> ⚠️ **`DATABASE_URL` tiene que usar el puerto `6543`, no el `5432`. Causó una caída real en producción.**
+>
+> Supabase ofrece la misma base por tres cadenas distintas, y en el panel (**Connect**) aparecen juntas:
+>
+> | Cadena | Puerto | Qué hace |
+> |---|---|---|
+> | **Transaction pooler** | `6543` | El lugar en el pooler se ocupa **solo mientras dura una consulta**. Es la que va. |
+> | Session pooler | `5432` | Cada conexión se queda con un lugar **mientras viva**, aunque esté sin hacer nada. |
+> | Direct connection | `5432` | Sin pooler. Sirve para migraciones y para desarrollo local. |
+>
+> Con la de **modo sesión**, el cupo del plan gratuito es de **15 conexiones para todo el proyecto**. En Vercel cada instancia levanta su propio pool, así que tres instancias atendiendo al mismo tiempo lo agotan y la siguiente persona que entra recibe un error en vez de una página:
+>
+> ```
+> error: (EMAXCONNSESSION) max clients reached in session mode
+>        - max clients are limited to pool_size: 15
+> ```
+>
+> El síntoma engaña: la aplicación anda perfecta con una persona y se cae **solo cuando hay varias a la vez**, que es justo cuando no se está mirando el log. Si la aplicación arranca con una URL en modo sesión, ahora avisa sola en Sentry.
+>
+> **Después de cambiarla hay que redesplegar**: una variable nueva no se aplica a un deploy ya hecho.
 
 > ⚠️ **`NEXT_PUBLIC_SITE_URL` faltaba de esta lista y causó un bug real en producción**: sin ella, todo el código cae a `http://localhost:3000` (los mails de confirmación de cuenta, verificación de organización, invitaciones y recuperación de contraseña arman el enlace con esa base) — el enlace del mail termina apuntando a la máquina de quien desarrolló, no al sitio real. **Después de cargarla hay que redesplegar**: una variable nueva no se aplica a un deploy ya hecho.
 >
@@ -176,7 +198,8 @@ Seis verificaciones, en el orden en que conviene hacerlas:
 
 0. **Una imagen subida se ve.** Subí un escudo desde "Crear equipo" y entrá al perfil del equipo. Si no se ve, empezá por el bucket `media` (Paso 6): es la causa más probable.
 1. **El resumen del despliegue dice São Paulo** en la región de las funciones.
-2. **La tarea horaria aparece en Sentry** con su *check-in*, y un resultado cargado hace más de 72 horas pasa a confirmado solo.
+2. **La tarea horaria aparece en Sentry** con su *check-in*, y un resultado cargado hace más de 72 horas pasa a confirmado solo. La corrida tiene 60 segundos y un presupuesto propio de 45: si queda trabajo sin hacer, lo toma la corrida siguiente y avisa en Sentry — una corrida cortada por la mitad se reportaba como caída y no confirmaba nada.
+2b. **`DATABASE_URL` usa el puerto `6543`.** Si usa el `5432` del pooler, Sentry lo dice apenas arranca la aplicación (`modo sesión: cambiar al puerto 6543`). Es la diferencia entre andar y caerse cuando entran varias personas juntas.
 3. **Un error provocado a propósito** llega a Sentry con contexto, y el usuario ve `ERROR_INTERNO` y nada más.
 4. **El producto se instala** en un teléfono desde el navegador, y una vez instalado **recibe una notificación push**.
 5. **Un despliegue con una migración nueva** la aplica solo, y uno que rompe los tipos no llega a producción.

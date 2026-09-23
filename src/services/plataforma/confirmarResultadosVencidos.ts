@@ -24,15 +24,54 @@ import { confirmarResultado } from '@/services/competencia/confirmarResultado';
  * **Reintento seguro:** correr esto dos veces sobre el mismo registro no
  * cambia el resultado — la segunda vez, ese partido ya no está en
  * `loaded`, así que ni siquiera entra al WHERE.
+ *
+ * **Por qué hay un tope y un reloj.** Esto corre en una función sin
+ * servidor, que tiene un límite de tiempo de pared: si se pasa, la
+ * plataforma la mata en el medio, sin dejar rastro. El bucle recorría
+ * todos los partidos vencidos, uno por uno y cada uno con su
+ * transacción, sin límite de ninguna clase. Mientras hubo pocos
+ * resultados por hora anduvo; la primera vez que vencen muchos juntos
+ * —una fecha entera cumple las 72 horas al mismo tiempo— la corrida se
+ * estira y se corta. Eso es exactamente lo que Sentry reporta como
+ * *timeout check-in*: el aviso de arranque llegó, el de fin nunca.
+ *
+ * Que el reintento sea seguro es justo lo que permite cortar a tiempo:
+ * se procesa lo que entra en el presupuesto, se informa cuántos
+ * quedaron y la corrida de la hora siguiente sigue por donde iba. Un
+ * resultado se confirma una hora más tarde; antes, con la corrida
+ * cortada, no se confirmaba ninguno y encima no se sabía.
  */
+
+/** Tope por corrida: acota la memoria y el tamaño del lote. */
+const MAXIMO_POR_CORRIDA = 200;
+
+/**
+ * Presupuesto de trabajo, bastante por debajo del límite de la función
+ * (`maxDuration` en la ruta). El margen es para cerrar el check-in y
+ * responder: cortar justo en el límite es lo mismo que no cortar.
+ */
+const MILISEGUNDOS_DE_PRESUPUESTO = 45_000;
 
 export interface ResumenEjecucion {
   procesados: number;
   cambiados: number;
   fallidos: Array<{ partidoId: string; error: string }>;
+  /**
+   * Del lote que se trajo, cuántos quedaron sin procesar porque se
+   * agotó el presupuesto. Es un número exacto.
+   */
+  pendientes: number;
+  /**
+   * La consulta llegó al tope, así que además de `pendientes` hay más
+   * esperando que ni siquiera se trajeron. No se cuentan: saber
+   * cuántos exactamente costaría otra consulta y no cambia qué hacer
+   * —la corrida siguiente sigue igual—, pero que los haya sí importa.
+   */
+  puedeHaberMas: boolean;
 }
 
 export async function confirmarResultadosVencidos(): Promise<ResumenEjecucion> {
+  const comenzoEn = Date.now();
   const pool = obtenerPool();
   const { rows } = await pool.query<{ id: string }>(
     `SELECT p.id
@@ -49,13 +88,34 @@ export async function confirmarResultadosVencidos(): Promise<ResumenEjecucion> {
            AND t.fecha_inicio_estimada IS NOT NULL AND t.fecha_fin_estimada IS NOT NULL
            AND (t.fecha_fin_estimada::date - t.fecha_inicio_estimada::date) <= 2
          )
-       )`,
+       )
+     ORDER BY p.fecha_carga_resultado ASC
+     LIMIT $1`,
+    // Uno más que el tope: si vuelve, es que hay más de los que entran
+    // en este lote, y hay que decirlo sin una segunda consulta.
+    [MAXIMO_POR_CORRIDA + 1],
   );
 
-  const resumen: ResumenEjecucion = { procesados: 0, cambiados: 0, fallidos: [] };
+  const hayMasQueElLote = rows.length > MAXIMO_POR_CORRIDA;
+  const delLote = hayMasQueElLote ? rows.slice(0, MAXIMO_POR_CORRIDA) : rows;
+
+  const resumen: ResumenEjecucion = {
+    procesados: 0,
+    cambiados: 0,
+    fallidos: [],
+    pendientes: 0,
+    puedeHaberMas: hayMasQueElLote,
+  };
   const contexto = contextoDeSistema();
 
-  for (const { id } of rows) {
+  for (const [indice, { id }] of delLote.entries()) {
+    // Antes de empezar otro, no en el medio: cada confirmación es una
+    // transacción y cortarla por la mitad sería peor que llegar tarde.
+    if (Date.now() - comenzoEn > MILISEGUNDOS_DE_PRESUPUESTO) {
+      resumen.pendientes = delLote.length - indice;
+      break;
+    }
+
     resumen.procesados += 1;
     try {
       await confirmarResultado({ partidoId: id }, contexto);
