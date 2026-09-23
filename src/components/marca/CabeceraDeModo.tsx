@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Escudo } from '@/components/Escudo';
 import { CambiarDeModo } from './CambiarDeModo';
 import { MarcaInvicta } from './MarcaInvicta';
@@ -16,6 +17,16 @@ export interface CabeceraDeModoProps {
   fotoUrl?: string | null;
   /** Solo se ofrece el cambio a quien tiene los dos roles. */
   puedeCambiarDeModo?: boolean;
+  /**
+   * Debajo del título, en la misma cabecera: en modo organizador, cuál
+   * de las organizaciones se está gestionando.
+   *
+   * El título dice el **modo** ("Organizador") y esto dice la
+   * **entidad**. Antes el título era el nombre de la organización, y no
+   * se distinguía de un rótulo cualquiera: no quedaba claro que fuera
+   * la organización activa ni que hubiera otra a la que cambiar.
+   */
+  bajoElTitulo?: ReactNode;
 }
 
 /**
@@ -37,10 +48,11 @@ export function CabeceraDeModo({
   titulo,
   fotoUrl,
   puedeCambiarDeModo = false,
+  bajoElTitulo,
 }: CabeceraDeModoProps) {
   return (
     <header className={styles.cabecera}>
-      <MarcaInvicta conEnlaceIngresar={false} />
+      <MarcaInvicta conEnlaceIngresar={false} modo={modo} />
 
       <div className={styles.filaUsuario}>
         <Escudo src={fotoUrl ?? null} nombre={nombreUsuario} tamano={44} />
@@ -49,6 +61,8 @@ export function CabeceraDeModo({
           <span className={`fuente-display ${styles.titulo}`}>{titulo}</span>
         </div>
       </div>
+
+      {bajoElTitulo}
 
       {puedeCambiarDeModo && <CambiarDeModo modoActual={modo} />}
     </header>

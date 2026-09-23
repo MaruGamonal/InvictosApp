@@ -1,0 +1,33 @@
+/* 44px de alto, como cualquier acción táctil (`08`, sección 10). */
+.boton,
+.botonBloqueado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radio-boton);
+  font: 700 14px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.boton {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+}
+
+/* Bloqueado, no apagado: se ve, se enfoca y al tocarlo explica por qué.
+   El contraste sigue siendo legible — no es un gris muerto. */
+.botonBloqueado {
+  background: var(--fondo-sutil);
+  color: var(--color-texto-secundario);
+  border: 1.5px dashed var(--borde-neutro);
+}
+
+.boton:focus-visible,
+.botonBloqueado:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}

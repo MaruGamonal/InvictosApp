@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Badge } from '@/components/Badge';
 import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { BotonVerificarOrganizacion } from '@/components/BotonVerificarOrganizacion';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerPerfilOrganizador } from '@/services/organizadores/obtenerPerfilOrganizador';
 import { obtenerContextoCacheado, obtenerOrganizacionActivaCacheada } from '../_datos';
@@ -50,6 +51,30 @@ export default async function PaginaPerfilPublicoOrganizador() {
       </Link>
 
       {perfil.descripcion && <p className={styles.descripcion}>{perfil.descripcion}</p>}
+
+      {/* La explicación larga de la verificación vive acá, en el detalle
+          de la organización, y no en la lista del panel: ahí ocupaba
+          espacio en cada tarjeta para decir siempre lo mismo. */}
+      {perfil.nivelVerificacion === 'unverified' && (
+        <section className={styles.verificacion}>
+          <h2 className={styles.verificacionTitulo}>
+            <span aria-hidden>⚠</span> Organización pendiente de verificación
+          </h2>
+          <p className={styles.verificacionTexto}>
+            Verificar es confirmar la dirección de correo con la que entrás: no pedimos
+            documentación ni validamos nada legal. Te mandamos un enlace y con tocarlo alcanza.
+          </p>
+          <p className={styles.verificacionTexto}>
+            Mientras no lo hagas, tus torneos funcionan completos y se comparten por link, pero no
+            aparecen en las búsquedas, y podés tener uno solo publicado a la vez.
+          </p>
+          <BotonVerificarOrganizacion
+            organizacionId={perfil.id}
+            soyTitular={organizacion.rol === 'owner'}
+            etiqueta="Verificar organización"
+          />
+        </section>
+      )}
 
       <div className={styles.gridStats}>
         <div className={styles.stat}>

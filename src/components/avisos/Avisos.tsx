@@ -62,6 +62,15 @@ export interface Avisador {
   exito: (mensaje: string, reemplazaA?: number) => void;
   error: (mensaje: string, reemplazaA?: number) => void;
   /**
+   * Ni éxito ni error: algo que falta hacer para poder seguir.
+   *
+   * Lleva acción opcional porque una advertencia sin salida es una
+   * puerta cerrada sin cartel: si se avisa que no se puede crear un
+   * torneo hasta verificar la organización, el camino a verificarla
+   * tiene que estar en el mismo aviso.
+   */
+  advertencia: (mensaje: string, accion?: AccionDeAviso) => void;
+  /**
    * El bloqueo por cuenta sin confirmar, igual en toda la aplicación.
    *
    * Antes cada pantalla insertaba un bloque dentro del contenido: el
@@ -87,6 +96,7 @@ const AVISADOR_MUDO: Avisador = {
   cargando: () => 0,
   exito: () => {},
   error: () => {},
+  advertencia: () => {},
   cuentaNoConfirmada: () => {},
   cerrar: () => {},
 };
@@ -169,6 +179,9 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
       },
       error: (mensaje, reemplazaA) => {
         mostrar('error', mensaje, reemplazaA);
+      },
+      advertencia: (mensaje, accion) => {
+        mostrar('advertencia', mensaje, undefined, accion);
       },
       cuentaNoConfirmada: (mensaje) => {
         const texto = mensaje ?? MENSAJE_CUENTA_NO_CONFIRMADA;

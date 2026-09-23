@@ -39,4 +39,31 @@ describe('construirEnlaceNotificacion', () => {
   it('sin entidadOrigenId, sin enlace', () => {
     expect(construirEnlaceNotificacion('team_invitation', 'equipo', null)).toBeNull();
   });
+
+  /**
+   * Reportado en vivo: quien gestionaba una organización tocaba un
+   * aviso de su propio torneo y aparecía en la ficha pública, en modo
+   * jugador, sin haberlo pedido.
+   */
+  it('en modo organizador, un torneo lleva a su panel de gestión', () => {
+    expect(
+      construirEnlaceNotificacion('tournament_cancelled', 'torneo', 't-1', 'organizador'),
+    ).toBe('/torneo/t-1/gestionar');
+    expect(
+      construirEnlaceNotificacion('registration_received', 'torneo', 't-1', 'organizador'),
+    ).toBe('/torneo/t-1/gestionar');
+  });
+
+  it('en modo jugador sigue yendo a la ficha pública del torneo', () => {
+    expect(construirEnlaceNotificacion('tournament_cancelled', 'torneo', 't-1', 'jugador')).toBe(
+      '/torneo/t-1',
+    );
+  });
+
+  /** Un equipo no es de la organización: no hay vista de organizador que mostrar. */
+  it('un equipo va a su ficha en los dos modos', () => {
+    expect(construirEnlaceNotificacion('team_join_resolved', 'equipo', 'eq-1', 'organizador')).toBe(
+      '/equipo/eq-1',
+    );
+  });
 });

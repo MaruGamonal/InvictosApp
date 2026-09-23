@@ -1,0 +1,94 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.identidad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nombre {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.15;
+  color: var(--color-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Dos líneas antes de cortar: un nombre largo no debe quedar en "Liga…". */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Tres cifras separadas, no una línea corrida que hay que leer entera. */
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-borde);
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cifraValor {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--color-texto);
+}
+
+.cifraEtiqueta {
+  font: 600 11px/1.2 var(--fuente-texto);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+}
+
+/* La explicación y la salida juntas: avisar sin dar el camino es una
+   puerta cerrada sin cartel. */
+.pendiente {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radio-boton);
+  background: var(--advertencia-fondo);
+}
+
+.pendienteTitulo {
+  margin: 0;
+  font: 700 14px/1.3 var(--fuente-texto);
+  color: var(--advertencia-texto);
+}
+
+.pendienteTexto {
+  margin: 0;
+  font: 400 13px/1.45 var(--fuente-texto);
+  color: var(--advertencia-texto);
+}

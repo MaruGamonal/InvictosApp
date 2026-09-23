@@ -15,7 +15,16 @@ import styles from './MarcaInvicta.module.css';
  * cachean con `CONTEXTO_PUBLICO` (`06`, D-90) y el servidor arma la
  * misma respuesta para cualquiera.
  */
-export function CampanaNotificaciones() {
+export interface CampanaNotificacionesProps {
+  /**
+   * Desde qué modo se toca la campanita. Viaja en la URL para que el
+   * centro de notificaciones no devuelva a quien está gestionando una
+   * organización al modo jugador sin haberlo pedido.
+   */
+  modo?: 'jugador' | 'organizador';
+}
+
+export function CampanaNotificaciones({ modo }: CampanaNotificacionesProps = {}) {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -35,7 +44,11 @@ export function CampanaNotificaciones() {
   if (!autenticado) return null;
 
   return (
-    <Link href="/notificaciones" className={styles.campana} aria-label="Notificaciones">
+    <Link
+      href={modo === 'organizador' ? '/notificaciones?modo=organizador' : '/notificaciones'}
+      className={styles.campana}
+      aria-label="Notificaciones"
+    >
       <svg
         width="22"
         height="22"

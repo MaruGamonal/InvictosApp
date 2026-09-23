@@ -3,6 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoOrganizacion } from '@/lib/permisos';
+import { CONFIGURACION } from '@/lib/configuracion';
 
 /**
  * Home del panel de Organizador (`/organizador/gestionar`): un
@@ -51,7 +52,26 @@ export interface TorneoPanelOrganizador {
 export interface PanelOrganizadorResultado {
   organizacionId: string;
   nombreOrganizacion: string;
-  stats: { activos: number; porComenzar: number; finalizados: number };
+  logoUrl: string | null;
+  nivelVerificacion: 'unverified' | 'basic' | 'trusted';
+  /** Solo el Titular puede pedir la verificación básica (`10`, 4.2). */
+  soyTitular: boolean;
+  /**
+   * Lo que la pantalla necesita para explicar por qué no se puede crear
+   * otro torneo: sin verificar, la organización puede tener uno solo
+   * publicado a la vez (`06`, D-51). Es lo que se muestra, no lo que
+   * decide — `publicarTorneo` lo vuelve a comprobar.
+   */
+  limitePublicadosAlcanzado: boolean;
+  stats: {
+    activos: number;
+    porComenzar: number;
+    finalizados: number;
+    /** Todos los no cancelados: el número que titula la organización. */
+    torneos: number;
+    /** Equipos distintos con inscripción aprobada en algún torneo suyo. */
+    equipos: number;
+  };
   necesitanAtencion: TorneoPanelOrganizador[];
   activos: TorneoPanelOrganizador[];
   proximos: TorneoPanelOrganizador[];
@@ -67,12 +87,19 @@ export const obtenerPanelOrganizador: Servicio<
 
   const pool = obtenerPool();
 
-  const { rows: organizacionRows } = await pool.query<{ nombre: string; logo_url: string | null }>(
-    'SELECT nombre, logo_url FROM organizacion WHERE id = $1',
+  const { rows: organizacionRows } = await pool.query<{
+    nombre: string;
+    logo_url: string | null;
+    nivel_verificacion: 'unverified' | 'basic' | 'trusted';
+    usuario_titular_id: string;
+  }>(
+    'SELECT nombre, logo_url, nivel_verificacion, usuario_titular_id FROM organizacion WHERE id = $1',
     [datos.organizacionId],
   );
   const nombreOrganizacion = organizacionRows[0]?.nombre ?? '';
   const logoOrganizacion = organizacionRows[0]?.logo_url ?? null;
+  const nivelVerificacion = organizacionRows[0]?.nivel_verificacion ?? 'unverified';
+  const soyTitular = organizacionRows[0]?.usuario_titular_id === contexto.usuarioId;
 
   const { rows: torneos } = await pool.query<{
     id: string;
@@ -95,18 +122,37 @@ export const obtenerPanelOrganizador: Servicio<
     [datos.organizacionId],
   );
 
+  // Publicado = todo lo que salió de `draft` sin cancelarse. La consulta
+  // de arriba ya excluye los cancelados, así que alcanza con contar los
+  // que no son borrador.
+  const publicados = torneos.filter((t) => t.estado !== 'draft').length;
+  const limitePublicadosAlcanzado =
+    nivelVerificacion === 'unverified' &&
+    publicados >= CONFIGURACION.limiteTorneosPublicadosSinVerificar;
+
   const idsTorneos = torneos.map((t) => t.id);
   if (idsTorneos.length === 0) {
     return {
       organizacionId: datos.organizacionId,
       nombreOrganizacion,
-      stats: { activos: 0, porComenzar: 0, finalizados: 0 },
+      logoUrl: logoOrganizacion,
+      nivelVerificacion,
+      soyTitular,
+      limitePublicadosAlcanzado,
+      stats: { activos: 0, porComenzar: 0, finalizados: 0, torneos: 0, equipos: 0 },
       necesitanAtencion: [],
       activos: [],
       proximos: [],
       finalizados: [],
     };
   }
+
+  const { rows: equiposRows } = await pool.query<{ cantidad: string }>(
+    `SELECT count(DISTINCT equipo_id) AS cantidad FROM inscripcion
+     WHERE torneo_id = ANY($1) AND estado = 'approved'`,
+    [idsTorneos],
+  );
+  const cantidadEquipos = Number(equiposRows[0]?.cantidad ?? 0);
 
   const { rows: inscripcionesPendRows } = await pool.query<{ torneo_id: string; cantidad: string }>(
     `SELECT torneo_id, count(*) AS cantidad FROM inscripcion
@@ -237,10 +283,16 @@ export const obtenerPanelOrganizador: Servicio<
   return {
     organizacionId: datos.organizacionId,
     nombreOrganizacion,
+    logoUrl: logoOrganizacion,
+    nivelVerificacion,
+    soyTitular,
+    limitePublicadosAlcanzado,
     stats: {
       activos: activos.length,
       porComenzar: proximos.length,
       finalizados: finalizados.length,
+      torneos: torneosArmados.length,
+      equipos: cantidadEquipos,
     },
     necesitanAtencion,
     activos,

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
-import { BotonVerificarOrganizacion } from '@/components/BotonVerificarOrganizacion';
 import type { OrganizacionListada } from '@/services/organizadores/listarMisOrganizaciones';
 import { elegirOrganizacionActiva } from './_acciones';
 import styles from './ListaMisOrganizaciones.module.css';
@@ -12,15 +11,21 @@ export interface ListaMisOrganizacionesProps {
 }
 
 /**
- * Las organizaciones que administra quien mira, y cuál está gestionando.
+ * Las otras organizaciones que administra quien mira.
  *
- * `miembro_organizacion` admite varias desde el esquema inicial, pero el
- * panel mostraba una sola —la primera— y no había forma de llegar a las
- * otras. Acá se ven todas, con su estado de verificación y cuántos
- * torneos sostienen, y "Gestionar" cambia cuál está activa.
+ * La tarjeta era una sola fila horizontal —escudo, nombre, badge,
+ * cantidad, "Verificar", "Gestionar"— y en un teléfono de 360px los dos
+ * botones y el texto se pisaban. Ahora la fila tiene **dos renglones**:
+ * arriba la identidad (escudo, nombre, estado, cantidad), abajo la
+ * acción. Nada compite por el mismo ancho.
  *
- * Cada fila es el `submit` de un formulario con una Server Action: sin
- * JavaScript se cambia de organización igual.
+ * Y hay **una sola acción principal por tarjeta**: "Gestionar". La
+ * verificación se pide desde el detalle de la organización, no desde
+ * esta lista: acá eran dos botones del mismo tamaño peleándose la
+ * atención para dos cosas que no están al mismo nivel.
+ *
+ * Cada acción es el `submit` de un formulario con una Server Action:
+ * sin JavaScript se cambia de organización igual.
  */
 export function ListaMisOrganizaciones({
   organizaciones,
@@ -38,38 +43,28 @@ export function ListaMisOrganizaciones({
               key={organizacion.organizacionId}
               className={esActiva ? `${styles.fila} ${styles.filaActiva}` : styles.fila}
             >
-              <Escudo src={organizacion.logoUrl} nombre={organizacion.nombre} tamano={40} />
-
-              <div className={styles.datos}>
-                <span className={styles.nombre}>{organizacion.nombre}</span>
-                <div className={styles.meta}>
-                  <Badge
-                    campo="organizacion.nivelVerificacion"
-                    valor={organizacion.nivelVerificacion}
-                    conPunto
-                  />
-                  <span className={styles.cantidad}>
-                    {organizacion.cantidadTorneos}{' '}
-                    {organizacion.cantidadTorneos === 1 ? 'torneo' : 'torneos'}
-                  </span>
+              <div className={styles.identidad}>
+                <Escudo src={organizacion.logoUrl} nombre={organizacion.nombre} tamano={40} />
+                <div className={styles.datos}>
+                  <span className={styles.nombre}>{organizacion.nombre}</span>
+                  <div className={styles.meta}>
+                    <Badge
+                      campo="organizacion.nivelVerificacion"
+                      valor={organizacion.nivelVerificacion}
+                      conPunto
+                    />
+                    <span className={styles.cantidad}>
+                      {organizacion.cantidadTorneos}{' '}
+                      {organizacion.cantidadTorneos === 1 ? 'torneo' : 'torneos'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Sin verificar, los torneos de esta organización no
-                  entran al descubrimiento (`06`, D-51). El badge ya lo
-                  dice; acá va la salida, que antes no existía en
-                  ninguna pantalla. */}
-              {organizacion.nivelVerificacion === 'unverified' && (
-                <BotonVerificarOrganizacion
-                  organizacionId={organizacion.organizacionId}
-                  soyTitular={organizacion.rol === 'owner'}
-                  etiqueta="Verificar"
-                  variante="secundaria"
-                />
-              )}
-
+              {/* Una sola acción, en su propio renglón: nunca dos
+                  botones compitiendo por el ancho de un teléfono. */}
               {esActiva ? (
-                <span className={styles.gestionando}>Gestionando</span>
+                <span className={styles.gestionando}>Gestionando ahora</span>
               ) : (
                 <button
                   type="submit"
@@ -84,6 +79,8 @@ export function ListaMisOrganizaciones({
         })}
       </form>
 
+      {/* Acción secundaria: crear otra organización no es lo que se
+          viene a hacer a esta pantalla. */}
       <Link href="/organizador/gestionar/crear" className={styles.enlaceCrear}>
         + Crear organización
       </Link>

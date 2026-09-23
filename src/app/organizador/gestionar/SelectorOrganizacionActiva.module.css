@@ -1,0 +1,128 @@
+/* Vive en el hero oscuro, así que usa los tokens de identidad y no los
+   del tema (`08`, 6.1). */
+
+.unica,
+.disparador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radio-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--identidad-texto);
+}
+
+.disparador {
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari muestra el triángulo propio del `summary` si no se apaga. */
+.disparador::-webkit-details-marker {
+  display: none;
+}
+
+.nombre {
+  font: 700 14px/1.2 var(--fuente-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flecha {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  transition: transform 140ms ease-out;
+}
+
+.selector[open] .flecha {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flecha {
+    transition: none;
+  }
+}
+
+/* Que el control se llame con todas las letras para un lector de
+   pantalla: el nombre solo no dice que sea un selector. */
+.leyenda {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.selector {
+  position: relative;
+  max-width: 100%;
+}
+
+.opciones {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  max-width: min(320px, calc(100vw - 2 * var(--espacio-pantalla-x)));
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+  box-shadow: 0 10px 28px rgba(14, 23, 32, 0.22);
+}
+
+/* 44px de área táctil (`08`, sección 10). */
+.opcion,
+.opcionActiva {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radio-boton);
+  background: transparent;
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.opcionActiva {
+  background: var(--fondo-sutil);
+  cursor: default;
+}
+
+.opcionNombre {
+  flex: 1;
+  min-width: 0;
+  font: 600 14px/1.2 var(--fuente-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La activa se dice, no solo se pinta (`08`, 11.10). */
+.opcionMarca {
+  flex: none;
+  font: 700 11px/1 var(--fuente-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--acento-oscuro);
+}
+
+.disparador:focus-visible,
+.opcion:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}

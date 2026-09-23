@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 import { CabeceraDeModo } from '@/components/marca/CabeceraDeModo';
 import {
   obtenerContextoCacheado,
+  obtenerMisOrganizacionesCacheadas,
   obtenerNombreDeQuienMiraCacheado,
   obtenerOrganizacionActivaCacheada,
 } from './_datos';
+import { SelectorOrganizacionActiva } from './SelectorOrganizacionActiva';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
 import styles from './layout.module.css';
 
@@ -43,18 +45,33 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
   const contexto = await obtenerContextoCacheado();
   if (!contexto.usuarioId) redirect('/ingresar');
 
-  const [organizacion, nombreUsuario] = await Promise.all([
+  const [organizacion, nombreUsuario, organizaciones] = await Promise.all([
     obtenerOrganizacionActivaCacheada(),
     obtenerNombreDeQuienMiraCacheado(),
+    obtenerMisOrganizacionesCacheadas(),
   ]);
+  const activa = organizaciones.find((o) => o.organizacionId === organizacion?.organizacionId);
 
   return (
     <div className={styles.pagina}>
+      {/* El título dice el modo; la organización activa va debajo, como
+          selector. Antes el nombre de la organización ocupaba el título
+          y no se distinguía de un rótulo cualquiera. */}
       <CabeceraDeModo
         modo="organizador"
         nombreUsuario={nombreUsuario}
-        titulo={organizacion?.nombre ?? 'Organizador'}
+        titulo="Organizador"
         puedeCambiarDeModo
+        bajoElTitulo={
+          organizacion ? (
+            <SelectorOrganizacionActiva
+              organizaciones={organizaciones}
+              activaId={organizacion.organizacionId}
+              nombreActiva={organizacion.nombre}
+              logoActiva={activa?.logoUrl ?? null}
+            />
+          ) : null
+        }
       />
 
       <main className={styles.contenido}>{children}</main>

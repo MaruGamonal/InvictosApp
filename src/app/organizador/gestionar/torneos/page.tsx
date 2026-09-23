@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerOrganizacionActivaCacheada, obtenerPanelCacheado } from '../_datos';
+import { BotonCrearTorneo } from '../BotonCrearTorneo';
 import { TabsTorneosPanel } from '../TabsTorneosPanel';
 import styles from '../pagina.module.css';
 
@@ -27,12 +27,12 @@ export default async function PaginaTorneosDeLaOrganizacion() {
   return (
     <div className={styles.contenidoPagina}>
       <section className={styles.seccion}>
-        <div className={styles.filaTituloSeccion}>
-          <h2 className={styles.tituloSeccion}>Mis torneos</h2>
-          <Link href="/torneo/crear" className={styles.enlaceCrear}>
-            + Crear torneo
-          </Link>
-        </div>
+        <h2 className={styles.tituloSeccion}>Mis torneos</h2>
+
+        {/* El mismo botón que en Inicio: si la organización no puede
+            publicar otro torneo (`06`, D-51), acá tampoco. Un atajo
+            que saltea el bloqueo lo vuelve inexistente. */}
+        <BotonCrearTorneo bloqueado={panel.limitePublicadosAlcanzado} />
         <TabsTorneosPanel
           activos={panel.activos}
           proximos={panel.proximos}

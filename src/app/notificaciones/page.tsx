@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { listarNotificaciones } from '@/services/notificaciones/listarNotificaciones';
 import { NavInferior } from '@/components/NavInferior';
+import { NavInferiorOrganizador } from '@/app/organizador/gestionar/NavInferiorOrganizador';
 import { MarcaInvicta } from '@/components/marca/MarcaInvicta';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { ListaNotificaciones } from './ListaNotificaciones';
@@ -11,10 +12,29 @@ import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Notificaciones') };
 
-/** UC-46 — Centro de notificaciones: solo el subconjunto accionable (`07`, D11). */
-export default async function PaginaNotificaciones() {
+/**
+ * UC-46 — Centro de notificaciones: solo el subconjunto accionable
+ * (`07`, D11).
+ *
+ * El modo viaja en la URL (`?modo=organizador`, que pone la campanita
+ * del panel). Sin eso, esta pantalla montaba siempre el nav de Jugador
+ * y tocar un aviso llevaba a la ficha pública del torneo: quien estaba
+ * gestionando una organización terminaba en el otro modo sin haberlo
+ * pedido, y tenía que rehacer el camino.
+ *
+ * El modo no otorga nada — solo elige nav y destino—, así que un valor
+ * raro en la URL cae en "jugador" en vez de fallar.
+ */
+export default async function PaginaNotificaciones({
+  searchParams,
+}: {
+  searchParams: Promise<{ modo?: string }>;
+}) {
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
+
+  const { modo: modoPedido } = await searchParams;
+  const modo = modoPedido === 'organizador' ? 'organizador' : 'jugador';
 
   const { notificaciones, cursorSiguiente } = await listarNotificaciones({}, contexto);
 
@@ -24,7 +44,11 @@ export default async function PaginaNotificaciones() {
       <div className={styles.filaTitulo}>
         <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
         <Link
-          href="/notificaciones/preferencias"
+          href={
+            modo === 'organizador'
+              ? '/notificaciones/preferencias?modo=organizador'
+              : '/notificaciones/preferencias'
+          }
           className={styles.enlacePreferencias}
           aria-label="Preferencias de notificación"
         >
@@ -46,8 +70,9 @@ export default async function PaginaNotificaciones() {
       <ListaNotificaciones
         notificacionesIniciales={notificaciones}
         cursorInicial={cursorSiguiente}
+        modo={modo}
       />
-      <NavInferior activo="inicio" />
+      {modo === 'organizador' ? <NavInferiorOrganizador /> : <NavInferior activo="inicio" />}
     </div>
   );
 }

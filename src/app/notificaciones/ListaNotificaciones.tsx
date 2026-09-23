@@ -6,16 +6,26 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { tiempoRelativo } from '@/lib/tiempoRelativo';
 import type { NotificacionListada } from '@/services/notificaciones/listarNotificaciones';
-import { construirEnlaceNotificacion } from './_enlace';
+import { construirEnlaceNotificacion, type ModoNavegacion } from './_enlace';
 import styles from './pagina.module.css';
 
 interface Props {
   notificacionesIniciales: NotificacionListada[];
   cursorInicial: string | null;
+  /**
+   * Desde qué modo se abrió el centro de notificaciones. Tocar un aviso
+   * no debería cambiar el contexto de trabajo: quien está gestionando
+   * una organización va al panel del torneo, no a su ficha pública.
+   */
+  modo?: ModoNavegacion;
 }
 
 /** Más nuevas primero — `listarNotificaciones` las trae ascendente (para cursor estable), se invierte acá. */
-export function ListaNotificaciones({ notificacionesIniciales, cursorInicial }: Props) {
+export function ListaNotificaciones({
+  notificacionesIniciales,
+  cursorInicial,
+  modo = 'jugador',
+}: Props) {
   const router = useRouter();
   const [notificaciones, setNotificaciones] = useState([...notificacionesIniciales].reverse());
   const [cursor, setCursor] = useState(cursorInicial);
@@ -42,6 +52,7 @@ export function ListaNotificaciones({ notificacionesIniciales, cursorInicial }: 
       notificacion.tipo,
       notificacion.entidadOrigenTipo,
       notificacion.entidadOrigenId,
+      modo,
     );
     if (enlace) router.push(enlace);
   }
@@ -78,6 +89,7 @@ export function ListaNotificaciones({ notificacionesIniciales, cursorInicial }: 
           notificacion.tipo,
           notificacion.entidadOrigenTipo,
           notificacion.entidadOrigenId,
+          modo,
         );
         return (
           <button

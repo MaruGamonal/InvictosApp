@@ -6,27 +6,36 @@ import {
   obtenerOrganizacionActivaCacheada,
   obtenerPanelCacheado,
 } from './_datos';
+import { BotonCrearTorneo } from './BotonCrearTorneo';
 import { ListaMisOrganizaciones } from './ListaMisOrganizaciones';
+import { ResumenOrganizacion } from './ResumenOrganizacion';
+import { TabsTorneosPanel } from './TabsTorneosPanel';
 import { TarjetaTorneoPanel } from './TarjetaTorneoPanel';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Panel de Organizador') };
 
 /**
- * Inicio del panel de Organizador.
+ * Inicio del panel de Organizador: el centro de operaciones.
  *
- * Antes redirigía a "Crear organización" cuando no había ninguna, y
- * asumía una sola cuando sí la había. `miembro_organizacion` admite
- * varias desde el esquema inicial, así que quien tuviera dos veía una y
- * no tenía cómo llegar a la otra.
+ * La organización es la entidad principal, no un rótulo de la
+ * cabecera: un torneo siempre nace bajo una, y sin organización no hay
+ * torneo posible. La pantalla sigue ese orden —organización activa,
+ * su estado, qué se puede hacer, los torneos, las demás
+ * organizaciones— para que las cinco preguntas se respondan en el
+ * orden en que se hacen.
  *
- * Ahora esta pantalla es el lugar donde viven las organizaciones: sin
- * ninguna, explica que hace falta una para crear torneos y ofrece
- * crearla —sin echar a nadie a otra pantalla—; con una o varias, las
- * lista, dice cuál se está gestionando y deja cambiar.
+ * Lo que cambió respecto de la versión anterior:
  *
- * El listado completo de torneos vive en su propia sección del nav; acá
- * queda lo que necesita atención, que es lo que esta pantalla responde.
+ * - Los números eran una línea corrida ("0 activos · 1 por comenzar ·
+ *   0 finalizados") que hay que leer entera para sacar un dato. Ahora
+ *   son tres cifras con su etiqueta, en el resumen de la organización.
+ * - "Crear torneo" estaba siempre habilitado aunque la organización no
+ *   pudiera publicar otro (`06`, D-51). Ahora dice que está bloqueado
+ *   y explica por qué al tocarlo, en vez de dejar completar el
+ *   formulario para fallar al final.
+ * - El estado de verificación se mezclaba con la cantidad de torneos.
+ *   Son preguntas distintas y ahora viven en filas distintas.
  */
 export default async function PaginaInicioOrganizador() {
   const [organizacion, organizaciones] = await Promise.all([
@@ -41,10 +50,10 @@ export default async function PaginaInicioOrganizador() {
           <h2 className={styles.vacioTitulo}>Todavía no tenés una organización</h2>
           <p className={styles.vacioTexto}>
             Los torneos los organiza una organización, no una persona. Para crear tu primer torneo
-            necesitás crear una.
+            primero necesitás crear una.
           </p>
-          <Link href="/organizador/gestionar/crear" className={styles.botonCrearTorneo}>
-            Crear organización
+          <Link href="/organizador/gestionar/crear" className={styles.botonCrearOrganizacion}>
+            + Crear organización
           </Link>
         </div>
       </div>
@@ -55,10 +64,17 @@ export default async function PaginaInicioOrganizador() {
 
   return (
     <div className={styles.contenidoPagina}>
-      <p className={styles.stats}>
-        {panel.stats.activos} activos · {panel.stats.porComenzar} por comenzar ·{' '}
-        {panel.stats.finalizados} finalizados
-      </p>
+      <ResumenOrganizacion
+        organizacionId={panel.organizacionId}
+        nombre={panel.nombreOrganizacion}
+        logoUrl={panel.logoUrl}
+        nivelVerificacion={panel.nivelVerificacion}
+        soyTitular={panel.soyTitular}
+        limitePublicadosAlcanzado={panel.limitePublicadosAlcanzado}
+        torneos={panel.stats.torneos}
+        activos={panel.stats.activos}
+        equipos={panel.stats.equipos}
+      />
 
       {panel.necesitanAtencion.length > 0 && (
         <section className={styles.seccion}>
@@ -78,9 +94,14 @@ export default async function PaginaInicioOrganizador() {
             Ver todos →
           </Link>
         </div>
-        <Link href="/torneo/crear" className={styles.botonCrearTorneo}>
-          + Crear torneo
-        </Link>
+
+        <BotonCrearTorneo bloqueado={panel.limitePublicadosAlcanzado} />
+
+        <TabsTorneosPanel
+          activos={panel.activos}
+          proximos={panel.proximos}
+          finalizados={panel.finalizados}
+        />
       </section>
 
       <ListaMisOrganizaciones

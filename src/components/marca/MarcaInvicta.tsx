@@ -17,6 +17,8 @@ export interface MarcaInvictaProps {
    * donde sería redundante: la propia pantalla de notificaciones.
    */
   conCampana?: boolean;
+  /** Se lo pasa a la campanita, para no perder el modo al tocarla. */
+  modo?: 'jugador' | 'organizador';
 }
 
 /**
@@ -37,6 +39,7 @@ export function MarcaInvicta({
   acciones,
   conEnlaceIngresar = true,
   conCampana = true,
+  modo,
 }: MarcaInvictaProps) {
   return (
     <div className={styles.fila}>
@@ -46,7 +49,7 @@ export function MarcaInvicta({
       </span>
       <span className={styles.acciones}>
         {acciones}
-        {conCampana && <CampanaNotificaciones />}
+        {conCampana && <CampanaNotificaciones modo={modo} />}
         {conEnlaceIngresar && <EnlaceIngresar />}
       </span>
     </div>
