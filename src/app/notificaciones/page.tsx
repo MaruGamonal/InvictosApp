@@ -72,7 +72,11 @@ export default async function PaginaNotificaciones({
         cursorInicial={cursorSiguiente}
         modo={modo}
       />
-      {modo === 'organizador' ? <NavInferiorOrganizador /> : <NavInferior activo="inicio" />}
+      {modo === 'organizador' ? (
+        <NavInferiorOrganizador />
+      ) : (
+        <NavInferior activo="inicio" autenticado />
+      )}
     </div>
   );
 }

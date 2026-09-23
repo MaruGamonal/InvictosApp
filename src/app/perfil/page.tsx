@@ -100,7 +100,7 @@ export default async function PaginaPerfil() {
         <BotonCerrarSesion />
       </div>
 
-      <NavInferior activo="perfil" />
+      <NavInferior activo="perfil" autenticado />
     </div>
   );
 }

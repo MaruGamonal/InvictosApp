@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSesion } from '@/components/useSesion';
 import styles from './MarcaInvicta.module.css';
 
 /**
@@ -11,9 +11,11 @@ import styles from './MarcaInvicta.module.css';
  *
  * Solo aparece con sesión: a quien todavía no entró no hay nada que
  * notificarle. Igual que `EnlaceIngresar`, se pregunta en el cliente
- * (`GET /api/mi-usuario`) porque las pantallas de descubrimiento se
- * cachean con `CONTEXTO_PUBLICO` (`06`, D-90) y el servidor arma la
- * misma respuesta para cualquiera.
+ * porque las pantallas de descubrimiento se cachean con
+ * `CONTEXTO_PUBLICO` (`06`, D-90) y el servidor arma la misma respuesta
+ * para cualquiera. La pregunta la comparten los tres componentes que la
+ * necesitan (`useSesion`): antes eran tres pedidos idénticos por
+ * pantalla.
  */
 export interface CampanaNotificacionesProps {
   /**
@@ -25,21 +27,7 @@ export interface CampanaNotificacionesProps {
 }
 
 export function CampanaNotificaciones({ modo }: CampanaNotificacionesProps = {}) {
-  const [autenticado, setAutenticado] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let cancelado = false;
-    fetch('/api/mi-usuario')
-      .then((respuesta) => {
-        if (!cancelado) setAutenticado(respuesta.ok);
-      })
-      .catch(() => {
-        if (!cancelado) setAutenticado(false);
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+  const autenticado = useSesion();
 
   if (!autenticado) return null;
 

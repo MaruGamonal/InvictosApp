@@ -360,7 +360,7 @@ export default async function PaginaInicio({
         )}
       </div>
 
-      <NavInferior activo="inicio" />
+      <NavInferior activo="inicio" autenticado />
     </div>
   );
 }

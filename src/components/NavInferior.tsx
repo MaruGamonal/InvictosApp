@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSesion } from './useSesion';
 import styles from './NavInferior.module.css';
 
 export type PestanaNavInferior = 'inicio' | 'equipos' | 'torneos' | 'perfil';
@@ -65,27 +65,35 @@ const PESTANAS: Array<{
  * Cliente, no de servidor: las páginas donde vive (`/torneos`,
  * `/torneo/[id]`, `/equipo/[id]`) son públicas y cacheadas por evento
  * (D-04b) — no saben si quien mira tiene sesión. Este componente sí
- * puede preguntarlo, con la sesión real, apenas se monta —
- * `GET /api/mi-usuario`— y se queda oculto mientras no confirme que hay
- * cuenta: reportado en vivo, un visitante sin ingresar no debería ver
- * un nav pensado para navegar la cuenta.
+ * puede preguntarlo, con la sesión real, y se queda oculto mientras no
+ * confirme que hay cuenta: reportado en vivo, un visitante sin ingresar
+ * no debería ver un nav pensado para navegar la cuenta.
+ *
+ * **`autenticado` como prop es el camino rápido.** Las pantallas que ya
+ * exigen sesión en el servidor (`/inicio`, `/perfil`,
+ * `/notificaciones`, que redirigen a "Ingresar" si no la hay) lo saben
+ * antes de dibujar: pasándolo, el nav sale con la página y no hay ni
+ * espera ni pedido. Sin la prop —en las pantallas públicas, donde el
+ * servidor de verdad no sabe— se pregunta, pero recordando la respuesta
+ * entre pantallas (`useSesion`), así que el nav aparece igual en el
+ * primer render a partir de la segunda.
+ *
+ * Reportado en vivo: "en el modo jugador el menú tiene un delay en cada
+ * pantalla". Eran las dos cosas juntas —un pedido por montaje y nada
+ * dibujado hasta que contestara—, en pantallas donde encima la
+ * respuesta ya se conocía.
  */
-export function NavInferior({ activo }: { activo: PestanaNavInferior }) {
-  const [autenticado, setAutenticado] = useState(false);
-
-  useEffect(() => {
-    let cancelado = false;
-    fetch('/api/mi-usuario')
-      .then((respuesta) => {
-        if (!cancelado && respuesta.ok) setAutenticado(true);
-      })
-      .catch(() => {
-        // Sin sesión o sin conexión: se queda oculto, que es lo seguro acá.
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+export function NavInferior({
+  activo,
+  autenticado: autenticadoDesdeElServidor,
+}: {
+  activo: PestanaNavInferior;
+  /** Lo que el servidor ya sabe; sin esto se pregunta desde el cliente. */
+  autenticado?: boolean;
+}) {
+  // Con la respuesta del servidor no se pregunta nada: el hook se apaga.
+  const autenticadoConsultado = useSesion(autenticadoDesdeElServidor === undefined);
+  const autenticado = autenticadoDesdeElServidor ?? autenticadoConsultado;
 
   if (!autenticado) return null;
 

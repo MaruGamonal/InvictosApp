@@ -1,34 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSesion } from '@/components/useSesion';
 import styles from './MarcaInvicta.module.css';
 
 /**
  * El descubrimiento se cachea con `CONTEXTO_PUBLICO` (`06`, D-90): el
  * servidor arma la misma respuesta para cualquiera, sin saber si quien
  * mira tiene sesión — por eso "Ingresar" no puede resolverse ahí. Se
- * pregunta en el cliente, mismo patrón que `NavInferior`
- * (`GET /api/mi-usuario`).
+ * pregunta en el cliente, compartiendo la consulta con `NavInferior` y
+ * la campanita (`useSesion`).
  *
  * Reportado en vivo: un usuario logueado veía igual el link.
  */
 export function EnlaceIngresar() {
-  const [autenticado, setAutenticado] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let cancelado = false;
-    fetch('/api/mi-usuario')
-      .then((respuesta) => {
-        if (!cancelado) setAutenticado(respuesta.ok);
-      })
-      .catch(() => {
-        if (!cancelado) setAutenticado(false);
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+  const autenticado = useSesion();
 
   if (autenticado !== false) return null;
 
