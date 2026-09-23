@@ -21,10 +21,15 @@ import path from 'node:path';
  * conexión que nadie va a liberar, y **el despliegue siguiente se cuelga
  * esperándolo**.
  *
- * Por eso las migraciones van por `DATABASE_URL_MIGRACIONES`: la
- * conexión directa a la base (o el pooler en modo sesión), donde la
- * sesión sí es una sola. Corre una vez por despliegue, así que no hay
- * problema de cupo.
+ * Por eso las migraciones van por `DATABASE_URL_MIGRACIONES`: el
+ * pooler en **modo sesión** (puerto 5432), donde la sesión sí es una
+ * sola y el lock vale. Corre una vez por despliegue, así que el cupo
+ * chico del modo sesión no molesta.
+ *
+ * **No la conexión directa**, aunque también tenga sesión fija: en los
+ * proyectos nuevos de Supabase resuelve solo por IPv6, y el entorno de
+ * construcción de Vercel no lo habla. Falla al conectar, y el error no
+ * nombra al IPv6 por ningún lado.
  *
  * Si la variable no está, usa `DATABASE_URL` — que es lo que pasaba
  * antes de que existiera esta separación, y sigue siendo correcto
@@ -62,8 +67,8 @@ if (!urlMigraciones && esModoTransaccion(elegida)) {
       'DATABASE_URL_MIGRACIONES. Las migraciones necesitan una sesión fija: usan un\n' +
       'advisory lock que, por el pooler, se tomaría en una conexión y se liberaría en\n' +
       'otra — puede quedar colgado y trabar los despliegues siguientes.\n\n' +
-      'Cargá DATABASE_URL_MIGRACIONES con la cadena de conexión directa\n' +
-      '(Supabase → Connect → "Direct connection") y volvé a desplegar.\n' +
+      'Cargá DATABASE_URL_MIGRACIONES con la cadena del pooler en modo sesión\n' +
+      '(Supabase → Connect → "Session pooler", puerto 5432) y volvé a desplegar.\n' +
       'Ver docs/contexto/pasos-infraestructura-T28.md, paso 5.',
   );
   process.exit(1);
