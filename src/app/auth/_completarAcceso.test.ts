@@ -4,12 +4,16 @@ import type { User } from '@supabase/supabase-js';
 const completarRegistro = vi.fn();
 const confirmarEmailCuenta = vi.fn();
 const confirmarVerificacionBasica = vi.fn();
+const confirmarVerificacionesPendientes = vi.fn(async () => []);
 
 vi.mock('@/lib/contexto', () => ({ construirContexto: async () => ({ usuarioId: 'u1' }) }));
 vi.mock('@/services/identidad/completarRegistro', () => ({ completarRegistro }));
 vi.mock('@/services/identidad/confirmarEmailCuenta', () => ({ confirmarEmailCuenta }));
 vi.mock('@/services/organizadores/confirmarVerificacionBasica', () => ({
   confirmarVerificacionBasica,
+}));
+vi.mock('@/services/organizadores/confirmarVerificacionesPendientes', () => ({
+  confirmarVerificacionesPendientes,
 }));
 
 const { completarAcceso, leerIntencion } = await import('./_completarAcceso');
@@ -61,9 +65,27 @@ describe('completarAcceso', () => {
     );
   });
 
-  it('no verifica ninguna organización cuando el enlace no menciona una', async () => {
+  /**
+   * El bug reportado en vivo: el id de la organización viajaba solo en
+   * la URL de vuelta, y si la plantilla del correo no la reenvía entera
+   * se pierde. La cuenta quedaba confirmada y la organización no, sin
+   * ningún error a la vista. Sin id, ahora se busca en la base qué
+   * verificación había pedido esa persona.
+   */
+  it('sin organización en la ruta, resuelve la que haya quedado pendiente', async () => {
     await completarAcceso(usuario());
     expect(confirmarVerificacionBasica).not.toHaveBeenCalled();
+    expect(confirmarVerificacionesPendientes).toHaveBeenCalledWith(undefined, expect.anything());
+  });
+
+  /** Con el id en la ruta no hace falta buscar nada: ya se sabe cuál es. */
+  it('con la organización en la ruta, no busca pendientes', async () => {
+    await completarAcceso(usuario(), { organizacionId: ORG });
+    expect(confirmarVerificacionBasica).toHaveBeenCalledWith(
+      { organizacionId: ORG },
+      expect.anything(),
+    );
+    expect(confirmarVerificacionesPendientes).not.toHaveBeenCalled();
   });
 });
 

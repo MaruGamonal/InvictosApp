@@ -54,15 +54,15 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
 
   return (
     <div className={styles.pagina}>
-      {/* El título dice el modo; la organización activa va debajo, como
-          selector. Antes el nombre de la organización ocupaba el título
-          y no se distinguía de un rótulo cualquiera. */}
+      {/* El título dice el modo; la organización activa va **al lado**,
+          como selector. Antes el nombre ocupaba el título y no se
+          distinguía de un rótulo; debajo, sumaba un tercer renglón. */}
       <CabeceraDeModo
         modo="organizador"
         nombreUsuario={nombreUsuario}
         titulo="Organizador"
         puedeCambiarDeModo
-        bajoElTitulo={
+        alCostadoDelTitulo={
           organizacion ? (
             <SelectorOrganizacionActiva
               organizaciones={organizaciones}

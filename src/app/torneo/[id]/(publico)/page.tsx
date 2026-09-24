@@ -2,9 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Escudo } from '@/components/Escudo';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
-import { CompartirBoton } from '@/components/CompartirBoton';
-import { BotonSeguir } from '@/components/BotonSeguir';
-import { BotonInscribirEquipo } from '@/components/BotonInscribirEquipo';
 import { EnlaceGestionarTorneo } from '@/components/EnlaceGestionarTorneo';
 import { RegistrarEvento } from '@/components/RegistrarEvento';
 import { NavInferior } from '@/components/NavInferior';
@@ -78,25 +75,6 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
         evento={EVENTOS_ANALITICA.fichaTorneoVista}
         propiedades={{ torneoId: id, estado: ficha.estado }}
       />
-
-      {/*
-        D-04b: visible sin sesión, el registro se pide recién al accionar.
-        Seguir e Inscribir a mi equipo piden cuenta al tocar (redirigen a
-        /ingresar sin sesión). Compartir es funcional: no necesita cuenta
-        ni confirmación.
-      */}
-      <div className={styles.accionesHero}>
-        <BotonSeguir
-          tipoSeguido="tournament"
-          entidadId={id}
-          cantidadSeguidoresInicial={ficha.seguidores}
-          mostrarCantidad={false}
-        />
-        {ficha.estado === 'registration_open' && (
-          <BotonInscribirEquipo torneoId={id} reglamentoVigente={reglamentoVigente} />
-        )}
-        <CompartirBoton titulo={ficha.nombre} url={`${urlDelSitio}/torneo/${id}`} />
-      </div>
 
       {ficha.direccion && (
         <>

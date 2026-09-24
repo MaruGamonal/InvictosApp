@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { BotonInscribirEquipo } from './BotonInscribirEquipo';
 
 const push = vi.fn();
@@ -30,7 +30,12 @@ describe('BotonInscribirEquipo', () => {
     expect(getByRole('button', { name: 'Inscribir a mi equipo' })).toBeTruthy();
   });
 
-  it('con una solicitud pendiente ya enviada, muestra ese estado en vez del botón', async () => {
+  /**
+   * Pedido en vivo: el estado va **en el botón**, como "Siguiendo ✓", en
+   * vez de un cartel debajo que corre la pantalla. El botón vive en la
+   * cabecera oscura, donde un cartel no entra.
+   */
+  it('con una solicitud pendiente, el botón pasa a decir "Solicitud enviada"', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -48,19 +53,24 @@ describe('BotonInscribirEquipo', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByText, queryByRole } = render(
+    const { getByRole, queryByRole, queryByText } = render(
       <BotonInscribirEquipo torneoId="t-1" reglamentoVigente={null} />,
     );
 
-    await waitFor(() =>
-      expect(
-        getByText('Solicitud enviada — el organizador la va a aprobar o rechazar.'),
-      ).toBeTruthy(),
-    );
+    await waitFor(() => expect(getByRole('button', { name: 'Solicitud enviada ✓' })).toBeTruthy());
     expect(queryByRole('button', { name: 'Inscribir a mi equipo' })).toBeNull();
+    // El cartel ya no se inserta en la pantalla: el detalle está a un toque.
+    expect(
+      queryByText('Solicitud enviada — el organizador la va a aprobar o rechazar.'),
+    ).toBeNull();
+
+    fireEvent.click(getByRole('button', { name: 'Solicitud enviada ✓' }));
+    expect(
+      queryByText('Solicitud enviada — el organizador la va a aprobar o rechazar.'),
+    ).toBeTruthy();
   });
 
-  it('con inscripción ya aprobada, muestra el mensaje de confirmación', async () => {
+  it('con inscripción aprobada el botón lo dice, y el detalle trae los enlaces', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -78,11 +88,14 @@ describe('BotonInscribirEquipo', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { getByText } = render(<BotonInscribirEquipo torneoId="t-1" reglamentoVigente={null} />);
-
-    await waitFor(() =>
-      expect(getByText('¡Inscripto! Ya sos parte de los equipos confirmados.')).toBeTruthy(),
+    const { getByText, getByRole } = render(
+      <BotonInscribirEquipo torneoId="t-1" reglamentoVigente={null} />,
     );
+
+    await waitFor(() => expect(getByRole('button', { name: 'Inscripto ✓' })).toBeTruthy());
+
+    fireEvent.click(getByRole('button', { name: 'Inscripto ✓' }));
+    expect(getByText('¡Inscripto! Ya sos parte de los equipos confirmados.')).toBeTruthy();
     expect(getByText('Lista de buena fe').closest('a')).toHaveProperty(
       'href',
       expect.stringContaining('/torneo/t-1/equipo/eq-1/lista-buena-fe'),

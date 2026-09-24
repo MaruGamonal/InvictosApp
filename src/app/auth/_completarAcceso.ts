@@ -3,6 +3,7 @@ import { construirContexto } from '@/lib/contexto';
 import { completarRegistro } from '@/services/identidad/completarRegistro';
 import { confirmarEmailCuenta } from '@/services/identidad/confirmarEmailCuenta';
 import { confirmarVerificacionBasica } from '@/services/organizadores/confirmarVerificacionBasica';
+import { confirmarVerificacionesPendientes } from '@/services/organizadores/confirmarVerificacionesPendientes';
 
 /**
  * Qué hacer una vez que la sesión ya existe. Lo comparten las dos
@@ -71,5 +72,13 @@ export async function completarAcceso(
   // una organización ajena.
   if (organizacionId) {
     await confirmarVerificacionBasica({ organizacionId }, contexto);
+    return;
   }
+
+  // Sin id en la URL, se busca en la base qué verificación había pedido
+  // esta persona. Es el camino que **no** depende de la plantilla del
+  // correo: si el enlace se arma sin reenviar la URL de vuelta entera,
+  // el id se pierde y por acá se recupera. Reportado en vivo — la cuenta
+  // quedaba confirmada y la organización no.
+  await confirmarVerificacionesPendientes(undefined, contexto);
 }

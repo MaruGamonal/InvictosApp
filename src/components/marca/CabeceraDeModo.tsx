@@ -18,15 +18,19 @@ export interface CabeceraDeModoProps {
   /** Solo se ofrece el cambio a quien tiene los dos roles. */
   puedeCambiarDeModo?: boolean;
   /**
-   * Debajo del título, en la misma cabecera: en modo organizador, cuál
+   * Al costado del título, en la misma línea: en modo organizador, cuál
    * de las organizaciones se está gestionando.
    *
    * El título dice el **modo** ("Organizador") y esto dice la
    * **entidad**. Antes el título era el nombre de la organización, y no
    * se distinguía de un rótulo cualquiera: no quedaba claro que fuera
    * la organización activa ni que hubiera otra a la que cambiar.
+   *
+   * Va al lado y no debajo para no sumar un tercer renglón a la
+   * cabecera — pedido en vivo: el saludo, el título y la organización
+   * uno arriba del otro empujaban todo el contenido hacia abajo.
    */
-  bajoElTitulo?: ReactNode;
+  alCostadoDelTitulo?: ReactNode;
 }
 
 /**
@@ -48,7 +52,7 @@ export function CabeceraDeModo({
   titulo,
   fotoUrl,
   puedeCambiarDeModo = false,
-  bajoElTitulo,
+  alCostadoDelTitulo,
 }: CabeceraDeModoProps) {
   return (
     <header className={styles.cabecera}>
@@ -58,11 +62,12 @@ export function CabeceraDeModo({
         <Escudo src={fotoUrl ?? null} nombre={nombreUsuario} tamano={44} />
         <div className={styles.textoUsuario}>
           <span className={styles.saludo}>Hola, {nombreUsuario}</span>
-          <span className={`fuente-display ${styles.titulo}`}>{titulo}</span>
+          <div className={styles.filaTitulo}>
+            <span className={`fuente-display ${styles.titulo}`}>{titulo}</span>
+            {alCostadoDelTitulo}
+          </div>
         </div>
       </div>
-
-      {bajoElTitulo}
 
       {puedeCambiarDeModo && <CambiarDeModo modoActual={modo} />}
     </header>

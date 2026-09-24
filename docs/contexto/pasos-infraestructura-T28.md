@@ -100,6 +100,29 @@ En el panel del proyecto, **Settings → Environment Variables**. Las que Claude
 >
 > **Además, en el panel de Supabase** (Authentication → URL Configuration) hay que fijar el mismo valor: **Site URL** a esa misma URL, y agregar `<esa URL>/auth/callback` a **Redirect URLs**. Supabase solo respeta el `emailRedirectTo` que le manda la app si esa URL está en la lista de Redirect URLs — si no, la ignora y usa el Site URL del panel (que en un proyecto nuevo suele quedar en localhost por default).
 
+### Paso 5b — La plantilla del correo (Supabase → Authentication → Email Templates → **Magic Link**)
+
+Todos los correos que manda la aplicación —confirmar la cuenta, verificar la organización, reenviar el enlace— salen por esta plantilla. Tiene que cumplir **dos** cosas:
+
+**1. El enlace debe reenviar la URL de vuelta entera.** Usar `{{ .RedirectTo }}`, no `{{ .SiteURL }}`:
+
+```html
+<h2>Confirmá tu acceso a INVICTA</h2>
+<p>Tocá el botón para continuar. El enlace sirve una sola vez y vence en una hora.</p>
+<p>
+  <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink">Continuar</a>
+</p>
+<p>Si no pediste esto, podés ignorar este correo.</p>
+```
+
+> ⚠️ **Con `{{ .SiteURL }}` se pierde la ruta de vuelta, y con ella el id de la organización.** Ese era el síntoma reportado: la persona tocaba el enlace, la cuenta quedaba confirmada y **la organización seguía sin verificar**, sin ningún error a la vista.
+>
+> La aplicación ya no depende de esto para funcionar: al volver del correo busca en la base qué verificación había pedido esa persona y la aplica igual (`confirmarVerificacionesPendientes`). Pero con `{{ .RedirectTo }}` la pantalla de confirmación además puede **nombrar** la organización que se está verificando, que es lo que la vuelve entendible.
+
+**2. `{{ .TokenHash }}` y no `{{ .ConfirmationURL }}`.** El enlace por defecto apunta al endpoint de Supabase, que lo canjea por GET — y los escáneres de correo siguen enlaces, así que lo gastan antes que la persona. La pantalla intermedia (`/acceso/confirmar`) canjea por POST, que los escáneres no completan.
+
+---
+
 ### Paso 6 — Crear el bucket `media` y dejarlo **público**
 
 En el panel de Supabase, **Storage → New bucket**, nombre `media`, con **Public bucket** activado. O desde el SQL Editor:

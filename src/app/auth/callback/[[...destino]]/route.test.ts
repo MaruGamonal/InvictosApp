@@ -13,6 +13,9 @@ vi.mock('@/services/identidad/confirmarEmailCuenta', () => ({ confirmarEmailCuen
 vi.mock('@/services/organizadores/confirmarVerificacionBasica', () => ({
   confirmarVerificacionBasica: vi.fn(),
 }));
+vi.mock('@/services/organizadores/confirmarVerificacionesPendientes', () => ({
+  confirmarVerificacionesPendientes: vi.fn(async () => []),
+}));
 
 const { GET } = await import('./route');
 

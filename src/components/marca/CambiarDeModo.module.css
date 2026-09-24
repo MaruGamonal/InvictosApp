@@ -1,7 +1,14 @@
+/* A todo el ancho y no como píldora chica al costado: es el único
+   control de la cabecera que cambia de contexto entero, y pedido en
+   vivo — al lado del resto parecía una acción más. */
 .cambiar {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   /* 44px de área táctil (`08`, sección 10). */
   min-height: 44px;
   padding: 0 12px;

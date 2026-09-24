@@ -79,3 +79,15 @@
   margin: 0 auto;
   padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
 }
+
+/* Las acciones, en la cabecera y no en el cuerpo de una pestaña — mismo
+   lugar que en el perfil del equipo. */
+.accionesHero {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}

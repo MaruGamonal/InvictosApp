@@ -40,3 +40,20 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* El modo y la entidad en la misma línea: la organización activa al
+   lado del título, no debajo — así la cabecera no gana un renglón. */
+.filaTitulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Con poco ancho la píldora baja sola en vez de apretar el título. */
+@media (max-width: 380px) {
+  .filaTitulo {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}

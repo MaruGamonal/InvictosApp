@@ -32,8 +32,6 @@
 }
 
 .panel {
-  flex: 1 1 100%;
-  order: 10;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -143,4 +141,68 @@
   color: var(--acento);
   font: 700 13px/1 var(--fuente-texto);
   text-decoration: none;
+}
+
+/* El estado de una inscripción ya hecha, dicho en el mismo botón. Vive
+   en la cabecera oscura, así que usa los tokens de identidad. */
+.pildoraHecha {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--acento);
+  border-radius: var(--radio-pill);
+  background: transparent;
+  color: var(--acento);
+  font: 700 13px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.pildoraHecha:focus-visible,
+.pillPrimaria:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* `<dialog>` nativo: el navegador pone el foco atrapado, el Escape y el
+   fondo inerte. Acá solo va la forma. */
+.dialogo {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  border: none;
+  border-radius: var(--radio-tarjeta);
+  background: transparent;
+  color: var(--color-texto);
+}
+
+.dialogo::backdrop {
+  background: rgba(14, 23, 32, 0.55);
+}
+
+.filaTitulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* 44px de área táctil aunque la cruz mida menos (`08`, sección 10). */
+.cerrar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px -10px 0;
+  border: none;
+  background: transparent;
+  color: var(--color-texto-secundario);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -4px;
+  border-radius: var(--radio-boton);
 }

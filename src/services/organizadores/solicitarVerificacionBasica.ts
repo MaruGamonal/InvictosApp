@@ -49,6 +49,13 @@ export const solicitarVerificacionBasica: Servicio<
     ]);
   }
 
+  // Antes de mandar el correo: si el envío falla, una marca de más no
+  // hace nada —nadie va a volver de un correo que no salió— y si se
+  // anotara después, un corte entre medio dejaría el enlace sin efecto.
+  await pool.query('UPDATE organizacion SET verificacion_solicitada_en = now() WHERE id = $1', [
+    datos.organizacionId,
+  ]);
+
   const supabase = obtenerClienteAdmin();
   const { error } = await supabase.auth.signInWithOtp({
     email: fila.email,

@@ -35,7 +35,13 @@ export const confirmarVerificacionBasica: Servicio<
   if (fila.usuario_titular_id !== contexto.usuarioId) throw crearError('SIN_PERMISO');
 
   await pool.query(
-    `UPDATE organizacion SET nivel_verificacion = 'basic', fecha_verificacion = now() WHERE id = $1`,
+    `UPDATE organizacion
+     SET nivel_verificacion = 'basic',
+         fecha_verificacion = now(),
+         -- El pedido queda saldado: si no se limpiara, el próximo enlace
+         -- de acceso volvería a "verificar" algo ya verificado.
+         verificacion_solicitada_en = NULL
+     WHERE id = $1`,
     [datos.organizacionId],
   );
 
