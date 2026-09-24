@@ -41,8 +41,8 @@
   white-space: nowrap;
 }
 
-/* El modo y la entidad en la misma línea: la organización activa al
-   lado del título, no debajo — así la cabecera no gana un renglón. */
+/* El nombre y la organización en la misma línea: la organización
+   activa al lado, no debajo — así la cabecera no gana un renglón. */
 .filaTitulo {
   display: flex;
   align-items: center;

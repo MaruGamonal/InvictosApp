@@ -161,7 +161,6 @@ export default async function PaginaInicio({
       <CabeceraDeModo
         modo="jugador"
         nombreUsuario={inicio.nombreUsuario}
-        titulo={inicio.jugador?.equipos[0] ? inicio.jugador.equipos[0].nombre : 'Inicio'}
         puedeCambiarDeModo={inicio.esOrganizador}
       />
 
