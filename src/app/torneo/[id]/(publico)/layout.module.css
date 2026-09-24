@@ -13,11 +13,17 @@
   gap: 16px;
 }
 
+/* `width: 100%` no es decorativo: un ítem flex con `margin: 0 auto`
+   pierde el `stretch` del contenedor y se encoge a su contenido. Sin
+   esto, el escudo y el título flotaban centrados como un bloque suelto
+   mientras la marca y las acciones llegaban a los 640px — las tres
+   filas de la cabecera arrancaban en lugares distintos. */
 .heroContenido {
   display: flex;
   align-items: center;
   gap: 14px;
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
 }
 
