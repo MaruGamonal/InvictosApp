@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 480px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   padding: 32px var(--espacio-pantalla-x) 24px;
   background: var(--color-fondo);

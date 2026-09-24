@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .titulo {
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 10px auto 0;
   font-size: 22px;
   line-height: 1.15;
@@ -47,7 +47,7 @@
 .nav {
   display: flex;
   gap: 4px;
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 14px auto 0;
   overflow-x: auto;
 }
@@ -70,7 +70,7 @@
 }
 
 .contenido {
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
 }

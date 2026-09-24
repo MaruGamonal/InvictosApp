@@ -19,6 +19,10 @@
   gap: 8px;
   padding: 0 16px;
   pointer-events: none;
+  /* Contra la ventana, no contra el `body`: necesita el mismo tope o se
+     iría a los costados de la columna en una pantalla ancha. */
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
 }
 
 .aviso {

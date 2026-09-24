@@ -1,7 +1,7 @@
 /* Vive dentro del hero oscuro de las dos pantallas, así que es blanco
    sobre el ink, no una superficie del cuerpo. */
 .busqueda {
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   width: 100%;
   margin: 0 auto;
   background: var(--blanco);

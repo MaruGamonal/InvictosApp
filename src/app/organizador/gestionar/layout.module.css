@@ -4,7 +4,7 @@
 }
 
 .contenido {
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 24px;
 }

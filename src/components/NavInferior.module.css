@@ -10,7 +10,7 @@
   z-index: 10;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  max-width: 480px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   padding: 8px 4px calc(14px + env(safe-area-inset-bottom, 0px));
   background: var(--color-superficie);

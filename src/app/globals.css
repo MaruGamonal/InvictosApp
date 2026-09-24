@@ -70,6 +70,17 @@
   --fuente-display: var(--font-barlow-condensed), sans-serif;
   --fuente-texto: var(--font-barlow), sans-serif;
 
+  /**
+   * Ancho de la aplicación. El producto es móvil (`06`, D-67): en una
+   * pantalla ancha no se reacomoda, se centra — una columna del ancho
+   * de un teléfono, que es para lo que está diseñada cada pantalla.
+   *
+   * Estaba escrito a mano en `/inicio` y `/perfil` y en ningún lado
+   * más, así que el resto de las pantallas se estiraba a lo ancho de
+   * la ventana. Reportado en vivo. Ahora es un solo número, acá.
+   */
+  --ancho-aplicacion: 480px;
+
   /* Radios */
   --radio-tarjeta: 10px;
   --radio-boton: 8px;
@@ -107,11 +118,30 @@ body {
   margin: 0;
 }
 
+/**
+ * El marco de la aplicación, en un solo lugar.
+ *
+ * Va en `body` y no en cada página para que ninguna pueda quedarse
+ * afuera: así estaba antes, y solo dos de las veintitantas pantallas
+ * tenían el tope puesto.
+ *
+ * Lo que está en `position: fixed` —los dos navs inferiores y los
+ * avisos— **no** entra acá: se posicionan contra la ventana, no contra
+ * el `body`, así que llevan el mismo tope por su cuenta.
+ */
 body {
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
   background: var(--color-fondo);
   color: var(--color-texto);
   font-family: var(--fuente-texto);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Lo que queda al costado en una pantalla ancha: un fondo propio, para
+   que se lea como el marco de la aplicación y no como un error. */
+html {
+  background: var(--fondo-sutil);
 }
 
 /* Números tabulares obligatorios (`08`, sección 7) — criterio de descarte,

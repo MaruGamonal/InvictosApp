@@ -7,7 +7,7 @@
   justify-content: center;
   gap: 7px;
   width: 100%;
-  max-width: 640px;
+  max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   /* 44px de área táctil (`08`, sección 10). */
   min-height: 44px;
