@@ -91,6 +91,10 @@
 .accionesHero {
   display: flex;
   align-items: center;
+  /* Centradas en la pantalla, igual que en el perfil del equipo: la fila
+     ocupa el ancho de la aplicación y las píldoras se centran adentro, así
+     las líneas siguen centradas cuando envuelven. */
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   max-width: var(--ancho-aplicacion);

@@ -50,9 +50,13 @@
 .accionesHero {
   display: flex;
   align-items: center;
+  /* Sin `justify-content` quedaban centradas sólo por encogerse a su
+     contenido; al envolver, las líneas se iban a la izquierda. */
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
   max-width: var(--ancho-aplicacion);
+  width: 100%;
   margin: 16px auto 0;
 }
 
