@@ -13,12 +13,12 @@
 | Textos extraídos | **927** |
 | Textos que llegan a una pantalla | **589** |
 | Problemas encontrados | **31** |
-| Corregidos | **28** |
-| Pendientes de decisión | **3** |
+| Corregidos | **30** |
+| Pendientes | **1** |
 
 | Severidad | Cantidad | Corregidos |
 |---|---|---|
-| **CRÍTICO** — información interna que no debería llegar al usuario | 4 | 2 |
+| **CRÍTICO** — información interna que no debería llegar al usuario | 4 | 4 |
 | **ALTO** — wording que puede provocar una acción incorrecta | 4 | 4 |
 | **MEDIO** — inconsistencia terminológica o texto innecesariamente complejo | 15 | 15 |
 | **BAJO** — claridad y estilo | 8 | 7 |
@@ -65,7 +65,7 @@ Primero se le sacó el texto que describía la infraestructura. Después, al con
 
 ---
 
-### WORDING #003 — CRÍTICO ⚠️ necesita decisión
+### WORDING #003 — CRÍTICO ✅ corregido: fuera de desarrollo no existe
 
 **Pantalla:** `/catalogo` — también **pública y sin control de acceso**.
 
@@ -73,7 +73,11 @@ Primero se le sacó el texto que describía la infraestructura. Después, al con
 
 **Problema:** es herramienta interna de diseño servida como si fuera una pantalla del producto. Su propio comentario en el código lo dice: «No es una pantalla del producto». No hay texto que corregir — el problema es que existe para cualquiera.
 
-**Acción:** DECIDIR (ver **PROBLEMAS PENDIENTES**).
+**Acción:** ELIMINAR de producción.
+
+**Texto nuevo:** [ninguno]
+
+La página devuelve 404 cuando `NODE_ENV === 'production'`. En desarrollo sigue entera, que es donde sirve: mirar un componente en sus variantes sin levantar nada aparte. Hay una prueba de arquitectura (`src/app/catalogo/pagina.arquitectura.test.ts`) que falla si el candado se pierde en un merge — perderlo no rompe nada visible, simplemente la pantalla vuelve a estar para cualquiera.
 
 ---
 
@@ -295,17 +299,9 @@ Vale decirlo, porque es la mayor parte:
 
 ## PROBLEMAS PENDIENTES
 
-### 1. `/catalogo` sigue siendo una pantalla interna servida en producción (CRÍTICO)
+### 1. Ninguno de los dos pendientes de acceso queda abierto
 
-`/admin/sembrar-demo` ya no existe: se borraron la pantalla y su ruta de API.
-
-Queda **`/catalogo`**, que es una ruta pública sin ningún control de acceso y sirve el sistema de diseño entero —componentes, variantes y todos los estados internos con su etiqueta—. No cambia por wording: la decisión es si existe o no para un usuario final. Tres opciones:
-
-- **A.** Devolver 404 fuera de desarrollo (`notFound()` cuando `NODE_ENV === 'production'`). Es lo más limpio y no rompe nada: en desarrollo sigue estando.
-- **B.** Borrarla, como se hizo con la de sembrar datos. El sistema de diseño ya vive en su propio artifact, así que la pantalla dejó de ser la única forma de verlo.
-- **C.** Dejarla y sacarla de los buscadores con `robots: noindex`. Tapa la vitrina, no la puerta.
-
-Recomiendo **A**: no le sirve a nadie en producción, y en desarrollo sigue siendo cómoda para mirar un componente sin levantar el artifact.
+`/admin/sembrar-demo` se borró, con su ruta de API. `/catalogo` devuelve 404 fuera de desarrollo. Las dos decisiones están registradas arriba, en sus hallazgos.
 
 ### 2. El aviso de Inicio tiene que volver a ser accionable
 

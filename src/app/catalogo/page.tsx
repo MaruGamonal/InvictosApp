@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation';
 import { Badge } from '@/components/Badge';
 import { Escudo } from '@/components/Escudo';
 import { Marcador } from '@/components/Marcador';
@@ -28,9 +29,20 @@ const TOKENS_DE_COLOR = [
 /**
  * Catálogo visual del sistema de diseño (T6, "cómo demostrarlo"): todos
  * los componentes clave en sus variantes, y los badges de todos los
- * estados de `04` con su etiqueta. No es una pantalla del producto.
+ * estados de `04` con su etiqueta.
+ *
+ * **No es una pantalla del producto, y fuera de desarrollo no existe.**
+ * Era una ruta pública: cualquiera que escribiera la URL veía el
+ * sistema de diseño entero, con los nombres internos de todos los
+ * estados. Eso no le sirve a nadie en producción y contradice que la
+ * aplicación se sienta terminada (auditoría de wording, hallazgo #003).
+ *
+ * En desarrollo sigue entera, que es donde sirve: mirar un componente
+ * en sus variantes sin levantar nada aparte.
  */
 export default function PaginaCatalogo() {
+  if (process.env.NODE_ENV === 'production') notFound();
+
   const etiquetas = listarTodasLasEtiquetas();
 
   return (
