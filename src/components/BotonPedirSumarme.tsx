@@ -83,7 +83,7 @@ export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedi
         }
         setEstado({
           paso: 'error',
-          mensaje: cuerpo?.error?.mensaje ?? 'No pudimos enviar el pedido. Probá de nuevo.',
+          mensaje: cuerpo?.error?.mensaje ?? 'No pudimos enviar la solicitud. Probá de nuevo.',
         });
         return;
       }
@@ -104,7 +104,7 @@ export function BotonPedirSumarme({ equipoId, deshabilitado = false }: BotonPedi
         className={styles.botonActivo}
       >
         {estado.paso === 'enviado'
-          ? 'Pedido enviado ✓'
+          ? 'Solicitud enviada ✓'
           : estado.paso === 'enviando'
             ? 'Enviando…'
             : 'Pedir sumarme'}

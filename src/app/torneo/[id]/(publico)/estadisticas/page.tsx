@@ -41,9 +41,7 @@ export default async function PaginaEstadisticas({ params }: { params: Promise<{
     !estadisticas ||
     (estadisticas.goleadores.length === 0 && estadisticas.tarjetas.length === 0)
   ) {
-    return (
-      <EstadoVacio mensaje="Todavía nadie cargó goleadores ni tarjetas de este torneo — es un dato opcional al cargar cada resultado." />
-    );
+    return <EstadoVacio mensaje="Todavía no hay goleadores ni tarjetas en este torneo." />;
   }
 
   return (

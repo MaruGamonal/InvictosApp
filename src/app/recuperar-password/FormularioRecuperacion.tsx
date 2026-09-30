@@ -46,9 +46,9 @@ export function FormularioRecuperacion() {
   if (estado.paso === 'enviado') {
     return (
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Te mandamos un link</h1>
+        <h1 className={`fuente-display ${styles.titulo}`}>Te mandamos un enlace</h1>
         <p className={styles.texto}>
-          Revisá <strong>{identificadorAcceso}</strong>. El link para elegir una contraseña nueva
+          Revisá <strong>{identificadorAcceso}</strong>. El enlace para elegir una contraseña nueva
           vence en 30 minutos.
         </p>
         <div className={styles.textoCentrado}>
@@ -84,7 +84,7 @@ export function FormularioRecuperacion() {
       </div>
 
       <button type="submit" className={styles.boton} disabled={estado.paso === 'enviando'}>
-        {estado.paso === 'enviando' ? 'Enviando…' : 'Enviar link'}
+        {estado.paso === 'enviando' ? 'Enviando…' : 'Enviar enlace'}
       </button>
     </form>
   );

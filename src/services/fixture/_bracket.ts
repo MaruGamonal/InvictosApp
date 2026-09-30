@@ -21,7 +21,7 @@ export function generarPrimeraRondaBracket(equiposOrdenados: string[]): PartidoP
       {
         campo: 'equipos',
         problema:
-          'La eliminación directa del MVP necesita una cantidad de equipos que sea potencia de 2 (2, 4, 8, 16...).',
+          'La eliminación directa necesita una cantidad de equipos que sea potencia de 2: 2, 4, 8, 16…',
       },
     ]);
   }

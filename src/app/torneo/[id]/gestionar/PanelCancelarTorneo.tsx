@@ -46,7 +46,7 @@ export function PanelCancelarTorneo({ torneoId }: PanelCancelarTorneoProps) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo cancelar el torneo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos cancelar el torneo.');
         setEnviando(false);
         return;
       }

@@ -79,8 +79,8 @@ export function ResumenOrganizacion({
           </p>
           <p className={styles.pendienteTexto}>
             {limitePublicadosAlcanzado
-              ? 'Ya tenés un torneo publicado. Hasta verificar la organización no vas a poder publicar otro, y los que tengas no aparecen en las búsquedas.'
-              : 'Podés crear y publicar un torneo, pero no va a aparecer en las búsquedas hasta que verifiques la organización.'}
+              ? 'Ya tenés un torneo publicado. Verificá tu organización para publicar más de uno, y para que aparezcan en las búsquedas.'
+              : 'Podés crear y publicar un torneo. Verificá tu organización para que aparezca en las búsquedas.'}
           </p>
           <BotonVerificarOrganizacion
             organizacionId={organizacionId}

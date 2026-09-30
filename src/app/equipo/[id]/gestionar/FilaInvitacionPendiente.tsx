@@ -38,7 +38,7 @@ export function FilaInvitacionPendiente({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo cancelar. Probá de nuevo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos cancelar. Probá de nuevo.');
         setEnviando(false);
         return;
       }

@@ -42,12 +42,12 @@ describe('Avisos', () => {
   it('el error NO se va solo: se lee y se cierra a mano', () => {
     const { queryByText, getByRole } = montar();
 
-    act(() => avisador.error('No se pudieron guardar los cambios'));
+    act(() => avisador.error('No pudimos guardar los cambios'));
     act(() => vi.advanceTimersByTime(60_000));
-    expect(queryByText('No se pudieron guardar los cambios')).toBeTruthy();
+    expect(queryByText('No pudimos guardar los cambios')).toBeTruthy();
 
     fireEvent.click(getByRole('button', { name: 'Cerrar aviso' }));
-    expect(queryByText('No se pudieron guardar los cambios')).toBeNull();
+    expect(queryByText('No pudimos guardar los cambios')).toBeNull();
   });
 
   it('«Guardando…» se queda mientras dura la operación', () => {
@@ -81,11 +81,11 @@ describe('Avisos', () => {
     act(() => {
       id = avisador.cargando('Guardando…');
     });
-    act(() => avisador.error('No se pudieron guardar los cambios', id));
+    act(() => avisador.error('No pudimos guardar los cambios', id));
 
     expect(queryByText('Guardando…')).toBeNull();
     act(() => vi.advanceTimersByTime(60_000));
-    expect(queryByText('No se pudieron guardar los cambios')).toBeTruthy();
+    expect(queryByText('No pudimos guardar los cambios')).toBeTruthy();
   });
 
   it('el éxito es role=status y el error role=alert (no solo un color distinto)', () => {
@@ -94,7 +94,7 @@ describe('Avisos', () => {
     act(() => avisador.exito('Equipo actualizado'));
     expect(container.querySelector('[role="status"]')).toBeTruthy();
 
-    act(() => avisador.error('No se pudieron guardar los cambios'));
+    act(() => avisador.error('No pudimos guardar los cambios'));
     expect(container.querySelector('[role="alert"]')).toBeTruthy();
   });
 
@@ -105,7 +105,7 @@ describe('Avisos', () => {
     const conExito = container.querySelectorAll('svg').length;
     expect(conExito).toBeGreaterThan(0);
 
-    act(() => avisador.error('No se pudieron guardar los cambios'));
+    act(() => avisador.error('No pudimos guardar los cambios'));
     // El error suma su ícono y además el botón de cerrar.
     expect(container.querySelectorAll('svg').length).toBeGreaterThan(conExito);
   });
@@ -116,7 +116,7 @@ describe('Avisos', () => {
     act(() => avisador.exito('Equipo actualizado'));
     expect(container.querySelector('[aria-live="polite"]')).toBeTruthy();
 
-    act(() => avisador.error('No se pudieron guardar los cambios'));
+    act(() => avisador.error('No pudimos guardar los cambios'));
     expect(container.querySelector('[aria-live="assertive"]')).toBeTruthy();
   });
 
@@ -140,7 +140,7 @@ describe('Avisos', () => {
 
       act(() => avisador.cuentaNoConfirmada());
       expect(queryByText(/Confirmá tu cuenta para continuar/)).toBeTruthy();
-      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
 
       act(() => vi.advanceTimersByTime(60_000));
       expect(queryByText(/Confirmá tu cuenta para continuar/)).toBeTruthy();
@@ -150,7 +150,7 @@ describe('Avisos', () => {
       const { queryByText, getByRole } = montar();
       act(() => avisador.cuentaNoConfirmada('Confirmá tu cuenta para crear un equipo.'));
       expect(queryByText('Confirmá tu cuenta para crear un equipo.')).toBeTruthy();
-      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
     });
 
     it('al reenviar pasa a «Reenviando…» y después a confirmado, en el mismo aviso', async () => {
@@ -160,7 +160,7 @@ describe('Avisos', () => {
       const { queryByText, getByRole, container } = montar();
       act(() => avisador.cuentaNoConfirmada());
       act(() => {
-        fireEvent.click(getByRole('button', { name: 'Reenviar email' }));
+        fireEvent.click(getByRole('button', { name: 'Reenviar enlace' }));
       });
 
       expect(queryByText('Reenviando el enlace…')).toBeTruthy();
@@ -181,14 +181,14 @@ describe('Avisos', () => {
       const { queryByText, getByRole } = montar();
       act(() => avisador.cuentaNoConfirmada());
       act(() => {
-        fireEvent.click(getByRole('button', { name: 'Reenviar email' }));
+        fireEvent.click(getByRole('button', { name: 'Reenviar enlace' }));
       });
       await act(async () => {
         await Promise.resolve();
       });
 
       expect(queryByText('No pudimos reenviarlo. Probá de nuevo.')).toBeTruthy();
-      expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+      expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
 
       vi.unstubAllGlobals();
     });

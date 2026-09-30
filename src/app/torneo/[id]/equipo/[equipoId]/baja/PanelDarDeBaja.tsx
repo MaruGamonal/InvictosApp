@@ -48,7 +48,7 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo dar de baja al equipo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos dar de baja al equipo.');
         setEnviando(false);
         return;
       }

@@ -78,16 +78,16 @@ describe('FilaIntegranteGestion', () => {
       />,
     );
     expect(getByTitle('Quitar a Bruno del plantel')).toBeTruthy();
-    expect(queryByText('Hacer capitán')).toBeNull();
+    expect(queryByText('Pasar la capitanía')).toBeNull();
 
     fireEvent.click(getByText('Más opciones'));
-    expect(getByText('Hacer capitán')).toBeTruthy();
+    expect(getByText('Pasar la capitanía')).toBeTruthy();
     expect(getByText('Hacer DT')).toBeTruthy();
     expect(getByText('Quitar como delegado')).toBeTruthy();
     expect(queryByText('Quitar del plantel')).toBeNull();
   });
 
-  it('en "Más opciones", "Hacer delegado" llama a cambiar-rol con accion asignar', async () => {
+  it('en "Más opciones", "Pasar a delegado/a" llama a cambiar-rol con accion asignar', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -103,7 +103,7 @@ describe('FilaIntegranteGestion', () => {
       />,
     );
     fireEvent.click(getByText('Más opciones'));
-    fireEvent.click(getByText('Hacer delegado'));
+    fireEvent.click(getByText('Pasar a delegado/a'));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -176,7 +176,7 @@ describe('FilaIntegranteGestion', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('"Hacer capitán" pide confirmación (transferencia) antes de llamar a la API', async () => {
+  it('"Pasar la capitanía" pide confirmación (transferencia) antes de llamar a la API', async () => {
     vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);
@@ -193,7 +193,7 @@ describe('FilaIntegranteGestion', () => {
       />,
     );
     fireEvent.click(getByText('Más opciones'));
-    fireEvent.click(getByText('Hacer capitán'));
+    fireEvent.click(getByText('Pasar la capitanía'));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(

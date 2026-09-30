@@ -84,7 +84,7 @@ export function PanelListaDeBuenaFe({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo confirmar la lista. Probá de nuevo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos confirmar la lista. Probá de nuevo.');
         return;
       }
       setResultado({
@@ -149,7 +149,9 @@ export function PanelListaDeBuenaFe({
               <div className={styles.datosIntegrante}>
                 <span className={styles.nombreIntegrante}>{integrante.nombreVisible}</span>
                 {bloqueado ? (
-                  <span className={styles.avisoBloqueado}>Ya habilitado en otro equipo</span>
+                  <span className={styles.avisoBloqueado}>
+                    Ya está en otro equipo de este torneo
+                  </span>
                 ) : (
                   <span className={styles.rolIntegrante}>
                     {integrante.rolesEquipo.map((rol) => (

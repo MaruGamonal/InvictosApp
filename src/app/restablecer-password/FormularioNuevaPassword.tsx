@@ -27,7 +27,7 @@ export function FormularioNuevaPassword() {
           paso: 'error',
           mensaje:
             cuerpo?.error?.mensaje ??
-            'No pudimos actualizar la contraseña. Pedí un nuevo link e intentá de nuevo.',
+            'No pudimos actualizar la contraseña. Pedí un enlace nuevo e intentá de nuevo.',
         });
         return;
       }

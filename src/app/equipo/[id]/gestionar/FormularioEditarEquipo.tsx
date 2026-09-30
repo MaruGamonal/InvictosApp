@@ -105,7 +105,7 @@ export function FormularioEditarEquipo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos guardar los cambios.', enCurso);
         return;
       }
       avisos.exito('Equipo actualizado', enCurso);

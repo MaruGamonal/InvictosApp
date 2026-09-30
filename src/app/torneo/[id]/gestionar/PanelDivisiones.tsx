@@ -60,7 +60,7 @@ export function PanelDivisiones({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo agregar la división. Probá de nuevo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos agregar la división. Probá de nuevo.');
         setEnviando(false);
         return;
       }

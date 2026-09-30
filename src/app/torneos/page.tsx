@@ -26,7 +26,7 @@ import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
   title: conNombreProducto('Descubrí torneos'),
-  description: 'Encontrá torneos de fútbol amateur cerca tuyo.',
+  description: 'Encontrá torneos de fútbol amateur cerca de vos.',
 };
 
 const MODALIDADES = ['f5', 'f7', 'f8', 'f9', 'f11'] as const;
@@ -80,7 +80,7 @@ export default async function PaginaDescubrimiento({
           <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
         </header>
         <div className={styles.contenido}>
-          <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca tuyo.</p>
+          <p className={styles.intro}>Elegí tu ciudad para ver los torneos cerca de vos.</p>
           <SelectorDeCiudad provincias={provincias} alElegirCiudad={elegirCiudad} />
         </div>
         <NavInferior activo="torneos" />

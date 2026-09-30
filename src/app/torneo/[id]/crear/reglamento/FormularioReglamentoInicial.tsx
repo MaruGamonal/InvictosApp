@@ -62,7 +62,7 @@ export function FormularioReglamentoInicial({ torneoId }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo guardar el reglamento.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos guardar el reglamento.');
         setEnviando(false);
         return;
       }

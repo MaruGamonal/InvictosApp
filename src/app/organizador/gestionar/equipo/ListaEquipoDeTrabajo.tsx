@@ -70,7 +70,7 @@ export function ListaEquipoDeTrabajo({
       */}
       {esTitular ? (
         <Link href="/organizador/gestionar/invitar" className={styles.botonInvitar}>
-          + Invitar Administrador
+          + Invitar administrador
         </Link>
       ) : (
         <p className={styles.ayudaSinPermiso}>

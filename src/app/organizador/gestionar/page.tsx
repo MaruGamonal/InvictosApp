@@ -13,7 +13,7 @@ import { TabsTorneosPanel } from './TabsTorneosPanel';
 import { TarjetaTorneoPanel } from './TarjetaTorneoPanel';
 import styles from './pagina.module.css';
 
-export const metadata: Metadata = { title: conNombreProducto('Panel de Organizador') };
+export const metadata: Metadata = { title: conNombreProducto('Modo organizador') };
 
 /**
  * Inicio del panel de Organizador: el centro de operaciones.

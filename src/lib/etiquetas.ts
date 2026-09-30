@@ -218,7 +218,7 @@ const CATALOGO: Record<Campo, Record<string, Etiqueta>> = {
   },
   'notificacion.canal': {
     in_app: { etiqueta: 'Dentro del producto', color: 'neutro' },
-    email: { etiqueta: 'Email', color: 'neutro' },
+    email: { etiqueta: 'Correo', color: 'neutro' },
   },
   'notificacion.tipo': {
     team_invitation: { etiqueta: 'Te invitaron a un equipo', color: 'advertencia' },

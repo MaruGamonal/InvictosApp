@@ -129,8 +129,8 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
             <h3 className={stylesCompartidos.tituloSeccion}>Visibilidad en el descubrimiento</h3>
             <p className={styles.textoVisibilidad}>
               {gestion.estado === 'draft'
-                ? 'Tu organización no está verificada. Podés publicar igual: el torneo se comparte por link y funciona completo, pero no va a aparecer en las búsquedas.'
-                : 'Tu organización no está verificada, así que este torneo no aparece en las búsquedas. Se comparte por link y funciona completo; verificar la organización lo suma al descubrimiento.'}
+                ? 'Tu organización no está verificada: el torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'
+                : 'Tu organización no está verificada: este torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'}
             </p>
             {publicacion.limitePublicadosAlcanzado && gestion.estado === 'draft' && (
               <p className={styles.textoVisibilidad}>

@@ -195,20 +195,20 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
                 return;
               }
               mostrar('error', 'No pudimos reenviarlo. Probá de nuevo.', enCurso, {
-                etiqueta: 'Reenviar email',
+                etiqueta: 'Reenviar enlace',
                 alTocar: () => pedirReenvio(enCurso),
               });
             })
             .catch(() => {
               mostrar('error', 'No pudimos conectar. Probá de nuevo.', enCurso, {
-                etiqueta: 'Reenviar email',
+                etiqueta: 'Reenviar enlace',
                 alTocar: () => pedirReenvio(enCurso),
               });
             });
         }
 
         const id = mostrar('advertencia', texto, undefined, {
-          etiqueta: 'Reenviar email',
+          etiqueta: 'Reenviar enlace',
           // El id que reemplaza es el del aviso que se está mostrando,
           // así el «Reenviando…» ocupa su lugar en vez de apilarse.
           alTocar: () => pedirReenvio(id),

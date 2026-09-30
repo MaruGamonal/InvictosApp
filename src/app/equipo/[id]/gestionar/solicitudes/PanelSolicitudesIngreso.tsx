@@ -36,7 +36,7 @@ export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo resolver la solicitud.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos resolver la solicitud.', enCurso);
         setEnviandoId(null);
         return;
       }
@@ -56,7 +56,7 @@ export function PanelSolicitudesIngreso({ equipoId, solicitudes }: Props) {
         return (
           <div key={solicitud.perfilId} className={styles.filaSolicitud}>
             <span className={styles.nombreSolicitud}>{solicitud.nombreVisible}</span>
-            <span className={styles.pideSer}>pide ser Jugador</span>
+            <span className={styles.pideSer}>quiere sumarse al plantel</span>
 
             {resultado ? (
               <span

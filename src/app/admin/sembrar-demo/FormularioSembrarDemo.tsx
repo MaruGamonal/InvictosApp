@@ -69,25 +69,19 @@ export function FormularioSembrarDemo() {
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
       <h1 className={`fuente-display ${styles.titulo}`}>Sembrar datos de demo</h1>
-      <p className={styles.texto}>
-        Carga torneos y equipos de prueba en la base de datos conectada a esta app — la de
-        producción, si estás viendo esto en tu dominio de Vercel. Puede tardar un rato.
-      </p>
+      <p className={styles.texto}>Carga torneos y equipos de ejemplo. Puede tardar un rato.</p>
 
       {estado.paso === 'error' && <p className={styles.error}>{estado.mensaje}</p>}
       {estado.paso === 'listo' && (
         <p className={styles.ayuda}>
-          Listo. Andá a /torneos y elegí una de las ciudades de la demo para verlos.
+          Listo. Entrá a Descubrir y elegí una de las ciudades de ejemplo.
         </p>
       )}
 
       <div className={styles.campo}>
-        <label htmlFor="secreto">CRON_SECRET</label>
+        <label htmlFor="secreto">Clave de acceso</label>
         <CampoPassword id="secreto" required value={secreto} onChange={setSecreto} />
-        <span className={styles.ayuda}>
-          El mismo valor que ya tenés cargado en Vercel → tu proyecto → Settings → Environment
-          Variables.
-        </span>
+        <span className={styles.ayuda}>La misma clave que usan las tareas programadas.</span>
       </div>
 
       <button type="submit" className={styles.boton} disabled={estado.paso === 'enviando'}>

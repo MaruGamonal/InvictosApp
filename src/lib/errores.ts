@@ -21,7 +21,7 @@ export const CODIGOS_ERROR = {
   NO_ENCONTRADO: {
     httpStatus: 404,
     mensaje:
-      'No encontramos lo que buscás. Puede que ya no esté disponible o que el link esté mal.',
+      'No encontramos lo que buscás. Puede que ya no esté disponible o que el enlace esté mal.',
   },
   DATOS_INVALIDOS: {
     httpStatus: 400,
@@ -52,7 +52,7 @@ export const CODIGOS_ERROR = {
   ORGANIZACION_NO_VERIFICADA: {
     httpStatus: 409,
     mensaje:
-      'Para que este torneo aparezca en las búsquedas, primero tenés que verificar tu organización confirmando tu email.',
+      'Para que este torneo aparezca en las búsquedas, primero tenés que verificar tu organización confirmando tu correo.',
   },
   LIMITE_TORNEOS_PUBLICADOS: {
     httpStatus: 409,
@@ -145,11 +145,11 @@ export const CODIGOS_ERROR = {
   },
   CAPITAN_SIN_REEMPLAZO: {
     httpStatus: 409,
-    mensaje: 'Antes de dejar el equipo, tenés que designar a otra persona como capitán.',
+    mensaje: 'Antes de dejar el equipo, tenés que pasarle la capitanía a otra persona.',
   },
   ROL_TITULAR_NO_GESTIONABLE: {
     httpStatus: 403,
-    mensaje: 'El rol de titular no se asigna ni se quita desde acá.',
+    mensaje: 'No se puede quitar a quien creó la organización.',
   },
   ADMIN_NO_PUEDE_GESTIONAR_ADMINS: {
     httpStatus: 403,

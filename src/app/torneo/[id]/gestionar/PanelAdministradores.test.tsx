@@ -68,7 +68,7 @@ describe('PanelAdministradores', () => {
     const { getByLabelText, getByText } = render(
       <PanelAdministradores organizacionId="org-1" administradores={[TITULAR]} esTitular={true} />,
     );
-    fireEvent.change(getByLabelText('Email de la persona'), {
+    fireEvent.change(getByLabelText('Correo de la persona'), {
       target: { value: 'nuevo@example.com' },
     });
     fireEvent.click(getByText('Invitar administrador'));
@@ -100,7 +100,7 @@ describe('PanelAdministradores', () => {
     const { getByLabelText, getByText } = render(
       <PanelAdministradores organizacionId="org-1" administradores={[]} esTitular={true} />,
     );
-    fireEvent.change(getByLabelText('Email de la persona'), {
+    fireEvent.change(getByLabelText('Correo de la persona'), {
       target: { value: 'nuevo@example.com' },
     });
     fireEvent.click(getByText('Invitar administrador'));

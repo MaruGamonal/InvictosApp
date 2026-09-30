@@ -94,7 +94,7 @@ export async function enviarCorreo(correo: CorreoAEnviar): Promise<void> {
     // La red se cayó o el proveedor no respondió. Vale reintentar.
     throw new ErrorDeCorreo(
       'proveedor_caido',
-      error instanceof Error ? error.message : 'No se pudo llegar al proveedor de correo.',
+      error instanceof Error ? error.message : 'No pudimos llegar al proveedor de correo.',
       true,
     );
   }

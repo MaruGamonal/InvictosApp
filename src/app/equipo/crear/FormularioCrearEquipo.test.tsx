@@ -125,7 +125,7 @@ describe('FormularioCrearEquipo', () => {
     fireEvent.click(getByRole('button', { name: 'Crear equipo' }));
 
     await waitFor(() => expect(getByText(/Confirmá tu cuenta/)).toBeTruthy());
-    expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
     // El formulario no cambió: ni un nodo más adentro.
     expect(container.querySelectorAll('form .campo, form label')).toHaveLength(camposAntes);
     expect(getByRole('button', { name: 'Crear equipo' })).toBeTruthy();

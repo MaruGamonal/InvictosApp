@@ -50,7 +50,7 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo enviar la invitación.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos enviar la invitación.', enCurso);
         setEnviando(false);
         return;
       }

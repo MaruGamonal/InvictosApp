@@ -21,7 +21,7 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: NOMBRE_PRODUCTO,
-  description: 'Plataforma de gestión y descubrimiento de torneos de fútbol amateur.',
+  description: 'Torneos de fútbol amateur: encontralos, sumate y seguí la tabla.',
   /** apple-touch-icon (T28, `09` 8.1): iOS no lee el manifiesto, así que necesita su propio link. */
   icons: {
     apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],

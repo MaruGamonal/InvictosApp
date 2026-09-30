@@ -24,10 +24,10 @@ const ROLES_DESIGNABLES: Array<{
 }> = [
   {
     rol: 'captain',
-    etiqueta: 'Hacer capitán',
-    confirmar: '¿Transferir la capitanía a esta persona? Vos dejás de ser capitán.',
+    etiqueta: 'Pasar la capitanía',
+    confirmar: '¿Pasarle la capitanía a esta persona? Vos dejás de tenerla.',
   },
-  { rol: 'delegate', etiqueta: 'Hacer delegado' },
+  { rol: 'delegate', etiqueta: 'Pasar a delegado/a' },
   { rol: 'coach', etiqueta: 'Hacer DT' },
 ];
 
@@ -58,7 +58,7 @@ export function FilaIntegranteGestion({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos guardar los cambios.', enCurso);
         setEnviando(null);
         return;
       }
@@ -116,7 +116,7 @@ export function FilaIntegranteGestion({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo dejar el equipo.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos dejar el equipo.', enCurso);
         setEnviando(null);
         return;
       }

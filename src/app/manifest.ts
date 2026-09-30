@@ -13,7 +13,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: NOMBRE_PRODUCTO,
     short_name: NOMBRE_PRODUCTO,
-    description: 'Plataforma de gestión y descubrimiento de torneos de fútbol amateur.',
+    description: 'Torneos de fútbol amateur: encontralos, sumate y seguí la tabla.',
     start_url: '/',
     display: 'standalone',
     background_color: '#0e1720',

@@ -49,7 +49,7 @@ export function PanelPublicarInicial({ torneoId, organizacionId, soyTitular }: P
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo publicar el torneo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos publicar el torneo.');
         setCodigoError(typeof cuerpo?.error?.codigo === 'string' ? cuerpo.error.codigo : null);
         if (Array.isArray(cuerpo?.error?.detalle)) {
           const nombres = (cuerpo.error.detalle as Array<{ campo?: unknown }>)

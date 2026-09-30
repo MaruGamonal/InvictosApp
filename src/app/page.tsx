@@ -8,7 +8,7 @@ import styles from './bienvenida.module.css';
 
 export const metadata: Metadata = {
   title: conNombreProducto(),
-  description: 'Armá el fixture, cargá resultados y seguí la tabla. Descubrí torneos cerca tuyo.',
+  description: 'Armá el fixture, cargá resultados y seguí la tabla. Descubrí torneos cerca de vos.',
 };
 
 /**
@@ -65,7 +65,7 @@ export default async function PaginaBienvenida() {
           tu app.
         </h1>
         <p className={styles.copy}>
-          Armá el fixture, cargá resultados y seguí la tabla. Descubrí torneos cerca tuyo sin
+          Armá el fixture, cargá resultados y seguí la tabla. Descubrí torneos cerca de vos sin
           necesidad de cuenta.
         </p>
       </div>

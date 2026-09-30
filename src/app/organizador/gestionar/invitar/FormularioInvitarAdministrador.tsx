@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * UC-07 — Pantalla dedicada de "Invitar Administrador" (distinta del
+ * UC-07 — Pantalla dedicada de "Invitar administrador" (distinta del
  * formulario inline de `PanelAdministradores`, que sigue existiendo en
  * `torneo/[id]/gestionar/configuracion` tal cual): mismo
  * `POST /api/organizaciones/invitar-administrador`, con su propia
@@ -44,7 +44,7 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
           setPideNombre(true);
           setError('Es una persona nueva en la plataforma — hace falta su nombre.');
         } else {
-          setError(cuerpo?.error?.mensaje ?? 'No se pudo invitar. Probá de nuevo.');
+          setError(cuerpo?.error?.mensaje ?? 'No pudimos invitar. Probá de nuevo.');
         }
         setEnviando(false);
         return;
@@ -59,7 +59,7 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Invitar Administrador</h1>
+      <h1 className={`fuente-display ${styles.titulo}`}>Invitar administrador</h1>
       <p className={styles.texto}>
         Un Administrador opera sobre todos los torneos de la organización, igual que vos — salvo que
         no puede sumar ni sacar administradores.
@@ -68,7 +68,7 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.campo}>
-        <label htmlFor="email">Email de la persona</label>
+        <label htmlFor="email">Correo de la persona</label>
         <input
           id="email"
           type="email"

@@ -81,7 +81,7 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
       const cuerpo = await respuesta.json();
 
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos guardar los cambios.', enCurso);
         return;
       }
       avisos.exito('Perfil actualizado', enCurso);
@@ -100,7 +100,7 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
           Ver cómo te ven los demás
         </Link>
       </div>
-      <p className={styles.texto}>Todo acá es opcional — nada de esto te bloquea nada.</p>
+      <p className={styles.texto}>Todo esto es opcional.</p>
 
       <div className={propios.filaFoto}>
         <button

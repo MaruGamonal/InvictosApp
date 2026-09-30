@@ -80,7 +80,7 @@ export function PanelProgramarPartidos({ partidos, ciudadId }: PanelProgramarPar
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo programar el partido.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos programar el partido.');
         return;
       }
       setEditando(null);

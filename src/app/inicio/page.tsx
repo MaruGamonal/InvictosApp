@@ -265,8 +265,8 @@ export default async function PaginaInicio({
             {inicio.jugador.resultadosPorConfirmar > 0 && (
               <div className={styles.avisoPendiente}>
                 {inicio.jugador.resultadosPorConfirmar === 1
-                  ? '1 resultado para confirmar o disputar.'
-                  : `${inicio.jugador.resultadosPorConfirmar} resultados para confirmar o disputar.`}
+                  ? 'Cargaron el resultado de un partido tuyo.'
+                  : `Cargaron el resultado de ${inicio.jugador.resultadosPorConfirmar} partidos tuyos.`}
               </div>
             )}
 

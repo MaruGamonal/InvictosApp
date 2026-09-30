@@ -17,7 +17,7 @@ describe('BotonPedirSumarme', () => {
     vi.unstubAllGlobals();
   });
 
-  it('al tocar, manda equipoId y pasa a "Pedido enviado ✓", deshabilitado', async () => {
+  it('al tocar, manda equipoId y pasa a "Solicitud enviada ✓", deshabilitado', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -25,7 +25,7 @@ describe('BotonPedirSumarme', () => {
     fireEvent.click(getByRole('button', { name: 'Pedir sumarme' }));
 
     await waitFor(() => {
-      const boton = getByRole('button', { name: 'Pedido enviado ✓' });
+      const boton = getByRole('button', { name: 'Solicitud enviada ✓' });
       expect(boton).toBeTruthy();
       expect(boton).toBeDisabled();
     });
@@ -99,6 +99,6 @@ describe('BotonPedirSumarme', () => {
 
     await waitFor(() => expect(getByText(/Confirmá tu cuenta/)).toBeTruthy());
     expect(getByRole('button', { name: 'Pedir sumarme' })).toBeTruthy();
-    expect(getByRole('button', { name: 'Reenviar email' })).toBeTruthy();
+    expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
   });
 });

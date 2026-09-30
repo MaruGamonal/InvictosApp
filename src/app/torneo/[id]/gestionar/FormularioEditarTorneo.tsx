@@ -89,7 +89,7 @@ export function FormularioEditarTorneo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudo quitar la imagen.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos quitar la imagen.', enCurso);
         return;
       }
       setImagenUrl(null);
@@ -144,7 +144,7 @@ export function FormularioEditarTorneo({
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No se pudieron guardar los cambios.', enCurso);
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos guardar los cambios.', enCurso);
         setEnviando(false);
         return;
       }
@@ -221,7 +221,9 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setFechaInicioEstimada(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoNotifica}>Este cambio notifica a inscriptos y seguidores.</span>
+      <span className={styles.avisoNotifica}>
+        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
+      </span>
 
       <label>
         Fecha de fin
@@ -251,7 +253,9 @@ export function FormularioEditarTorneo({
           }}
         />
       </label>
-      <span className={styles.avisoNotifica}>Este cambio notifica a inscriptos y seguidores.</span>
+      <span className={styles.avisoNotifica}>
+        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
+      </span>
 
       <label>
         Descripción
@@ -290,7 +294,7 @@ export function FormularioEditarTorneo({
           />
         </label>
       </div>
-      <span className={styles.avisoSinNotificar}>Este cambio no notifica.</span>
+      <span className={styles.avisoSinNotificar}>Esto no le avisa a nadie.</span>
 
       <label>
         Cupo de equipos
@@ -302,7 +306,9 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setCupoEquipos(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoNotifica}>Este cambio notifica a inscriptos y seguidores.</span>
+      <span className={styles.avisoNotifica}>
+        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
+      </span>
 
       <button type="submit" disabled={enviando}>
         {enviando ? 'Guardando…' : 'Guardar cambios'}

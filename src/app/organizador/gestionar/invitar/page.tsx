@@ -5,7 +5,7 @@ import { obtenerOrganizacionActivaCacheada } from '../_datos';
 import { FormularioInvitarAdministrador } from './FormularioInvitarAdministrador';
 import styles from '../equipo/pagina.module.css';
 
-export const metadata: Metadata = { title: conNombreProducto('Invitar Administrador') };
+export const metadata: Metadata = { title: conNombreProducto('Invitar administrador') };
 
 /** UC-07 — Sumar un Administrador al equipo de trabajo. Solo el Titular (`06`, D-64). */
 export default async function PaginaInvitarAdministrador() {
@@ -15,7 +15,7 @@ export default async function PaginaInvitarAdministrador() {
   if (organizacion.rol !== 'owner') {
     return (
       <div className={styles.contenidoPagina}>
-        <h1 className={styles.titulo}>Invitar Administrador</h1>
+        <h1 className={styles.titulo}>Invitar administrador</h1>
         <p className={styles.aviso}>
           Solo el Titular puede invitar administradores a la organización.
         </p>

@@ -186,7 +186,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
       </div>
 
       <div className={styles.campo}>
-        <label htmlFor="categoriaGenero">Categoría de género · obligatoria</label>
+        <label htmlFor="categoriaGenero">Categoría de género</label>
         <div id="categoriaGenero" className={styles.segmentado} role="radiogroup">
           {CATEGORIAS_GENERO.map((opcion) => (
             <button

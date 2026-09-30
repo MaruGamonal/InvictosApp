@@ -48,7 +48,7 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
           setPideNombre(true);
           setError('Es una persona nueva en la plataforma — hace falta su nombre.');
         } else {
-          setError(cuerpo?.error?.mensaje ?? 'No se pudo asignar. Probá de nuevo.');
+          setError(cuerpo?.error?.mensaje ?? 'No pudimos asignar. Probá de nuevo.');
         }
         setEnviando(false);
         return;
@@ -112,8 +112,8 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
         <input
           type="email"
           required
-          placeholder="Email de la persona"
-          aria-label="Email de la persona"
+          placeholder="Correo de la persona"
+          aria-label="Correo de la persona"
           value={email}
           onChange={(evento) => setEmail(evento.target.value)}
         />

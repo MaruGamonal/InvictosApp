@@ -40,7 +40,7 @@ describe('PanelListaDeBuenaFe', () => {
         cerrada={false}
       />,
     );
-    expect(getByText('Ya habilitado en otro equipo')).toBeTruthy();
+    expect(getByText('Ya está en otro equipo de este torneo')).toBeTruthy();
     expect(getByText('1 habilitados')).toBeTruthy();
     expect(getByText('máx. 15')).toBeTruthy();
   });

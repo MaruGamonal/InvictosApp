@@ -30,7 +30,7 @@ export function BotonesResponderInvitacion({ equipoId }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo responder. Probá de nuevo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos responder. Probá de nuevo.');
         setEnviando(null);
         return;
       }

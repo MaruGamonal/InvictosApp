@@ -50,8 +50,8 @@ export default async function PaginaPublicarInicial({
           <div className={pasoStyles.bloqueVerificacion}>
             <p className={pasoStyles.avisoInfo}>
               {resumen.limitePublicadosAlcanzado
-                ? 'Mientras tu organización no esté verificada podés tener un solo torneo publicado a la vez, y ya tenés uno. Verificala para publicar este.'
-                : 'Tu organización todavía no está verificada: el torneo se va a poder compartir por link, pero no va a aparecer en las búsquedas hasta que la verifiques.'}
+                ? 'Ya tenés un torneo publicado. Verificá tu organización para publicar más de uno a la vez.'
+                : 'Tu organización no está verificada: el torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'}
             </p>
             {/* D-51 pide ofrecer la verificación en el mismo lugar donde
                 se da la noticia, no mandar a buscarla a otra pantalla. */}

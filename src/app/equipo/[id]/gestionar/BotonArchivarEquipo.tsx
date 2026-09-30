@@ -32,7 +32,7 @@ export function BotonArchivarEquipo({ equipoId }: Props) {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo archivar. Probá de nuevo.');
+        setError(cuerpo?.error?.mensaje ?? 'No pudimos archivar. Probá de nuevo.');
         setEnviando(false);
         return;
       }

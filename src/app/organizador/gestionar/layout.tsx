@@ -15,7 +15,7 @@ import styles from './layout.module.css';
 /**
  * Cabecera y bottom nav compartidos por el panel de Organizador
  * ("Ver como organizador" en Inicio): Home, Crear organización,
- * Equipo de trabajo, Invitar Administrador y Perfil público —
+ * Equipo de trabajo, Invitar administrador y Perfil público —
  * "Transferir" queda deliberadamente afuera de esta tanda.
  *
  * A diferencia de `torneo/[id]/gestionar` (que exige un torneo y una
