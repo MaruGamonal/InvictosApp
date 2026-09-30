@@ -15,7 +15,7 @@
 | 3 | `recalcular-score` no está agendada en `pg_cron` | ~~Bloqueante~~ | **Resuelto** (`30/09`): agendada diaria a las 4:20 UTC |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | ~~Importante~~ | **Resuelto** (`30/09`), y antes de agendarla |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | ~~Bloqueante~~ | **Resuelto** (`30/09`), con la resolución de la objeción incluida |
-| 6 | Registrar partido no disputado (walkover, suspendido) | **Bloqueante** | Servicio sí, ruta y pantalla no |
+| 6 | Registrar partido no disputado (walkover, suspendido) | ~~Bloqueante~~ | **Resuelto** (`30/09`) |
 | 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
 | 9 | Historial del jugador torneo por torneo (UC-38) | Importante | No existe |
@@ -226,13 +226,17 @@ Cinco decisiones que conviene tener a mano:
 
 ## 6. Registrar un partido no disputado
 
-**Bloqueante para el flujo de resultados.**
+> **RESUELTO el 30/09/2026.** Con esto el ciclo de un partido cierra: cargar, confirmar, objetar, resolver, y lo que no se jugó.
+
+**Era bloqueante para el flujo de resultados.**
 
 Mismo caso: `src/services/competencia/registrarNoDisputado.ts` está escrito y probado, maneja walkover, suspendido y cancelado. **No hay ruta de API ni pantalla que lo invoque** — la única mención en toda la aplicación es un comentario en `src/app/equipo/[id]/page.tsx:39` que lo nombra como invalidador de caché.
 
 En un torneo amateur, un equipo que no se presenta es semanal, no excepcional. Hoy el organizador no tiene cómo registrarlo.
 
-**Qué falta.** Ruta `POST /api/partidos/no-disputado` y la opción en el panel de resultados del torneo, con las tres causas y el efecto correspondiente en la tabla de posiciones.
+**Qué se construyó.** La ruta `POST /api/partidos/no-disputado` y, en el panel de Resultados, una acción secundaria por partido: «No se jugó». Se abre sólo al pedirla —lo habitual es que el partido se haya jugado, y la carga del resultado tiene que quedar a la vista primero— y pregunta las tres cosas del catálogo: suspendido, ganado por presentación o anulado. El equipo ganador se pide **sólo** para la presentación, que es la única de las tres que lo necesita.
+
+**Un problema que este cambio destapó y también se arregló.** El panel dividía los partidos en «pendientes» (todo lo que no estuviera `played`) y «cargados» (`played` o `walkover`). Con eso, un partido ganado por presentación o anulado **seguía apareciendo en pendientes**, con los campos de goles al lado de algo que ya estaba resuelto. Ahora pendiente es lo que todavía puede recibir un resultado —sin programar, programado o suspendido, que se reprograma y se juega— y lo demás baja a la lista de abajo con su etiqueta, porque un walkover con su 3-0 configurado se lee como un partido jugado si no se dice lo que es.
 
 ---
 
@@ -368,7 +372,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
 1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; faltan dos variables de entorno en Vercel.
-2. ~~**Los puntos 5 y 6**~~ — el 5 está **hecho el 30/09**. Queda el 6 (partido no disputado): sin eso el ciclo de un partido todavía no cierra del todo.
+2. ~~**Los puntos 5 y 6**~~ — los dos **hechos el 30/09**. El ciclo de un partido cierra.
 3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.
 5. ~~**El punto 8** — sacar o blindar el endpoint que borra datos.~~ **Hecho el 30/09**: se quitó.

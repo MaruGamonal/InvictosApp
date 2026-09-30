@@ -239,7 +239,10 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 7.12c | Resolver: dejarlo como está | Desde Resultados, abrir el objetado y elegir «Dejarlo como está» | Queda confirmado y la objeción cerrada |
 | 7.12d | Resolver: corregirlo | Corregir ese resultado desde Resultados | Queda confirmado con el marcador nuevo, la tabla se recalcula, y la objeción se cierra sola |
 | 7.12e | Una objeción no se puede saltear | Como capitán, intentar recargar un resultado objetado | Lo rechaza: lo resuelve el organizador |
-| 7.13 | **Partido no disputado** | Buscar cómo registrar un walkover | **Punto abierto: el servicio existe, la pantalla no** |
+| 7.13 | Suspender un partido | En Resultados, «No se jugó» → Suspendido, con motivo | Sale de pendientes sólo si se lo reprograma; la tabla no cambia |
+| 7.13b | Ganado por presentación | «No se jugó» → Ganado por presentación, elegir el equipo | Se aplica el resultado configurado del torneo, la tabla lo cuenta, y en la lista de cargados aparece con su etiqueta |
+| 7.13c | Anular un partido | «No se jugó» → Anulado | Deja de estar en pendientes y no afecta la tabla |
+| 7.13d | La presentación exige el ganador | Elegir «Ganado por presentación» y no elegir equipo | El botón Guardar queda deshabilitado |
 | 7.14 | Score del equipo | Mirar el score al día siguiente de cargar varios resultados | Se actualizó: la tarea corre a las 4:20 UTC. Un equipo sin resultados en 24 meses queda sin score, no en cero |
 
 ---

@@ -45,6 +45,21 @@ interface EventoForm {
   tipoEvento: TipoEvento;
 }
 
+/** UC-33 — Las tres cosas que le pueden pasar a un partido que no se jugó (`04`, 4.6). */
+type Resolucion = 'postponed' | 'walkover' | 'cancelled';
+
+const ETIQUETA_RESOLUCION: Record<Resolucion, string> = {
+  postponed: 'Suspendido',
+  walkover: 'Ganado por presentación',
+  cancelled: 'Anulado',
+};
+
+interface NoDisputadoForm {
+  resolucion: Resolucion;
+  equipoGanadorId: string;
+  motivo: string;
+}
+
 /** UC-31 — Cargar el resultado de un partido a mano, con su `version` para el optimistic concurrency. */
 export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultadosProps) {
   const router = useRouter();
@@ -52,6 +67,7 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
   const [eventos, setEventos] = useState<Record<string, EventoForm[]>>({});
   const [jugadorDelPartido, setJugadorDelPartido] = useState<Record<string, string>>({});
   const [abiertoEventos, setAbiertoEventos] = useState<Record<string, boolean>>({});
+  const [noDisputado, setNoDisputado] = useState<Record<string, NoDisputadoForm>>({});
   const [enviando, setEnviando] = useState<string | null>(null);
   const avisos = useAvisos();
   const idBase = useId();
@@ -165,6 +181,44 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
         return;
       }
       avisos.exito('Resultado cargado', enCurso);
+      router.refresh();
+    } catch {
+      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
+    } finally {
+      setEnviando(null);
+    }
+  }
+
+  async function registrarNoDisputado(partido: PartidoResultado) {
+    const form = noDisputado[partido.id];
+    if (!form) return;
+    if (form.resolucion === 'walkover' && !form.equipoGanadorId) return;
+
+    setEnviando(partido.id);
+    const enCurso = avisos.cargando('Guardando…');
+    try {
+      const respuesta = await fetch('/api/partidos/no-disputado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partidoId: partido.id,
+          resolucion: form.resolucion,
+          ...(form.resolucion === 'walkover' ? { equipoGanadorId: form.equipoGanadorId } : {}),
+          ...(form.motivo.trim() ? { motivo: form.motivo.trim() } : {}),
+        }),
+      });
+      const cuerpo = await respuesta.json();
+      // `fetch` no lanza con 4xx: sin esto, un rechazo se vería como éxito.
+      if (!respuesta.ok || !cuerpo.ok) {
+        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos guardar el cambio.', enCurso);
+        return;
+      }
+      avisos.exito(`${ETIQUETA_RESOLUCION[form.resolucion]}`, enCurso);
+      setNoDisputado((actual) => {
+        const siguiente = { ...actual };
+        delete siguiente[partido.id];
+        return siguiente;
+      });
       router.refresh();
     } catch {
       avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
@@ -360,6 +414,120 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                 )}
               </div>
             )}
+
+            {/* UC-33 — Abajo de todo y como acción secundaria: lo
+                habitual es que el partido se haya jugado. */}
+            <div className={styles.noDisputado}>
+              {!noDisputado[partido.id] ? (
+                <button
+                  type="button"
+                  className={styles.botonSecundarioChico}
+                  onClick={() =>
+                    setNoDisputado((actual) => ({
+                      ...actual,
+                      [partido.id]: { resolucion: 'postponed', equipoGanadorId: '', motivo: '' },
+                    }))
+                  }
+                >
+                  No se jugó
+                </button>
+              ) : (
+                <div className={styles.formNoDisputado}>
+                  <label>
+                    Qué pasó
+                    <select
+                      aria-label={`Qué pasó con ${partido.equipoLocalNombre} vs ${partido.equipoVisitanteNombre}`}
+                      value={noDisputado[partido.id]!.resolucion}
+                      onChange={(evento) =>
+                        setNoDisputado((actual) => ({
+                          ...actual,
+                          [partido.id]: {
+                            ...actual[partido.id]!,
+                            resolucion: evento.target.value as Resolucion,
+                            equipoGanadorId: '',
+                          },
+                        }))
+                      }
+                    >
+                      {(Object.keys(ETIQUETA_RESOLUCION) as Resolucion[]).map((valor) => (
+                        <option key={valor} value={valor}>
+                          {ETIQUETA_RESOLUCION[valor]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {/* Sólo cuando hace falta: una presentación necesita
+                      saber quién ganó; una suspensión, no. */}
+                  {noDisputado[partido.id]!.resolucion === 'walkover' && (
+                    <label>
+                      Ganó
+                      <select
+                        aria-label="Equipo ganador por presentación"
+                        value={noDisputado[partido.id]!.equipoGanadorId}
+                        onChange={(evento) =>
+                          setNoDisputado((actual) => ({
+                            ...actual,
+                            [partido.id]: {
+                              ...actual[partido.id]!,
+                              equipoGanadorId: evento.target.value,
+                            },
+                          }))
+                        }
+                      >
+                        <option value="">Elegí un equipo</option>
+                        <option value={partido.equipoLocalId}>{partido.equipoLocalNombre}</option>
+                        <option value={partido.equipoVisitanteId}>
+                          {partido.equipoVisitanteNombre}
+                        </option>
+                      </select>
+                    </label>
+                  )}
+
+                  <label>
+                    Motivo (opcional)
+                    <input
+                      type="text"
+                      aria-label="Motivo"
+                      value={noDisputado[partido.id]!.motivo}
+                      onChange={(evento) =>
+                        setNoDisputado((actual) => ({
+                          ...actual,
+                          [partido.id]: { ...actual[partido.id]!, motivo: evento.target.value },
+                        }))
+                      }
+                    />
+                  </label>
+
+                  <div className={styles.filaBotonesNoDisputado}>
+                    <button
+                      type="button"
+                      className={styles.botonSecundarioChico}
+                      onClick={() =>
+                        setNoDisputado((actual) => {
+                          const siguiente = { ...actual };
+                          delete siguiente[partido.id];
+                          return siguiente;
+                        })
+                      }
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => registrarNoDisputado(partido)}
+                      disabled={
+                        enviando !== null ||
+                        (noDisputado[partido.id]!.resolucion === 'walkover' &&
+                          !noDisputado[partido.id]!.equipoGanadorId)
+                      }
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

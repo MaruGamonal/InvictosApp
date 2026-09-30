@@ -512,3 +512,43 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
+
+/* UC-33 — Registrar que un partido no se jugó. Va abajo de todo y como
+   acción secundaria: lo habitual es que se haya jugado, y la carga del
+   resultado es lo que tiene que quedar a la vista primero. */
+.noDisputado {
+  border-top: 1px solid var(--borde-sutil);
+  padding-top: 10px;
+}
+
+.formNoDisputado {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formNoDisputado label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 600 12px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.formNoDisputado select,
+.formNoDisputado input {
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
+  padding: 0 10px;
+  font: 400 15px/1 var(--fuente-texto);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-boton);
+}
+
+.filaBotonesNoDisputado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
