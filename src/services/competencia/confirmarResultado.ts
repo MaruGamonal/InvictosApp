@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
+import { puedeResponderPorElEquipo, resolverEquipoQueResponde } from './_rival';
 
 /**
  * T26, `10` 6.1 — Confirma un resultado que está `loaded`. Es el único
@@ -13,11 +14,13 @@ import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
  * las dos por acá — "si hubiera dos caminos, se desincronizan" (`10`,
  * 6, y `09`, 6.1).
  *
- * Por ahora solo lo puede invocar el contexto de sistema: la tarea
- * programada es el único llamador hasta que T29 sume el suyo, con su
- * propia verificación de permiso (el capitán del equipo rival). Marcar
- * `confirmado_por_vencimiento` con `contexto.esSistema` en vez de un
- * valor fijo ya deja ese día resuelto sin tocar esta función.
+ * Dos llamadores, y el estado final es el mismo: la tarea programada
+ * (contexto de sistema, a las 72 horas) y el equipo rival confirmando a
+ * mano. `confirmado_por_vencimiento` sale de `contexto.esSistema`, así
+ * que queda registrado cuál de los dos fue sin ramificar nada.
+
+ * El rival es el equipo que **no** cargó el resultado (`_rival.ts`):
+ * quien cargó ya dio su versión al cargarla.
  *
  * Revalida que no haya una disputa abierta (`06`, D-60: una disputa
  * congela el plazo) acá adentro, no solo en el filtro de la tarea que
@@ -38,7 +41,6 @@ export const confirmarResultado: Servicio<ConfirmarResultadoInput, ResultadoConf
   contexto,
 ) => {
   const datos = validarEntrada(esquemaEntrada, input);
-  if (!contexto.esSistema) throw crearError('SIN_PERMISO');
 
   const pool = obtenerPool();
   const { rows } = await pool.query<{
@@ -46,13 +48,26 @@ export const confirmarResultado: Servicio<ConfirmarResultadoInput, ResultadoConf
     equipo_local_id: string;
     equipo_visitante_id: string;
     estado_resultado: string;
+    cargado_por_usuario_id: string | null;
   }>(
-    `SELECT torneo_id, equipo_local_id, equipo_visitante_id, estado_resultado
+    `SELECT torneo_id, equipo_local_id, equipo_visitante_id, estado_resultado,
+            cargado_por_usuario_id
      FROM partido WHERE id = $1`,
     [datos.partidoId],
   );
   const partido = rows[0];
   if (!partido) throw crearError('NO_ENCONTRADO');
+
+  // El permiso se resuelve acá y no en la ruta: ocultar el botón no
+  // alcanza, porque a la API se le puede pegar directo.
+  if (!contexto.esSistema) {
+    const equipoQueResponde = await resolverEquipoQueResponde(pool, partido);
+    if (!equipoQueResponde) throw crearError('SIN_PERMISO');
+    if (!(await puedeResponderPorElEquipo(pool, contexto, equipoQueResponde))) {
+      throw crearError('SIN_PERMISO');
+    }
+  }
+
   if (partido.estado_resultado !== 'loaded') throw crearError('RESULTADO_NO_CONFIRMABLE');
 
   const { rows: disputas } = await pool.query(

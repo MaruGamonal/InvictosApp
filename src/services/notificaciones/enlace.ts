@@ -7,10 +7,12 @@ import type { TipoNotificacion } from './tipos';
  * despachador de correos también es un servicio, y dos criterios de
  * enlace para el mismo aviso terminarían separándose.
  *
- * A dónde manda cada notificación al tocarla. Las de origen `partido`
- * (match_scheduled, match_rescheduled, result_pending_confirmation,
- * result_disputed) no tienen todavía una pantalla propia por partido —
- * quedan sin enlace, visibles igual, en vez de mandar a un 404.
+ * A dónde manda cada notificación al tocarla.
+ *
+ * Las cuatro de origen `partido` (match_scheduled, match_rescheduled,
+ * result_pending_confirmation, result_disputed) estuvieron mucho tiempo
+ * sin enlace: no existía una pantalla por partido y mandarlas a un 404
+ * era peor. Desde T29 existe, así que las cuatro llevan ahí.
  *
  * **El modo no se pierde al tocar una notificación.** Reportado en
  * vivo: quien estaba gestionando una organización tocaba un aviso de su
@@ -30,6 +32,7 @@ export function construirEnlaceNotificacion(
   entidadOrigenTipo: string | null,
   entidadOrigenId: string | null,
   modo: ModoNavegacion = 'jugador',
+  torneoId: string | null = null,
 ): string | null {
   if (!entidadOrigenId) return null;
 
@@ -39,6 +42,13 @@ export function construirEnlaceNotificacion(
       return `/equipo/${entidadOrigenId}/gestionar`;
     }
     return `/equipo/${entidadOrigenId}`;
+  }
+
+  // La pantalla del partido cuelga del torneo, así que necesita los dos
+  // ids. Los avisos viejos, guardados cuando no se registraba el
+  // torneo, se quedan sin enlace en vez de armar una ruta inventada.
+  if (entidadOrigenTipo === 'partido') {
+    return torneoId ? `/torneo/${torneoId}/partido/${entidadOrigenId}` : null;
   }
 
   if (entidadOrigenTipo === 'torneo') {

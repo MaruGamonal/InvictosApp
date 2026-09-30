@@ -209,6 +209,39 @@ export async function verificarPermisoTorneo(
 }
 
 /**
+ * Quiénes gestionan un torneo, como lista: la dueña de la organización,
+ * sus administradores, y los colaboradores asignados a ese torneo.
+ *
+ * Es **el mismo conjunto** que `verificarPermisoTorneo` deja pasar para
+ * `cargar_resultados`, escrito como consulta en vez de como chequeo.
+ * Vive acá y no en el servicio que lo usa por la regla de T4: el
+ * criterio de quién puede qué se decide en un solo archivo, aunque lo
+ * que se necesite sea la lista y no el sí o el no.
+ *
+ * Lo usa T29 para avisarle de una objeción a quien puede resolverla —
+ * avisarle a alguien de algo que después no puede hacer es la peor
+ * combinación posible.
+ */
+export async function usuariosQueGestionanElTorneo(torneoId: string): Promise<string[]> {
+  const pool = obtenerPool();
+  const { rows } = await pool.query<{ usuario_id: string | null }>(
+    `SELECT o.usuario_titular_id AS usuario_id
+     FROM torneo t JOIN organizacion o ON o.id = t.organizacion_id
+     WHERE t.id = $1
+     UNION
+     SELECT mo.usuario_id
+     FROM torneo t JOIN miembro_organizacion mo ON mo.organizacion_id = t.organizacion_id
+     WHERE t.id = $1 AND mo.rol = 'admin'
+     UNION
+     SELECT ct.usuario_id
+     FROM colaborador_torneo ct
+     WHERE ct.torneo_id = $1 AND ct.estado = 'active'`,
+    [torneoId],
+  );
+  return rows.map((f) => f.usuario_id).filter((id): id is string => id !== null);
+}
+
+/**
  * Verifica que el contexto pueda hacer `accion` sobre un equipo. Capitán y
  * Delegado gestionan el plantel y las inscripciones; Jugador y DT no, sin
  * importar cuántos vínculos tengan con el equipo (`06`, D-25): el rol

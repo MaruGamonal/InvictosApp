@@ -233,8 +233,12 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 7.8 | Confirmación automática | Cargar un resultado como colaborador y esperar 72 h | La tarea horaria lo confirma |
 | 7.9 | La tarea no se pasa de tiempo | Mirar los logs de Vercel de esa corrida | Termina dentro del presupuesto y reporta `pendientes` si cortó |
 | 7.10 | Torneo relámpago | Terminar un relámpago con resultados sin confirmar | Se confirman al pasar a finalizado, no a las 72 h |
-| 7.11 | **Confirmar a mano por el rival** | Buscar dónde confirmar desde el equipo rival | **Punto abierto: hoy no existe la pantalla ni la ruta.** Registrar como falta, no como bug |
-| 7.12 | **Disputar un resultado** | Buscar cómo disputar | **Punto abierto: no existe.** La tabla sabe mostrar «provisorio» pero nada puede llegar a ese estado |
+| 7.11 | Confirmar a mano por el rival | Cargar un resultado como capitán de un equipo y confirmarlo desde el otro | Se confirma, y **no** queda marcado como confirmado por vencimiento |
+| 7.12 | Objetar un resultado | Desde el equipo rival, tocar «No coincide» y escribir el motivo | El partido queda objetado, la tabla lo muestra como provisoria, y le llega el aviso a quien organiza |
+| 7.12b | Quien cargó no se confirma a sí mismo | Intentar confirmar desde el equipo que cargó | No aparece la acción, y por API da SIN_PERMISO |
+| 7.12c | Resolver: dejarlo como está | Desde Resultados, abrir el objetado y elegir «Dejarlo como está» | Queda confirmado y la objeción cerrada |
+| 7.12d | Resolver: corregirlo | Corregir ese resultado desde Resultados | Queda confirmado con el marcador nuevo, la tabla se recalcula, y la objeción se cierra sola |
+| 7.12e | Una objeción no se puede saltear | Como capitán, intentar recargar un resultado objetado | Lo rechaza: lo resuelve el organizador |
 | 7.13 | **Partido no disputado** | Buscar cómo registrar un walkover | **Punto abierto: el servicio existe, la pantalla no** |
 | 7.14 | Score del equipo | Mirar el score al día siguiente de cargar varios resultados | Se actualizó: la tarea corre a las 4:20 UTC. Un equipo sin resultados en 24 meses queda sin score, no en cero |
 
@@ -277,7 +281,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 |---|---|---|---|
 | 10.1 | Centro de notificaciones | Entrar a `/notificaciones` | Están las que se generaron en los bloques anteriores |
 | 10.2 | Marcar leída | Tocar una | Se marca y el contador baja |
-| 10.3 | El enlace lleva bien | Tocar una notificación de cada tipo | Cada una cae en la pantalla correcta |
+| 10.3 | El enlace lleva bien | Tocar una notificación de cada tipo | Cada una cae en la pantalla correcta. Las cuatro de partido llevan a la pantalla del partido |
 | 10.4 | El modo no cambia solo | Estando en modo organizador, tocar una notificación de un torneo propio | Queda en **modo organizador**, no lo pasa a jugador |
 | 10.5 | El modo no da permisos | Ver Bloque 11, caso 11.5 | — |
 | 10.6 | Preferencias | Apagar una categoría y provocar ese aviso | No llega |

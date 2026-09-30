@@ -49,6 +49,9 @@ export interface PartidoGestion {
   version: number;
   fechaHoraProgramada: string | null;
   sedeNombre: string | null;
+  estadoResultado: 'pending' | 'loaded' | 'confirmed' | 'disputed';
+  /** El motivo de la objeción abierta, si la hay. Es lo que el organizador tiene que leer. */
+  objecionMotivo: string | null;
 }
 
 /** UC-34 — Alguien de la lista de buena fe al que se le puede acreditar un gol o una tarjeta. */
@@ -193,16 +196,20 @@ export const obtenerGestionTorneo: Servicio<
     version: number;
     fecha_hora_programada: Date | null;
     sede_nombre: string | null;
+    estado_resultado: 'pending' | 'loaded' | 'confirmed' | 'disputed';
+    objecion_motivo: string | null;
   }>(
     `SELECT p.id, p.fase_id, p.numero_fecha,
             el.id AS equipo_local_id, el.nombre AS equipo_local_nombre,
             ev.id AS equipo_visitante_id, ev.nombre AS equipo_visitante_nombre,
             p.goles_local, p.goles_visitante, p.estado, p.version,
-            p.fecha_hora_programada, s.nombre AS sede_nombre
+            p.fecha_hora_programada, s.nombre AS sede_nombre,
+            p.estado_resultado, d.motivo AS objecion_motivo
      FROM partido p
      JOIN equipo el ON el.id = p.equipo_local_id
      JOIN equipo ev ON ev.id = p.equipo_visitante_id
      LEFT JOIN sede s ON s.id = p.sede_id
+     LEFT JOIN disputa_resultado d ON d.partido_id = p.id AND d.estado = 'open'
      WHERE p.torneo_id = $1
      ORDER BY p.numero_fecha ASC`,
     [datos.torneoId],
@@ -278,6 +285,8 @@ export const obtenerGestionTorneo: Servicio<
       fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
       sedeNombre: fila.sede_nombre,
       version: fila.version,
+      estadoResultado: fila.estado_resultado,
+      objecionMotivo: fila.objecion_motivo,
     })),
     elegiblesPorEquipo,
   };

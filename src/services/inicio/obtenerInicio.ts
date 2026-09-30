@@ -97,6 +97,8 @@ export interface InicioResultado {
     equiposSeguidos: EquipoSeguido[];
     torneosSeguidos: TorneoSeguido[];
     resultadosPorConfirmar: number;
+    /** A dónde lleva el aviso. `null` si no hay ninguno. */
+    primerResultadoPorConfirmar: { partidoId: string; torneoId: string } | null;
   } | null;
   organizador: {
     torneosAdministrados: TorneoAdministrado[];
@@ -284,12 +286,17 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
       [contexto.usuarioId],
     );
 
-    const { rows: pendientesRows } = await pool.query<{ cantidad: string }>(
-      `SELECT count(*) AS cantidad
+    // Los ids y no sólo el conteo: el aviso de Inicio lleva al partido.
+    // Sin esto era un callejón — decía que había algo pendiente y no
+    // había a dónde ir. Sin `LIMIT` porque una persona no acumula
+    // decenas de resultados sin responder.
+    const { rows: pendientesRows } = await pool.query<{ id: string; torneo_id: string }>(
+      `SELECT p.id, p.torneo_id
        FROM partido p
        WHERE (p.equipo_local_id = ANY($1) OR p.equipo_visitante_id = ANY($1))
          AND p.estado_resultado = 'loaded'
-         AND p.cargado_por_usuario_id IS DISTINCT FROM $2`,
+         AND p.cargado_por_usuario_id IS DISTINCT FROM $2
+       ORDER BY p.fecha_carga_resultado ASC`,
       [misEquiposIds, contexto.usuarioId],
     );
 
@@ -323,7 +330,10 @@ export const obtenerInicio: Servicio<void, InicioResultado> = async (_input, con
         categoriaGenero: fila.categoria_genero,
         escudoUrl: fila.escudo_url,
       })),
-      resultadosPorConfirmar: Number(pendientesRows[0]?.cantidad ?? 0),
+      resultadosPorConfirmar: pendientesRows.length,
+      primerResultadoPorConfirmar: pendientesRows[0]
+        ? { partidoId: pendientesRows[0].id, torneoId: pendientesRows[0].torneo_id }
+        : null,
     };
   }
 

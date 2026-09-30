@@ -14,7 +14,7 @@
 | 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Cerrado** (`30/09`). El despacho existe; el correo de producto queda **apagado por decisión** |
 | 3 | `recalcular-score` no está agendada en `pg_cron` | ~~Bloqueante~~ | **Resuelto** (`30/09`): agendada diaria a las 4:20 UTC |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | ~~Importante~~ | **Resuelto** (`30/09`), y antes de agendarla |
-| 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
+| 5 | Confirmar / disputar resultado por el equipo rival (T29) | ~~Bloqueante~~ | **Resuelto** (`30/09`), con la resolución de la objeción incluida |
 | 6 | Registrar partido no disputado (walkover, suspendido) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
@@ -191,13 +191,36 @@ La tarea quedó agendada **diaria a las 4:20 UTC** (1:20 de la madrugada en Arge
 
 ## 5. Confirmar o disputar el resultado, por el equipo rival (T29)
 
-**Bloqueante para el flujo de resultados.**
+> **RESUELTO el 30/09/2026**, y más grande de lo que decía este punto: una objeción sin forma de resolverse deja el partido congelado para siempre, así que la resolución entró en la misma tanda.
+
+**Era bloqueante para el flujo de resultados.**
 
 `src/services/competencia/confirmarResultado.ts` existe y funciona. Pero su **único** llamador es la tarea programada `confirmar-resultados-vencidos`, que confirma automáticamente lo que venció el plazo.
 
 No hay ruta de API ni pantalla para que el capitán del equipo rival confirme a mano, y **no hay ninguna forma de disputar un resultado**. El estado `disputed` existe en el modelo, `obtenerTabla.ts:224` marca la tabla como `provisorio` cuando hay alguno, y `/torneo/[id]/tabla` lo muestra — pero nada puede poner un partido en ese estado.
 
-**Qué falta.** La ruta `POST /api/partidos/confirmar-resultado`, una pantalla o panel donde el capitán vea «el organizador cargó 3-1, ¿confirmás?» con las dos salidas, el servicio de disputa, y el congelamiento del plazo de confirmación automática mientras la disputa está abierta (D-60) — que la tarea de hoy no contempla.
+**Qué se construyó.**
+
+| Pieza | Dónde |
+|---|---|
+| Quién es el equipo rival: el que **no** cargó | `src/services/competencia/_rival.ts` |
+| `confirmarResultado` abierto al rival, sin tocar el camino de la tarea | `confirmarResultado.ts` |
+| Objetar, con motivo obligatorio y en una transacción | `disputarResultado.ts` |
+| Resolver: el organizador rechaza y el resultado queda firme | `resolverDisputa.ts` |
+| Resolver dándole la razón: el organizador corrige, y la corrección cierra la objeción | dentro de `cargarResultado.ts` |
+| Leer un partido y decir qué puede hacer quien lo mira | `obtenerPartido.ts` |
+| La pantalla del partido | `src/app/torneo/[id]/partido/[partidoId]/` |
+| Tres rutas | `/api/partidos/{confirmar-resultado, objetar-resultado, resolver-objecion}` |
+
+Cinco decisiones que conviene tener a mano:
+
+- **El rival es el que no cargó.** Quien cargó ya dio su versión al cargarla. Capitanía **o** delegación, porque `cargarResultado` ya le notifica a los dos roles, y avisarle a alguien de algo que después no puede hacer es la peor combinación posible.
+- **La resolución no era opcional.** Una objeción abierta congela el plazo (D-60): ni el rival ni la tarea de las 72 horas confirman. Sin forma de resolverla, el partido y la tabla quedaban en suspenso para siempre.
+- **Hay dos salidas y viven en lugares distintos.** Rechazar la objeción es `resolverDisputa`. Darle la razón es corregir el resultado con `cargarResultado`, que ya recalcula la tabla y rehace los eventos, y que ahora cierra la objeción como `upheld` en la misma transacción. Duplicar ese camino habría sido reescribir la operación más delicada del producto para cambiarle una columna.
+- **Un capitán no puede recargar por encima de una objeción abierta** (`RESULTADO_CON_OBJECION_ABIERTA`). Si pudiera, la vaciaría de sentido y dejaría el partido de vuelta en `loaded` con la objeción viva: nadie lo confirmaría nunca.
+- **El permiso se resuelve en el servicio, no en la pantalla.** Los dos booleanos que la pantalla recibe deciden qué se dibuja, nunca si se puede.
+
+**Lo que esta tanda destrabó de paso**: la pantalla del partido es la primera del producto, así que los cuatro tipos de notificación de origen `partido` —programado, reprogramado, resultado por confirmar, resultado objetado— **dejaron de quedarse sin enlace**, y el aviso de Inicio dejó de ser un callejón sin salida.
 
 ---
 
@@ -345,7 +368,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
 1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; faltan dos variables de entorno en Vercel.
-2. **Los puntos 5 y 6** — confirmar/disputar y no disputado. Sin esto el ciclo de un partido no cierra.
+2. ~~**Los puntos 5 y 6**~~ — el 5 está **hecho el 30/09**. Queda el 6 (partido no disputado): sin eso el ciclo de un partido todavía no cierra del todo.
 3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.
 5. ~~**El punto 8** — sacar o blindar el endpoint que borra datos.~~ **Hecho el 30/09**: se quitó.

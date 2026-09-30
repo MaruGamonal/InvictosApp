@@ -163,6 +163,22 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'Este resultado no está en condiciones de confirmarse todavía.',
   },
+  RESULTADO_NO_OBJETABLE: {
+    httpStatus: 409,
+    mensaje: 'Este resultado ya no se puede objetar.',
+  },
+  OBJECION_YA_ABIERTA: {
+    httpStatus: 409,
+    mensaje: 'Ya hay una objeción abierta sobre este resultado.',
+  },
+  OBJECION_NO_ABIERTA: {
+    httpStatus: 409,
+    mensaje: 'Esta objeción ya está resuelta.',
+  },
+  RESULTADO_CON_OBJECION_ABIERTA: {
+    httpStatus: 409,
+    mensaje: 'Este resultado está objetado: lo resuelve el organizador del torneo.',
+  },
   FASE_CON_RESULTADOS_SIN_CONFIRMAR: {
     httpStatus: 409,
     mensaje:

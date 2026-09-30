@@ -71,3 +71,25 @@
   font-size: 13px;
   color: var(--color-texto-secundario);
 }
+
+/* Un resultado objetado es lo único de esta pantalla que está esperando
+   a alguien: advertencia, que es la categoría que le corresponde
+   (`04`, 6), y enlace al partido, que es donde se resuelve. */
+.filaObjetado {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
+  padding: 12px 14px;
+  background: var(--advertencia-fondo);
+  border-radius: var(--radio-tarjeta);
+  text-decoration: none;
+  color: var(--advertencia-texto);
+}
+
+.motivoObjecion {
+  font: 400 13px/1.4 var(--fuente-texto);
+  color: var(--advertencia-texto);
+  overflow-wrap: anywhere;
+}

@@ -34,7 +34,11 @@ describe('CODIGOS_ERROR', () => {
     // Más SIN_ORGANIZACION: crear un torneo exige una organización
     // propia, y antes se creaba sola con un nombre de arranque que nadie
     // eligió.
-    expect(codigos).toHaveLength(34);
+    // Más los cuatro de T29 (objetar un resultado):
+    // RESULTADO_NO_OBJETABLE, OBJECION_YA_ABIERTA, OBJECION_NO_ABIERTA y
+    // RESULTADO_CON_OBJECION_ABIERTA — este último frena que un capitán
+    // recargue por encima de una objeción que todavía nadie resolvió.
+    expect(codigos).toHaveLength(38);
   });
 
   it.each(codigos)(

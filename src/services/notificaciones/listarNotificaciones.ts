@@ -29,6 +29,13 @@ export interface NotificacionListada {
   canal: 'in_app' | 'email';
   estado: 'pending' | 'delivered' | 'read';
   fechaGeneracion: string;
+  /**
+   * El torneo del partido, cuando el aviso nace de uno. La fila de
+   * `notificacion` guarda sólo la entidad de origen, y la pantalla del
+   * partido cuelga del torneo: sin esto, los cuatro tipos de origen
+   * `partido` no tendrían a dónde llevar.
+   */
+  torneoId: string | null;
 }
 
 interface FilaNotificacion {
@@ -39,6 +46,7 @@ interface FilaNotificacion {
   canal: 'in_app' | 'email';
   estado: 'pending' | 'delivered' | 'read';
   fecha_generacion: Date;
+  torneo_id: string | null;
 }
 
 export const listarNotificaciones: Servicio<
@@ -54,17 +62,20 @@ export const listarNotificaciones: Servicio<
   if (datos.cursor) {
     const [fecha, id] = decodificarCursor(datos.cursor);
     valores.push(fecha, id);
-    condicionCursor = `AND (fecha_generacion > $${valores.length - 1}
-      OR (fecha_generacion = $${valores.length - 1} AND id > $${valores.length}))`;
+    condicionCursor = `AND (n.fecha_generacion > $${valores.length - 1}
+      OR (n.fecha_generacion = $${valores.length - 1} AND n.id > $${valores.length}))`;
   }
   valores.push(tamanoPagina + 1);
 
   const pool = obtenerPool();
   const { rows } = await pool.query<FilaNotificacion>(
-    `SELECT id, tipo, entidad_origen_tipo, entidad_origen_id, canal, estado, fecha_generacion
-     FROM notificacion
-     WHERE usuario_id = $1 AND canal = 'in_app' AND tipo = ANY($2) ${condicionCursor}
-     ORDER BY fecha_generacion ASC, id ASC
+    `SELECT n.id, n.tipo, n.entidad_origen_tipo, n.entidad_origen_id, n.canal, n.estado,
+            n.fecha_generacion, pa.torneo_id
+     FROM notificacion n
+     LEFT JOIN partido pa
+       ON n.entidad_origen_tipo = 'partido' AND pa.id = n.entidad_origen_id
+     WHERE n.usuario_id = $1 AND n.canal = 'in_app' AND n.tipo = ANY($2) ${condicionCursor}
+     ORDER BY n.fecha_generacion ASC, n.id ASC
      LIMIT $${valores.length}`,
     valores,
   );
@@ -83,6 +94,7 @@ export const listarNotificaciones: Servicio<
       canal: fila.canal,
       estado: fila.estado,
       fechaGeneracion: fila.fecha_generacion.toISOString(),
+      torneoId: fila.torneo_id,
     })),
     cursorSiguiente,
   };

@@ -4,6 +4,7 @@ import type { Contexto } from '@/lib/contexto';
 const SISTEMA: Contexto = { usuarioId: null, permisos: {}, esSistema: true };
 const VISITANTE: Contexto = { usuarioId: null, permisos: {}, esSistema: false };
 const USUARIO: Contexto = { usuarioId: 'usuario-1', permisos: {}, esSistema: false };
+const RIVAL: Contexto = { usuarioId: 'usuario-rival', permisos: {}, esSistema: false };
 
 const PARTIDO = '11111111-1111-1111-1111-111111111111';
 const TORNEO = '22222222-2222-2222-2222-222222222222';
@@ -38,6 +39,18 @@ function mockearDb(opciones: {
         }
         if (t.startsWith('SELECT 1 FROM disputa_resultado')) {
           return { rows: opciones.disputaAbierta ? [{ '?column?': 1 }] : [] };
+        }
+        // Resolución del equipo rival (T29): quien cargó capitanea el
+        // local, así que el que responde es el visitante.
+        if (t.startsWith('SELECT id FROM perfil_deportivo')) {
+          return { rows: [{ id: `perfil-${valores[0]}` }] };
+        }
+        if (t.includes('FROM integrante_equipo')) {
+          const [perfilId, equipoId] = valores as [string, string];
+          const esCapitan =
+            (perfilId === 'perfil-usuario-cargo' && equipoId === EQUIPO_LOCAL) ||
+            (perfilId === 'perfil-usuario-rival' && equipoId === EQUIPO_VISITANTE);
+          return { rows: esCapitan ? [{ rol_equipo: 'captain' }] : [] };
         }
         return { rows: [] };
       },
@@ -76,12 +89,37 @@ describe('confirmarResultado', () => {
     });
   });
 
-  it('un usuario real todavía no puede confirmar a mano (eso es T29): SIN_PERMISO', async () => {
-    mockearDb({});
+  it('alguien ajeno a los dos equipos no puede confirmar: SIN_PERMISO', async () => {
+    mockearDb({ partido: filaPartido({ cargado_por_usuario_id: 'usuario-cargo' }) });
     const { confirmarResultado } = await import('./confirmarResultado');
     await expect(confirmarResultado({ partidoId: PARTIDO }, USUARIO)).rejects.toMatchObject({
       codigo: 'SIN_PERMISO',
     });
+  });
+
+  /**
+   * T29 — La mitad que faltaba. Quien cargó ya dio su versión; el que
+   * confirma es el otro equipo.
+   */
+  it('la capitana del equipo que no cargó confirma, y no queda como vencimiento', async () => {
+    const consultas = mockearDb({
+      partido: filaPartido({ cargado_por_usuario_id: 'usuario-cargo' }),
+    });
+    const { confirmarResultado } = await import('./confirmarResultado');
+
+    const resultado = await confirmarResultado({ partidoId: PARTIDO }, RIVAL);
+
+    expect(resultado).toEqual({ estadoResultado: 'confirmed', confirmadoPorVencimiento: false });
+    const update = consultas.find((c) => c.texto.startsWith('UPDATE partido'));
+    expect(update!.valores).toEqual([PARTIDO, false]);
+  });
+
+  it('quien cargó el resultado no se lo confirma a sí mismo: SIN_PERMISO', async () => {
+    mockearDb({ partido: filaPartido({ cargado_por_usuario_id: 'usuario-cargo' }) });
+    const { confirmarResultado } = await import('./confirmarResultado');
+    await expect(
+      confirmarResultado({ partidoId: PARTIDO }, { ...RIVAL, usuarioId: 'usuario-cargo' }),
+    ).rejects.toMatchObject({ codigo: 'SIN_PERMISO' });
   });
 
   it('partido inexistente, NO_ENCONTRADO', async () => {

@@ -94,6 +94,7 @@ interface FilaPartido {
   equipo_local_id: string;
   equipo_visitante_id: string;
   estado: string;
+  estado_resultado: string;
   goles_local: number | null;
   goles_visitante: number | null;
   version: number;
@@ -133,7 +134,7 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
 
   const { rows } = await pool.query<FilaPartido>(
     `SELECT p.torneo_id, p.grupo_id, p.equipo_local_id, p.equipo_visitante_id, p.estado,
-            p.goles_local, p.goles_visitante, p.version,
+            p.goles_local, p.goles_visitante, p.version, p.estado_resultado,
             t.estado AS torneo_estado, t.puntos_victoria, t.puntos_empate, t.puntos_derrota
      FROM partido p JOIN torneo t ON t.id = p.torneo_id
      WHERE p.id = $1`,
@@ -155,6 +156,18 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
     );
     if (!esCapitan) throw error;
     estadoResultado = 'loaded';
+  }
+
+  // Un resultado objetado no se puede volver a cargar desde el equipo
+  // (T29): la objeción existe para que la resuelva el organizador, y
+  // dejar que un capitán la pase por encima recargando la vaciaría de
+  // sentido. Además quedaría el partido de vuelta en `loaded` con la
+  // objeción abierta: ni el plazo ni el rival lo confirmarían nunca.
+  //
+  // El organizador sí puede: su carga *es* la resolución, y cierra la
+  // objeción como aceptada más abajo, en la misma transacción.
+  if (estadoResultado === 'loaded' && partido.estado_resultado === 'disputed') {
+    throw crearError('RESULTADO_CON_OBJECION_ABIERTA');
   }
 
   if (datos.version !== partido.version) {
@@ -285,6 +298,25 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       });
     }
     nuevaVersion = actualizadas[0]!.version;
+
+    // La otra salida de una objeción (T29): si el organizador corrige
+    // un resultado objetado, esa corrección **es** la resolución. Se
+    // cierra acá adentro y no en un servicio aparte porque un partido
+    // con el resultado ya corregido y la objeción todavía abierta
+    // quedaría trabado — ni el plazo ni el rival lo confirman (`06`,
+    // D-60), y el organizador creería que ya lo resolvió.
+    //
+    // Sin objeción abierta esto no hace nada: cero filas, cero costo.
+    if (estadoResultado === 'confirmed') {
+      await cliente.query(
+        `UPDATE disputa_resultado
+         SET estado = 'upheld',
+             resolucion = 'El organizador corrigió el resultado.',
+             resuelta_por_usuario_id = $2
+         WHERE partido_id = $1 AND estado = 'open'`,
+        [datos.partidoId, contexto.usuarioId],
+      );
+    }
 
     if (partido.grupo_id) {
       await aplicarResultadoAPosicion(

@@ -213,10 +213,17 @@
   margin-top: 4px;
 }
 
+/* Ahora es un enlace al partido: era un cartel sin salida, que decía
+   que había algo pendiente y no llevaba a ningún lado. */
 .avisoPendiente {
+  display: flex;
+  align-items: center;
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
   background: var(--advertencia-fondo);
   color: var(--advertencia-texto);
   border-radius: var(--radio-tarjeta);
   padding: 14px 16px;
   font: 600 14px/1.4 var(--fuente-texto);
+  text-decoration: none;
 }

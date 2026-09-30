@@ -262,12 +262,15 @@ export default async function PaginaInicio({
 
             {bloqueAhoraActividad}
 
-            {inicio.jugador.resultadosPorConfirmar > 0 && (
-              <div className={styles.avisoPendiente}>
+            {inicio.jugador.primerResultadoPorConfirmar && (
+              <Link
+                href={`/torneo/${inicio.jugador.primerResultadoPorConfirmar.torneoId}/partido/${inicio.jugador.primerResultadoPorConfirmar.partidoId}`}
+                className={styles.avisoPendiente}
+              >
                 {inicio.jugador.resultadosPorConfirmar === 1
-                  ? 'Cargaron el resultado de un partido tuyo.'
-                  : `Cargaron el resultado de ${inicio.jugador.resultadosPorConfirmar} partidos tuyos.`}
-              </div>
+                  ? 'Confirmá el resultado de tu partido'
+                  : `Confirmá ${inicio.jugador.resultadosPorConfirmar} resultados`}
+              </Link>
             )}
 
             {inicio.jugador.equipos.length > 0 && (

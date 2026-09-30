@@ -15,6 +15,10 @@ export default async function PaginaResultados({ params }: { params: Promise<{ i
 
   const partidosSinJugar = gestion.partidos.filter((p) => p.estado !== 'played');
   const cargados = gestion.partidos.filter((p) => p.estado === 'played' || p.estado === 'walkover');
+  // Arriba de todo: es lo único de esta pantalla que está esperando a
+  // alguien. Un resultado objetado no lo confirma el plazo ni el
+  // equipo rival (`06`, D-60) — queda quieto hasta que se resuelva.
+  const objetados = gestion.partidos.filter((p) => p.estadoResultado === 'disputed');
 
   if (gestion.partidos.length === 0) {
     return <EstadoVacio mensaje="Todavía no hay partidos generados en el fixture." />;
@@ -22,6 +26,32 @@ export default async function PaginaResultados({ params }: { params: Promise<{ i
 
   return (
     <div className={styles.pagina}>
+      {objetados.length > 0 && (
+        <div>
+          <span className={styles.tituloSeccion}>Objetados</span>
+          <div className={styles.lista}>
+            {objetados.map((partido) => (
+              <Link
+                key={partido.id}
+                href={`/torneo/${id}/partido/${partido.id}`}
+                className={styles.filaObjetado}
+              >
+                <span className={styles.nombresCargado}>
+                  <span className={styles.equipoCargado}>{partido.equipoLocalNombre}</span>
+                  <span className={styles.marcadorCargado}>
+                    {partido.golesLocal} – {partido.golesVisitante}
+                  </span>
+                  <span className={styles.equipoCargado}>{partido.equipoVisitanteNombre}</span>
+                </span>
+                {partido.objecionMotivo && (
+                  <span className={styles.motivoObjecion}>{partido.objecionMotivo}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {gestion.estado === 'in_progress' ? (
         <div>
           <span className={styles.tituloSeccion}>Pendientes</span>

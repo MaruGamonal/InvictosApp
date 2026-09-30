@@ -53,6 +53,7 @@ export function ListaNotificaciones({
       notificacion.entidadOrigenTipo,
       notificacion.entidadOrigenId,
       modo,
+      notificacion.torneoId,
     );
     if (enlace) router.push(enlace);
   }
@@ -90,6 +91,7 @@ export function ListaNotificaciones({
           notificacion.entidadOrigenTipo,
           notificacion.entidadOrigenId,
           modo,
+          notificacion.torneoId,
         );
         return (
           <button

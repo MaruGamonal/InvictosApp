@@ -38,6 +38,7 @@ describe('ListaNotificaciones', () => {
             canal: 'in_app',
             estado: 'delivered',
             fechaGeneracion: new Date().toISOString(),
+            torneoId: null,
           },
         ]}
         cursorInicial={null}
@@ -71,6 +72,7 @@ describe('ListaNotificaciones', () => {
             canal: 'in_app',
             estado: 'delivered',
             fechaGeneracion: new Date().toISOString(),
+            torneoId: null,
           },
         ]}
         cursorInicial={null}
