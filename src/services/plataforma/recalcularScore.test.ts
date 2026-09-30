@@ -35,7 +35,10 @@ function mockearDb(opciones: {
           inserts.push({ valores });
           return { rows: [] };
         }
-        if (t.includes("SELECT id FROM equipo WHERE estado = 'active'")) {
+        // La selección de equipos ahora ordena por antigüedad del
+        // último recálculo y recorta con `LIMIT`, para no recorrer una
+        // tabla que crece contra una función con tiempo máximo.
+        if (t.startsWith('SELECT e.id')) {
           return { rows: (opciones.equipoIds ?? []).map((id) => ({ id })) };
         }
         if (t.includes('FROM partido p') && t.includes('fecha_confirmacion_resultado > now()')) {
@@ -66,7 +69,13 @@ describe('recalcularScore', () => {
     mockearDb({ equipoIds: [] });
     const { recalcularScore } = await import('./recalcularScore');
     const resumen = await recalcularScore();
-    expect(resumen).toEqual({ procesados: 0, cambiados: 0, fallidos: [] });
+    expect(resumen).toEqual({
+      procesados: 0,
+      cambiados: 0,
+      fallidos: [],
+      pendientes: 0,
+      puedeHaberMas: false,
+    });
   });
 
   it('un equipo sin ningún resultado confirmado nunca, queda insufficient_activity', async () => {
@@ -78,7 +87,13 @@ describe('recalcularScore', () => {
     const { recalcularScore } = await import('./recalcularScore');
     const resumen = await recalcularScore();
 
-    expect(resumen).toEqual({ procesados: 1, cambiados: 1, fallidos: [] });
+    expect(resumen).toEqual({
+      procesados: 1,
+      cambiados: 1,
+      fallidos: [],
+      pendientes: 0,
+      puedeHaberMas: false,
+    });
     expect(inserts).toHaveLength(1);
     expect(inserts[0]!.valores).toEqual([EQUIPO, 'v1-provisional', 'insufficient_activity']);
   });
@@ -131,7 +146,13 @@ describe('recalcularScore', () => {
     const { recalcularScore } = await import('./recalcularScore');
     const resumen = await recalcularScore();
 
-    expect(resumen).toEqual({ procesados: 1, cambiados: 1, fallidos: [] });
+    expect(resumen).toEqual({
+      procesados: 1,
+      cambiados: 1,
+      fallidos: [],
+      pendientes: 0,
+      puedeHaberMas: false,
+    });
     expect(inserts).toHaveLength(1);
     // El quinto valor ($5) es partidos_computados — 'active' queda fijo en el SQL, no es un parámetro.
     const [equipoId, valor, desgloseJson, version, partidosComputados] = inserts[0]!.valores as [

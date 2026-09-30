@@ -28,12 +28,31 @@ const VENTANA_MESES = 24;
 const MESES_A_MS = 1000 * 60 * 60 * 24 * 30.44;
 const TOPE_TORNEOS_PARA_COMPONENTE = 6;
 const TOPE_DIFERENCIA_GOL_BRUTA = 10;
+
+/**
+ * Lote y presupuesto de tiempo, por la misma razón que en
+ * `confirmarResultadosVencidos`: esto corre en una función con tiempo
+ * máximo y recorre una tabla que crece sin techo. Sin el lote, el día
+ * que haya suficientes equipos la corrida se corta por la mitad y no lo
+ * señala nada.
+ *
+ * El recorte no pierde a nadie porque el orden es "el que hace más que
+ * no se recalcula, primero" (`ultima_actualizacion ASC NULLS FIRST`):
+ * lo que no entró hoy encabeza la cola mañana, y un equipo nuevo, que
+ * todavía no tiene fila de score, va antes que todos.
+ */
+const MAXIMO_POR_CORRIDA = 200;
+const MILISEGUNDOS_DE_PRESUPUESTO = 45_000;
 const DIFERENCIA_COMPRIMIDA_MAXIMA = Math.sqrt(TOPE_DIFERENCIA_GOL_BRUTA);
 
 export interface ResumenRecalculoScore {
   procesados: number;
   cambiados: number;
   fallidos: Array<{ equipoId: string; error: string }>;
+  /** Los que quedaron del lote sin tocar por falta de tiempo. Exacto, no una marca. */
+  pendientes: number;
+  /** `true` si la consulta se llenó: hay más equipos de los que entran en una corrida. */
+  puedeHaberMas: boolean;
 }
 
 interface FilaPartidoConfirmado {
@@ -225,14 +244,38 @@ async function recalcularScoreDeUnEquipo(
 }
 
 export async function recalcularScore(): Promise<ResumenRecalculoScore> {
+  const comenzoEn = Date.now();
   const pool = obtenerPool();
-  const resumen: ResumenRecalculoScore = { procesados: 0, cambiados: 0, fallidos: [] };
+  const resumen: ResumenRecalculoScore = {
+    procesados: 0,
+    cambiados: 0,
+    fallidos: [],
+    pendientes: 0,
+    puedeHaberMas: false,
+  };
 
+  // Primero el que hace más que no se recalcula, y antes que todos el
+  // que nunca se calculó (`NULLS FIRST`): así el recorte del lote rota
+  // y ningún equipo se queda sin score para siempre.
   const { rows: equipos } = await pool.query<{ id: string }>(
-    `SELECT id FROM equipo WHERE estado = 'active'`,
+    `SELECT e.id
+     FROM equipo e
+     LEFT JOIN score_equipo s ON s.equipo_id = e.id
+     WHERE e.estado = 'active'
+     ORDER BY s.ultima_actualizacion ASC NULLS FIRST
+     LIMIT $1`,
+    [MAXIMO_POR_CORRIDA + 1],
   );
 
-  for (const { id: equipoId } of equipos) {
+  resumen.puedeHaberMas = equipos.length > MAXIMO_POR_CORRIDA;
+  const delLote = equipos.slice(0, MAXIMO_POR_CORRIDA);
+
+  for (const [indice, { id: equipoId }] of delLote.entries()) {
+    if (Date.now() - comenzoEn > MILISEGUNDOS_DE_PRESUPUESTO) {
+      resumen.pendientes = delLote.length - indice;
+      break;
+    }
+
     resumen.procesados += 1;
     try {
       await recalcularScoreDeUnEquipo(pool, equipoId);

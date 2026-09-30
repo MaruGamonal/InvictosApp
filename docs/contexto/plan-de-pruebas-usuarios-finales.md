@@ -87,7 +87,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 0.3 | `DATABASE_URL_MIGRACIONES` apunta al Session pooler | Variables en Vercel | Host `…pooler.supabase.com`, puerto `5432`. **Nunca** la conexión directa: es sólo IPv6 y el build no la alcanza |
 | 0.4 | `DATABASE_URL` apunta al pooler en modo transacción | Variables en Vercel | Puerto `6543`. Con `5432` se agota `pool_size: 15` (incidente Sentry 7751157836) |
 | 0.5 | El secreto de cron está en Vault | `select name from vault.secrets` | Existe `cron_secret`, y su valor coincide con la variable `CRON_SECRET` de Vercel |
-| 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (horaria) y `despachar-correos` (cada 10 min). **`recalcular-score` todavía no: es un punto abierto** |
+| 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (`0 * * * *`) y `recalcular-score` (`20 4 * * *`). `despachar-correos` **no** debe aparecer: el correo de producto está apagado |
 | 0.7 | La tarea apunta al host canónico | `select command from cron.job` | `https://www.invicta.com.ar/…` **con `www`**. Sin `www`, libcurl descarta el header `Authorization` en la redirección y la tarea da 403 |
 | 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink` |
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
@@ -243,7 +243,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 7.11 | **Confirmar a mano por el rival** | Buscar dónde confirmar desde el equipo rival | **Punto abierto: hoy no existe la pantalla ni la ruta.** Registrar como falta, no como bug |
 | 7.12 | **Disputar un resultado** | Buscar cómo disputar | **Punto abierto: no existe.** La tabla sabe mostrar «provisorio» pero nada puede llegar a ese estado |
 | 7.13 | **Partido no disputado** | Buscar cómo registrar un walkover | **Punto abierto: el servicio existe, la pantalla no** |
-| 7.14 | Score del equipo | Mirar el score después de varios resultados | **Punto abierto: la tarea no está agendada**, así que probablemente no se mueva |
+| 7.14 | Score del equipo | Mirar el score al día siguiente de cargar varios resultados | Se actualizó: la tarea corre a las 4:20 UTC. Un equipo sin resultados en 24 meses queda sin score, no en cero |
 
 ---
 

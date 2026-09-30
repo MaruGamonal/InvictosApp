@@ -12,8 +12,8 @@
 |---|---|---|---|
 | 1 | Publicidad: el contenedor está, la publicidad no | Importante | **Decidido**: la caja desaparece si no hay anuncio. Sin hacer |
 | 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Cerrado** (`30/09`). El despacho existe; el correo de producto queda **apagado por decisión** |
-| 3 | `recalcular-score` no está agendada en `pg_cron` | **Bloqueante** | La ruta existe, nada la llama. Siguiente en la fila |
-| 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | Importante | Recorre todos los equipos de una |
+| 3 | `recalcular-score` no está agendada en `pg_cron` | ~~Bloqueante~~ | **Resuelto** (`30/09`): agendada diaria a las 4:20 UTC |
+| 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | ~~Importante~~ | **Resuelto** (`30/09`), y antes de agendarla |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 6 | Registrar partido no disputado (walkover, suspendido) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
@@ -147,7 +147,7 @@ Los correos de autenticación y los de producto saldrían de la misma cuenta de 
 
 ## 3. `recalcular-score` no está agendada
 
-**Bloqueante, y fácil de arreglar.**
+> **RESUELTO el 30/09/2026**, junto con el punto 4 y en ese orden: primero el lote, después agendarla.
 
 `src/app/api/tareas/recalcular-score/route.ts` existe, está protegida con `CRON_SECRET`, y llama a `recalcularScore()`. El servicio está completo: ventana de 24 meses, decaimiento lineal por antigüedad, resultados (50) + diferencia de gol comprimida (20) + torneos disputados (15) + posición final (15), y deja el desglose guardado.
 
@@ -161,6 +161,8 @@ Los correos de autenticación y los de producto saldrían de la misma cuenta de 
 
 ## 4. `recalcularScore` no tiene lote ni presupuesto de tiempo
 
+> **RESUELTO el 30/09/2026.**
+
 `recalcularScore()` hace `SELECT id FROM equipo WHERE estado = 'active'` y recorre **todos** los equipos, uno por uno, con dos consultas cada uno. Sin `LIMIT`, sin cursor, sin control de cuánto lleva.
 
 Es exactamente el mismo defecto estructural que tenía `confirmarResultadosVencidos` antes de arreglarlo (ver el incidente de Sentry 7747128577): una función con tiempo máximo de ejecución recorriendo una tabla que crece sin techo. Con 50 equipos anda; con 2.000 se va a cortar por la mitad, y el corte va a ser silencioso porque no hay nada que lo señale.
@@ -168,6 +170,22 @@ Es exactamente el mismo defecto estructural que tenía `confirmarResultadosVenci
 **Qué falta.** El mismo tratamiento que ya se le dio a la otra tarea: un `MAXIMO_POR_CORRIDA`, un presupuesto de milisegundos, un campo `pendientes` exacto en el resumen y un booleano `puedeHaberMas`, `maxDuration` en la ruta y `Sentry.flush()` en un `finally`. El patrón ya está escrito en `src/services/plataforma/confirmarResultadosVencidos.ts` — es copiarlo.
 
 Conviene hacerlo **antes** de agendarla (punto 3), no después.
+
+### Qué se construyó
+
+`MAXIMO_POR_CORRIDA = 200` y `MILISEGUNDOS_DE_PRESUPUESTO = 45_000`, con `pendientes` exacto y `puedeHaberMas`, igual que en la tarea horaria.
+
+La parte que no es copia es **el orden**, y es lo que hace que recortar no pierda a nadie:
+
+```sql
+LEFT JOIN score_equipo s ON s.equipo_id = e.id
+ORDER BY s.ultima_actualizacion ASC NULLS FIRST
+LIMIT $1
+```
+
+El que hace más que no se recalcula va primero, y el que nunca se calculó —todavía sin fila en `score_equipo`— va antes que todos. Lo que no entró hoy encabeza la cola mañana.
+
+La tarea quedó agendada **diaria a las 4:20 UTC** (1:20 de la madrugada en Argentina), en `db/migrations/1790737006885_agendar-recalculo-de-score.js`. Diaria y no horaria: el score mide desempeño con decaimiento en una ventana de 24 meses, entre una hora y la siguiente no cambia nada que se note, y recalcular todos los equipos activos es el trabajo más caro de la plataforma.
 
 ---
 
@@ -311,7 +329,7 @@ Si no, el enlace de confirmación de cuenta y el de verificación de organizaci�
 
 Dos, encontrados de paso:
 
-- `src/app/api/tareas/recalcular-score/route.ts:6` dice «declarada y agendada (diaria), todavía sin fórmula». Es al revés en las dos mitades: la fórmula está completa, y no está agendada.
+- ~~`src/app/api/tareas/recalcular-score/route.ts:6` decía «declarada y agendada (diaria), todavía sin fórmula», al revés en las dos mitades.~~ Corregido el 30/09.
 - `src/lib/accionesPendientes.ts:8` dice «hoy ninguna acción concreta está registrada porque `seguir` es de T25 y `solicitarInscripcion` es de T20 — ninguno de los dos existe todavía». Los dos existen, y `seguir` ya está registrada.
 
 Son comentarios, no código, pero son de los que hacen perder media hora al que venga después.
@@ -324,7 +342,7 @@ Si hubiera que elegir, esto es lo que no puede quedar como está:
 
 1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; faltan dos variables de entorno en Vercel.
 2. **Los puntos 5 y 6** — confirmar/disputar y no disputado. Sin esto el ciclo de un partido no cierra.
-3. **El punto 3**, después del 4 — agendar el score, en lote.
+3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.
 5. **El punto 8** — sacar o blindar el endpoint que borra datos.
 
