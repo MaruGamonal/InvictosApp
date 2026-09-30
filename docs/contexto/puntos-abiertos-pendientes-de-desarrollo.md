@@ -11,7 +11,7 @@
 | # | Punto | Severidad | Estado hoy |
 |---|---|---|---|
 | 1 | Publicidad: el contenedor está, la publicidad no | Importante | **Decidido**: la caja desaparece si no hay anuncio. Sin hacer |
-| 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Resuelto** (`30/09`). Faltan dos variables en Vercel |
+| 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Cerrado** (`30/09`). El despacho existe; el correo de producto queda **apagado por decisión** |
 | 3 | `recalcular-score` no está agendada en `pg_cron` | **Bloqueante** | La ruta existe, nada la llama. Siguiente en la fila |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | Importante | Recorre todos los equipos de una |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
@@ -56,8 +56,11 @@ Y **no está** en ningún flujo de tarea del organizador ni en la inscripción d
 
 ## 2. El canal `email` de notificaciones no despacha nada
 
-> **RESUELTO el 30/09/2026.** Al final de esta sección, qué se construyó
-> y qué queda pendiente fuera del repositorio.
+> **CERRADO el 30/09/2026, y no como estaba planteado.** El despacho se
+> construyó entero y funciona, pero **el correo de producto quedó
+> apagado a propósito**: el único mail que sale es el de la cuenta. Al
+> final de la sección, qué se construyó, por qué está apagado y cómo se
+> prende.
 
 **Era lo más grave del inventario.**
 
@@ -122,9 +125,23 @@ Queda sólo:
 
 **Mientras las variables no estén, la aplicación funciona igual**: los avisos quedan encolados en `pending` y no se gasta ningún reintento, así que la tarea los manda en cuanto existan.
 
-### Una cosa a vigilar: la cuota es compartida
+### Y sin embargo, está apagado
 
-Los correos de autenticación y los de producto salen ahora de la misma cuenta de Resend y consumen el mismo cupo. Un torneo de 16 equipos al que se le reprograma una fecha genera un aviso por equipo, más los seguidores; con tres torneos activos el consumo sube rápido. Conviene mirar el panel de Resend después de la primera semana con usuarios reales, antes de que un límite alcanzado deje sin avisar a alguien.
+Con todo eso construido, la decisión fue **no mandar ningún correo de producto por ahora**. El interruptor es `CORREO_DE_PRODUCTO_ACTIVO`, en `src/services/notificaciones/tipos.ts`, y hoy vale `false`.
+
+El motivo no es técnico. Un remitente que manda de más se filtra entero, y con eso se pierden también **los correos de la cuenta** —confirmar el alta, recuperar la contraseña, verificar una organización—, que son los que no se pueden perder. Mientras el producto se estrena, el criterio es no ocupar la casilla de nadie.
+
+Qué cambió en concreto:
+
+- `canalesDe()` devuelve `['in_app']` para los **16 tipos**, no sólo para los informativos. Antes eran 12 los que salían por correo, y siete de ellos ni siquiera se podían apagar desde Preferencias.
+- Las tres categorías accionables de `/notificaciones/preferencias` —invitaciones, estado de inscripción, cambios de horario— **perdieron el botón de correo**. Siguen sin poder apagarse: una invitación que no llega deja a alguien afuera de un partido, y ahora que no hay un segundo canal de respaldo, menos todavía.
+- La tarea `despachar-correos` se **desagendó** (`1790736418929_desagendar-despacho-de-correos.js`). Con el interruptor apagado no hay filas que mandar, y correr 144 veces por día para no encontrar nada ensucia los check-ins de Sentry hasta que nadie los mira.
+
+**Para volver a prenderlo**: `CORREO_DE_PRODUCTO_ACTIVO = true`, el `down` de esa migración —que reagenda la tarea idéntica—, y las dos variables de entorno de abajo. Nada que reescribir. Hay una prueba (`tipos.test.ts`) que falla si alguien pone el interruptor en `true` sin actualizarla: es a propósito, para que prenderlo sea una decisión y no un descuido.
+
+### Una cosa a vigilar cuando vuelva: la cuota es compartida
+
+Los correos de autenticación y los de producto saldrían de la misma cuenta de Resend y consumen el mismo cupo. Un torneo de 16 equipos al que se le reprograma una fecha genera un aviso por equipo, más los seguidores; con tres torneos activos el consumo sube rápido. Conviene mirar el panel de Resend después de la primera semana con usuarios reales, antes de que un límite alcanzado deje sin avisar a alguien.
 
 ---
 

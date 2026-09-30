@@ -38,8 +38,8 @@ export default async function PaginaPreferencias() {
       </Link>
       <h1 className={`fuente-display ${styles.titulo}`}>Preferencias</h1>
       <p className={styles.subtitulo}>
-        Dos canales: dentro de la app y correo. WhatsApp llega en la segunda etapa, solo para
-        reprogramaciones.
+        Los avisos llegan dentro de la aplicación. Por correo sólo mandamos lo de tu cuenta:
+        confirmarla, recuperar la contraseña y verificar una organización.
       </p>
       <PanelPreferencias preferenciasIniciales={preferencias} />
     </div>

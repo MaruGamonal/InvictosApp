@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
-import { TIPOS_NOTIFICACION, esAccionable, type TipoNotificacion } from './tipos';
+import { TIPOS_NOTIFICACION, canalesDe, type TipoNotificacion } from './tipos';
 import { categoriaDePreferencia } from './preferencias';
 import { despacharFilas } from './_despachoDeCorreo';
 
@@ -65,9 +65,7 @@ export const notificar: Servicio<NotificarInput, void> = async (input) => {
   }
   if (usuarioIds.size === 0) return;
 
-  const canalesPorDefecto: Array<'in_app' | 'email'> = esAccionable(datos.tipo)
-    ? ['in_app', 'email']
-    : ['in_app'];
+  const canalesPorDefecto = canalesDe(datos.tipo);
 
   const categoria = categoriaDePreferencia(datos.tipo);
   const canalesApagadosPorUsuario = new Map<string, Set<'in_app' | 'email'>>();

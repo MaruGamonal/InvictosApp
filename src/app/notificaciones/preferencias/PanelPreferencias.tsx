@@ -37,26 +37,21 @@ function IconoCampana() {
   );
 }
 
-function IconoSobre() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="m3 7 9 6 9-6" />
-    </svg>
-  );
-}
-
-/** UC-47 — Un toggle por canal en accionables; un switch único en informativas. */
+/**
+ * UC-47 — Las accionables llegan siempre y sólo dentro de la aplicación;
+ * las informativas tienen un switch que las apaga.
+ *
+ * Las accionables tenían un segundo botón para elegir si además llegaba
+ * por correo. El correo de producto está apagado (ver
+ * `CORREO_DE_PRODUCTO_ACTIVO` en `services/notificaciones/tipos.ts`):
+ * dejar el botón habría sido ofrecer una opción que no hace nada, que
+ * es peor que no ofrecerla.
+ *
+ * Siguen sin poder apagarse. Una invitación a un plantel o un cambio de
+ * cancha son avisos que, si no llegan, dejan a alguien afuera de un
+ * partido — y ahora que no hay un segundo canal de respaldo, menos
+ * todavía.
+ */
 export function PanelPreferencias({ preferenciasIniciales }: Props) {
   const [preferencias, setPreferencias] = useState(preferenciasIniciales);
   const [enviando, setEnviando] = useState<string | null>(null);
@@ -65,28 +60,19 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
   const accionables = preferencias.filter((p) => p.accionable);
   const informativas = preferencias.filter((p) => !p.accionable);
 
-  async function cambiar(
-    categoria: CategoriaPreferencia,
-    canal: 'in_app' | 'email',
-    activo: boolean,
-  ) {
-    const clave = `${categoria}:${canal}`;
-    setEnviando(clave);
+  async function cambiar(categoria: CategoriaPreferencia, activo: boolean) {
+    setEnviando(categoria);
     setError(null);
     const anteriores = preferencias;
     setPreferencias((actuales) =>
-      actuales.map((p) =>
-        p.categoria === categoria
-          ? { ...p, [canal === 'in_app' ? 'inAppActivo' : 'emailActivo']: activo }
-          : p,
-      ),
+      actuales.map((p) => (p.categoria === categoria ? { ...p, inAppActivo: activo } : p)),
     );
 
     try {
       const respuesta = await fetch('/api/notificaciones/preferencias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoria, canal, activo }),
+        body: JSON.stringify({ categoria, canal: 'in_app', activo }),
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok || !cuerpo.ok) {
@@ -111,9 +97,7 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
           <div key={pref.categoria} className={styles.fila}>
             <div className={styles.filaTexto}>
               <span className={styles.filaTitulo}>{ETIQUETAS[pref.categoria]}</span>
-              <span className={styles.filaDetalle}>
-                No se puede apagar del todo — solo elegir el canal.
-              </span>
+              <span className={styles.filaDetalle}>Siempre activo — no se puede apagar.</span>
             </div>
             <div className={styles.canales}>
               <button
@@ -123,20 +107,6 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
                 aria-label={`${ETIQUETAS[pref.categoria]}: siempre activo dentro de la app`}
               >
                 <IconoCampana />
-              </button>
-              <button
-                type="button"
-                className={
-                  pref.emailActivo
-                    ? `${styles.botonCanal} ${styles.botonCanalActivo}`
-                    : styles.botonCanal
-                }
-                onClick={() => cambiar(pref.categoria, 'email', !pref.emailActivo)}
-                disabled={enviando !== null}
-                aria-pressed={pref.emailActivo}
-                aria-label={`${ETIQUETAS[pref.categoria]}: notificar por email`}
-              >
-                <IconoSobre />
               </button>
             </div>
           </div>
@@ -156,7 +126,7 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
               role="switch"
               aria-checked={pref.inAppActivo}
               aria-label={ETIQUETAS[pref.categoria]}
-              onClick={() => cambiar(pref.categoria, 'in_app', !pref.inAppActivo)}
+              onClick={() => cambiar(pref.categoria, !pref.inAppActivo)}
               disabled={enviando !== null}
             >
               <span className={styles.switchPerilla} />

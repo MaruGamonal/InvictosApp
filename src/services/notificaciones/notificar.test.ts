@@ -33,7 +33,12 @@ function mockearDb(opciones: {
 }
 
 describe('notificar', () => {
-  it('una notificación accionable registra dos filas por destinatario, una por canal', async () => {
+  /**
+   * Con `CORREO_DE_PRODUCTO_ACTIVO` apagado, una accionable registra
+   * **una sola fila**, igual que una informativa: el único correo que
+   * manda el producto es el de la cuenta, y ese no pasa por acá.
+   */
+  it('una notificación accionable registra una sola fila, dentro de la app', async () => {
     const inserts: unknown[][] = [];
     mockearDb({ capturarInsert: (_t, v) => inserts.push(v) });
     const { notificar } = await import('./notificar');
@@ -48,10 +53,10 @@ describe('notificar', () => {
 
     expect(inserts).toHaveLength(1);
     const valores = inserts[0]!;
-    // 5 columnas x 2 canales = 10 valores
-    expect(valores).toHaveLength(10);
+    // 5 columnas x 1 canal = 5 valores
+    expect(valores).toHaveLength(5);
     expect(valores).toContain('in_app');
-    expect(valores).toContain('email');
+    expect(valores).not.toContain('email');
   });
 
   it('una notificación informativa registra una sola fila, por push (in_app)', async () => {
@@ -103,8 +108,8 @@ describe('notificar', () => {
     );
 
     const valores = inserts[0]!;
-    // 4 destinatarios (2 explícitos + 2 seguidores) x 2 canales (accionable) = 40 valores
-    expect(valores).toHaveLength(40);
+    // 4 destinatarios (2 explícitos + 2 seguidores) x 1 canal = 20 valores
+    expect(valores).toHaveLength(20);
   });
 
   it('deduplica un destinatario que además sigue la entidad de origen', async () => {
@@ -130,8 +135,8 @@ describe('notificar', () => {
       contextoSistema,
     );
 
-    // 1 solo destinatario (deduplicado) x 2 canales = 10 valores
-    expect(inserts[0]).toHaveLength(10);
+    // 1 solo destinatario (deduplicado) x 1 canal = 5 valores
+    expect(inserts[0]).toHaveLength(5);
   });
 
   it('UC-47: un destinatario que apagó el email de esa categoría solo recibe in_app', async () => {
@@ -156,7 +161,7 @@ describe('notificar', () => {
     expect(valores).not.toContain('email');
   });
 
-  it('UC-47: un tipo sin categoría de preferencia (todavía no expuesto) ignora cualquier apagado y sigue la regla global', async () => {
+  it('UC-47: un tipo sin categoría de preferencia ignora cualquier apagado y sigue la regla global', async () => {
     const inserts: unknown[][] = [];
     mockearDb({
       apagados: [{ usuario_id: '77777777-7777-7777-7777-777777777777', canal: 'email' }],
@@ -173,8 +178,9 @@ describe('notificar', () => {
     );
 
     const valores = inserts[0]!;
-    expect(valores).toHaveLength(10);
-    expect(valores).toContain('email');
+    expect(valores).toHaveLength(5);
+    // Apagado el correo de producto, "la regla global" es un solo canal.
+    expect(valores).not.toContain('email');
   });
 
   it('UC-47: si todos los destinatarios apagaron el único canal de una informativa, no inserta nada', async () => {
