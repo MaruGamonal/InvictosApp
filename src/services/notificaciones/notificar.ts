@@ -4,6 +4,7 @@ import { obtenerPool } from '@/db/cliente';
 import { validarEntrada } from '@/lib/validacion';
 import { TIPOS_NOTIFICACION, esAccionable, type TipoNotificacion } from './tipos';
 import { categoriaDePreferencia } from './preferencias';
+import { despacharFilas } from './_despachoDeCorreo';
 
 /**
  * `notificar(tipo, destinatarios, origen)` (`10`, 4.9) es interno y
@@ -104,9 +105,35 @@ export const notificar: Servicio<NotificarInput, void> = async (input) => {
   }
   if (marcadores.length === 0) return;
 
-  await pool.query(
+  const { rows: registradas } = await pool.query<{ id: string; usuario_id: string; canal: string }>(
     `INSERT INTO notificacion (usuario_id, tipo, entidad_origen_tipo, entidad_origen_id, canal)
-     VALUES ${marcadores.join(', ')}`,
+     VALUES ${marcadores.join(', ')}
+     RETURNING id, usuario_id, canal`,
     valores,
   );
+
+  // Mitad inmediata del despacho híbrido: el correo sale ahora, no
+  // dentro de diez minutos. Lo que falle acá queda en `failed` y lo
+  // recoge `despacharCorreosPendientes`.
+  //
+  // Envuelto entero: un correo es un efecto del hecho de negocio, no
+  // parte de su invariante — mismo criterio por el que `notificar` se
+  // llama fuera de la transacción del llamador. Si el proveedor se cae,
+  // la inscripción igual quedó hecha.
+  try {
+    await despacharFilas(
+      pool,
+      registradas
+        .filter((fila) => fila.canal === 'email')
+        .map((fila) => ({
+          id: fila.id,
+          usuarioId: fila.usuario_id,
+          tipo: datos.tipo,
+          entidadOrigenTipo: datos.entidadOrigenTipo ?? null,
+          entidadOrigenId: datos.entidadOrigenId ?? null,
+        })),
+    );
+  } catch (error) {
+    console.error('[notificar] el despacho inmediato de correo falló', error);
+  }
 };

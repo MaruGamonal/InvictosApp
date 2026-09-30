@@ -10,9 +10,9 @@
 
 | # | Punto | Severidad | Estado hoy |
 |---|---|---|---|
-| 1 | Publicidad: el contenedor está, la publicidad no | Importante | Caja vacía en 3 superficies |
-| 2 | El canal `email` de notificaciones no despacha nada | **Bloqueante** | Se registra la fila, nadie la manda |
-| 3 | `recalcular-score` no está agendada en `pg_cron` | **Bloqueante** | La ruta existe, nada la llama |
+| 1 | Publicidad: el contenedor está, la publicidad no | Importante | **Decidido**: la caja desaparece si no hay anuncio. Sin hacer |
+| 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Resuelto** (`30/09`). Falta el alta del dominio en Resend |
+| 3 | `recalcular-score` no está agendada en `pg_cron` | **Bloqueante** | La ruta existe, nada la llama. Siguiente en la fila |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | Importante | Recorre todos los equipos de una |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 6 | Registrar partido no disputado (walkover, suspendido) | **Bloqueante** | Servicio sí, ruta y pantalla no |
@@ -56,7 +56,10 @@ Y **no está** en ningún flujo de tarea del organizador ni en la inscripción d
 
 ## 2. El canal `email` de notificaciones no despacha nada
 
-**Bloqueante.** Esto es lo más grave del inventario.
+> **RESUELTO el 30/09/2026.** Al final de esta sección, qué se construyó
+> y qué queda pendiente fuera del repositorio.
+
+**Era lo más grave del inventario.**
 
 `src/services/notificaciones/notificar.ts` aplica la regla de canal de D-53: las notificaciones accionables se registran en dos canales, `in_app` y `email`; las demás sólo `in_app`. Escribe una fila en `notificacion` por cada canal, respetando las preferencias por usuario de UC-47.
 
@@ -73,6 +76,34 @@ Los únicos correos que hoy salen de verdad son los de Supabase Auth: confirmaci
 3. Plantillas por tipo de notificación, en castellano, con el enlace profundo correcto (ya existe `src/app/notificaciones/_enlace.ts`, que resuelve a dónde lleva cada tipo y en qué modo).
 4. Marcar la fila como enviada o fallida — la columna de estado ya existe.
 5. Baja de suscripción por categoría, enganchada a las preferencias que ya están en `/notificaciones/preferencias`.
+
+### Qué se construyó
+
+Se eligió el **despacho híbrido**: el correo sale en el momento, y una tarea agendada recoge lo que falló. Proveedor: **Resend**, detrás de una interfaz propia (`src/lib/correo.ts`) — cambiar de proveedor toca un archivo.
+
+| Pieza | Dónde |
+|---|---|
+| Migración: `failed` como cuarto estado, `intentos`, `fecha_envio`, `ultimo_error`, e índice parcial sobre lo pendiente de email | `db/migrations/1790734699355_despacho-de-correos-de-notificacion.js` |
+| El proveedor, con la clasificación de qué se reintenta y qué no | `src/lib/correo.ts` |
+| El texto del correo: asunto desde `etiquetas.ts`, enlace desde `enlace.ts`, escapado del nombre de la entidad | `src/services/notificaciones/_contenidoDelCorreo.ts` |
+| El despacho de un lote, compartido por los dos caminos | `src/services/notificaciones/_despachoDeCorreo.ts` |
+| El envío inmediato, dentro de `notificar()`, que nunca puede voltear el hecho de negocio | `src/services/notificaciones/notificar.ts` |
+| La tarea que recoge lo fallido, con lote y presupuesto de tiempo desde el día uno | `src/services/notificaciones/despacharCorreosPendientes.ts` |
+| La ruta, con secreto, `maxDuration` y `Sentry.flush` en `finally` | `src/app/api/tareas/despachar-correos/route.ts` |
+| `cron.schedule` cada 10 minutos, con host canónico y secreto de Vault | `db/migrations/1790734913801_agendar-despacho-de-correos.js` |
+
+Cuatro decisiones que conviene tener a mano:
+
+- **El asunto sale de `etiquetas.ts`**, el mismo catálogo que ve la persona dentro de la aplicación. No hay un segundo juego de frases para el correo: dos catálogos del mismo aviso se separan al primer cambio de wording.
+- **El enlace sale de `enlace.ts`**, que se movió de `app/notificaciones/` a `services/notificaciones/` para que el servicio pudiera usarlo (un servicio no puede importar de una pantalla). La pantalla lo sigue viendo con el nombre de antes.
+- **Sólo se le escribe a casillas confirmadas.** Mandarle a una que nadie verificó es la forma más rápida de que el dominio termine en spam.
+- **Dos topes para no reintentar para siempre**: cinco intentos, y siete días de antigüedad. A nadie le sirve enterarse el jueves del cambio de horario del partido del domingo pasado.
+
+### Lo que falta, y no está en el repositorio
+
+1. Dar de alta el dominio en Resend y cargar **SPF, DKIM y DMARC** en el DNS. Sin esto los correos salen y caen en spam.
+2. Cargar `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel. **Mientras no estén, la aplicación funciona igual**: los avisos quedan encolados en `pending` y no se gasta ningún reintento, así que la tarea los manda en cuanto las variables existan.
+3. Desplegar, para que corra la migración que agenda la tarea, y verificar en `cron.job` que quedó agendada.
 
 ---
 
@@ -253,7 +284,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
-1. **El punto 2** — despachar los correos de notificación. Sin esto el producto no avisa nada.
+1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; falta el alta del dominio.
 2. **Los puntos 5 y 6** — confirmar/disputar y no disputado. Sin esto el ciclo de un partido no cierra.
 3. **El punto 3**, después del 4 — agendar el score, en lote.
 4. **El punto 18** — la plantilla de mail.

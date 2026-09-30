@@ -87,7 +87,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 0.3 | `DATABASE_URL_MIGRACIONES` apunta al Session pooler | Variables en Vercel | Host `…pooler.supabase.com`, puerto `5432`. **Nunca** la conexión directa: es sólo IPv6 y el build no la alcanza |
 | 0.4 | `DATABASE_URL` apunta al pooler en modo transacción | Variables en Vercel | Puerto `6543`. Con `5432` se agota `pool_size: 15` (incidente Sentry 7751157836) |
 | 0.5 | El secreto de cron está en Vault | `select name from vault.secrets` | Existe `cron_secret`, y su valor coincide con la variable `CRON_SECRET` de Vercel |
-| 0.6 | La tarea está agendada | `select jobname, schedule from cron.job` | Aparece `confirmar-resultados-vencidos`, horaria. **Hoy `recalcular-score` no va a aparecer: es un punto abierto** |
+| 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (horaria) y `despachar-correos` (cada 10 min). **`recalcular-score` todavía no: es un punto abierto** |
 | 0.7 | La tarea apunta al host canónico | `select command from cron.job` | `https://www.invicta.com.ar/…` **con `www`**. Sin `www`, libcurl descarta el header `Authorization` en la redirección y la tarea da 403 |
 | 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink` |
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
@@ -288,7 +288,11 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 10.5 | El modo no da permisos | Ver Bloque 11, caso 11.5 | — |
 | 10.6 | Preferencias | Apagar una categoría y provocar ese aviso | No llega |
 | 10.7 | Preferencias por usuario | Dos usuarios con preferencias distintas, mismo evento | A cada uno lo que eligió |
-| 10.8 | **Correo de notificación** | Provocar una notificación accionable y mirar la casilla | **Punto abierto: no llega nada.** El canal se registra pero nadie lo despacha. Verificar que al menos la fila se cree |
+| 10.8 | Correo de notificación | Provocar una notificación accionable y mirar la casilla | Llega el correo, con el asunto del catálogo y el nombre de la entidad. **Requiere el dominio dado de alta en Resend y las variables cargadas** |
+| 10.9 | El correo lleva al mismo lugar que la notificación | Tocar el botón del correo | Cae en la misma pantalla que tocar el aviso dentro de la app |
+| 10.10 | No se le escribe a una casilla sin confirmar | Provocar un aviso a la cuenta demo sin confirmar | No llega correo, y la fila queda sin intentos gastados |
+| 10.11 | La cola se vacía sola | Cortar la variable del proveedor, provocar avisos, restaurarla y esperar 10 min | La tarea `despachar-correos` los manda en la corrida siguiente |
+| 10.12 | La baja de suscripción funciona | Tocar «Cambiar qué avisos recibo» en el pie del correo | Cae en `/notificaciones/preferencias` |
 
 ---
 
@@ -354,7 +358,7 @@ Se puede abrir a usuarios finales cuando:
 2. **Todo el Bloque 11 está en verde.** Sin excepción. Un permiso que se puede saltar es una falla de seguridad, no un bug de prioridad media.
 3. **Los Bloques 1 a 6 no tienen ningún fallo que impida completar el recorrido.** Un capitán tiene que poder crear su equipo, inscribirlo y ver el fixture sin ayuda.
 4. **El Bloque 7 cierra el ciclo de un partido.** Hoy no cierra: faltan los casos 7.11, 7.12 y 7.13, que son puntos abiertos de desarrollo, no bugs. **Esto es lo que hay que decidir antes de abrir**: o se construyen, o se abre sabiendo que el organizador carga resultados y nadie los puede objetar.
-5. **El Bloque 10 avisa por algún canal.** Hoy avisa sólo dentro de la aplicación. Si la primera camada de usuarios es gente conocida a la que se le puede avisar por WhatsApp, se puede vivir con eso un tiempo. Si no, el correo es bloqueante.
+5. **El Bloque 10 avisa por correo.** El despacho está construido (punto 2 de los abiertos, resuelto el 30/09), pero **no sale un solo correo hasta que el dominio esté dado de alta en Resend con SPF, DKIM y DMARC, y las dos variables cargadas en Vercel**. Ese es el paso que falta, y es de configuración, no de código.
 6. **El Bloque 12 pasa en un teléfono de gama baja, al sol.** No en el emulador.
 
 ---
