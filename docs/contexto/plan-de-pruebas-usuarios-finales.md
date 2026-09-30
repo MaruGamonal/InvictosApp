@@ -93,7 +93,9 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
 | 0.10 | El check-in del cron llega | Esperar a la hora en punto y mirar Sentry Crons | Check-in `ok` |
 | 0.11 | El bucket de imágenes existe y es accesible | Supabase → Storage | El bucket de la migración `1789046007002` existe con sus políticas |
-| 0.12 | Ninguna variable secreta se fue a Sentry | Buscar en un evento de Sentry | **Nunca** debe aparecer `DATABASE_URL` completa: lleva la contraseña. Sólo se reporta el modo |
+| 0.12 | El correo de producto está configurado | Variables en Vercel | Están `RESEND_API_KEY` y `CORREO_REMITENTE`. Son **distintas** del SMTP que Supabase usa para los correos de autenticación, aunque vayan a la misma cuenta de Resend |
+| 0.13 | Queda cupo de correos | Panel de Resend | El consumo del mes está lejos del límite del plan. Autenticación y producto comparten la misma cuota |
+| 0.14 | Ninguna variable secreta se fue a Sentry | Buscar en un evento de Sentry | **Nunca** debe aparecer `DATABASE_URL` completa: lleva la contraseña. Sólo se reporta el modo |
 
 ---
 
@@ -288,7 +290,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 10.5 | El modo no da permisos | Ver Bloque 11, caso 11.5 | — |
 | 10.6 | Preferencias | Apagar una categoría y provocar ese aviso | No llega |
 | 10.7 | Preferencias por usuario | Dos usuarios con preferencias distintas, mismo evento | A cada uno lo que eligió |
-| 10.8 | Correo de notificación | Provocar una notificación accionable y mirar la casilla | Llega el correo, con el asunto del catálogo y el nombre de la entidad. **Requiere el dominio dado de alta en Resend y las variables cargadas** |
+| 10.8 | Correo de notificación | Provocar una notificación accionable y mirar la casilla | Llega el correo, con el asunto del catálogo y el nombre de la entidad. **Requiere `RESEND_API_KEY` y `CORREO_REMITENTE` cargadas en Vercel** |
 | 10.9 | El correo lleva al mismo lugar que la notificación | Tocar el botón del correo | Cae en la misma pantalla que tocar el aviso dentro de la app |
 | 10.10 | No se le escribe a una casilla sin confirmar | Provocar un aviso a la cuenta demo sin confirmar | No llega correo, y la fila queda sin intentos gastados |
 | 10.11 | La cola se vacía sola | Cortar la variable del proveedor, provocar avisos, restaurarla y esperar 10 min | La tarea `despachar-correos` los manda en la corrida siguiente |
@@ -358,7 +360,7 @@ Se puede abrir a usuarios finales cuando:
 2. **Todo el Bloque 11 está en verde.** Sin excepción. Un permiso que se puede saltar es una falla de seguridad, no un bug de prioridad media.
 3. **Los Bloques 1 a 6 no tienen ningún fallo que impida completar el recorrido.** Un capitán tiene que poder crear su equipo, inscribirlo y ver el fixture sin ayuda.
 4. **El Bloque 7 cierra el ciclo de un partido.** Hoy no cierra: faltan los casos 7.11, 7.12 y 7.13, que son puntos abiertos de desarrollo, no bugs. **Esto es lo que hay que decidir antes de abrir**: o se construyen, o se abre sabiendo que el organizador carga resultados y nadie los puede objetar.
-5. **El Bloque 10 avisa por correo.** El despacho está construido (punto 2 de los abiertos, resuelto el 30/09), pero **no sale un solo correo hasta que el dominio esté dado de alta en Resend con SPF, DKIM y DMARC, y las dos variables cargadas en Vercel**. Ese es el paso que falta, y es de configuración, no de código.
+5. **El Bloque 10 avisa por correo.** El despacho está construido (punto 2 de los abiertos, resuelto el 30/09). El dominio ya está verificado en Resend —es el mismo que usa Supabase para los correos de autenticación—, así que **lo único que falta son `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel**. Es configuración, no código.
 6. **El Bloque 12 pasa en un teléfono de gama baja, al sol.** No en el emulador.
 
 ---

@@ -11,7 +11,7 @@
 | # | Punto | Severidad | Estado hoy |
 |---|---|---|---|
 | 1 | Publicidad: el contenedor está, la publicidad no | Importante | **Decidido**: la caja desaparece si no hay anuncio. Sin hacer |
-| 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Resuelto** (`30/09`). Falta el alta del dominio en Resend |
+| 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Resuelto** (`30/09`). Faltan dos variables en Vercel |
 | 3 | `recalcular-score` no está agendada en `pg_cron` | **Bloqueante** | La ruta existe, nada la llama. Siguiente en la fila |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | Importante | Recorre todos los equipos de una |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
@@ -63,7 +63,18 @@ Y **no está** en ningún flujo de tarea del organizador ni en la inscripción d
 
 `src/services/notificaciones/notificar.ts` aplica la regla de canal de D-53: las notificaciones accionables se registran en dos canales, `in_app` y `email`; las demás sólo `in_app`. Escribe una fila en `notificacion` por cada canal, respetando las preferencias por usuario de UC-47.
 
-**Pero no hay nada que lea las filas con `canal = 'email'` y mande el correo.** No hay proveedor de email transaccional en el proyecto: ni Resend, ni SendGrid, ni nodemailer, ni una Edge Function. `listarNotificaciones.ts:66` filtra explícitamente `canal = 'in_app'`, así que esas filas no se ven en ningún lado.
+**Pero no había nada que leyera las filas con `canal = 'email'` y mandara el correo.** No había proveedor de email transaccional **en el proyecto**: ni Resend, ni SendGrid, ni nodemailer, ni una Edge Function. `listarNotificaciones.ts:66` filtra explícitamente `canal = 'in_app'`, así que esas filas no se veían en ningún lado.
+
+> **Ojo con una confusión fácil, que tuve yo al auditar.** La cuenta de Resend **ya existía**, configurada como SMTP de Supabase Auth — pero en el panel de Supabase, no en el repositorio, así que no aparece en ninguna línea de código. Son dos caminos distintos al mismo proveedor, y conviene tenerlos separados en la cabeza:
+>
+> | | Correos de autenticación | Correos de producto |
+> |---|---|---|
+> | Cuáles | Confirmar cuenta, recuperar contraseña, verificar organización, invitaciones | Los 12 tipos accionables de notificación |
+> | Quién arma el mail | **Supabase**, con sus plantillas | Nosotros, en `_contenidoDelCorreo.ts` |
+> | Cómo llega a Resend | **SMTP** (`smtp.resend.com`), configurado en el panel de Supabase | **API HTTP** (`api.resend.com/emails`), desde `lib/correo.ts` |
+> | Está en el repositorio | No | Sí |
+>
+> Supabase sólo manda sus correos de autenticación: no se le puede pedir que mande «te invitaron a un equipo». De ahí el camino nuevo.
 
 Los únicos correos que hoy salen de verdad son los de Supabase Auth: confirmación de cuenta, recuperación de contraseña, verificación de organización e invitaciones. Todos pasan por `signInWithOtp` o `inviteUserByEmail`.
 
@@ -101,9 +112,19 @@ Cuatro decisiones que conviene tener a mano:
 
 ### Lo que falta, y no está en el repositorio
 
-1. Dar de alta el dominio en Resend y cargar **SPF, DKIM y DMARC** en el DNS. Sin esto los correos salen y caen en spam.
-2. Cargar `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel. **Mientras no estén, la aplicación funciona igual**: los avisos quedan encolados en `pending` y no se gasta ningún reintento, así que la tarea los manda en cuanto las variables existan.
-3. Desplegar, para que corra la migración que agenda la tarea, y verificar en `cron.job` que quedó agendada.
+El dominio **ya está verificado en Resend** con SPF, DKIM y DMARC: es el mismo que Supabase usa hoy para los correos de autenticación. Eso ya está hecho y no hay que volver a tocarlo.
+
+Queda sólo:
+
+1. **`RESEND_API_KEY` en Vercel.** La misma clave que figura como contraseña SMTP en el panel de Supabase sirve tal cual; también se puede crear una nueva en Resend. Misma cuenta, mismo dominio.
+2. **`CORREO_REMITENTE` en Vercel**, con el formato `INVICTA <avisos@invicta.com.ar>`: una dirección de ese dominio verificado.
+3. **Desplegar**, para que corra la migración que agenda la tarea, y verificar en `cron.job` que quedó agendada.
+
+**Mientras las variables no estén, la aplicación funciona igual**: los avisos quedan encolados en `pending` y no se gasta ningún reintento, así que la tarea los manda en cuanto existan.
+
+### Una cosa a vigilar: la cuota es compartida
+
+Los correos de autenticación y los de producto salen ahora de la misma cuenta de Resend y consumen el mismo cupo. Un torneo de 16 equipos al que se le reprograma una fecha genera un aviso por equipo, más los seguidores; con tres torneos activos el consumo sube rápido. Conviene mirar el panel de Resend después de la primera semana con usuarios reales, antes de que un límite alcanzado deje sin avisar a alguien.
 
 ---
 
@@ -284,7 +305,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
-1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; falta el alta del dominio.
+1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; faltan dos variables de entorno en Vercel.
 2. **Los puntos 5 y 6** — confirmar/disputar y no disputado. Sin esto el ciclo de un partido no cierra.
 3. **El punto 3**, después del 4 — agendar el score, en lote.
 4. **El punto 18** — la plantilla de mail.
