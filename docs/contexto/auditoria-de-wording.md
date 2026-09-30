@@ -23,7 +23,7 @@
 | **MEDIO** — inconsistencia terminológica o texto innecesariamente complejo | 15 | 15 |
 | **BAJO** — claridad y estilo | 8 | 7 |
 
-Archivos tocados: **41** (28 de producto, 6 de pruebas que afirmaban sobre el copy viejo, más los que arrastró la unificación de términos).
+Archivos tocados: **46** (28 de producto, 6 de pruebas que afirmaban sobre el copy viejo, más los que arrastró la unificación de términos).
 
 ---
 
@@ -45,7 +45,7 @@ Cuatro hallazgos. Dos corregidos, dos que necesitan una decisión tuya porque la
 
 ---
 
-### WORDING #002 — CRÍTICO ⚠️ parcialmente corregido, necesita decisión
+### WORDING #002 — CRÍTICO ✅ corregido: la pantalla se quitó
 
 **Pantalla:** `/admin/sembrar-demo` — **una pantalla pública, sin ningún control de acceso**, alcanzable escribiendo la URL.
 
@@ -57,11 +57,11 @@ Cuatro hallazgos. Dos corregidos, dos que necesitan una decisión tuya porque la
 
 **Problema:** es el peor hallazgo del inventario. Un desconocido que escriba esa URL se entera de que existe una herramienta que escribe sobre la base de producción, de **cómo se llama el secreto que la protege** y de dónde está guardado. Es información interna, y además reduce el trabajo de quien quiera adivinarlo.
 
-**Acción:** REEMPLAZAR el texto (hecho) + **DECIDIR sobre la pantalla** (pendiente).
+**Acción:** ELIMINAR.
 
-**Texto nuevo:** «Carga torneos y equipos de ejemplo. Puede tardar un rato.» · etiqueta «Clave de acceso» · «La misma clave que usan las tareas programadas.» · «Listo. Entrá a Descubrir y elegí una de las ciudades de ejemplo.»
+**Texto nuevo:** [ninguno]
 
-**Lo que queda por decidir:** la pantalla en sí. No la saqué de producción porque la usás desde el navegador contra el entorno desplegado, y sacarla te rompe ese camino sin avisarte. Las opciones, de más a menos segura, están al final en **PROBLEMAS PENDIENTES**.
+Primero se le sacó el texto que describía la infraestructura. Después, al confirmarse que el camino desde el navegador ya no hace falta, **se borraron la pantalla y la ruta de API que usaba**. El dataset de ejemplo se siembra desde la terminal con `npm run demo:reset`, que nunca estuvo expuesto.
 
 ---
 
@@ -283,9 +283,9 @@ Vale decirlo, porque es la mayor parte:
 
 ## CAMBIOS REALIZADOS
 
-**Producto (28 archivos)**
+**Producto (40 archivos)**
 
-`src/app/layout.tsx` · `src/app/manifest.ts` · `src/app/inicio/page.tsx` · `src/app/page.tsx` · `src/app/perfil/editar/FormularioEditarPerfil.tsx` · `src/app/recuperar-password/FormularioRecuperacion.tsx` · `src/app/restablecer-password/FormularioNuevaPassword.tsx` · `src/app/equipo/crear/FormularioCrearEquipo.tsx` · `src/app/equipo/[id]/gestionar/BotonArchivarEquipo.tsx` · `src/app/equipo/[id]/gestionar/FilaIntegranteGestion.tsx` · `src/app/equipo/[id]/gestionar/FilaInvitacionPendiente.tsx` · `src/app/equipo/[id]/gestionar/FormularioEditarEquipo.tsx` · `src/app/equipo/[id]/gestionar/invitar/FormularioInvitarIntegrante.tsx` · `src/app/equipo/[id]/gestionar/solicitudes/PanelSolicitudesIngreso.tsx` · `src/app/equipo/[id]/invitacion/BotonesResponderInvitacion.tsx` · `src/app/torneos/page.tsx` · `src/app/torneo/crear/FormularioCrearTorneo.tsx` · `src/app/torneo/[id]/(publico)/estadisticas/page.tsx` · `src/app/torneo/[id]/crear/publicar/page.tsx` · `src/app/torneo/[id]/crear/publicar/PanelPublicarInicial.tsx` · `src/app/torneo/[id]/crear/reglamento/FormularioReglamentoInicial.tsx` · `src/app/torneo/[id]/equipo/[equipoId]/baja/PanelDarDeBaja.tsx` · `src/app/torneo/[id]/equipo/[equipoId]/lista-buena-fe/PanelListaDeBuenaFe.tsx` · `src/app/torneo/[id]/gestionar/configuracion/page.tsx` · `src/app/torneo/[id]/gestionar/FormularioEditarTorneo.tsx` · `src/app/torneo/[id]/gestionar/PanelAdministradores.tsx` · `src/app/torneo/[id]/gestionar/PanelCancelarTorneo.tsx` · `src/app/torneo/[id]/gestionar/PanelColaboradores.tsx` · `src/app/torneo/[id]/gestionar/PanelDivisiones.tsx` · `src/app/torneo/[id]/gestionar/PanelProgramarPartidos.tsx` · `src/app/organizador/gestionar/page.tsx` · `src/app/organizador/gestionar/ResumenOrganizacion.tsx` · `src/app/organizador/gestionar/invitar/FormularioInvitarAdministrador.tsx` · `src/app/organizador/gestionar/invitar/page.tsx` · `src/app/admin/sembrar-demo/FormularioSembrarDemo.tsx` · `src/components/BotonPedirSumarme.tsx` · `src/components/avisos/Avisos.tsx` · `src/lib/errores.ts` · `src/lib/etiquetas.ts` · `src/services/fixture/_bracket.ts`
+`src/app/layout.tsx` · `src/app/manifest.ts` · `src/app/inicio/page.tsx` · `src/app/page.tsx` · `src/app/perfil/editar/FormularioEditarPerfil.tsx` · `src/app/recuperar-password/FormularioRecuperacion.tsx` · `src/app/restablecer-password/FormularioNuevaPassword.tsx` · `src/app/equipo/crear/FormularioCrearEquipo.tsx` · `src/app/equipo/[id]/gestionar/BotonArchivarEquipo.tsx` · `src/app/equipo/[id]/gestionar/FilaIntegranteGestion.tsx` · `src/app/equipo/[id]/gestionar/FilaInvitacionPendiente.tsx` · `src/app/equipo/[id]/gestionar/FormularioEditarEquipo.tsx` · `src/app/equipo/[id]/gestionar/invitar/FormularioInvitarIntegrante.tsx` · `src/app/equipo/[id]/gestionar/solicitudes/PanelSolicitudesIngreso.tsx` · `src/app/equipo/[id]/invitacion/BotonesResponderInvitacion.tsx` · `src/app/torneos/page.tsx` · `src/app/torneo/crear/FormularioCrearTorneo.tsx` · `src/app/torneo/[id]/(publico)/estadisticas/page.tsx` · `src/app/torneo/[id]/crear/publicar/page.tsx` · `src/app/torneo/[id]/crear/publicar/PanelPublicarInicial.tsx` · `src/app/torneo/[id]/crear/reglamento/FormularioReglamentoInicial.tsx` · `src/app/torneo/[id]/equipo/[equipoId]/baja/PanelDarDeBaja.tsx` · `src/app/torneo/[id]/equipo/[equipoId]/lista-buena-fe/PanelListaDeBuenaFe.tsx` · `src/app/torneo/[id]/gestionar/configuracion/page.tsx` · `src/app/torneo/[id]/gestionar/FormularioEditarTorneo.tsx` · `src/app/torneo/[id]/gestionar/PanelAdministradores.tsx` · `src/app/torneo/[id]/gestionar/PanelCancelarTorneo.tsx` · `src/app/torneo/[id]/gestionar/PanelColaboradores.tsx` · `src/app/torneo/[id]/gestionar/PanelDivisiones.tsx` · `src/app/torneo/[id]/gestionar/PanelProgramarPartidos.tsx` · `src/app/organizador/gestionar/page.tsx` · `src/app/organizador/gestionar/ResumenOrganizacion.tsx` · `src/app/organizador/gestionar/invitar/FormularioInvitarAdministrador.tsx` · `src/app/organizador/gestionar/invitar/page.tsx` · `src/components/BotonPedirSumarme.tsx` · `src/components/avisos/Avisos.tsx` · `src/lib/errores.ts` · `src/lib/etiquetas.ts` · `src/services/fixture/_bracket.ts`
 
 **Pruebas que afirmaban sobre el copy viejo (6 archivos)**
 
@@ -295,15 +295,17 @@ Vale decirlo, porque es la mayor parte:
 
 ## PROBLEMAS PENDIENTES
 
-### 1. Las dos pantallas internas servidas en producción (CRÍTICO)
+### 1. `/catalogo` sigue siendo una pantalla interna servida en producción (CRÍTICO)
 
-`/catalogo` y `/admin/sembrar-demo` son **rutas públicas sin ningún control de acceso**. Ninguna cambia por wording: la decisión es si existen o no para un usuario final. Tres opciones, de más a menos segura:
+`/admin/sembrar-demo` ya no existe: se borraron la pantalla y su ruta de API.
 
-- **A.** Devolver 404 fuera de desarrollo (`notFound()` cuando `NODE_ENV === 'production'`). Es lo más limpio, y **te rompe el camino de sembrar datos desde el navegador contra el entorno desplegado**, que hoy usás.
-- **B.** Dejarlas, y ponerle a `/admin/sembrar-demo` un secreto propio distinto de `CRON_SECRET` más una confirmación explícita en el cuerpo. Conservás el camino y dejás de compartir el secreto de las tareas.
-- **C.** Dejarlas como están y sacarlas de los buscadores con `robots: noindex`. Tapa la vitrina, no la puerta.
+Queda **`/catalogo`**, que es una ruta pública sin ningún control de acceso y sirve el sistema de diseño entero —componentes, variantes y todos los estados internos con su etiqueta—. No cambia por wording: la decisión es si existe o no para un usuario final. Tres opciones:
 
-No elegí por vos porque la A te cambia una herramienta que usás. Mi recomendación es **B**, y `/catalogo` con **A**, que no le sirve a nadie en producción.
+- **A.** Devolver 404 fuera de desarrollo (`notFound()` cuando `NODE_ENV === 'production'`). Es lo más limpio y no rompe nada: en desarrollo sigue estando.
+- **B.** Borrarla, como se hizo con la de sembrar datos. El sistema de diseño ya vive en su propio artifact, así que la pantalla dejó de ser la única forma de verlo.
+- **C.** Dejarla y sacarla de los buscadores con `robots: noindex`. Tapa la vitrina, no la puerta.
+
+Recomiendo **A**: no le sirve a nadie en producción, y en desarrollo sigue siendo cómoda para mirar un componente sin levantar el artifact.
 
 ### 2. El aviso de Inicio tiene que volver a ser accionable
 

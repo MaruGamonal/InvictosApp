@@ -84,15 +84,13 @@ dato.
 
 ## Correrlo contra el entorno desplegado
 
-Desde el navegador, con el `CRON_SECRET` que ya vive en Vercel — corre dentro
-del despliegue, así que hereda `SUPABASE_SERVICE_ROLE_KEY` y puede crear las
-cuentas de Auth:
+Se corre desde una terminal, apuntando `.env` a la base del entorno que
+corresponda. Hace falta `SUPABASE_SERVICE_ROLE_KEY` en ese `.env`: sin ella los
+scripts crean las filas pero no las cuentas de Auth, así que no se puede entrar
+con los usuarios de ejemplo.
 
-```bash
-curl -X POST https://invicta.com.ar/api/admin/sembrar-demo \
-  -H "Authorization: Bearer $CRON_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"accion":"reset"}'
-```
-
-Acciones: `limpiar`, `sembrar`, `validar`, `reset`.
+Hubo una pantalla (`/admin/sembrar-demo`) y una ruta (`/api/admin/sembrar-demo`)
+que hacían esto desde el navegador contra el despliegue. **Se quitaron**: eran
+públicas, describían la infraestructura, y la ruta borraba datos con el mismo
+secreto que usan las tareas programadas. Correrlo desde la terminal es el único
+camino.

@@ -57,14 +57,7 @@ El repositorio trae un dataset demo completo. Desde una terminal con `.env` carg
 npm run demo:reset
 ```
 
-o, sobre el entorno desplegado, sin terminal:
-
-```
-curl -X POST https://www.invicta.com.ar/api/admin/sembrar-demo \
-  -H "Authorization: Bearer $CRON_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"accion":"reset"}'
-```
+apuntando el `.env` a la base del entorno que corresponda. **Sólo desde una terminal**: la pantalla y la ruta que hacían esto desde el navegador se quitaron.
 
 Deja creadas, entre otras cosas: un torneo en curso, uno con inscripciones abiertas, uno finalizado, un borrador sin datos mínimos, un equipo sin plantel y una cuenta sin confirmar para probar el bloqueo. Las cuentas son `demo.organizador@`, `demo.capitana@`, `demo.capitan@`, `demo.jugador@` y `demo.delegada@`, todas en `demo.invicta.com.ar`, con la contraseña que define `PASSWORD_DEMO`.
 
@@ -312,7 +305,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 11.8 | Verificación sólo por la dueña | `POST /api/organizaciones/solicitar-verificacion` desde una administradora | Lo rechaza |
 | 11.9 | Tareas sin secreto | `POST /api/tareas/confirmar-resultados-vencidos` sin header | 401 |
 | 11.10 | Tareas con secreto equivocado | Lo mismo con un secreto inventado | 401 |
-| 11.11 | **El endpoint que borra datos** | `POST /api/admin/sembrar-demo` sin secreto | 401. Y decidir si ese endpoint debe seguir desplegado (ver punto 8 de los puntos abiertos) |
+| 11.11 | El endpoint que borraba datos ya no existe | `POST /api/admin/sembrar-demo` | 404. Se quitó junto con su pantalla |
 | 11.12 | Cuenta sin confirmar por API | Con una cuenta sin confirmar, `POST /api/equipos` | `CUENTA_NO_CONFIRMADA` |
 | 11.13 | Subida de archivos | Intentar subir un archivo a un recurso ajeno | Lo rechaza |
 | 11.14 | Sin sesión | Cualquier ruta que requiera sesión, sin cookie | 401, nunca 500 |

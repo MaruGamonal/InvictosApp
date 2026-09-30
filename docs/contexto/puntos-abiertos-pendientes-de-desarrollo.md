@@ -17,7 +17,7 @@
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 6 | Registrar partido no disputado (walkover, suspendido) | **Bloqueante** | Servicio sí, ruta y pantalla no |
 | 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
-| 8 | `/api/admin/sembrar-demo` está en producción y borra datos | **Bloqueante** | Protegido por `CRON_SECRET` |
+| 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
 | 9 | Historial del jugador torneo por torneo (UC-38) | Importante | No existe |
 | 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | Importante | Sólo "seguir" se retoma |
 | 11 | Notificaciones push (Web Push) | Puede esperar | No existe el canal |
@@ -225,11 +225,15 @@ En un torneo amateur, un equipo que no se presenta es semanal, no excepcional. H
 
 ## 8. `/api/admin/sembrar-demo` está en producción
 
+> **RESUELTO el 30/09/2026**: se quitaron la ruta y la pantalla. El dataset de ejemplo se siembra desde la terminal, con `npm run demo:reset`.
+
 `src/app/api/admin/sembrar-demo/route.ts` acepta las acciones `limpiar`, `sembrar`, `validar` y `reset`. `limpiar` **borra los datos demo de la base de producción**, y `reset` limpia antes de sembrar.
 
 Está protegida con `CRON_SECRET` en el header `Authorization`, igual que las tareas programadas, así que no es un agujero abierto. Pero es un endpoint destructivo desplegado en producción cuyo secreto es el mismo que usan las tareas: si ese secreto se filtra alguna vez, lo que se pierde no es una corrida de cron.
 
-**Qué falta.** Una de tres, en orden de preferencia: sacarla del despliegue de producción; ponerle un secreto propio distinto de `CRON_SECRET`; o exigir una confirmación explícita en el cuerpo (`{"confirmar":"borrar-datos-demo"}`) además del secreto. También conviene revisar que `limpiarDemo` no pueda tocar nada que no sea del dominio `@demo.invicta.com.ar`.
+**Qué se hizo.** Se eligió la primera de las tres opciones que estaban planteadas —sacarla del despliegue— porque el camino desde el navegador dejó de hacer falta. Se borraron `src/app/api/admin/sembrar-demo/route.ts` y la pantalla `/admin/sembrar-demo` que la usaba. Los scripts siguen enteros: `npm run demo:limpiar`, `demo:sembrar`, `demo:validar` y `demo:reset` corren desde una terminal con su `.env`.
+
+**Lo que queda anotado para cuando se toque de nuevo**: conviene revisar que `limpiarDemo` no pueda borrar nada que no sea del dominio `@demo.invicta.com.ar`. Hoy corre sólo desde una terminal, con alguien mirando, así que el riesgo bajó mucho — pero el resguardo sigue sin estar.
 
 ---
 
@@ -344,6 +348,6 @@ Si hubiera que elegir, esto es lo que no puede quedar como está:
 2. **Los puntos 5 y 6** — confirmar/disputar y no disputado. Sin esto el ciclo de un partido no cierra.
 3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.
-5. **El punto 8** — sacar o blindar el endpoint que borra datos.
+5. ~~**El punto 8** — sacar o blindar el endpoint que borra datos.~~ **Hecho el 30/09**: se quitó.
 
 El resto aguanta una primera camada de usuarios.
