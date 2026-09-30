@@ -104,13 +104,15 @@ describe('PanelPublicarInicial — sin verificar (D-51)', () => {
     fireEvent.click(getByText('Publicar'));
 
     await waitFor(() => expect(getByText(/Tu torneo está publicado/)).toBeTruthy());
-    expect(getByText(/no va a aparecer en las búsquedas|aparezca en las búsquedas/)).toBeTruthy();
+    expect(getByText(/no aparece en las búsquedas/)).toBeTruthy();
     expect(getByRole('button', { name: 'Verificar ahora' })).toBeTruthy();
     expect(push).not.toHaveBeenCalled();
   });
 
-  /** Quien no es Titular no puede pedirla: se le dice, no se le ofrece. */
-  it('a quien no es Titular no le ofrece el botón, le dice quién la pide', async () => {
+  /** Quien no es Titular no puede pedirla: no se le ofrece, y tampoco
+   * se le explica el permiso. La noticia —el torneo está publicado, no
+   * aparece en las búsquedas— sí le sirve y se queda. */
+  it('a quien no es Titular le da la noticia, sin botón ni explicación del permiso', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -119,14 +121,15 @@ describe('PanelPublicarInicial — sin verificar (D-51)', () => {
       }),
     );
 
-    const { getByText, queryByRole } = render(
+    const { getByText, queryByRole, queryByText } = render(
       <PanelPublicarInicial torneoId="t-1" organizacionId="o-1" soyTitular={false} />,
     );
     fireEvent.click(getByText('Publicar'));
 
     await waitFor(() => expect(getByText(/Tu torneo está publicado/)).toBeTruthy());
+    expect(getByText(/no aparece en las búsquedas/)).toBeTruthy();
     expect(queryByRole('button', { name: 'Verificar ahora' })).toBeNull();
-    expect(getByText(/La verificación la pide quien creó la organización/)).toBeTruthy();
+    expect(queryByText(/La verificación la pide/)).toBeNull();
   });
 
   /** El límite de un torneo publicado se levanta verificando: la salida va ahí. */

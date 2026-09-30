@@ -48,11 +48,6 @@ export default async function PaginaRanking({ params }: { params: Promise<{ id: 
               {obtenerEtiqueta('torneo.categoriaGenero', ranking.categoriaGenero).etiqueta}
             </span>
           </div>
-          <p className={styles.texto}>
-            Acotado a esta zona, modalidad y categoría — leídas del equipo, no de los torneos que
-            jugó.
-          </p>
-
           {ranking.equipos.length === 0 ? (
             <EstadoVacio mensaje="Todavía no hay equipos con score en esta zona, modalidad y categoría." />
           ) : (

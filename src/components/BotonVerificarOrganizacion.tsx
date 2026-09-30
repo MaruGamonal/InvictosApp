@@ -7,9 +7,9 @@ import styles from './BotonVerificarOrganizacion.module.css';
 export interface BotonVerificarOrganizacionProps {
   organizacionId: string;
   /**
-   * Solo el Titular puede pedir la verificación (`10`, 4.2). Un
-   * Administrador ve qué falta y a quién pedírselo, no un botón que le
-   * va a responder que no.
+   * Solo el Titular puede pedir la verificación (`10`, 4.2). Para el
+   * resto el componente no renderiza nada: el estado de la organización
+   * —que sí les sirve— lo muestra la pantalla; la gestión, no.
    */
   soyTitular: boolean;
   /** «Verificar ahora» al publicar; «Verificar organización» en el panel. */
@@ -41,13 +41,7 @@ export function BotonVerificarOrganizacion({
   const avisos = useAvisos();
   const [enviando, setEnviando] = useState(false);
 
-  if (!soyTitular) {
-    return (
-      <p className={styles.soloTitular}>
-        La verificación la pide quien creó la organización, desde su cuenta.
-      </p>
-    );
-  }
+  if (!soyTitular) return null;
 
   async function pedirVerificacion() {
     setEnviando(true);

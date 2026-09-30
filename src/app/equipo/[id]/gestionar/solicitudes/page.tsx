@@ -40,21 +40,12 @@ export default async function PaginaSolicitudesIngreso({
         ← Volver
       </Link>
       <h1 className={`fuente-display ${styles.titulo}`}>Solicitudes de ingreso</h1>
-      <p className={styles.texto}>
-        Piden sumarse ellos. Distinto de las invitaciones que mandaste vos, y no aparecen en el
-        plantel hasta que las resolvés.
-      </p>
 
       {gestion.solicitudesPendientes.length === 0 ? (
         <EstadoVacio mensaje="No hay solicitudes de ingreso pendientes." />
       ) : (
         <PanelSolicitudesIngreso equipoId={id} solicitudes={gestion.solicitudesPendientes} />
       )}
-
-      <p className={styles.textoAyuda}>
-        Tras un rechazo, la persona puede volver a solicitar: la fila vuelve a aparecer acá como
-        pendiente.
-      </p>
     </div>
   );
 }

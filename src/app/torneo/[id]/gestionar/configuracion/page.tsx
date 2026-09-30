@@ -123,19 +123,21 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
         {/* D-51: la verificación no bloquea trabajar, condiciona aparecer
             en el descubrimiento. Eso es un estado del torneo que dura
             hasta que alguien lo resuelve, así que vive acá —con la
-            salida al lado— y no en un aviso que se va solo. */}
+            salida al lado— y no en un aviso que se va solo.
+
+            Estado y bloqueo van separados: arriba, qué está pasando;
+            abajo, y sólo cuando de verdad frena la publicación, qué hay
+            que hacer para destrabarla. Antes eran dos párrafos largos
+            que mezclaban las dos cosas. */}
         {!publicacion.organizacionVerificada && (
           <div className={styles.bloqueVisibilidad}>
-            <h3 className={stylesCompartidos.tituloSeccion}>Visibilidad en el descubrimiento</h3>
-            <p className={styles.textoVisibilidad}>
-              {gestion.estado === 'draft'
-                ? 'Tu organización no está verificada: el torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'
-                : 'Tu organización no está verificada: este torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'}
-            </p>
+            <h3 className={styles.tituloVisibilidad}>
+              <span aria-hidden>⚠</span> Organización pendiente de verificación
+            </h3>
+            <p className={styles.textoVisibilidad}>Este torneo no aparece en las búsquedas.</p>
             {publicacion.limitePublicadosAlcanzado && gestion.estado === 'draft' && (
               <p className={styles.textoVisibilidad}>
-                Además, sin verificar podés tener un solo torneo publicado a la vez — y ya tenés
-                uno, así que este no va a poder publicarse hasta que la verifiques.
+                Verificá tu organización para publicar este torneo.
               </p>
             )}
             <BotonVerificarOrganizacion

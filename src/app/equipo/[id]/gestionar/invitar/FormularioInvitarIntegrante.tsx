@@ -113,11 +113,6 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
       <button type="submit" className={styles.boton} disabled={enviando || !formularioValido}>
         {enviando ? 'Invitando…' : 'Enviar invitación'}
       </button>
-
-      <p className={styles.ayuda}>
-        Invitar dos veces a la misma persona no duplica: reenvía el acceso. Las invitaciones no
-        vencen.
-      </p>
     </form>
   );
 }

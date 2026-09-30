@@ -69,16 +69,18 @@ describe('BotonVerificarOrganizacion', () => {
 
   /**
    * Solo el Titular puede pedirla (`10`, 4.2). Mostrarle el botón a un
-   * Administrador sería ofrecerle algo que el servidor le va a negar.
+   * Administrador sería ofrecerle algo que el servidor le va a negar —y
+   * explicarle el permiso, contarle una regla que no está intentando
+   * romper. No renderiza nada: el estado de la organización lo muestra
+   * la pantalla que lo incluye.
    */
-  it('a un Administrador no le ofrece el botón: le dice quién la pide', () => {
+  it('a un Administrador no le muestra nada', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    const { queryByRole, getByText } = montar({ soyTitular: false });
+    const { container } = montar({ soyTitular: false });
 
-    expect(queryByRole('button')).toBeNull();
-    expect(getByText(/La verificación la pide quien creó la organización/)).toBeTruthy();
+    expect(container.textContent).toBe('');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

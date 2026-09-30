@@ -127,7 +127,7 @@ export function PanelAdministradores({
         </div>
       ))}
 
-      {esTitular ? (
+      {esTitular && (
         <>
           <form className={styles.formularioChico} onSubmit={invitar}>
             <input
@@ -157,10 +157,6 @@ export function PanelAdministradores({
             que no puede sumar ni sacar administradores.
           </p>
         </>
-      ) : (
-        <p className={styles.avisoChico}>
-          Solo el Titular puede sumar o sacar administradores de la organización.
-        </p>
       )}
     </div>
   );

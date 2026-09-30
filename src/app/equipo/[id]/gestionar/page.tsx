@@ -108,11 +108,6 @@ export default async function PaginaGestionarEquipo({
           </Link>
         )}
 
-        <p className={styles.avisoInfo}>
-          El Capitán no puede irse sin designar reemplazo. Cualquier otro se da de baja al instante
-          — nadie tiene que confirmarlo.
-        </p>
-
         {gestion && (
           <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />
         )}

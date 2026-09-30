@@ -80,9 +80,8 @@ export function PanelPublicarInicial({ torneoId, organizacionId, soyTitular }: P
     return (
       <div className={pasoStyles.resultado}>
         <p className={pasoStyles.avisoInfo}>
-          <strong>Tu torneo está publicado.</strong> Se puede compartir por link y funciona
-          completo: los equipos se inscriben, el fixture y la tabla andan igual. Lo único que falta
-          es que aparezca en las búsquedas, y para eso hace falta verificar tu organización.
+          <strong>Tu torneo está publicado.</strong> Todavía no aparece en las búsquedas: para eso,
+          verificá tu organización.
         </p>
         <div className={pasoStyles.filaAcciones}>
           <BotonVerificarOrganizacion organizacionId={organizacionId} soyTitular={soyTitular} />

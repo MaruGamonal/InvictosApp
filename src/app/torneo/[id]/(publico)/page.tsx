@@ -280,11 +280,6 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
 
       <EnlaceGestionarTorneo torneoId={id} />
 
-      <p className={styles.aviso}>
-        Toda esta ficha es visible sin cuenta. El registro se pide recién al tocar
-        &quot;Seguir&quot; o &quot;Inscribir a mi equipo&quot;.
-      </p>
-
       <NavInferior activo="torneos" />
     </div>
   );

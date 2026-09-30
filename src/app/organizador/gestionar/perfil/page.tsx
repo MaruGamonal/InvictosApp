@@ -52,21 +52,17 @@ export default async function PaginaPerfilPublicoOrganizador() {
 
       {perfil.descripcion && <p className={styles.descripcion}>{perfil.descripcion}</p>}
 
-      {/* La explicación larga de la verificación vive acá, en el detalle
-          de la organización, y no en la lista del panel: ahí ocupaba
-          espacio en cada tarjeta para decir siempre lo mismo. */}
+      {/* Estado, consecuencia y salida, en ese orden y una línea cada
+          uno. Lo que no está: que la verificación no pide documentación
+          —se resuelve solo al tocar el botón— y el límite de un torneo
+          publicado, que se avisa donde frena, al publicar. */}
       {perfil.nivelVerificacion === 'unverified' && (
         <section className={styles.verificacion}>
           <h2 className={styles.verificacionTitulo}>
             <span aria-hidden>⚠</span> Organización pendiente de verificación
           </h2>
           <p className={styles.verificacionTexto}>
-            Verificar es confirmar la dirección de correo con la que entrás: no pedimos
-            documentación ni validamos nada legal. Te mandamos un enlace y con tocarlo alcanza.
-          </p>
-          <p className={styles.verificacionTexto}>
-            Mientras no lo hagas, tus torneos funcionan completos y se comparten por link, pero no
-            aparecen en las búsquedas, y podés tener uno solo publicado a la vez.
+            Tus torneos no aparecen en las búsquedas. Te mandamos un enlace por correo.
           </p>
           <BotonVerificarOrganizacion
             organizacionId={perfil.id}

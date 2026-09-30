@@ -64,18 +64,18 @@ export function ListaEquipoDeTrabajo({
       {/*
         Reportado en vivo — "no tengo cómo invitar colaboradores al
         equipo de trabajo". Era un enlace de 13px en un rincón de la
-        cabecera, y para quien no es Titular directamente no estaba, sin
-        decir por qué: esconder algo sin explicarlo se siente igual que
-        si no existiera.
+        cabecera: por eso hoy es un botón y no un enlace.
+
+        Para quien no es Titular no hay botón y tampoco hay explicación:
+        no está intentando invitar a nadie, está mirando la lista. El
+        permiso se explica cuando alguien intenta la acción —en
+        `/organizador/gestionar/invitar`, si llega por URL—, no mientras
+        no la intenta.
       */}
-      {esTitular ? (
+      {esTitular && (
         <Link href="/organizador/gestionar/invitar" className={styles.botonInvitar}>
           + Invitar administrador
         </Link>
-      ) : (
-        <p className={styles.ayudaSinPermiso}>
-          Solo el Titular de la organización puede sumar Administradores. Pedíselo a quien la creó.
-        </p>
       )}
 
       {error && <p className={styles.error}>{error}</p>}
@@ -106,12 +106,6 @@ export function ListaEquipoDeTrabajo({
           </div>
         ))}
       </div>
-
-      {!esTitular && (
-        <p className={styles.aviso}>
-          Solo el Titular puede sumar o sacar administradores de la organización.
-        </p>
-      )}
     </div>
   );
 }

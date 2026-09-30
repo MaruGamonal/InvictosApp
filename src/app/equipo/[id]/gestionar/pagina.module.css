@@ -59,16 +59,6 @@
   text-decoration: none;
 }
 
-.avisoInfo {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-texto-secundario);
-  background: var(--fondo-sutil);
-  border-radius: var(--radio-tarjeta);
-  padding: 12px 14px;
-}
-
 .enlacePeligro {
   align-self: center;
   background: none;

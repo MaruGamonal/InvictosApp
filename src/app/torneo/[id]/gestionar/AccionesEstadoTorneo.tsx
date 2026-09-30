@@ -90,19 +90,11 @@ export function AccionesEstadoTorneo({
   return (
     <div className={styles.formularioChico}>
       {estado === 'draft' && (
-        <>
-          {!tieneFormatoDefinido && (
-            <p className={styles.avisoChico}>
-              Podés publicar sin definir el formato todavía — solo hace falta antes de generar el
-              fixture.
-            </p>
-          )}
-          <div className={styles.filaAcciones}>
-            <button type="button" onClick={publicar} disabled={enviando !== null}>
-              {enviando === 'publicar' ? 'Publicando…' : 'Publicar torneo'}
-            </button>
-          </div>
-        </>
+        <div className={styles.filaAcciones}>
+          <button type="button" onClick={publicar} disabled={enviando !== null}>
+            {enviando === 'publicar' ? 'Publicando…' : 'Publicar torneo'}
+          </button>
+        </div>
       )}
 
       {estado === 'registration_open' && (
@@ -127,11 +119,7 @@ export function AccionesEstadoTorneo({
 
       {estado === 'registration_closed' && (
         <>
-          {!tienePartidos && (
-            <p className={styles.avisoChico}>
-              Para iniciar el torneo primero hace falta confirmar el fixture, más abajo.
-            </p>
-          )}
+          {!tienePartidos && <p className={styles.avisoChico}>Falta confirmar el fixture.</p>}
           <div className={styles.filaAcciones}>
             <button
               type="button"

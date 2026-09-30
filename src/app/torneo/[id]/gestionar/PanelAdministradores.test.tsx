@@ -46,19 +46,24 @@ describe('PanelAdministradores', () => {
     expect(queryByText('María Titular')).toBeTruthy();
   });
 
-  it('un Administrador no ve el formulario ni puede quitar a nadie', () => {
-    const { queryByText, getByText } = render(
+  /**
+   * Ve la lista y nada más: ni el formulario, ni los botones de quitar,
+   * ni un párrafo explicándole el permiso. No está intentando invitar a
+   * nadie —eso se explica en `/organizador/gestionar/invitar`, si llega
+   * por URL—, está mirando quiénes son.
+   */
+  it('un Administrador ve la lista, sin formulario ni explicación del permiso', () => {
+    const { queryByText } = render(
       <PanelAdministradores
         organizacionId="org-1"
         administradores={[TITULAR, ADMIN]}
         esTitular={false}
       />,
     );
+    expect(queryByText('María Titular')).toBeTruthy();
     expect(queryByText('Invitar administrador')).toBeNull();
     expect(queryByText('Quitar')).toBeNull();
-    expect(
-      getByText('Solo el Titular puede sumar o sacar administradores de la organización.'),
-    ).toBeTruthy();
+    expect(queryByText(/Solo el Titular/)).toBeNull();
   });
 
   it('el Titular invita a alguien nuevo: manda el email a la API', async () => {

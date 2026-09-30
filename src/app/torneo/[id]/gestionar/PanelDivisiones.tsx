@@ -84,8 +84,7 @@ export function PanelDivisiones({
         </p>
       ) : (
         <p className={styles.avisoChico}>
-          Todavía es un torneo suelto. Agregar una división lo agrupa con la nueva bajo un mismo
-          evento — cada una queda como un torneo completo e independiente.
+          Este torneo no forma parte de un certamen. Agregar una división lo agrupa con la nueva.
         </p>
       )}
 

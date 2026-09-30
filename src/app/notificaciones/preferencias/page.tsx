@@ -38,8 +38,7 @@ export default async function PaginaPreferencias() {
       </Link>
       <h1 className={`fuente-display ${styles.titulo}`}>Preferencias</h1>
       <p className={styles.subtitulo}>
-        Los avisos llegan dentro de la aplicación. Por correo sólo mandamos lo de tu cuenta:
-        confirmarla, recuperar la contraseña y verificar una organización.
+        Los avisos llegan dentro de la aplicación. Por correo sólo mandamos lo de tu cuenta.
       </p>
       <PanelPreferencias preferenciasIniciales={preferencias} />
     </div>

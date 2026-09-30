@@ -199,7 +199,7 @@ export function FormularioEditarTorneo({
           </div>
         </div>
       </div>
-      <span className={styles.avisoSinNotificar}>
+      <span className={styles.ayudaCampo}>
         Imagen opcional del torneo (JPG, PNG o WEBP). Sin cargar, se usa el logo de la organización.
       </span>
 
@@ -214,16 +214,16 @@ export function FormularioEditarTorneo({
       </label>
 
       <label>
-        Fecha de inicio
+        <span className={styles.filaEtiqueta}>
+          Fecha de inicio
+          <span className={styles.marcaAvisa}>avisa a inscriptos y seguidores</span>
+        </span>
         <input
           type="date"
           value={fechaInicioEstimada}
           onChange={(evento) => setFechaInicioEstimada(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoNotifica}>
-        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
-      </span>
 
       <label>
         Fecha de fin
@@ -233,13 +233,16 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setFechaFinEstimada(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoSinNotificar}>
-        Este cambio no notifica. Con las dos fechas cargadas, un torneo de hasta 3 días se trata
-        como relámpago: los plazos de confirmación se cierran cuando termina, no a las 72 horas.
+      <span className={styles.ayudaCampo}>
+        Con fecha de fin, un torneo de hasta 3 días se maneja como relámpago: los plazos de
+        confirmación se cierran cuando termina.
       </span>
 
       <label>
-        Dirección
+        <span className={styles.filaEtiqueta}>
+          Dirección
+          <span className={styles.marcaAvisa}>avisa a inscriptos y seguidores</span>
+        </span>
         <BuscadorDireccionTorneo
           id="direccionTorneoEditar"
           value={direccion}
@@ -253,9 +256,6 @@ export function FormularioEditarTorneo({
           }}
         />
       </label>
-      <span className={styles.avisoNotifica}>
-        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
-      </span>
 
       <label>
         Descripción
@@ -265,11 +265,6 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setDescripcion(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoSinNotificar}>
-        Este cambio no notifica: no es de los cinco relevantes (fecha, sede, formato, cupo,
-        reglamento).
-      </span>
-
       <div className={styles.filaCostos}>
         <label>
           Inscripción
@@ -294,10 +289,11 @@ export function FormularioEditarTorneo({
           />
         </label>
       </div>
-      <span className={styles.avisoSinNotificar}>Esto no le avisa a nadie.</span>
-
       <label>
-        Cupo de equipos
+        <span className={styles.filaEtiqueta}>
+          Cupo de equipos
+          <span className={styles.marcaAvisa}>avisa a inscriptos y seguidores</span>
+        </span>
         <input
           type="number"
           required
@@ -306,9 +302,6 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setCupoEquipos(evento.target.value)}
         />
       </label>
-      <span className={styles.avisoNotifica}>
-        Esto les avisa a los equipos inscriptos y a quienes siguen el torneo.
-      </span>
 
       <button type="submit" disabled={enviando}>
         {enviando ? 'Guardando…' : 'Guardar cambios'}

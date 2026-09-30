@@ -57,10 +57,7 @@ export default async function PaginaListaDeBuenaFe({
         cerrada={lista.cerrada}
       />
 
-      <p className={styles.textoAyuda}>
-        El DT no ocupa cupo de jugadores. La lista sigue abierta durante todo el torneo salvo que el
-        organizador la cierre.
-      </p>
+      <p className={styles.textoAyuda}>El DT no ocupa cupo de jugadores.</p>
     </div>
   );
 }

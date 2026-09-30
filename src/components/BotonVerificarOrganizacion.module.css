@@ -34,10 +34,3 @@
   outline: 2px solid var(--acento);
   outline-offset: 2px;
 }
-
-/* Lo que ve un Administrador que no es el Titular: a quién pedírselo. */
-.soloTitular {
-  margin: 0;
-  font: 400 13px/1.4 var(--fuente-texto);
-  color: var(--color-texto-secundario);
-}

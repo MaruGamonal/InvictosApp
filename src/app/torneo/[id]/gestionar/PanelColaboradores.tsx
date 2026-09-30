@@ -95,7 +95,16 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
       ) : (
         colaboradores.map((colaborador) => (
           <div key={colaborador.usuarioId} className={styles.filaIntegranteCabecera}>
-            <span className={styles.nombreIntegrante}>{colaborador.nombreVisible}</span>
+            <div className={styles.filaIntegranteInfo}>
+              <span className={styles.nombreIntegrante}>{colaborador.nombreVisible}</span>
+              {/* El rol va en la fila y no en un párrafo al pie: el
+                  alcance —este torneo— ya lo dice el título del
+                  acordeón, y qué puede hacer es una etiqueta, no una
+                  explicación. */}
+              <div className={styles.filaBadgesRol}>
+                <span className={styles.rolIntegrante}>Colaborador</span>
+              </div>
+            </div>
             <button
               type="button"
               className={styles.botonPeligroChico}
@@ -131,12 +140,6 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
           {enviando ? 'Asignando…' : 'Asignar colaborador'}
         </button>
       </form>
-
-      <p className={styles.avisoChico}>
-        Va a poder cargar resultados, programar partidos y marcar partidos no disputados en este
-        torneo — nada más. Es una asignación por torneo: quitarlo de acá no lo saca de otros torneos
-        donde también colabore.
-      </p>
     </div>
   );
 }
