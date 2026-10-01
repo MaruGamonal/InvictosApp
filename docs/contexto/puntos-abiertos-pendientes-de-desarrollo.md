@@ -344,15 +344,82 @@ Esto es lo que hace que el plan de pruebas manual del documento hermano sea larg
 
 ## 18. La plantilla de mail de Supabase
 
-**Paso manual, fuera del repositorio, bloqueante.**
+**Paso manual, fuera del repositorio, bloqueante.** Son dos cosas en el
+panel de Supabase, no una: la plantilla **y** la lista de URLs
+permitidas. Con la plantilla sola, la verificación de organización sigue
+rota.
 
-La plantilla de Magic Link en Supabase tiene que usar:
+### 18.a — La plantilla de Magic Link
+
+En *Authentication → Emails → Magic Link*, el enlace tiene que apuntar a:
 
 ```
 {{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink
 ```
 
-Si no, el enlace de confirmación de cuenta y el de verificación de organización no llegan al destino correcto. Este fue el tercer problema de la misma familia: un flujo que depende de algo que viaja fuera de la base de datos. La verificación ya quedó anclada en una columna para no depender de la plantilla, pero el enlace en sí sigue dependiendo.
+y **no** al `{{ .ConfirmationURL }}` que viene por defecto.
+
+Afecta a los dos únicos flujos que mandan Magic Link: confirmar la
+cuenta (`lib/emailConfirmacion.ts`) y verificar una organización
+(`services/organizadores/solicitarVerificacionBasica.ts`). Los dos usan
+`signInWithOtp` con el **cliente admin**.
+
+Por qué, dos razones independientes:
+
+1. **El enlace se gasta antes de que lo toquen.** `{{ .ConfirmationURL }}`
+   apunta a `/auth/v1/verify` de Supabase, que es un `GET` que consume el
+   token y recién después redirige. Los escáneres de correo abren los
+   enlaces para revisarlos, así que el token se quema antes de que la
+   persona haga clic y el enlace llega vencido. Con `{{ .TokenHash }}` el
+   enlace va directo a nuestra pantalla, que no canjea nada: muestra un
+   botón. Los escáneres siguen enlaces (`GET`) pero no completan
+   formularios (`POST`), así que abrirla no consume el token.
+
+2. **La cookie que el canje por código necesita no existe.** El flujo de
+   `{{ .ConfirmationURL }}` termina en `exchangeCodeForSession`, que
+   busca en el navegador un verificador PKCE guardado al pedir el enlace.
+   Estos dos enlaces los emite el **cliente admin**, que no escribe
+   cookies: esa cookie nunca existió. Por eso el canje es
+   `verifyOtp({ token_hash })` en `api/acceso/confirmar/route.ts`.
+
+### 18.b — La lista de URLs permitidas
+
+En *Authentication → URL Configuration → Redirect URLs*, tienen que estar:
+
+```
+https://www.invicta.com.ar/acceso/confirmar
+https://www.invicta.com.ar/acceso/confirmar/organizacion/*
+```
+
+Supabase consulta esa lista antes de redirigir y, **si la URL no está,
+usa el Site URL en su lugar** — sin avisar. Con la plantilla puesta pero
+la lista incompleta, `{{ .RedirectTo }}` se cae al Site URL y el enlace
+de verificación pierde el `organizacion/<id>` del final. No da error:
+simplemente la pantalla no puede nombrar la organización, que es
+exactamente el caso que ya contempla el comentario de
+`acceso/confirmar/[[...intencion]]/page.tsx`. La verificación en sí se
+resuelve igual del lado del servidor
+(`confirmarVerificacionesPendientes`), porque quedó anclada en una
+columna justamente para no depender de esto.
+
+El `*` alcanza para el id: los separadores que `*` no cruza son `.` y
+`/`, y un UUID no tiene ninguno de los dos.
+
+### Lo que no hay que tocar
+
+**Reset Password** y **Invite user** se quedan con su plantilla por
+defecto. Esos dos flujos sí emiten el enlace desde el cliente de
+servidor, que escribe la cookie, así que el canje por código funciona y
+vuelven por `/auth/callback`.
+
+> Pendiente aparte: `/restablecer-password/confirmar` y su
+> `api/restablecer-password/confirmar` implementan el patrón
+> `token_hash` para recuperar la contraseña, pero
+> `solicitarRecuperacionPassword.ts:49` manda a
+> `/auth/callback/restablecer-password`. Mientras la plantilla de Reset
+> Password siga en su forma por defecto, esa pantalla y esa ruta no se
+> alcanzan nunca. Hay que decidir cuál de los dos caminos queda y borrar
+> el otro.
 
 ---
 
