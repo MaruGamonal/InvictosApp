@@ -199,10 +199,6 @@ export function FormularioEditarTorneo({
           </div>
         </div>
       </div>
-      <span className={styles.ayudaCampo}>
-        Imagen opcional del torneo (JPG, PNG o WEBP). Sin cargar, se usa el logo de la organización.
-      </span>
-
       <label>
         Nombre del torneo
         <input
@@ -233,11 +229,6 @@ export function FormularioEditarTorneo({
           onChange={(evento) => setFechaFinEstimada(evento.target.value)}
         />
       </label>
-      <span className={styles.ayudaCampo}>
-        Con fecha de fin, un torneo de hasta 3 días se maneja como relámpago: los plazos de
-        confirmación se cierran cuando termina.
-      </span>
-
       <label>
         <span className={styles.filaEtiqueta}>
           Dirección

@@ -91,14 +91,11 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
     <>
       {error && <p className={styles.errorChico}>{error}</p>}
 
-      <span className={styles.tituloSeccion}>Accionables</span>
+      <span className={styles.tituloSeccion}>Accionables · siempre activas</span>
       <div className={styles.lista}>
         {accionables.map((pref) => (
           <div key={pref.categoria} className={styles.fila}>
-            <div className={styles.filaTexto}>
-              <span className={styles.filaTitulo}>{ETIQUETAS[pref.categoria]}</span>
-              <span className={styles.filaDetalle}>Siempre activo — no se puede apagar.</span>
-            </div>
+            <span className={styles.filaTitulo}>{ETIQUETAS[pref.categoria]}</span>
             <div className={styles.canales}>
               <button
                 type="button"
@@ -134,10 +131,6 @@ export function PanelPreferencias({ preferenciasIniciales }: Props) {
           </div>
         ))}
       </div>
-
-      <p className={styles.avisoInfo}>
-        Si apagás algo, el hecho no se pierde: sigue en tu actividad. Solo deja de interrumpirte.
-      </p>
     </>
   );
 }

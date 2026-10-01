@@ -505,3 +505,88 @@ organización. La definición del rol debería salir de un solo lugar.
 síntoma: invitar administrador existe dos veces, con su propio estado,
 su propio manejo de «persona nueva, hace falta el nombre» y su propio
 copy. Cualquier cambio hay que hacerlo dos veces.
+
+---
+
+## Segunda pasada, sobre capturas reales
+
+Revisando las pantallas en el teléfono salieron seis textos más que la
+primera pasada había conservado y no hacían falta.
+
+### UX #020 — Preferencias: el encabezado y el pie
+
+**PANTALLA:** Notificaciones → Preferencias.
+
+**TEXTO ACTUAL:** «Los avisos llegan dentro de la aplicación. Por correo
+sólo mandamos lo de tu cuenta.» (encabezado) y «Si apagás algo, el hecho
+no se pierde: sigue en tu actividad. Solo deja de interrumpirte.» (pie).
+
+**PROBLEMA:** La pantalla es una lista de seis interruptores. Tenía un
+párrafo arriba y otro abajo, los dos sobre cosas que no se deciden acá:
+la política de correo y qué pasa con el historial.
+
+**SOLUCIÓN:** Los dos se van. La lista queda sola.
+
+### UX #021 — «Siempre activo — no se puede apagar.», tres veces
+
+**PANTALLA:** Notificaciones → Preferencias, sección Accionables.
+
+**PROBLEMA:** La misma oración debajo de cada una de las tres filas
+accionables. Es una propiedad del grupo, no de cada fila.
+
+**¿REQUIERE CAMBIO DE UX?** Sí: pasarla al título de la sección.
+
+**SOLUCIÓN:** El encabezado pasa a «ACCIONABLES · SIEMPRE ACTIVAS» y las
+filas quedan con el nombre y la campana deshabilitada. Una marca en vez
+de tres oraciones. El `aria-label` de cada campana ya decía «siempre
+activo dentro de la app», así que el lector de pantalla no pierde nada.
+
+### UX #022 — Editar torneo: la ayuda de la imagen y la del relámpago
+
+**PANTALLA:** Gestionar torneo → Configuración → Datos del torneo.
+
+**TEXTO ACTUAL:** «Imagen opcional del torneo (JPG, PNG o WEBP). Sin
+cargar, se usa el logo de la organización.» y «Con fecha de fin, un
+torneo de hasta 3 días se maneja como relámpago: los plazos de
+confirmación se cierran cuando termina.»
+
+**PROBLEMA:** La primera describe un comportamiento que ya se está
+viendo: el avatar con la inicial de la organización está ahí, arriba del
+texto que lo explica. La segunda es una regla de plazos en un campo de
+fecha.
+
+**SOLUCIÓN:** Las dos se van.
+
+### UX #023 — El bloque de visibilidad, fuera de Configuración
+
+**PANTALLA:** Gestionar torneo → Configuración.
+
+**PROBLEMA:** Para quien no es Titular quedaba una caja con un título,
+una consecuencia y **ningún botón** —porque el componente de verificar
+ya no renderiza nada sin permiso—. Una caja que informa de un problema
+que quien la lee no puede resolver.
+
+**SOLUCIÓN:** El bloque se va de esta pantalla. La verificación se sigue
+ofreciendo en los tres lugares donde hay algo que hacer: el panel de la
+organización, su perfil y el último paso de publicar, que es el momento
+en que la noticia importa (D-51). Al sacarlo se cae también la consulta
+`obtenerResumenParaPublicar`, que esta pantalla hacía en cada carga sólo
+para pintar esa caja.
+
+### UX #024 — Cancelar es definitivo, dicho donde se cancela
+
+**PANTALLA:** Gestionar torneo → Configuración → Interrumpir el torneo.
+
+**TEXTO ACTUAL:** «Cancelar es definitivo — a diferencia de "Suspender",
+más arriba, que se puede retomar.»
+
+**PROBLEMA:** Estaba fijo, encima del botón, aunque cancelar ya tiene un
+segundo paso de confirmación con motivo obligatorio. La advertencia vivía
+en el lugar donde nadie está cancelando todavía.
+
+**¿REQUIERE CAMBIO DE UX?** No: el paso de confirmación ya existe.
+
+**SOLUCIÓN:** Se va de la pantalla y «Cancelar es definitivo.» encabeza
+el aviso que ya estaba en el paso de confirmación, que pasa a decir:
+«Cancelar es definitivo. Los partidos ya jugados cuentan igual para el
+score de los equipos.» Más corto que el anterior y con las dos cosas.
