@@ -19,23 +19,34 @@ import styles from './pagina.module.css';
  */
 type Estado = { paso: 'formulario' } | { paso: 'enviando' } | { paso: 'error'; mensaje: string };
 
-interface SeguirPendiente {
-  tipoSeguido: 'tournament' | 'team';
-  entidadId: string;
-}
+/**
+ * Qué estaba haciendo la persona cuando le pedimos la cuenta (D-04b).
+ *
+ * `seguir` se puede ejecutar sola apenas hay sesión. `inscribir` no: el
+ * redirect pasa antes de elegir equipo, y quien se acaba de registrar no
+ * tiene ninguno. De esa sólo se retoma el lugar.
+ */
+export type AccionPendienteDeLaUrl =
+  | { tipo: 'seguir'; tipoSeguido: 'tournament' | 'team'; entidadId: string }
+  | { tipo: 'inscribir'; torneoId: string };
 
 interface Props {
   modoInicial: 'ingresar' | 'crear';
-  seguirPendiente?: SeguirPendiente | null;
+  accionPendiente?: AccionPendienteDeLaUrl | null;
 }
 
-function conSeguirPendiente(href: string, seguirPendiente?: SeguirPendiente | null): string {
-  if (!seguirPendiente) return href;
+/** Mantiene la acción pendiente al alternar entre «Ingresar» y «Crear cuenta». */
+function conAccionPendiente(href: string, accion?: AccionPendienteDeLaUrl | null): string {
+  if (!accion) return href;
   const separador = href.includes('?') ? '&' : '?';
-  return `${href}${separador}accion=seguir&tipoSeguido=${seguirPendiente.tipoSeguido}&entidadId=${seguirPendiente.entidadId}`;
+  const parametros =
+    accion.tipo === 'seguir'
+      ? `accion=seguir&tipoSeguido=${accion.tipoSeguido}&entidadId=${accion.entidadId}`
+      : `accion=inscribir&torneoId=${accion.torneoId}`;
+  return `${href}${separador}${parametros}`;
 }
 
-export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
+export function FormularioIngreso({ modoInicial, accionPendiente }: Props) {
   const [estado, setEstado] = useState<Estado>({ paso: 'formulario' });
   const esCrear = modoInicial === 'crear';
   const [identificadorAcceso, setIdentificadorAcceso] = useState('');
@@ -66,9 +77,18 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
                 identificadorAcceso,
                 nombreVisible,
                 password,
-                accionPendiente: seguirPendiente
-                  ? { tipo: 'seguir', datos: seguirPendiente }
-                  : undefined,
+                // Solo `seguir` tiene ejecutor: es la única que se
+                // puede completar sin preguntarle nada más a la persona.
+                accionPendiente:
+                  accionPendiente?.tipo === 'seguir'
+                    ? {
+                        tipo: 'seguir',
+                        datos: {
+                          tipoSeguido: accionPendiente.tipoSeguido,
+                          entidadId: accionPendiente.entidadId,
+                        },
+                      }
+                    : undefined,
               }
             : { identificadorAcceso, password, recordarme },
         ),
@@ -87,20 +107,32 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
         return;
       }
 
-      if (seguirPendiente) {
+      if (accionPendiente?.tipo === 'seguir') {
+        const seguir = {
+          tipoSeguido: accionPendiente.tipoSeguido,
+          entidadId: accionPendiente.entidadId,
+        };
         // Crear cuenta ya la deja siguiendo (accionPendiente, arriba); acá
         // se repite para ingresar (sesión ya existente, sin ese enganche) —
         // es idempotente, así que no hace nada de más en el otro caso.
         await fetch('/api/seguir', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(seguirPendiente),
+          body: JSON.stringify(seguir),
         }).catch(() => {});
         window.location.assign(
-          seguirPendiente.tipoSeguido === 'tournament'
-            ? `/torneo/${seguirPendiente.entidadId}`
-            : `/equipo/${seguirPendiente.entidadId}`,
+          seguir.tipoSeguido === 'tournament'
+            ? `/torneo/${seguir.entidadId}`
+            : `/equipo/${seguir.entidadId}`,
         );
+        return;
+      }
+
+      if (accionPendiente?.tipo === 'inscribir') {
+        // No se inscribe nada acá: todavía no hay equipo elegido, y quien
+        // se acaba de registrar no tiene ninguno. Se vuelve al torneo con
+        // `?inscribir=1`, que reabre el panel donde había quedado.
+        window.location.assign(`/torneo/${accionPendiente.torneoId}?inscribir=1`);
         return;
       }
 
@@ -200,12 +232,12 @@ export function FormularioIngreso({ modoInicial, seguirPendiente }: Props) {
         {esCrear ? (
           <>
             ¿Ya tenés cuenta?{' '}
-            <Link href={conSeguirPendiente('/ingresar', seguirPendiente)}>Ingresá</Link>
+            <Link href={conAccionPendiente('/ingresar', accionPendiente)}>Ingresá</Link>
           </>
         ) : (
           <>
             ¿No tenés cuenta?{' '}
-            <Link href={conSeguirPendiente('/ingresar?modo=crear', seguirPendiente)}>
+            <Link href={conAccionPendiente('/ingresar?modo=crear', accionPendiente)}>
               Creala en un momento
             </Link>
           </>

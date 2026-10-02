@@ -108,6 +108,26 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
 
   useEffect(() => {
     let cancelado = false;
+    // `?inscribir=1` lo pone `/ingresar` al volver: retoma el panel que
+    // la persona había abierto antes de que le pidiéramos la cuenta. Se
+    // lee acá —y no en un efecto aparte— para que no compita con el
+    // chequeo de abajo: si ya hay una inscripción vigente, no hay nada
+    // que retomar. Se saca de la URL para que recargar no lo reabra.
+    let retomarInscripcion = false;
+    if (typeof window !== 'undefined') {
+      const parametros = new URLSearchParams(window.location.search);
+      retomarInscripcion = parametros.get('inscribir') === '1';
+      if (retomarInscripcion) {
+        parametros.delete('inscribir');
+        const consulta = parametros.toString();
+        window.history.replaceState(
+          null,
+          '',
+          `${window.location.pathname}${consulta ? `?${consulta}` : ''}`,
+        );
+      }
+    }
+
     fetch(`/api/torneos/mi-inscripcion?torneoId=${torneoId}`)
       .then((respuesta) => (respuesta.ok ? respuesta.json() : null))
       .then((cuerpo) => {
@@ -127,12 +147,17 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
             advertenciaMultiplesDivisiones: vigente.advertenciaMultiplesDivisiones,
             equipoId: vigente.equipoId,
           });
+          return;
         }
+        if (retomarInscripcion) void empezar();
       })
       .catch(() => {});
     return () => {
       cancelado = true;
     };
+    // `empezar` se redefine en cada render pero no cambia de
+    // comportamiento; este efecto corre una vez por torneo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [torneoId]);
 
   // El `<dialog>` se abre y se cierra por método, no por atributo: es la
@@ -155,7 +180,11 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
     try {
       const respuesta = await fetch('/api/equipos/mios');
       if (respuesta.status === 401) {
-        router.push('/ingresar');
+        // Con el torneo en la URL: terminar el ingreso vuelve acá con el
+        // panel abierto. Sin esto la persona se registraba y quedaba en
+        // la aplicación sin haber pedido nada, y tenía que volver al
+        // torneo y repetir todo.
+        router.push(`/ingresar?accion=inscribir&torneoId=${torneoId}`);
         return;
       }
       const cuerpo = await respuesta.json();

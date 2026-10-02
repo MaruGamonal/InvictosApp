@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { FormularioIngreso } from './FormularioIngreso';
+import { FormularioIngreso, type AccionPendienteDeLaUrl } from './FormularioIngreso';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = {
@@ -17,17 +17,23 @@ export const metadata: Metadata = {
  * ruta mandar el formulario. Viene de qué botón se tocó en la
  * bienvenida (`/`, "Ingresar" vs "Crear cuenta").
  *
- * `accion`/`tipoSeguido`/`entidadId` llegan cuando `BotonSeguir` manda acá
- * sin sesión (D-04b): "seguir" es la única acción pendiente hoy, con su
- * ejecutor en `registrarEjecutorSeguir.ts`. Con eso en la URL, terminar
- * el ingreso o el registro deja a la persona directamente siguiendo lo
- * que quería, sin volver a tocar "Seguir".
+ * `accion` dice qué estaba haciendo la persona cuando le pedimos la
+ * cuenta (D-04b: la acción se ve sin sesión, la cuenta se pide recién al
+ * usarla). Hay dos, y se resuelven distinto:
+ *
+ * - **`seguir`** (`tipoSeguido`, `entidadId`), desde `BotonSeguir`. Se
+ *   puede ejecutar sola: terminar el ingreso o el registro ya deja a la
+ *   persona siguiendo, con el ejecutor de `registrarEjecutorSeguir.ts`.
+ * - **`inscribir`** (`torneoId`), desde `BotonInscribirEquipo`. Esta
+ *   **no** se puede ejecutar sola, y por eso no tiene ejecutor: el
+ *   redirect ocurre antes de elegir equipo, y quien se acaba de
+ *   registrar ni siquiera tiene uno. Lo que se retoma es el lugar — se
+ *   vuelve al torneo con el panel abierto.
  *
  * Quien ya tiene sesión iniciada no debería ver este formulario de nuevo —
  * va directo a `/inicio` (reportado en vivo: "siempre me manda al login").
- * Excepción: si llegó con una acción de seguir pendiente (D-04b), esa
- * combinación solo se da sin sesión (`BotonSeguir` manda acá recién cuando
- * `POST /api/seguir` responde 401), así que no hace falta contemplarla.
+ * Excepción: si llegó con una acción pendiente, que solo pasa sin sesión
+ * (los dos botones mandan acá recién ante un 401).
  */
 export default async function PaginaIngresar({
   searchParams,
@@ -37,17 +43,21 @@ export default async function PaginaIngresar({
     accion?: string;
     tipoSeguido?: string;
     entidadId?: string;
+    torneoId?: string;
   }>;
 }) {
-  const { modo, accion, tipoSeguido, entidadId } = await searchParams;
+  const { modo, accion, tipoSeguido, entidadId, torneoId } = await searchParams;
   const esTipoSeguidoValido = tipoSeguido === 'tournament' || tipoSeguido === 'team';
-  const seguirPendiente =
-    accion === 'seguir' && esTipoSeguidoValido && entidadId
-      ? { tipoSeguido: tipoSeguido as 'tournament' | 'team', entidadId }
-      : null;
+
+  let accionPendiente: AccionPendienteDeLaUrl | null = null;
+  if (accion === 'seguir' && esTipoSeguidoValido && entidadId) {
+    accionPendiente = { tipo: 'seguir', tipoSeguido, entidadId };
+  } else if (accion === 'inscribir' && torneoId) {
+    accionPendiente = { tipo: 'inscribir', torneoId };
+  }
 
   const contexto = await construirContexto();
-  if (contexto.usuarioId && !seguirPendiente) {
+  if (contexto.usuarioId && !accionPendiente) {
     redirect('/inicio');
   }
 
@@ -55,7 +65,7 @@ export default async function PaginaIngresar({
     <div className={styles.pagina}>
       <FormularioIngreso
         modoInicial={modo === 'crear' ? 'crear' : 'ingresar'}
-        seguirPendiente={seguirPendiente}
+        accionPendiente={accionPendiente}
       />
     </div>
   );

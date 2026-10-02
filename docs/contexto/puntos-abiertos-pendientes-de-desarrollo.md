@@ -19,7 +19,7 @@
 | 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
 | 9 | Historial del jugador torneo por torneo (UC-38) | Importante | No existe |
-| 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | Importante | Sólo "seguir" se retoma |
+| 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | ~~Importante~~ | **Resuelto** (`02/10`), aunque no como decía este documento |
 | 11 | Notificaciones push (Web Push) | Puede esperar | No existe el canal |
 | 12 | Monetización: planes, pagos, comisión | Puede esperar | Etapas 2 a 4, no empezadas |
 | 13 | Verificación avanzada de organización (`trusted`) | Puede esperar | Sólo la básica por email |
@@ -280,7 +280,33 @@ El mecanismo genérico está: `src/lib/accionesPendientes.ts` deja registrar una
 
 `solicitarInscripcion` no tiene ejecutor registrado. Entonces: un capitán sin cuenta entra a un torneo, toca «Inscribir a mi equipo», lo mandan a registrarse, se registra… y queda en la app sin haber pedido nada. Tiene que volver al torneo y repetir.
 
-**Qué falta.** Un `registrarEjecutorInscripcion` análogo al de seguir. Es chico y el andamiaje ya está probado.
+> **RESUELTO el 02/10 — y la solución que proponía este punto no servía.**
+>
+> Decía: «un `registrarEjecutorInscripcion` análogo al de seguir». Un
+> ejecutor no habría tenido nada que ejecutar. El redirect a `/ingresar`
+> ocurre en `empezar()`, **antes** de que la persona elija equipo
+> —`BotonInscribirEquipo` pide `/api/equipos/mios` y recién con esa lista
+> abre el panel—, así que en el momento de guardar la acción pendiente no
+> existe ningún `equipoId`. Y quien se acaba de registrar directamente no
+> tiene equipos: no hay inscripción posible que retomar.
+>
+> Lo que sí se perdía era **el lugar**. Ahora:
+>
+> - El 401 manda a `/ingresar?accion=inscribir&torneoId=<id>` en vez de
+>   `/ingresar` a secas.
+> - Terminar el ingreso o el registro vuelve a `/torneo/<id>?inscribir=1`.
+> - `BotonInscribirEquipo` lee ese parámetro al montar y **reabre el
+>   panel solo**, salvo que ya haya una inscripción vigente —en cuyo caso
+>   no hay nada que retomar—. Después lo saca de la URL, para que
+>   recargar no lo reabra.
+>
+> Quien no tenga equipos cae en el paso «sin-equipos», con el camino para
+> crear uno. Es el final honesto del flujo: no se puede inscribir un
+> equipo que no existe.
+>
+> De paso, `seguirPendiente` se generalizó a `AccionPendienteDeLaUrl`, un
+> tipo con dos variantes. `seguir` sigue teniendo ejecutor —se completa
+> sola— y `inscribir` no lo tiene, a propósito.
 
 ---
 
