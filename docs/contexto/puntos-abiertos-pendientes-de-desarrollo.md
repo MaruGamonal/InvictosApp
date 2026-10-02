@@ -10,7 +10,7 @@
 
 | # | Punto | Severidad | Estado hoy |
 |---|---|---|---|
-| 1 | Publicidad: el contenedor está, la publicidad no | Importante | **Decidido**: la caja desaparece si no hay anuncio. Sin hacer |
+| 1 | Publicidad: el contenedor está, la publicidad no | Importante | **La caja vacía ya no se muestra** (`02/10`). Falta de dónde salen los anuncios, que es T24 |
 | 2 | El canal `email` de notificaciones no despacha nada | ~~Bloqueante~~ | **Cerrado** (`30/09`). El despacho existe; el correo de producto queda **apagado por decisión** |
 | 3 | `recalcular-score` no está agendada en `pg_cron` | ~~Bloqueante~~ | **Resuelto** (`30/09`): agendada diaria a las 4:20 UTC |
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | ~~Importante~~ | **Resuelto** (`30/09`), y antes de agendarla |
@@ -28,7 +28,7 @@
 | 16 | Tema oscuro (D-71) | Puede esperar | Decidido para después |
 | 17 | No hay pruebas end-to-end | Importante | 1806 unitarias, 6 de integración, 0 e2e |
 | 18 | Plantilla de mail de Supabase sin actualizar | **Bloqueante** | Paso manual fuera del repo |
-| 19 | Comentarios desactualizados en el código | Puede esperar | Dos que mienten |
+| 19 | Comentarios desactualizados en el código | ~~Puede esperar~~ | **Cerrado** (`02/10`) |
 
 ---
 
@@ -48,7 +48,7 @@ Y **no está** en ningún flujo de tarea del organizador ni en la inscripción d
 2. **Si es red:** el script de terceros, el consentimiento de cookies que eso arrastra (y hoy la app no tiene banner de consentimiento), y medir cuánto pesa en un teléfono barato — que es el dispositivo objetivo.
 3. **Si es sponsor directo:** tabla `sponsor` o similar, subida de imagen (ya hay bucket de imágenes: `db/migrations/1789046007002_bucket-de-imagenes.js`), vigencia, segmentación por ciudad, y una pantalla de administración para cargarlos.
 4. **Medición.** Impresiones y clics por superficie. Sin esto no se le puede vender nada a nadie ni saber si la etapa 1 genera.
-5. **Qué pasa cuando no hay anuncio.** Hoy la caja vacía se muestra igual, con la palabra «Publicidad». Con usuarios reales eso es ruido: hay que decidir si colapsa a cero alto o si se muestra algo propio.
+5. ~~**Qué pasa cuando no hay anuncio.**~~ **Resuelto el 02/10**: sin anuncio el contenedor no se renderiza. El rótulo «Publicidad» pasó a acompañar al anuncio en vez de reemplazarlo —es lo que lo declara como tal (D-75)—, y el `min-height` de 90px se fue: la caja la define el anuncio. Las tres llamadas quedan puestas y la prueba de arquitectura las sigue exigiendo; cuando haya anuncios, el único cambio es pasarlos como `children`.
 
 **Por qué no es urgente.** D-02 manda: sin torneos publicados y tráfico, no hay nada que vender. La publicidad se construye cuando el descubrimiento tiene contenido, no antes. Pero la caja vacía sí conviene resolverla antes de abrir a usuarios: mostrar un rótulo «Publicidad» sobre un rectángulo vacío le dice al usuario que algo está roto.
 
@@ -464,7 +464,7 @@ organización, pero que llega. El camino de respaldo se deja puesto.
 Dos, encontrados de paso:
 
 - ~~`src/app/api/tareas/recalcular-score/route.ts:6` decía «declarada y agendada (diaria), todavía sin fórmula», al revés en las dos mitades.~~ Corregido el 30/09.
-- `src/lib/accionesPendientes.ts:8` dice «hoy ninguna acción concreta está registrada porque `seguir` es de T25 y `solicitarInscripcion` es de T20 — ninguno de los dos existe todavía». Los dos existen, y `seguir` ya está registrada.
+- ~~`src/lib/accionesPendientes.ts:8` dice «hoy ninguna acción concreta está registrada porque `seguir` es de T25 y `solicitarInscripcion` es de T20 — ninguno de los dos existe todavía». Los dos existen, y `seguir` ya está registrada.~~ Corregido el 02/10.
 
 Son comentarios, no código, pero son de los que hacen perder media hora al que venga después.
 
@@ -474,7 +474,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
-1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; las dos variables de entorno quedaron cargadas y probadas el 02/10.
+1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; las dos variables de entorno quedaron cargadas el 02/10, con redespliegue y prueba. Con eso corrieron también las cuatro migraciones del 30/09.
 2. ~~**Los puntos 5 y 6**~~ — los dos **hechos el 30/09**. El ciclo de un partido cierra.
 3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.

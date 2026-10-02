@@ -180,7 +180,20 @@ export default function PaginaCatalogo() {
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Contenedor de publicidad</h2>
-        <ContenedorPublicidad />
+        {/* Con un hijo de muestra: sin anuncio el contenedor no se
+            renderiza, y una sección vacía en la galería no exhibe nada. */}
+        <ContenedorPublicidad>
+          <div
+            style={{
+              minHeight: 90,
+              display: 'grid',
+              placeItems: 'center',
+              background: 'var(--fondo-aplicacion)',
+            }}
+          >
+            Acá iría el anuncio
+          </div>
+        </ContenedorPublicidad>
       </section>
 
       <section className={styles.seccion}>

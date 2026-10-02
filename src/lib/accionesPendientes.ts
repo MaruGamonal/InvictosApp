@@ -4,13 +4,16 @@
  * el que se disparó el alta (`10`, 4.1; `02`, UC-01).
  *
  * Este módulo es el mecanismo genérico, no el catálogo de acciones: cada
- * dominio registra la suya cuando su servicio existe. Hoy ninguna acción
- * concreta está registrada porque `seguir` (UC-42/43) es de T25 y
- * `solicitarInscripcion` (UC-24) es de T20 — ninguno de los dos existe
- * todavía. Cuando esos tickets se construyan, la ruta de "seguir sin
- * cuenta → registrarse → ya sigue" se completa con
- * `registrarAccionPendiente('seguir_torneo', ...)`, sin tocar `registrar`
- * ni este archivo.
+ * dominio registra la suya cuando su servicio existe. Hoy hay una sola
+ * registrada, `seguir`, en
+ * `services/notificaciones/registrarEjecutorSeguir.ts`: con eso la ruta
+ * "seguir sin cuenta → registrarse → ya sigue" queda completa.
+ *
+ * La que falta es `solicitar_inscripcion` (UC-24): quien toca «Inscribir
+ * a mi equipo» sin cuenta se registra y la solicitud **no** se retoma.
+ * El servicio existe (`services/equipos/solicitarIngreso.ts` y
+ * `services/inscripciones/`), así que es registrar el ejecutor, no
+ * construir el dominio.
  */
 
 export interface AccionPendiente {

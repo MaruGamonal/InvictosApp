@@ -1,8 +1,10 @@
+/* Sin `min-height`: la caja la define el anuncio que lleva adentro. El
+   alto fijo existía para que el contenedor vacío se viera; ahora el
+   contenedor vacío no se renderiza. */
 .contenedor {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 90px;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px;
   border: 1px dashed var(--borde-neutro);
   border-radius: var(--radio-tarjeta);
