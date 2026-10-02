@@ -76,13 +76,15 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | # | Qué verificar | Cómo | Esperado |
 |---|---|---|---|
 | 0.1 | El despliegue está sano | `GET https://www.invicta.com.ar/api/salud` | 200 |
-| 0.2 | Las migraciones corrieron | Tabla `pgmigrations` en Supabase | La última es `1790263186905_verificacion-de-organizacion-solicitada` |
+| 0.2 | Las migraciones corrieron | Tabla `pgmigrations` en Supabase | La última es `1790737006885_agendar-recalculo-de-score`. Si figura `1790263186905_verificacion-de-organizacion-solicitada`, faltan las cuatro del 30/09: hay que desplegar |
 | 0.3 | `DATABASE_URL_MIGRACIONES` apunta al Session pooler | Variables en Vercel | Host `…pooler.supabase.com`, puerto `5432`. **Nunca** la conexión directa: es sólo IPv6 y el build no la alcanza |
 | 0.4 | `DATABASE_URL` apunta al pooler en modo transacción | Variables en Vercel | Puerto `6543`. Con `5432` se agota `pool_size: 15` (incidente Sentry 7751157836) |
 | 0.5 | El secreto de cron está en Vault | `select name from vault.secrets` | Existe `cron_secret`, y su valor coincide con la variable `CRON_SECRET` de Vercel |
 | 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (`0 * * * *`) y `recalcular-score` (`20 4 * * *`). `despachar-correos` **no** debe aparecer: el correo de producto está apagado |
 | 0.7 | La tarea apunta al host canónico | `select command from cron.job` | `https://www.invicta.com.ar/…` **con `www`**. Sin `www`, libcurl descarta el header `Authorization` en la redirección y la tarea da 403 |
-| 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink` |
+| 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink`. Hace falta para la **confirmación de cuenta**; la verificación de organización ya no depende de esto |
+| 0.8b | La URL de vuelta está permitida | Supabase → Authentication → URL Configuration | Figura `https://www.invicta.com.ar/acceso/confirmar`. Si no está, Supabase la reemplaza por el Site URL sin avisar |
+| 0.8c | Hay proveedor de correo propio | Variables en Vercel | `RESEND_API_KEY` y `CORREO_REMITENTE`. Sin ellas el correo de verificación sale por Supabase y **no** nombra la organización |
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
 | 0.10 | El check-in del cron llega | Esperar a la hora en punto y mirar Sentry Crons | Check-in `ok` |
 | 0.11 | El bucket de imágenes existe y es accesible | Supabase → Storage | El bucket de la migración `1789046007002` existe con sus políticas |
@@ -143,10 +145,10 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 3.2 | Logo | Subir el logo | Se ve en el panel y en el perfil público |
 | 3.3 | Sin verificar: tope de torneos | Crear dos torneos y publicar los dos | El primero publica; el segundo lo bloquea explicando D-51 |
 | 3.4 | Sin verificar: el torneo nace oculto | Publicar el primero y buscarlo en Descubrir sin sesión | No aparece en el listado, pero sí se abre por enlace directo (`unlisted`) |
-| 3.5 | Pedir verificación | Tocar «Verificar organización» | Llega el correo **nombrando la organización** |
+| 3.5 | Pedir verificación | Tocar «Verificar organización» | Llega el correo con asunto «Verificá \<organización\>». Si el asunto es genérico, faltan las variables de 0.8c |
 | 3.6 | Confirmar la verificación | Abrir el enlace | La pantalla dice qué organización se está confirmando, y queda verificada |
 | 3.7 | Después de verificar | Volver a Descubrir | El torneo ya aparece en el listado, y se puede publicar más de uno |
-| 3.8 | Sólo la dueña pide verificación | Intentarlo desde una cuenta administradora | Lo rechaza |
+| 3.8 | Sólo la dueña pide verificación | Entrar como administradora y mirar el panel de la organización | **No hay botón de verificar**: a quien no puede pedirla no se le ofrece ni se le explica. El rechazo del servidor se prueba en 11.8 |
 | 3.9 | Invitar administrador | Invitar por correo | Llega, acepta, y aparece en el equipo de trabajo |
 | 3.10 | Una administradora no gestiona administradoras | Intentar invitar a otra desde la cuenta administradora | Lo rechaza (`ADMIN_NO_PUEDE_GESTIONAR_ADMINS`) |
 | 3.11 | Quitar administradora | Quitarla | Pierde el acceso al panel de inmediato |
