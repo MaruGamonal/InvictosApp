@@ -117,13 +117,15 @@ Cuatro decisiones que conviene tener a mano:
 
 El dominio **ya está verificado en Resend** con SPF, DKIM y DMARC: es el mismo que Supabase usa hoy para los correos de autenticación. Eso ya está hecho y no hay que volver a tocarlo.
 
-Queda sólo:
+~~Queda sólo `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel.~~
+**Cargadas el 02/10**, y probadas con el correo de verificación de
+organización, que es el único que las usa hoy.
 
-1. **`RESEND_API_KEY` en Vercel.** La misma clave que figura como contraseña SMTP en el panel de Supabase sirve tal cual; también se puede crear una nueva en Resend. Misma cuenta, mismo dominio.
-2. **`CORREO_REMITENTE` en Vercel**, con el formato `INVICTA <avisos@invicta.com.ar>`: una dirección de ese dominio verificado.
-3. **Desplegar**, para que corra la migración que agenda la tarea, y verificar en `cron.job` que quedó agendada.
-
-**Mientras las variables no estén, la aplicación funciona igual**: los avisos quedan encolados en `pending` y no se gasta ningún reintento, así que la tarea los manda en cuanto existan.
+Que estén **no prende ningún correo de producto**: eso lo decide
+`CORREO_DE_PRODUCTO_ACTIVO`, que sigue en `false`. Con el interruptor
+apagado `canalesDe()` nunca devuelve `email`, así que no se encola
+ninguna fila, y además la tarea `despachar-correos` está desagendada.
+Son dos cerrojos independientes y los dos siguen puestos.
 
 ### Y sin embargo, está apagado
 
@@ -450,11 +452,10 @@ Dos efectos secundarios, los dos buenos:
   notificación. Antes había un solo juego de HTML; con dos copias se iba
   a separar al primer cambio de color.
 
-**Depende de `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel** — las dos
-que ya estaban pendientes para los correos de notificación. Sin ellas,
-`hayProveedorDeCorreo()` da `false` y el flujo cae al envío de Supabase,
-que es lo que había antes: un correo genérico que no nombra la
-organización, pero que llega.
+Depende de `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel, **cargadas y
+probadas el 02/10**. Sin ellas `hayProveedorDeCorreo()` da `false` y el
+flujo cae al envío de Supabase: un correo genérico que no nombra la
+organización, pero que llega. El camino de respaldo se deja puesto.
 
 ---
 
@@ -473,7 +474,7 @@ Son comentarios, no código, pero son de los que hacen perder media hora al que 
 
 Si hubiera que elegir, esto es lo que no puede quedar como está:
 
-1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; faltan dos variables de entorno en Vercel.
+1. ~~**El punto 2** — despachar los correos de notificación.~~ **Hecho el 30/09**; las dos variables de entorno quedaron cargadas y probadas el 02/10.
 2. ~~**Los puntos 5 y 6**~~ — los dos **hechos el 30/09**. El ciclo de un partido cierra.
 3. ~~**El punto 3**, después del 4 — agendar el score, en lote.~~ **Hecho el 30/09**, en ese orden.
 4. **El punto 18** — la plantilla de mail.

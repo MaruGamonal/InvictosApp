@@ -84,7 +84,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 0.7 | La tarea apunta al host canónico | `select command from cron.job` | `https://www.invicta.com.ar/…` **con `www`**. Sin `www`, libcurl descarta el header `Authorization` en la redirección y la tarea da 403 |
 | 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink`. Hace falta para la **confirmación de cuenta**; la verificación de organización ya no depende de esto |
 | 0.8b | La URL de vuelta está permitida | Supabase → Authentication → URL Configuration | Figura `https://www.invicta.com.ar/acceso/confirmar`. Si no está, Supabase la reemplaza por el Site URL sin avisar |
-| 0.8c | Hay proveedor de correo propio | Variables en Vercel | `RESEND_API_KEY` y `CORREO_REMITENTE`. Sin ellas el correo de verificación sale por Supabase y **no** nombra la organización |
+| 0.8c | Hay proveedor de correo propio | Variables en Vercel | `RESEND_API_KEY` y `CORREO_REMITENTE`. Sin ellas el correo de verificación sale por Supabase y **no** nombra la organización. ✅ Cargadas y probadas el 02/10 |
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
 | 0.10 | El check-in del cron llega | Esperar a la hora en punto y mirar Sentry Crons | Check-in `ok` |
 | 0.11 | El bucket de imágenes existe y es accesible | Supabase → Storage | El bucket de la migración `1789046007002` existe con sus políticas |
