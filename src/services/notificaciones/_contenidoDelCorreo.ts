@@ -1,4 +1,5 @@
 import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { escapar, envolverCorreo, GRIS_SECUNDARIO } from '@/lib/plantillaDeCorreo';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { construirEnlaceNotificacion } from './enlace';
 import type { TipoNotificacion } from './tipos';
@@ -16,16 +17,10 @@ import type { TipoNotificacion } from './tipos';
  * **El enlace sale de `enlace.ts`**, por la misma razón: el botón del
  * correo lleva exactamente a donde lleva tocar la notificación.
  *
- * Los colores acá **sí** son literales, y es la única excepción del
- * sistema (`08`, tema): un cliente de correo no lee variables CSS ni
- * hojas externas. Son los mismos valores de `globals.css`.
+ * El armazón —cabecera, tarjeta, botón, pie— y los colores salen de
+ * `lib/plantillaDeCorreo.ts`, compartidos con los demás correos que
+ * escribimos nosotros.
  */
-
-const INK_900 = '#0e1720';
-const ACENTO = '#00a8cc';
-const GRIS_SECUNDARIO = '#5c6a74';
-const FONDO_PAGINA = '#f7f9fa';
-const BLANCO = '#ffffff';
 
 export interface DatosDelCorreo {
   tipo: TipoNotificacion;
@@ -39,15 +34,6 @@ export interface CorreoArmado {
   asunto: string;
   html: string;
   texto: string;
-}
-
-/** Nombres de equipos y torneos los escribe gente: nunca van crudos al HTML. */
-function escapar(texto: string): string {
-  return texto
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
 
 /**
@@ -80,30 +66,15 @@ export function construirCorreoDeNotificacion(
 
   const asunto = datos.nombreEntidad ? `${titulo} — ${datos.nombreEntidad}` : titulo;
 
-  const lineaEntidad = datos.nombreEntidad
-    ? `<p style="margin:0 0 20px;font:400 15px/1.45 Arial,Helvetica,sans-serif;color:${GRIS_SECUNDARIO};">${escapar(datos.nombreEntidad)}</p>`
-    : '';
-
-  const html = `<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapar(asunto)}</title></head>
-<body style="margin:0;padding:24px 16px;background:${FONDO_PAGINA};">
-  <div style="max-width:480px;margin:0 auto;background:${BLANCO};border-radius:10px;overflow:hidden;">
-    <div style="background:${INK_900};padding:18px 20px;">
-      <span style="font:700 20px/1 Arial,Helvetica,sans-serif;letter-spacing:0.02em;color:${BLANCO};">${NOMBRE_PRODUCTO}</span>
-    </div>
-    <div style="padding:24px 20px;">
-      <p style="margin:0 0 8px;font:700 19px/1.25 Arial,Helvetica,sans-serif;color:${INK_900};">${escapar(titulo)}</p>
-      ${lineaEntidad}
-      <a href="${destino}" style="display:inline-block;background:${ACENTO};color:${INK_900};font:700 14px/1 Arial,Helvetica,sans-serif;text-decoration:none;padding:14px 22px;border-radius:999px;">Ver en ${NOMBRE_PRODUCTO}</a>
-    </div>
-    <div style="padding:0 20px 22px;">
-      <p style="margin:0;font:400 12px/1.45 Arial,Helvetica,sans-serif;color:${GRIS_SECUNDARIO};">
-        Recibís este correo porque tenés avisos activados.
-        <a href="${preferencias}" style="color:${GRIS_SECUNDARIO};">Cambiar qué avisos recibo</a>.
-      </p>
-    </div>
-  </div>
-</body></html>`;
+  const html = envolverCorreo({
+    asunto,
+    titulo: escapar(titulo),
+    bajada: datos.nombreEntidad ? escapar(datos.nombreEntidad) : undefined,
+    textoBoton: `Ver en ${NOMBRE_PRODUCTO}`,
+    urlBoton: destino,
+    pie: `Recibís este correo porque tenés avisos activados.
+        <a href="${preferencias}" style="color:${GRIS_SECUNDARIO};">Cambiar qué avisos recibo</a>.`,
+  });
 
   const texto = [
     titulo,

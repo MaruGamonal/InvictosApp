@@ -344,10 +344,14 @@ Esto es lo que hace que el plan de pruebas manual del documento hermano sea larg
 
 ## 18. La plantilla de mail de Supabase
 
-**Paso manual, fuera del repositorio, bloqueante.** Son dos cosas en el
-panel de Supabase, no una: la plantilla **y** la lista de URLs
-permitidas. Con la plantilla sola, la verificación de organización sigue
-rota.
+**Paso manual, fuera del repositorio, bloqueante.**
+
+> **Actualización del 02/10.** La verificación de organización ya **no**
+> depende de esto: ese correo lo arma y lo manda el producto
+> (`_correoDeVerificacion.ts` + `lib/correo.ts`), con el token que
+> `generateLink` devuelve sin enviar nada. Lo de abajo sigue siendo
+> necesario **para la confirmación de cuenta**, que sigue saliendo por
+> la plantilla de Supabase.
 
 ### 18.a — La plantilla de Magic Link
 
@@ -359,10 +363,10 @@ En *Authentication → Emails → Magic Link*, el enlace tiene que apuntar a:
 
 y **no** al `{{ .ConfirmationURL }}` que viene por defecto.
 
-Afecta a los dos únicos flujos que mandan Magic Link: confirmar la
-cuenta (`lib/emailConfirmacion.ts`) y verificar una organización
-(`services/organizadores/solicitarVerificacionBasica.ts`). Los dos usan
-`signInWithOtp` con el **cliente admin**.
+Afecta a la confirmación de cuenta (`lib/emailConfirmacion.ts`), que usa
+`signInWithOtp` con el **cliente admin** — y al camino de respaldo de la
+verificación de organización, el que corre cuando no hay proveedor de
+correo propio configurado.
 
 Por qué, dos razones independientes:
 
@@ -378,32 +382,32 @@ Por qué, dos razones independientes:
 2. **La cookie que el canje por código necesita no existe.** El flujo de
    `{{ .ConfirmationURL }}` termina en `exchangeCodeForSession`, que
    busca en el navegador un verificador PKCE guardado al pedir el enlace.
-   Estos dos enlaces los emite el **cliente admin**, que no escribe
-   cookies: esa cookie nunca existió. Por eso el canje es
+   Estos enlaces los emite el **cliente admin**, que no escribe cookies:
+   esa cookie nunca existió. Por eso el canje es
    `verifyOtp({ token_hash })` en `api/acceso/confirmar/route.ts`.
 
 ### 18.b — La lista de URLs permitidas
 
-En *Authentication → URL Configuration → Redirect URLs*, tienen que estar:
+En *Authentication → URL Configuration → Redirect URLs*, tiene que estar:
 
 ```
 https://www.invicta.com.ar/acceso/confirmar
-https://www.invicta.com.ar/acceso/confirmar/organizacion/*
 ```
 
 Supabase consulta esa lista antes de redirigir y, **si la URL no está,
-usa el Site URL en su lugar** — sin avisar. Con la plantilla puesta pero
-la lista incompleta, `{{ .RedirectTo }}` se cae al Site URL y el enlace
-de verificación pierde el `organizacion/<id>` del final. No da error:
-simplemente la pantalla no puede nombrar la organización, que es
-exactamente el caso que ya contempla el comentario de
-`acceso/confirmar/[[...intencion]]/page.tsx`. La verificación en sí se
-resuelve igual del lado del servidor
-(`confirmarVerificacionesPendientes`), porque quedó anclada en una
-columna justamente para no depender de esto.
+usa el Site URL en su lugar** — sin avisar.
+
+Mientras el camino de respaldo de la verificación de organización siga
+existiendo, conviene sumar también:
+
+```
+https://www.invicta.com.ar/acceso/confirmar/organizacion/*
+```
 
 El `*` alcanza para el id: los separadores que `*` no cruza son `.` y
-`/`, y un UUID no tiene ninguno de los dos.
+`/`, y un UUID no tiene ninguno de los dos. Por el camino bueno —el
+correo propio— esto ya no hace falta: la URL la arma el producto, no
+Supabase.
 
 ### Lo que no hay que tocar
 
@@ -420,6 +424,37 @@ vuelven por `/auth/callback`.
 > Password siga en su forma por defecto, esa pantalla y esa ruta no se
 > alcanzan nunca. Hay que decidir cuál de los dos caminos queda y borrar
 > el otro.
+
+---
+
+## 18 bis. El correo de verificación de organización
+
+**Hecho el 02/10.** Antes salía por la plantilla de Magic Link de
+Supabase, compartida con la confirmación de cuenta, así que **no podía
+nombrar la organización**: quien tiene dos clubes a cargo recibía dos
+correos idénticos y tenía que adivinar cuál era cuál.
+
+Supabase tiene **seis plantillas fijas** (Confirm signup, Magic Link,
+Invite user, Change Email, Reset Password, Reauthentication) y no deja
+agregar una séptima, así que la única salida era sacar ese correo de
+Supabase. `auth.admin.generateLink()` devuelve el `hashed_token` **sin
+mandar nada**; con eso el producto arma el enlace y despacha el correo
+por `lib/correo.ts`, el mismo camino que ya usan las notificaciones.
+
+Dos efectos secundarios, los dos buenos:
+
+- El enlace lo arma el producto, así que este flujo **ya no depende de la
+  lista de Redirect URLs** del panel.
+- El armazón del correo (cabecera, tarjeta, botón, pie y colores) pasó a
+  `lib/plantillaDeCorreo.ts`, compartido con los correos de
+  notificación. Antes había un solo juego de HTML; con dos copias se iba
+  a separar al primer cambio de color.
+
+**Depende de `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel** — las dos
+que ya estaban pendientes para los correos de notificación. Sin ellas,
+`hayProveedorDeCorreo()` da `false` y el flujo cae al envío de Supabase,
+que es lo que había antes: un correo genérico que no nombra la
+organización, pero que llega.
 
 ---
 

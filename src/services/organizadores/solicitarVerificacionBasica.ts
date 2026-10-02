@@ -6,6 +6,8 @@ import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoOrganizacion } from '@/lib/permisos';
 import { verificarLimite } from '@/lib/limiteFrecuencia';
 import { obtenerClienteAdmin } from '@/lib/supabase/admin';
+import { enviarCorreo, hayProveedorDeCorreo } from '@/lib/correo';
+import { construirCorreoDeVerificacion } from './_correoDeVerificacion';
 
 /**
  * UC-06 — Solicita la verificación básica de la organización: confirmar
@@ -14,10 +16,24 @@ import { obtenerClienteAdmin } from '@/lib/supabase/admin';
  *
  * Reutiliza el mismo mecanismo de enlace de acceso de T3 en vez de
  * inventar un sistema de tokens propio: la persona ya demuestra ser
- * quien dice ser al hacer clic y volver con una sesión válida. La
- * metadata del enlace lleva `accion: 'verificar_organizacion'`, que
- * `src/app/auth/callback` usa para invocar `confirmarVerificacionBasica`
- * en vez del flujo de alta.
+ * quien dice ser al hacer clic y volver con una sesión válida. Qué
+ * organización verificar viaja en la **ruta** del enlace de vuelta, que
+ * `completarAcceso` lee para invocar `confirmarVerificacionBasica`.
+ *
+ * **El correo lo escribimos nosotros** (`_correoDeVerificacion.ts`).
+ * Supabase tiene seis plantillas fijas y este correo compartía la de
+ * Magic Link con la confirmación de cuenta, así que no podía nombrar la
+ * organización: quien tiene dos clubes a cargo recibía dos correos
+ * idénticos. `generateLink` devuelve el token **sin mandar nada**, y de
+ * ahí en adelante el correo es nuestro.
+ *
+ * Como el enlace lo armamos acá, este flujo tampoco depende ya de la
+ * lista de *Redirect URLs* del panel de Supabase, que es donde se
+ * perdía el id de la organización cuando la URL no estaba permitida.
+ *
+ * Sin proveedor de correo propio configurado cae al envío de Supabase,
+ * que es lo que había antes: un correo genérico que no nombra la
+ * organización, pero que llega. Vale más eso que no poder verificar.
  */
 
 const esquemaEntrada = z.object({ organizacionId: z.string().uuid() });
@@ -34,8 +50,8 @@ export const solicitarVerificacionBasica: Servicio<
   await verificarPermisoOrganizacion(contexto, datos.organizacionId, 'solicitar_verificacion');
 
   const pool = obtenerPool();
-  const { rows } = await pool.query<{ email: string; nivel_verificacion: string }>(
-    `SELECT u.email, o.nivel_verificacion
+  const { rows } = await pool.query<{ email: string; nombre: string; nivel_verificacion: string }>(
+    `SELECT u.email, o.nombre, o.nivel_verificacion
      FROM organizacion o JOIN usuario u ON u.id = o.usuario_titular_id
      WHERE o.id = $1`,
     [datos.organizacionId],
@@ -56,23 +72,48 @@ export const solicitarVerificacionBasica: Servicio<
     datos.organizacionId,
   ]);
 
+  // Qué organización verificar va en la ruta, no en `data`:
+  // `signInWithOtp` solo aplica `data` al **crear** la cuenta, y acá va
+  // sobre una que ya existe, así que no llegaba y la verificación no
+  // hacía nada. Que el id sea visible no alcanza para verificar una
+  // organización ajena: `confirmarVerificacionBasica` comprueba que
+  // quien vuelve sea el titular.
+  const urlDeVuelta = `${URL_DEL_SITIO()}/acceso/confirmar/organizacion/${datos.organizacionId}`;
   const supabase = obtenerClienteAdmin();
-  const { error } = await supabase.auth.signInWithOtp({
+  const falloDelEnvio = () =>
+    crearError('ERROR_INTERNO', { motivo: 'no se pudo enviar el correo de verificación' });
+
+  if (!hayProveedorDeCorreo()) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: fila.email,
+      options: { shouldCreateUser: false, emailRedirectTo: urlDeVuelta },
+    });
+    if (error) throw falloDelEnvio();
+    return { enviado: true };
+  }
+
+  // `generateLink` **no manda nada**: devuelve el token para que lo
+  // mandemos nosotros. Es lo que permite que el correo diga de qué
+  // organización se trata.
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: 'magiclink',
     email: fila.email,
-    options: {
-      shouldCreateUser: false,
-      // Qué organización verificar va en la URL de vuelta, no en `data`:
-      // `signInWithOtp` solo aplica `data` al **crear** la cuenta, y acá
-      // va con `shouldCreateUser: false` sobre una que ya existe, así que
-      // no llegaba y la verificación no hacía nada. Que el id sea visible
-      // no alcanza para verificar una organización ajena:
-      // `confirmarVerificacionBasica` comprueba que quien vuelve sea el
-      // titular.
-      emailRedirectTo: `${URL_DEL_SITIO()}/acceso/confirmar/organizacion/${datos.organizacionId}`,
-    },
+    options: { redirectTo: urlDeVuelta },
   });
-  if (error)
-    throw crearError('ERROR_INTERNO', { motivo: 'no se pudo enviar el correo de verificación' });
+  const token = data?.properties?.hashed_token;
+  if (error || !token) throw falloDelEnvio();
+
+  const enlace = `${urlDeVuelta}?token_hash=${encodeURIComponent(token)}&type=magiclink`;
+  const correo = construirCorreoDeVerificacion({
+    nombreOrganizacion: fila.nombre,
+    enlace,
+  });
+
+  try {
+    await enviarCorreo({ para: fila.email, ...correo });
+  } catch {
+    throw falloDelEnvio();
+  }
 
   return { enviado: true };
 };
