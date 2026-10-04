@@ -25,7 +25,7 @@ const LIMITE_BUSQUEDA = { maximoIntentos: 2, ventanaMs: 1000 };
  * error — la dirección es opcional y nunca bloquea crear el torneo.
  */
 export async function buscarDirecciones(consulta: string): Promise<DireccionEncontrada[]> {
-  if (!verificarLimite('nominatim-busqueda', LIMITE_BUSQUEDA)) return [];
+  if (!(await verificarLimite('nominatim-busqueda', LIMITE_BUSQUEDA))) return [];
 
   const url = new URL('https://nominatim.openstreetmap.org/search');
   url.searchParams.set('q', consulta);

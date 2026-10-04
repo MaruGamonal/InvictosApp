@@ -59,7 +59,12 @@ export const solicitarVerificacionBasica: Servicio<
   const fila = rows[0];
   if (!fila) throw crearError('NO_ENCONTRADO');
 
-  if (!verificarLimite(`verificacion-org:${datos.organizacionId}`, LIMITE_CORREOS_VERIFICACION)) {
+  if (
+    !(await verificarLimite(
+      `verificacion-org:${datos.organizacionId}`,
+      LIMITE_CORREOS_VERIFICACION,
+    ))
+  ) {
     throw crearError('DATOS_INVALIDOS', [
       { campo: 'organizacionId', problema: 'Demasiados intentos. Probá de nuevo más tarde.' },
     ]);

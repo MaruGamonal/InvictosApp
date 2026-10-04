@@ -16,7 +16,7 @@
 | 4 | `recalcularScore` no tiene lote ni presupuesto de tiempo | ~~Importante~~ | **Resuelto** (`30/09`), y antes de agendarla |
 | 5 | Confirmar / disputar resultado por el equipo rival (T29) | ~~Bloqueante~~ | **Resuelto** (`30/09`), con la resolución de la objeción incluida |
 | 6 | Registrar partido no disputado (walkover, suspendido) | ~~Bloqueante~~ | **Resuelto** (`30/09`) |
-| 7 | El límite de frecuencia vive en memoria del proceso | Importante | Por instancia, no compartido |
+| 7 | El límite de frecuencia vive en memoria del proceso | ~~Importante~~ | **Resuelto** (`04/10`): cuenta en Postgres, compartido entre instancias |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
 | 9 | Historial del jugador torneo por torneo (UC-38) | Importante | No existe |
 | 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | ~~Importante~~ | **Resuelto** (`02/10`), aunque no como decía este documento |
@@ -248,7 +248,39 @@ En un torneo amateur, un equipo que no se presenta es semanal, no excepcional. H
 
 **Ya corre en más de una instancia.** Vercel levanta funciones serverless en paralelo: cada una tiene su propio `Map` y cuenta desde cero. El límite sigue frenando a alguien que reintenta rápido en la misma instancia, pero no es la defensa que D-51 pide contra crear cuentas y organizaciones descartables en serie.
 
-**Qué falta.** Mover el estado a una tabla (es lo más barato: ya hay Postgres y no agrega un servicio) o a Redis. Es un cambio acotado: el módulo ya tiene la interfaz correcta, cambia la implementación de `verificarLimite`.
+> **RESUELTO el 04/10.** El conteo pasó a una tabla (`intento_limitado`)
+> y a la función `registrar_intento_limitado`, en la migración
+> `1791076072275_limite-de-frecuencia-compartido`. Postgres y no Redis:
+> ya está ahí y esto no justifica sumar un servicio con su propia
+> disponibilidad, su clave y su factura.
+>
+> **Una función y no tres consultas.** Limpiar, insertar y contar desde
+> la aplicación son tres viajes, y entre el insert y el count otra
+> instancia puede insertar lo suyo: dos pedidos simultáneos se cuentan
+> cada uno sin ver al otro y los dos pasan. Un
+> `pg_advisory_xact_lock(hashtext(clave))` los serializa **por clave**,
+> así que dos cuentas distintas no se esperan. Un solo `SELECT` desde la
+> aplicación, un solo viaje.
+>
+> **Si la base no contesta, cae al conteo en memoria** en vez de negar.
+> Un límite degradado a por-instancia sigue frenando al que reintenta en
+> bucle; negar convertiría un hipo de la base en "no podés ingresar". El
+> primer fallo por proceso va a Sentry: sin eso el límite dejaría de ser
+> compartido en silencio, que es justo el problema que esto vino a
+> resolver.
+>
+> Las filas se limpian solas por clave en cada llamada, y hay un barrido
+> diario (`limpiar-intentos-limitados`, 5:07 UTC) para las claves que no
+> se vuelven a consultar.
+>
+> **Sobre la prueba de concurrencia, que es la que importa.** La primera
+> versión lanzaba diez llamadas en paralelo y pasaba igual con la
+> función sin lock: el pool las despacha tan rápido y cada una tarda tan
+> poco que casi nunca se solapan. Se reemplazó por una que fuerza el
+> solapamiento —una transacción abierta retiene el lock y la segunda
+> llamada tiene que esperar— y se verificó que **falla** si se le quita
+> el lock a la función. Una prueba de concurrencia que pasa con y sin la
+> defensa no prueba nada.
 
 ---
 

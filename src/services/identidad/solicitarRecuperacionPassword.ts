@@ -30,7 +30,7 @@ export const solicitarRecuperacionPassword: Servicio<
 > = async (input) => {
   const datos = validarEntrada(esquemaEntrada, input);
 
-  const dentroDelLimite = verificarLimite(
+  const dentroDelLimite = await verificarLimite(
     `recuperacion:${datos.identificadorAcceso.toLowerCase()}`,
     LIMITE_RECUPERACION,
   );

@@ -43,7 +43,9 @@ export async function verificarCuentaConfirmada(contexto: Contexto): Promise<voi
   if (!usuario) throw crearError('NO_AUTENTICADO');
   if (usuario.email_confirmado) return;
 
-  if (verificarLimite(`reenviar-confirmacion:${contexto.usuarioId}`, LIMITE_REENVIO_AUTOMATICO)) {
+  if (
+    await verificarLimite(`reenviar-confirmacion:${contexto.usuarioId}`, LIMITE_REENVIO_AUTOMATICO)
+  ) {
     try {
       await enviarEmailConfirmacion(usuario.email);
     } catch {

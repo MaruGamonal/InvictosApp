@@ -53,7 +53,7 @@ export const iniciarRegistro: Servicio<IniciarRegistroInput, IniciarRegistroResu
 ) => {
   const datos = validarEntrada(esquemaEntrada, input);
 
-  const dentroDelLimite = verificarLimite(
+  const dentroDelLimite = await verificarLimite(
     `registro:${datos.identificadorAcceso.toLowerCase()}`,
     LIMITE_REGISTRO,
   );

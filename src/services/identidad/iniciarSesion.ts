@@ -43,7 +43,7 @@ export const iniciarSesion: Servicio<IniciarSesionInput, IniciarSesionResultado>
 ) => {
   const datos = validarEntrada(esquemaEntrada, input);
 
-  const dentroDelLimite = verificarLimite(
+  const dentroDelLimite = await verificarLimite(
     `ingreso:${datos.identificadorAcceso.toLowerCase()}`,
     LIMITE_INGRESO,
   );

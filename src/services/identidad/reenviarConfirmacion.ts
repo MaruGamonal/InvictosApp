@@ -16,7 +16,7 @@ const LIMITE_REENVIO = { maximoIntentos: 3, ventanaMs: 15 * 60 * 1000 };
 export const reenviarConfirmacion: Servicio<void, { enviado: true }> = async (_input, contexto) => {
   if (!contexto.usuarioId) throw crearError('NO_AUTENTICADO');
 
-  if (!verificarLimite(`reenviar-confirmacion:${contexto.usuarioId}`, LIMITE_REENVIO)) {
+  if (!(await verificarLimite(`reenviar-confirmacion:${contexto.usuarioId}`, LIMITE_REENVIO))) {
     throw crearError('DATOS_INVALIDOS', [
       { campo: 'email', problema: 'Demasiados intentos. Probá de nuevo más tarde.' },
     ]);

@@ -76,11 +76,11 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | # | Qué verificar | Cómo | Esperado |
 |---|---|---|---|
 | 0.1 | El despliegue está sano | `GET https://www.invicta.com.ar/api/salud` | 200 |
-| 0.2 | Las migraciones corrieron | Tabla `pgmigrations` en Supabase | La última es `1790737006885_agendar-recalculo-de-score`. Si figura `1790263186905_verificacion-de-organizacion-solicitada`, faltan las cuatro del 30/09: hay que desplegar |
+| 0.2 | Las migraciones corrieron | Tabla `pgmigrations` en Supabase | La última es `1791076072275_limite-de-frecuencia-compartido` |
 | 0.3 | `DATABASE_URL_MIGRACIONES` apunta al Session pooler | Variables en Vercel | Host `…pooler.supabase.com`, puerto `5432`. **Nunca** la conexión directa: es sólo IPv6 y el build no la alcanza |
 | 0.4 | `DATABASE_URL` apunta al pooler en modo transacción | Variables en Vercel | Puerto `6543`. Con `5432` se agota `pool_size: 15` (incidente Sentry 7751157836) |
 | 0.5 | El secreto de cron está en Vault | `select name from vault.secrets` | Existe `cron_secret`, y su valor coincide con la variable `CRON_SECRET` de Vercel |
-| 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (`0 * * * *`) y `recalcular-score` (`20 4 * * *`). `despachar-correos` **no** debe aparecer: el correo de producto está apagado |
+| 0.6 | Las tareas están agendadas | `select jobname, schedule from cron.job` | Aparecen `confirmar-resultados-vencidos` (`0 * * * *`), `recalcular-score` (`20 4 * * *`) y `limpiar-intentos-limitados` (`7 5 * * *`). `despachar-correos` **no** debe aparecer: el correo de producto está apagado |
 | 0.7 | La tarea apunta al host canónico | `select command from cron.job` | `https://www.invicta.com.ar/…` **con `www`**. Sin `www`, libcurl descarta el header `Authorization` en la redirección y la tarea da 403 |
 | 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink`. Hace falta para la **confirmación de cuenta**; la verificación de organización ya no depende de esto |
 | 0.8b | La URL de vuelta está permitida | Supabase → Authentication → URL Configuration | Figura `https://www.invicta.com.ar/acceso/confirmar`. Si no está, Supabase la reemplaza por el Site URL sin avisar |
