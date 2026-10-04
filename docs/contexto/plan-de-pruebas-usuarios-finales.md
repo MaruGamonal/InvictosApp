@@ -85,6 +85,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 0.8 | La plantilla de Magic Link está actualizada | Supabase → Authentication → Email Templates | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink`. Hace falta para la **confirmación de cuenta**; la verificación de organización ya no depende de esto |
 | 0.8b | La URL de vuelta está permitida | Supabase → Authentication → URL Configuration | Figura `https://www.invicta.com.ar/acceso/confirmar`. Si no está, Supabase la reemplaza por el Site URL sin avisar |
 | 0.8c | Hay proveedor de correo propio | Variables en Vercel | `RESEND_API_KEY` y `CORREO_REMITENTE`. Sin ellas el correo de verificación sale por Supabase y **no** nombra la organización. ✅ Cargadas y probadas el 02/10 |
+| 0.8d | La plantilla de Reset Password está actualizada | Supabase → Authentication → Emails | Usa `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery`, y `https://www.invicta.com.ar/restablecer-password/confirmar` figura en Redirect URLs. Sin esto, recuperar contraseña avisa «El enlace está incompleto» |
 | 0.9 | Sentry recibe | Provocar un error a propósito (una ruta inexistente de API) | Aparece en Sentry en menos de un minuto |
 | 0.10 | El check-in del cron llega | Esperar a la hora en punto y mirar Sentry Crons | Check-in `ok` |
 | 0.11 | El bucket de imágenes existe y es accesible | Supabase → Storage | El bucket de la migración `1789046007002` existe con sus políticas |
@@ -104,7 +105,8 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 1.5 | Límite de frecuencia del reenvío | Tocar «Reenviar» cinco veces seguidas | Corta con un mensaje claro, no con un error genérico. **Ojo:** el límite vive en memoria por instancia, así que puede no cortar — es un punto abierto conocido |
 | 1.6 | Ingreso y persistencia | Ingresar, cerrar la pestaña, volver a abrir | Sigue la sesión |
 | 1.7 | Refresh en cada pantalla | F5 en `/inicio`, `/perfil`, un torneo, el panel del organizador | Ninguna vuelve a la pantalla de ingreso |
-| 1.8 | Recuperar contraseña | Pedir recuperación, abrir el enlace, cambiarla | Entra con la nueva y **no** con la vieja |
+| 1.8 | Recuperar contraseña | Pedir recuperación, abrir el enlace, cambiarla | El enlace lleva a una pantalla con un botón «Continuar» —no entra de una—, y después deja cambiarla. Entra con la nueva y **no** con la vieja |
+| 1.8b | Recuperar desde otro dispositivo | Pedir la recuperación en la computadora y abrir el correo en el teléfono | Funciona igual. Era el caso que fallaba con el canje por código, que necesitaba una cookie del navegador donde se pidió |
 | 1.9 | El enlace de recuperación no se reusa | Abrir dos veces el mismo enlace | La segunda vez lo rechaza |
 | 1.10 | Editar el perfil | Cambiar nombre, ciudad y foto | Se refleja en `/perfil` y en el perfil público |
 | 1.11 | Subir foto de perfil | Desde el teléfono, sacando una foto en el momento | Sube, se ve, y no queda rotada |

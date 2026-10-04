@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Destino del enlace de recuperación, después de que `auth/callback`
- * canjea el código por una sesión (`?next=/restablecer-password`, que
- * arma `solicitarRecuperacionPassword`). Sin esa sesión de recuperación
- * puesta, `POST /api/restablecer-password` rechaza con `NO_AUTENTICADO`.
+ * Adonde lleva `/restablecer-password/confirmar` una vez que su `POST`
+ * verificó el token del correo y dejó puesta la sesión de recuperación.
+ * Sin esa sesión, `POST /api/restablecer-password` rechaza con
+ * `NO_AUTENTICADO`.
  */
 export default function PaginaRestablecerPassword() {
   return (

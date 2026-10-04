@@ -11,12 +11,20 @@ import { completarAcceso } from '../../_completarAcceso';
  * La metadata del enlace (`accion`) dice qué hacer una vez que la
  * sesión ya existe.
  *
- * El destino final viaja en la **ruta**, no en la query
- * (`/auth/callback/restablecer-password`). Con `?next=` no llegaba: el
- * proveedor arma el enlace de vuelta agregándole sus propios parámetros
- * a la URL que le pasamos, y una URL que ya traía query se mezcla con
- * eso de formas que dependen del flujo. Un segmento de ruta no se mezcla
- * con nada y sobrevive el viaje de ida y vuelta entero.
+ * El destino final viaja en la **ruta**, no en la query. Con `?next=`
+ * no llegaba: el proveedor arma el enlace de vuelta agregándole sus
+ * propios parámetros a la URL que le pasamos, y una URL que ya traía
+ * query se mezcla con eso de formas que dependen del flujo. Un segmento
+ * de ruta no se mezcla con nada y sobrevive el viaje entero.
+ *
+ * Hoy el único que llega acá es el de las invitaciones, sin segmento.
+ * Recuperar la contraseña **ya no pasa por el canje por código**: el
+ * canje necesita un verificador PKCE que vive como cookie en el
+ * navegador donde se pidió el enlace, y eso rompía el caso de pedirlo
+ * en la computadora y abrirlo en el teléfono. Ese flujo pasó a
+ * `/restablecer-password/confirmar`, con `verifyOtp`. El segmento
+ * `restablecer-password` se sigue aceptando acá por los enlaces que ya
+ * salieron por correo con la forma vieja.
  */
 
 /**

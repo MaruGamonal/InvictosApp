@@ -469,21 +469,31 @@ El `*` alcanza para el id: los separadores que `*` no cruza son `.` y
 correo propio— esto ya no hace falta: la URL la arma el producto, no
 Supabase.
 
+### 18.c — La plantilla de Reset Password
+
+Desde el 04/10 recuperar la contraseña también usa `token_hash`. En
+*Authentication → Emails → Reset Password*:
+
+```
+{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery
+```
+
+y en *Redirect URLs*:
+
+```
+https://www.invicta.com.ar/restablecer-password/confirmar
+```
+
 ### Lo que no hay que tocar
 
-**Reset Password** y **Invite user** se quedan con su plantilla por
-defecto. Esos dos flujos sí emiten el enlace desde el cliente de
-servidor, que escribe la cookie, así que el canje por código funciona y
-vuelven por `/auth/callback`.
+**Invite user** se queda con su plantilla por defecto. Ese flujo emite
+el enlace desde el cliente de servidor, que escribe la cookie, así que
+el canje por código funciona y vuelve por `/auth/callback`.
 
-> Pendiente aparte: `/restablecer-password/confirmar` y su
-> `api/restablecer-password/confirmar` implementan el patrón
-> `token_hash` para recuperar la contraseña, pero
-> `solicitarRecuperacionPassword.ts:49` manda a
-> `/auth/callback/restablecer-password`. Mientras la plantilla de Reset
-> Password siga en su forma por defecto, esa pantalla y esa ruta no se
-> alcanzan nunca. Hay que decidir cuál de los dos caminos queda y borrar
-> el otro.
+> ~~Pendiente aparte: `/restablecer-password/confirmar` no se alcanzaba
+> nunca.~~ **Resuelto el 04/10**: ver «18 ter» más abajo. Recuperar la
+> contraseña pasó al patrón `token_hash`, así que **la plantilla «Reset
+> Password» también hay que cambiarla**.
 
 ---
 
@@ -514,6 +524,48 @@ Depende de `RESEND_API_KEY` y `CORREO_REMITENTE` en Vercel, **cargadas y
 probadas el 02/10**. Sin ellas `hayProveedorDeCorreo()` da `false` y el
 flujo cae al envío de Supabase: un correo genérico que no nombra la
 organización, pero que llega. El camino de respaldo se deja puesto.
+
+---
+
+## 18 ter. Recuperar la contraseña tenía dos caminos, y el conectado era el peor
+
+**Resuelto el 04/10.**
+
+Había dos implementaciones completas. La conectada —`redirectTo` a
+`/auth/callback/restablecer-password`, con `exchangeCodeForSession`—
+tenía dos problemas, los dos visibles con usuarios reales:
+
+1. **Pedirlo en un dispositivo y abrirlo en otro no funcionaba.**
+   `@supabase/ssr@0.12.5` fuerza `flowType: 'pkce'` en
+   `createServerClient` (está en el propio paquete). El canje por código
+   busca un verificador que quedó **como cookie en el navegador donde se
+   pidió el enlace**. Pedir el reset en la notebook y abrir el correo en
+   el teléfono fallaba.
+2. **Los escáneres de correo gastaban el enlace**, igual que pasaba con
+   Magic Link: `{{ .ConfirmationURL }}` es un `GET` que consume el token.
+
+La otra —`/restablecer-password/confirmar` + su API, con `verifyOtp`—
+arregla las dos cosas: no necesita cookie, así que anda desde cualquier
+dispositivo, y la pantalla no canjea nada, muestra un botón cuyo `POST`
+ningún escáner dispara. Estaba escrita y probada, y **nunca se
+conectó**: nada en el código enlazaba a esa pantalla.
+
+Lo que cambió es una línea de `redirectTo`, más los comentarios que
+seguían nombrando el camino viejo. El canje por código **se queda** en
+`/auth/callback`, porque las invitaciones lo usan y porque los enlaces
+de recuperación que ya salieron por correo apuntan ahí.
+
+> ⚠️ **Hay una ventana entre el despliegue y el cambio de plantilla.**
+> El código nuevo manda a `/restablecer-password/confirmar`, y la
+> plantilla vieja arma el enlace con `?code=` en vez de `token_hash`:
+> esa pantalla avisa que el enlace está incompleto. No hay orden que
+> evite el hueco —con la plantilla nueva y el código viejo pasa lo
+> simétrico—, así que las dos cosas van juntas. Son minutos.
+>
+> Se puede cerrar del todo con unas cinco líneas: que la pantalla, al
+> recibir `?code=`, reenvíe a `/auth/callback/restablecer-password`. No
+> se agregó porque es compatibilidad temporal y el hueco es corto; si
+> se quiere, es un cambio chico.
 
 ---
 

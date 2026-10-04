@@ -7,9 +7,9 @@ import { crearClienteServidor } from '@/lib/supabase/servidor';
 /**
  * Último paso de "¿Olvidaste tu contraseña?": fija la contraseña nueva.
  * Solo funciona con la sesión de recuperación que dejó puesta
- * `auth/callback` al canjear el enlace del correo — sin eso,
- * `updateUser` de Supabase falla porque no hay a quién actualizarle
- * la contraseña.
+ * `/api/restablecer-password/confirmar` al verificar el token del
+ * correo — sin eso, `updateUser` de Supabase falla porque no hay a
+ * quién actualizarle la contraseña.
  */
 
 const esquemaEntrada = z.object({
