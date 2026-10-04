@@ -493,18 +493,29 @@ de mandar, no explicaciones de cómo funciona el sistema.
 
 Se reportan aparte, sin tocarlos en esta pasada.
 
-**F-01 — Texto de rol duplicado en dos archivos.** «Un Administrador
-opera sobre todos los torneos de la organización, igual que vos — salvo
-que no puede sumar ni sacar administradores» está literal en
-`PanelAdministradores.tsx:155` y en
-`FormularioInvitarAdministrador.tsx:63`. Son dos formularios de invitar
-administrador, uno en el panel del torneo y otro en el de la
-organización. La definición del rol debería salir de un solo lugar.
+**F-01 — Texto de rol duplicado en dos archivos.** ~~«Un Administrador
+opera sobre todos los torneos de la organización…» está literal en dos
+formularios de invitar administrador.~~ **Resuelto el 04/10**: la frase
+salió a `lib/rolesDeOrganizacion.ts` y los dos la importan.
 
-**F-02 — Dos formularios para la misma acción.** Lo anterior es el
-síntoma: invitar administrador existe dos veces, con su propio estado,
-su propio manejo de «persona nueva, hace falta el nombre» y su propio
-copy. Cualquier cambio hay que hacerlo dos veces.
+**F-02 — Dos formularios para la misma acción.** ~~Invitar
+administrador existe dos veces, con su propio estado, su propio manejo
+de «persona nueva, hace falta el nombre» y su propio copy.~~ **Resuelto
+el 04/10**, y eran **tres**, no dos: asignar un colaborador tenía la
+misma copia contra otra ruta. El envío pasó a
+`components/useInvitacionPorCorreo.ts`.
+
+Es un hook y no un componente porque lo que se repetía era la lógica, no
+la pantalla: una de las tres es una página con etiquetas visibles y las
+otras dos son formularios dentro de un acordeón, con `aria-label` y
+`placeholder`. Un componente compartido las habría obligado a verse
+igual.
+
+Lo que más importaba de unificar es la lectura del error
+`error.detalle[0].campo === 'nombreCompleto'`, que distingue «no
+pudimos» de «esta persona todavía no tiene cuenta». Tres copias de algo
+tan puntual se separan al primer cambio del backend, y las dos que nadie
+toca quedan mostrando el mensaje equivocado.
 
 ---
 

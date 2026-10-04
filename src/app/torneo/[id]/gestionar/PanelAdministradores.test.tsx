@@ -66,6 +66,43 @@ describe('PanelAdministradores', () => {
     expect(queryByText(/Solo el Titular/)).toBeNull();
   });
 
+  /**
+   * Los dos errores —quitar e invitar— se muestran en el mismo renglón
+   * pero viven en estados distintos desde que el envío pasó al hook
+   * compartido. Sin limpiarse entre sí, el de una acción quedaba tapando
+   * al de la otra.
+   */
+  it('el error de quitar no sobrevive al siguiente intento de invitar', async () => {
+    const fetchMock = vi
+      .fn()
+      // Quitar falla…
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ ok: false, error: { mensaje: 'No se puede quitar al Titular.' } }),
+      })
+      // …y después invitar falla por otra cosa.
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ ok: false, error: { mensaje: 'Ya es administradora.' } }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByText, getByLabelText, queryByText } = render(
+      <PanelAdministradores organizacionId="org-1" administradores={[TITULAR, ADMIN]} esTitular />,
+    );
+
+    fireEvent.click(getByText('Quitar'));
+    await waitFor(() => expect(getByText('No se puede quitar al Titular.')).toBeTruthy());
+
+    fireEvent.change(getByLabelText('Correo de la persona'), {
+      target: { value: 'otra@example.com' },
+    });
+    fireEvent.click(getByText('Invitar administrador'));
+
+    await waitFor(() => expect(getByText('Ya es administradora.')).toBeTruthy());
+    expect(queryByText('No se puede quitar al Titular.')).toBeNull();
+  });
+
   it('el Titular invita a alguien nuevo: manda el email a la API', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);

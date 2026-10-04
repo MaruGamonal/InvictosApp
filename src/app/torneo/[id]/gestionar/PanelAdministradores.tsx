@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/Badge';
+import { useInvitacionPorCorreo } from '@/components/useInvitacionPorCorreo';
+import { DESCRIPCION_ADMINISTRADOR } from '@/lib/rolesDeOrganizacion';
 import styles from './pagina.module.css';
 
 export interface AdministradorGestion {
@@ -26,6 +28,12 @@ export interface PanelAdministradoresProps {
  * Administrador opera sobre **todos** los torneos de la organización.
  * Solo el Titular puede sumarlos o sacarlos; un Administrador ve la
  * lista pero no puede tocarla (`06`, D-64).
+ *
+ * El envío de la invitación es el mismo de la pantalla dedicada
+ * (`organizador/gestionar/invitar`), compartido en
+ * `useInvitacionPorCorreo`: acá el formulario vive dentro de un
+ * acordeón y al terminar refresca la lista en el lugar; allá es una
+ * pantalla propia que vuelve al Equipo de trabajo.
  */
 export function PanelAdministradores({
   organizacionId,
@@ -33,53 +41,21 @@ export function PanelAdministradores({
   esTitular,
 }: PanelAdministradoresProps) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [nombreCompleto, setNombreCompleto] = useState('');
-  const [pideNombre, setPideNombre] = useState(false);
-  const [enviando, setEnviando] = useState(false);
   const [quitando, setQuitando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  async function invitar(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    setEnviando(true);
-    setError(null);
-
-    try {
-      const respuesta = await fetch('/api/organizaciones/invitar-administrador', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organizacionId,
-          email,
-          nombreCompleto: nombreCompleto || undefined,
-        }),
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        if (cuerpo?.error?.detalle?.[0]?.campo === 'nombreCompleto') {
-          setPideNombre(true);
-          setError('Es una persona nueva en la plataforma — hace falta su nombre.');
-        } else {
-          setError(cuerpo?.error?.mensaje ?? 'No pudimos invitar. Probá de nuevo.');
-        }
-        setEnviando(false);
-        return;
-      }
-      setEmail('');
-      setNombreCompleto('');
-      setPideNombre(false);
-      router.refresh();
-    } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setEnviando(false);
-    }
-  }
+  const invitacion = useInvitacionPorCorreo({
+    url: '/api/organizaciones/invitar-administrador',
+    datos: { organizacionId },
+    mensajeDeFallo: 'No pudimos invitar. Probá de nuevo.',
+    alLograrlo: () => router.refresh(),
+  });
 
   async function quitar(usuarioId: string) {
     setQuitando(usuarioId);
     setError(null);
+    // El error de la otra acción no tiene por qué seguir ahí: las dos
+    // se muestran en el mismo renglón.
+    invitacion.limpiarError();
     try {
       const respuesta = await fetch('/api/organizaciones/quitar-administrador', {
         method: 'POST',
@@ -101,7 +77,11 @@ export function PanelAdministradores({
 
   return (
     <div className={styles.lista}>
-      {error && <p className={styles.errorChico}>{error}</p>}
+      {/* Dos orígenes, un solo lugar donde se ve: quitar tiene su propio
+          estado y el de invitar lo lleva el hook. */}
+      {(error ?? invitacion.error) && (
+        <p className={styles.errorChico}>{error ?? invitacion.error}</p>
+      )}
 
       {administradores.map((persona) => (
         <div key={persona.usuarioId} className={styles.filaIntegranteCabecera}>
@@ -129,33 +109,36 @@ export function PanelAdministradores({
 
       {esTitular && (
         <>
-          <form className={styles.formularioChico} onSubmit={invitar}>
+          <form
+            className={styles.formularioChico}
+            onSubmit={(evento) => {
+              setError(null);
+              return invitacion.enviar(evento);
+            }}
+          >
             <input
               type="email"
               required
               placeholder="Correo de la persona"
               aria-label="Correo de la persona"
-              value={email}
-              onChange={(evento) => setEmail(evento.target.value)}
+              value={invitacion.email}
+              onChange={(evento) => invitacion.cambiarEmail(evento.target.value)}
             />
-            {pideNombre && (
+            {invitacion.pideNombre && (
               <input
                 type="text"
                 required
                 placeholder="Nombre completo"
                 aria-label="Nombre completo"
-                value={nombreCompleto}
-                onChange={(evento) => setNombreCompleto(evento.target.value)}
+                value={invitacion.nombreCompleto}
+                onChange={(evento) => invitacion.cambiarNombreCompleto(evento.target.value)}
               />
             )}
-            <button type="submit" disabled={enviando}>
-              {enviando ? 'Invitando…' : 'Invitar administrador'}
+            <button type="submit" disabled={invitacion.enviando}>
+              {invitacion.enviando ? 'Invitando…' : 'Invitar administrador'}
             </button>
           </form>
-          <p className={styles.avisoChico}>
-            Un Administrador opera sobre todos los torneos de la organización, igual que vos — salvo
-            que no puede sumar ni sacar administradores.
-          </p>
+          <p className={styles.avisoChico}>{DESCRIPCION_ADMINISTRADOR}</p>
         </>
       )}
     </div>

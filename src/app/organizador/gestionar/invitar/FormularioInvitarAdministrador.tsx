@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { useInvitacionPorCorreo } from '@/components/useInvitacionPorCorreo';
+import { DESCRIPCION_ADMINISTRADOR } from '@/lib/rolesDeOrganizacion';
 import styles from '../../../ingresar/pagina.module.css';
 
 interface Props {
@@ -9,63 +10,30 @@ interface Props {
 }
 
 /**
- * UC-07 — Pantalla dedicada de "Invitar administrador" (distinta del
- * formulario inline de `PanelAdministradores`, que sigue existiendo en
- * `torneo/[id]/gestionar/configuracion` tal cual): mismo
- * `POST /api/organizaciones/invitar-administrador`, con su propia
- * pantalla y confirmación al volver al Equipo de trabajo.
+ * UC-07 — Pantalla dedicada de "Invitar administrador". Comparte el
+ * envío con el formulario inline de `PanelAdministradores`, vía
+ * `useInvitacionPorCorreo`: lo que cambia entre las dos es la pantalla
+ * —acá con etiquetas visibles, allá dentro de un acordeón— y qué pasa
+ * al terminar, que acá es volver al Equipo de trabajo.
  */
 export function FormularioInvitarAdministrador({ organizacionId }: Props) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [nombreCompleto, setNombreCompleto] = useState('');
-  const [pideNombre, setPideNombre] = useState(false);
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function enviar(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    setEnviando(true);
-    setError(null);
-
-    try {
-      const respuesta = await fetch('/api/organizaciones/invitar-administrador', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organizacionId,
-          email,
-          nombreCompleto: nombreCompleto || undefined,
-        }),
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        if (cuerpo?.error?.detalle?.[0]?.campo === 'nombreCompleto') {
-          setPideNombre(true);
-          setError('Es una persona nueva en la plataforma — hace falta su nombre.');
-        } else {
-          setError(cuerpo?.error?.mensaje ?? 'No pudimos invitar. Probá de nuevo.');
-        }
-        setEnviando(false);
-        return;
-      }
+  const invitacion = useInvitacionPorCorreo({
+    url: '/api/organizaciones/invitar-administrador',
+    datos: { organizacionId },
+    mensajeDeFallo: 'No pudimos invitar. Probá de nuevo.',
+    alLograrlo: () => {
       router.push('/organizador/gestionar/equipo');
       router.refresh();
-    } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
-      setEnviando(false);
-    }
-  }
+    },
+  });
 
   return (
-    <form className={styles.tarjeta} onSubmit={enviar}>
+    <form className={styles.tarjeta} onSubmit={invitacion.enviar}>
       <h1 className={`fuente-display ${styles.titulo}`}>Invitar administrador</h1>
-      <p className={styles.texto}>
-        Un Administrador opera sobre todos los torneos de la organización, igual que vos — salvo que
-        no puede sumar ni sacar administradores.
-      </p>
+      <p className={styles.texto}>{DESCRIPCION_ADMINISTRADOR}</p>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {invitacion.error && <p className={styles.error}>{invitacion.error}</p>}
 
       <div className={styles.campo}>
         <label htmlFor="email">Correo de la persona</label>
@@ -74,12 +42,12 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
           type="email"
           required
           placeholder="nombre@email.com"
-          value={email}
-          onChange={(evento) => setEmail(evento.target.value)}
+          value={invitacion.email}
+          onChange={(evento) => invitacion.cambiarEmail(evento.target.value)}
         />
       </div>
 
-      {pideNombre && (
+      {invitacion.pideNombre && (
         <div className={styles.campo}>
           <label htmlFor="nombreCompleto">Nombre completo</label>
           <input
@@ -87,14 +55,18 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
             type="text"
             required
             placeholder="Nombre y apellido"
-            value={nombreCompleto}
-            onChange={(evento) => setNombreCompleto(evento.target.value)}
+            value={invitacion.nombreCompleto}
+            onChange={(evento) => invitacion.cambiarNombreCompleto(evento.target.value)}
           />
         </div>
       )}
 
-      <button type="submit" className={styles.boton} disabled={enviando || !email.trim()}>
-        {enviando ? 'Invitando…' : 'Invitar administrador'}
+      <button
+        type="submit"
+        className={styles.boton}
+        disabled={invitacion.enviando || !invitacion.email.trim()}
+      >
+        {invitacion.enviando ? 'Invitando…' : 'Invitar administrador'}
       </button>
     </form>
   );

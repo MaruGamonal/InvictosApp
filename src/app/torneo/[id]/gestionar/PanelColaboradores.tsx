@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { useInvitacionPorCorreo } from '@/components/useInvitacionPorCorreo';
 import styles from './pagina.module.css';
 
 export interface ColaboradorGestion {
@@ -16,6 +17,10 @@ export interface PanelColaboradoresProps {
 }
 
 /**
+ * El envío de la asignación es el mismo que el de invitar un
+ * administrador, compartido en `useInvitacionPorCorreo`: cambia la ruta
+ * de la API y el mensaje de fallo, nada más.
+ *
  * UC-52 — Colaboradores de este torneo puntual: solo pueden cargar
  * resultados, programar partidos y registrar no disputados en este
  * torneo — nada más (`06`, D-32). Es una asignación por torneo, no por
@@ -24,49 +29,21 @@ export interface PanelColaboradoresProps {
  */
 export function PanelColaboradores({ torneoId, colaboradores }: PanelColaboradoresProps) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [nombreCompleto, setNombreCompleto] = useState('');
-  const [pideNombre, setPideNombre] = useState(false);
-  const [enviando, setEnviando] = useState(false);
   const [quitando, setQuitando] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  async function invitar(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    setEnviando(true);
-    setError(null);
-
-    try {
-      const respuesta = await fetch('/api/torneos/invitar-colaborador', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ torneoId, email, nombreCompleto: nombreCompleto || undefined }),
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        if (cuerpo?.error?.detalle?.[0]?.campo === 'nombreCompleto') {
-          setPideNombre(true);
-          setError('Es una persona nueva en la plataforma — hace falta su nombre.');
-        } else {
-          setError(cuerpo?.error?.mensaje ?? 'No pudimos asignar. Probá de nuevo.');
-        }
-        setEnviando(false);
-        return;
-      }
-      setEmail('');
-      setNombreCompleto('');
-      setPideNombre(false);
-      router.refresh();
-    } catch {
-      setError('No pudimos conectar. Probá de nuevo.');
-    } finally {
-      setEnviando(false);
-    }
-  }
+  const invitacion = useInvitacionPorCorreo({
+    url: '/api/torneos/invitar-colaborador',
+    datos: { torneoId },
+    mensajeDeFallo: 'No pudimos asignar. Probá de nuevo.',
+    alLograrlo: () => router.refresh(),
+  });
 
   async function quitar(usuarioId: string) {
     setQuitando(usuarioId);
     setError(null);
+    // El error de la otra acción no tiene por qué seguir ahí: las dos
+    // se muestran en el mismo renglón.
+    invitacion.limpiarError();
     try {
       const respuesta = await fetch('/api/torneos/quitar-colaborador', {
         method: 'POST',
@@ -88,7 +65,11 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
 
   return (
     <div className={styles.lista}>
-      {error && <p className={styles.errorChico}>{error}</p>}
+      {/* Dos orígenes, un solo lugar donde se ve: quitar tiene su propio
+          estado y el de asignar lo lleva el hook. */}
+      {(error ?? invitacion.error) && (
+        <p className={styles.errorChico}>{error ?? invitacion.error}</p>
+      )}
 
       {colaboradores.length === 0 ? (
         <EstadoVacio mensaje="Este torneo todavía no tiene colaboradores asignados." />
@@ -117,27 +98,33 @@ export function PanelColaboradores({ torneoId, colaboradores }: PanelColaborador
         ))
       )}
 
-      <form className={styles.formularioChico} onSubmit={invitar}>
+      <form
+        className={styles.formularioChico}
+        onSubmit={(evento) => {
+          setError(null);
+          return invitacion.enviar(evento);
+        }}
+      >
         <input
           type="email"
           required
           placeholder="Correo de la persona"
           aria-label="Correo de la persona"
-          value={email}
-          onChange={(evento) => setEmail(evento.target.value)}
+          value={invitacion.email}
+          onChange={(evento) => invitacion.cambiarEmail(evento.target.value)}
         />
-        {pideNombre && (
+        {invitacion.pideNombre && (
           <input
             type="text"
             required
             placeholder="Nombre completo"
             aria-label="Nombre completo"
-            value={nombreCompleto}
-            onChange={(evento) => setNombreCompleto(evento.target.value)}
+            value={invitacion.nombreCompleto}
+            onChange={(evento) => invitacion.cambiarNombreCompleto(evento.target.value)}
           />
         )}
-        <button type="submit" disabled={enviando}>
-          {enviando ? 'Asignando…' : 'Asignar colaborador'}
+        <button type="submit" disabled={invitacion.enviando}>
+          {invitacion.enviando ? 'Asignando…' : 'Asignar colaborador'}
         </button>
       </form>
     </div>
