@@ -18,7 +18,7 @@
 | 6 | Registrar partido no disputado (walkover, suspendido) | ~~Bloqueante~~ | **Resuelto** (`30/09`) |
 | 7 | El límite de frecuencia vive en memoria del proceso | ~~Importante~~ | **Resuelto** (`04/10`): cuenta en Postgres, compartido entre instancias |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
-| 9 | Historial del jugador torneo por torneo (UC-38) | Importante | No existe |
+| 9 | Historial del jugador torneo por torneo (UC-38) | ~~Importante~~ | **Resuelto** (`05/10`), sin «partidos jugados»: ese dato no existe en el modelo |
 | 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | ~~Importante~~ | **Resuelto** (`02/10`), aunque no como decía este documento |
 | 11 | Notificaciones push (Web Push) | Puede esperar | No existe el canal |
 | 12 | Monetización: planes, pagos, comisión | Puede esperar | Etapas 2 a 4, no empezadas |
@@ -303,6 +303,36 @@ Está protegida con `CRON_SECRET` en el header `Authorization`, igual que las ta
 No existe. `/jugador/[id]` muestra el perfil público, pero no la lista de «jugué la Copa Costanera 2025 con Deportivo Pichincha, 8 partidos, 3 goles». El dato está: `partido`, `inscripcion`, goleadores y tarjetas ya se registran.
 
 Es la pantalla que hace que un jugador vuelva a la app fuera de la semana de su partido. Sin ella el perfil del jugador es una tarjeta de presentación, no un historial.
+
+> **RESUELTO el 05/10**, con una salvedad que vale la pena leer.
+>
+> `/jugador/[id]` tiene ahora una sección **«Torneos jugados»**: por cada
+> torneo, el equipo con el que lo jugó, la ciudad, la modalidad, el año,
+> y las marcas que haya —goles, veces elegido jugador del partido,
+> amarillas, rojas—. Cada fila lleva a la ficha del torneo. El servicio
+> es `obtenerHistorialDelJugador.ts`.
+>
+> **Sale de la lista de buena fe (`integrante_habilitado`), no de
+> `estadistica_jugador`.** Aquella dice quién estaba habilitado para
+> jugar ese torneo con ese equipo; ésta sólo tiene fila para quien hizo
+> un gol o se comió una tarjeta. Partiendo de las estadísticas, un
+> arquero que jugó el torneo entero sin que le anotaran nada no
+> aparecería. Es el mismo error que tenía la tabla de posiciones.
+>
+> **No hay «8 partidos».** Este punto lo pedía, y no se puede: la columna
+> `estadistica_jugador.partidos_jugados` existe pero **nadie la
+> escribe**, porque el producto registra el resultado y los eventos de
+> cada partido, no quién entró a la cancha. Con lo que hay en la base no
+> se puede saber en cuántos partidos jugó alguien, y un número inventado
+> en un historial es peor que no tenerlo. Para que exista hace falta
+> registrar la alineación de cada partido —quién jugó, no sólo quién
+> estaba habilitado—, que es un ticket propio y toca la carga de
+> resultados.
+>
+> Tampoco se filtra por visibilidad: ni la del perfil (`02`, UC-04: un
+> perfil `restricted` oculta foto, posición y ciudad, nunca la
+> participación) ni la del torneo, siguiendo lo que ya hacía la ficha
+> pública del equipo, que lista todos sus torneos.
 
 ---
 

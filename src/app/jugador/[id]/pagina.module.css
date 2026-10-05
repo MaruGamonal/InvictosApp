@@ -127,3 +127,70 @@
   padding: 3px 8px;
   border-radius: var(--radio-pill);
 }
+
+/* UC-38 — El historial torneo por torneo. Misma caja que la lista de
+   equipos, con una línea más para las marcas (goles, tarjetas), que
+   sólo aparece cuando hay alguna. */
+.listaTorneos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.torneo {
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-sutil);
+}
+
+.enlaceTorneo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.enlaceTorneo:hover .torneoNombre {
+  text-decoration: underline;
+}
+
+.torneoCabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.torneoNombre {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.torneoAnio {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+}
+
+.torneoDetalle {
+  font-size: 12px;
+  color: var(--color-texto-secundario);
+}
+
+.torneoMarcas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.amarilla,
+.roja {
+  color: var(--color-texto-secundario);
+}

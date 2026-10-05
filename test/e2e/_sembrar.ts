@@ -2,6 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { obtenerPool } from '@/db/cliente';
 import { cargarResultado } from '@/services/competencia/cargarResultado';
+import { confirmarPlantel } from '@/services/inscripciones/confirmarPlantel';
 import {
   crearTorneoDePrueba,
   inscribirEquipos,
@@ -35,6 +36,9 @@ export interface EscenarioSembrado {
   equipoNombres: string[];
   /** El partido que quedó con resultado cargado, 3 a 1. */
   partidoConResultadoId: string;
+  /** El capitán del equipo local de ese partido: tiene historial con goles (UC-38). */
+  perfilConHistorialId: string;
+  perfilConHistorialNombre: string;
 }
 
 export async function sembrarEscenario(): Promise<EscenarioSembrado> {
@@ -58,19 +62,47 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
   // tiene filas: `posicion` se llena a medida que llegan los
   // resultados, no al confirmar el fixture. Sin esto la pantalla de
   // tabla mostraría su estado vacío y no habría nada que verificar.
-  const { rows: primerPartido } = await pool.query<{ id: string; version: number }>(
-    `SELECT id, version FROM partido
+  const { rows: primerPartido } = await pool.query<{
+    id: string;
+    version: number;
+    equipo_local_id: string;
+  }>(
+    `SELECT id, version, equipo_local_id FROM partido
      WHERE torneo_id = $1 ORDER BY numero_fecha ASC, id ASC LIMIT 1`,
     [escenario.torneoId],
   );
+
+  // El capitán del equipo local se anota en la lista de buena fe y hace
+  // los tres goles: con eso su perfil tiene historial (UC-38), que es lo
+  // que las pruebas de esa pantalla necesitan ver.
+  const local = equipos.find((equipo) => equipo.equipoId === primerPartido[0]!.equipo_local_id)!;
+  await confirmarPlantel(
+    {
+      torneoId: escenario.torneoId,
+      equipoId: local.equipoId,
+      integrantes: [{ perfilId: local.capitan.perfilId, rolEnTorneo: 'player' }],
+    },
+    local.capitan.contexto,
+  );
+
   await cargarResultado(
     {
       partidoId: primerPartido[0]!.id,
       version: primerPartido[0]!.version,
       golesLocal: 3,
       golesVisitante: 1,
+      eventos: [0, 1, 2].map(() => ({
+        perfilId: local.capitan.perfilId,
+        equipoId: local.equipoId,
+        tipoEvento: 'goal' as const,
+      })),
     },
     escenario.titular.contexto,
+  );
+
+  const { rows: perfilLocal } = await pool.query<{ nombre_visible: string }>(
+    'SELECT nombre_visible FROM perfil_deportivo WHERE id = $1',
+    [local.capitan.perfilId],
   );
 
   const { rows: torneo } = await pool.query<{ nombre: string; ciudad: string }>(
@@ -97,6 +129,8 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
     equipoIds: nombresEquipos.map((fila) => fila.id),
     equipoNombres: nombresEquipos.map((fila) => fila.nombre),
     partidoConResultadoId: primerPartido[0]!.id,
+    perfilConHistorialId: local.capitan.perfilId,
+    perfilConHistorialNombre: perfilLocal[0]!.nombre_visible,
   };
 
   writeFileSync(ARCHIVO_ESCENARIO, JSON.stringify(sembrado, null, 2));

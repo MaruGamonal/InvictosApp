@@ -52,7 +52,12 @@ export default defineConfig({
   webServer: {
     command: `npm run start -- --port ${PUERTO}`,
     url: `${BASE_URL}/api/salud`,
-    reuseExistingServer: !process.env.CI,
+    // Nunca reusar: `pretest:e2e` reconstruye la aplicación, y un
+    // servidor que quedó de una corrida anterior seguiría sirviendo el
+    // build viejo. Costó un rato descubrirlo —las pruebas de una
+    // pantalla recién agregada fallaban porque el servidor no la
+    // tenía—. Levantarlo de nuevo tarda un segundo.
+    reuseExistingServer: false,
     timeout: 120_000,
     stdout: 'pipe',
     stderr: 'pipe',

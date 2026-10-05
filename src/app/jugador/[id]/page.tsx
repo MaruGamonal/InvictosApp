@@ -13,12 +13,18 @@ import {
   obtenerPerfilPublico,
   type PerfilPublico,
 } from '@/services/identidad/obtenerPerfilPublico';
+import { obtenerHistorialDelJugador } from '@/services/identidad/obtenerHistorialDelJugador';
 import styles from './pagina.module.css';
 
 /**
  * UC-03 — Perfil público del jugador (`10`, sección 5). Un perfil
  * `restricted` oculta foto/posición/ciudad, nunca el nombre ni los
  * equipos (`02`, UC-04) — el servicio ya resuelve ese filtro.
+ *
+ * UC-38 — Y debajo, el historial torneo por torneo, que es lo que
+ * convierte esta pantalla de tarjeta de presentación en algo a lo que
+ * volver. Va después de Equipos porque responde otra pregunta: Equipos
+ * dice con quién juega hoy, el historial dice qué jugó.
  */
 
 // `generateMetadata` y la página piden el mismo perfil; `cache()` de React
@@ -73,6 +79,9 @@ function comoAño(fechaIso: string | null): string | null {
 export default async function PaginaPerfilPublico({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const perfil = await obtenerPerfilOFallar(id);
+  // Después del perfil y no en paralelo: si el id no existe, la página
+  // ya cortó con su 404 y esta consulta no llega a hacerse.
+  const historial = await obtenerHistorialDelJugador({ perfilId: perfil.id }, CONTEXTO_PUBLICO);
 
   return (
     <div className={styles.pagina}>
@@ -131,6 +140,55 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
             </ul>
           )}
         </section>
+
+        {historial.length > 0 && (
+          <section>
+            <h2 className={styles.tituloSeccion}>Torneos jugados</h2>
+            <ul className={styles.listaTorneos}>
+              {historial.map((torneo) => (
+                <li key={`${torneo.torneoId}-${torneo.equipoId}`} className={styles.torneo}>
+                  <Link href={`/torneo/${torneo.torneoId}`} className={styles.enlaceTorneo}>
+                    <div className={styles.torneoCabecera}>
+                      <span className={styles.torneoNombre}>{torneo.torneoNombre}</span>
+                      <span className={styles.torneoAnio}>{comoAño(torneo.fechaInicio)}</span>
+                    </div>
+                    <span className={styles.torneoDetalle}>
+                      {torneo.equipoNombre}
+                      {torneo.ciudadNombre && ` · ${torneo.ciudadNombre}`}
+                      {' · '}
+                      {obtenerEtiqueta('torneo.modalidad', torneo.modalidad).etiqueta}
+                    </span>
+                    {/* Sólo lo que tiene algo que decir: una fila de
+                        ceros no es un dato, es ruido. Y no hay
+                        "partidos jugados": nadie registra quién entró a
+                        la cancha, así que el número no existe. */}
+                    {(torneo.goles > 0 ||
+                      torneo.tarjetasAmarillas > 0 ||
+                      torneo.tarjetasRojas > 0 ||
+                      torneo.vecesJugadorDelPartido > 0) && (
+                      <span className={styles.torneoMarcas}>
+                        {torneo.goles > 0 && (
+                          <span>
+                            ⚽ {torneo.goles} {torneo.goles === 1 ? 'gol' : 'goles'}
+                          </span>
+                        )}
+                        {torneo.vecesJugadorDelPartido > 0 && (
+                          <span>⭐ {torneo.vecesJugadorDelPartido}</span>
+                        )}
+                        {torneo.tarjetasAmarillas > 0 && (
+                          <span className={styles.amarilla}>🟨 {torneo.tarjetasAmarillas}</span>
+                        )}
+                        {torneo.tarjetasRojas > 0 && (
+                          <span className={styles.roja}>🟥 {torneo.tarjetasRojas}</span>
+                        )}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   );
