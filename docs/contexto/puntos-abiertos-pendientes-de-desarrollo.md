@@ -26,7 +26,7 @@
 | 14 | Despublicación automática por inactividad (D-80) | Puede esperar | Decidido no construir en MVP |
 | 15 | Estados `rechazada` / `suspendida` de organización, `tipo`, seguir a una organización | Puede esperar | Propuesta sin empezar |
 | 16 | Tema oscuro (D-71) | Puede esperar | Decidido para después |
-| 17 | No hay pruebas end-to-end | Importante | 1806 unitarias, 6 de integración, 0 e2e |
+| 17 | No hay pruebas end-to-end | ~~Importante~~ | **Parcial** (`05/10`): 10 de punta a punta sobre las superficies públicas. Los recorridos con sesión siguen sin cubrir |
 | 18 | Plantilla de mail de Supabase sin actualizar | **Bloqueante** | Paso manual fuera del repo |
 | 19 | Comentarios desactualizados en el código | ~~Puede esperar~~ | **Cerrado** (`02/10`) |
 
@@ -399,6 +399,39 @@ La red automática es grande y buena en lo suyo: **1806 pruebas unitarias en 171
 Lo que no hay es una sola prueba que abra la aplicación y haga clic. No está Playwright ni Cypress en las dependencias. Todo lo que es «el botón lleva a la pantalla correcta», «el formulario manda lo que dice», «la sesión sobrevive al refresh» se verifica a mano o no se verifica.
 
 Esto es lo que hace que el plan de pruebas manual del documento hermano sea largo. Con tres o cuatro recorridos end-to-end automatizados (registro, crear torneo y publicar, inscribir equipo, cargar resultado) buena parte de ese plan pasaría a correr solo.
+
+> **PARCIALMENTE RESUELTO el 05/10.** Hay suite de punta a punta con
+> Playwright: `npm run pretest:e2e && npm run test:e2e`, 10 pruebas,
+> contra la aplicación **construida** y una base propia (`_e2e`)
+> sembrada con los servicios reales. Detalle en `test/e2e/README.md`.
+>
+> **Cubre las superficies públicas**: el descubrimiento con su selector
+> de ciudad —que es lo que sólo un navegador puede verificar, porque la
+> ciudad viaja en una cookie que escribe una Server Action—, la ficha
+> del torneo con sus pestañas, el fixture, la tabla de posiciones y las
+> puertas de acceso.
+>
+> **No cubre los recorridos con sesión**, que son los cuatro que este
+> punto pedía. Las sesiones las resuelve Supabase Auth contra su
+> servidor y este entorno no tiene credenciales. Para cubrirlos hacen
+> falta las de un proyecto de Supabase de pruebas, o un servidor que
+> imite su API de autenticación. Lo que no hay que hacer es abrirle una
+> puerta al código de producción para saltarse la sesión en pruebas.
+>
+> Dos cosas que aparecieron construyéndola y están anotadas en el README
+> porque cuestan una tarde: `unstable_cache` guarda sus entradas en
+> `.next/cache/fetch-cache` y **sobrevive al build y al reinicio del
+> servidor**, así que la corrida arrancaba sirviendo datos del sembrado
+> anterior; y como efecto de lo mismo, cambiar la base mientras la suite
+> corre no se ve, porque las superficies públicas están cacheadas a
+> propósito (T21).
+>
+> Hallazgo de paso, sin arreglar: **un torneo en curso sin ningún
+> resultado cargado muestra la tabla de posiciones vacía**. `posicion`
+> se llena a medida que llegan los resultados, no al confirmar el
+> fixture, así que entre el inicio del torneo y el primer resultado la
+> pantalla dice «Todavía no hay tabla de posiciones». Un usuario
+> esperaría ver a los equipos en cero.
 
 ---
 

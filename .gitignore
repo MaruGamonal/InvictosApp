@@ -9,3 +9,8 @@ dist/
 .DS_Store
 coverage/
 *.tsbuildinfo
+
+# Punta a punta: el informe de Playwright y los ids del escenario sembrado.
+playwright-report/
+test-results/
+test/e2e/.escenario.json

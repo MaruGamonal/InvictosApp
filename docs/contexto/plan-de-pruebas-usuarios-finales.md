@@ -26,7 +26,7 @@ Conviene tener esto claro antes de empezar, para no gastar tiempo probando lo qu
 
 **Lo que no cubre, y es lo que hay que probar a mano:**
 
-- **No hay una sola prueba end-to-end.** Ninguna abre la aplicación y hace clic. Que el botón lleve a la pantalla correcta, que el formulario mande lo que muestra, que la sesión sobreviva a un refresh: nada de eso está verificado.
+- **Las pruebas de punta a punta cubren sólo lo público** (desde el 05/10: `npm run test:e2e`, ver `test/e2e/README.md`). Descubrimiento, ficha del torneo, fixture, tabla y puertas de acceso ya corren solas. Todo lo que necesita sesión —que es la mayor parte de este plan— se sigue verificando a mano.
 - **Ningún correo real se envió nunca en una prueba.** Todo lo de Supabase Auth está mockeado.
 - **Ningún archivo real se subió nunca.** Escudos, logos e imágenes de torneo están mockeados.
 - **Nada se probó en un teléfono de verdad.** Las mediciones de ancho y de área táctil se hicieron en Chromium con el CSS real, que es mejor que adivinar pero no es un teléfono al sol.

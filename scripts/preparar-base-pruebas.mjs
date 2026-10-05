@@ -20,7 +20,10 @@ async function main() {
     );
   }
 
-  const urlPrueba = urlDePrueba(urlDev);
+  // `--sufijo _e2e` para la base de punta a punta; sin él, la de integración.
+  const indice = process.argv.indexOf('--sufijo');
+  const sufijo = indice !== -1 ? process.argv[indice + 1] : undefined;
+  const urlPrueba = urlDePrueba(urlDev, sufijo);
   const nombrePrueba = nombreDeBase(urlPrueba);
 
   const admin = new pg.Client({ connectionString: urlAdmin(urlDev) });

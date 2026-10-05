@@ -16,6 +16,8 @@
     "test": "vitest run",
     "pretest:integracion": "dotenv -e .env -q -- node scripts/preparar-base-pruebas.mjs",
     "test:integracion": "dotenv -e .env -q -- vitest run --config vitest.integration.config.ts",
+    "pretest:e2e": "dotenv -e .env -q -- node scripts/preparar-e2e.mjs",
+    "test:e2e": "dotenv -e .env -q -- node scripts/correr-e2e.mjs",
     "migrate:create": "node-pg-migrate create --migrations-dir db/migrations --",
     "migrate:up": "dotenv -e .env -q -- node-pg-migrate up --migrations-dir db/migrations",
     "migrate:down": "dotenv -e .env -q -- node-pg-migrate down --migrations-dir db/migrations",
@@ -37,6 +39,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

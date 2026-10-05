@@ -7,11 +7,15 @@
  * pool de cada test ahí — nunca a la base de desarrollo. Así, correr
  * los tests de integración no pide ninguna variable de entorno nueva:
  * alcanza con el `DATABASE_URL` que ya existe.
+ *
+ * El sufijo es parámetro porque la suite de punta a punta usa su propia
+ * base (`_e2e`): comparte el mecanismo pero no los datos, así que una
+ * corrida no le pisa el escenario a la otra.
  */
-export function urlDePrueba(urlDesarrollo) {
+export function urlDePrueba(urlDesarrollo, sufijo = '_test') {
   const url = new URL(urlDesarrollo);
   const nombreBase = url.pathname.replace(/^\//, '');
-  url.pathname = `/${nombreBase}_test`;
+  url.pathname = `/${nombreBase}${sufijo}`;
   return url.toString();
 }
 

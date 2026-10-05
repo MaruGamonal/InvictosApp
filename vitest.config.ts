@@ -8,12 +8,13 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
-    // Los tests de integración (T27) tienen su propia suite —
-    // `vitest.integration.config.ts`, corrida por
-    // `npm run test:integracion`— porque necesitan la base de pruebas
-    // real que esa suite prepara antes de arrancar; acá excluidos para
-    // que `npm test` (mockeado, sin Postgres) nunca los toque.
-    exclude: ['node_modules/**', 'test/integracion/**'],
+    // Las otras dos suites tienen su propio corredor y acá se excluyen,
+    // para que `npm test` —mockeado, sin Postgres ni navegador— nunca
+    // las toque: integración (T27) necesita la base real que
+    // `npm run test:integracion` prepara, y las de punta a punta las
+    // corre Playwright, no Vitest (sus `.spec.ts` ni siquiera
+    // compilarían acá).
+    exclude: ['node_modules/**', 'test/integracion/**', 'test/e2e/**'],
   },
   resolve: {
     alias: {
