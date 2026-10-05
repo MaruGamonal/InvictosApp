@@ -8,6 +8,20 @@ import { validarEntrada } from '@/lib/validacion';
  * UC-35 — Tabla de posiciones, pública y sin sesión (`10`, 4.8). Lee el
  * valor guardado por `cargarResultado`, nunca lo recalcula (`10`, 7.1).
  *
+ * **Parte de los equipos del grupo, no de las filas de `posicion`.**
+ * `posicion` se escribe recién cuando llega el primer resultado de cada
+ * equipo, así que un torneo recién arrancado no tenía ninguna fila y la
+ * tabla aparecía vacía —con el fixture ya confirmado y los partidos a la
+ * vista—. Quien entra espera ver a todos los equipos en cero, que es lo
+ * que la tabla dice al empezar cualquier torneo. Los equipos salen de
+ * `partido`, que es lo único que sabe quién juega en qué grupo: no hay
+ * tabla de pertenencia, y en un formato de zonas la inscripción al
+ * torneo no alcanza para saber a cuál fue cada equipo.
+ *
+ * Se resuelve leyendo, no escribiendo filas en cero al confirmar el
+ * fixture: así vale también para los torneos que ya estaban en curso,
+ * sin migración ni relleno.
+ *
  * Orden: `puntos + ajuste_puntos` DESC y después los criterios de
  * desempate configurados del torneo, en su orden (`torneo.criterios_desempate`,
  * default `goal_difference → goals_for → head_to_head`). Los dos
@@ -181,18 +195,36 @@ async function construirTablaDeGrupo(
 ): Promise<TablaDeGrupo> {
   const pool = obtenerPool();
   const { rows } = await pool.query<FilaPosicionCruda>(
-    `SELECT p.equipo_id, e.nombre AS equipo_nombre, e.escudo_url AS equipo_escudo_url,
-            p.puntos, p.ajuste_puntos, p.partidos_jugados, p.ganados, p.empatados, p.perdidos,
-            p.goles_favor, p.goles_contra, p.diferencia_gol,
+    `WITH equipos_del_grupo AS (
+       SELECT equipo_local_id AS equipo_id FROM partido WHERE grupo_id = $1
+       UNION
+       SELECT equipo_visitante_id FROM partido WHERE grupo_id = $1
+     )
+     SELECT eg.equipo_id, e.nombre AS equipo_nombre, e.escudo_url AS equipo_escudo_url,
+            coalesce(p.puntos, 0) AS puntos,
+            coalesce(p.ajuste_puntos, 0) AS ajuste_puntos,
+            coalesce(p.partidos_jugados, 0) AS partidos_jugados,
+            coalesce(p.ganados, 0) AS ganados,
+            coalesce(p.empatados, 0) AS empatados,
+            coalesce(p.perdidos, 0) AS perdidos,
+            coalesce(p.goles_favor, 0) AS goles_favor,
+            coalesce(p.goles_contra, 0) AS goles_contra,
+            coalesce(p.diferencia_gol, 0) AS diferencia_gol,
+            -- El parámetro y no p.grupo_id: con el LEFT JOIN, un equipo
+            -- sin fila en posicion traería grupo_id nulo y el conteo
+            -- daría cero aunque hubiera ganado por presentación.
             (SELECT count(*) FROM partido pw
-             WHERE pw.grupo_id = p.grupo_id AND pw.estado = 'walkover'
-               AND ((pw.equipo_local_id = p.equipo_id AND pw.goles_local > pw.goles_visitante)
-                 OR (pw.equipo_visitante_id = p.equipo_id AND pw.goles_visitante > pw.goles_local))
+             WHERE pw.grupo_id = $1 AND pw.estado = 'walkover'
+               AND ((pw.equipo_local_id = eg.equipo_id AND pw.goles_local > pw.goles_visitante)
+                 OR (pw.equipo_visitante_id = eg.equipo_id AND pw.goles_visitante > pw.goles_local))
             ) AS ganados_por_presentacion
-     FROM posicion p
-     JOIN equipo e ON e.id = p.equipo_id
-     WHERE p.grupo_id = $1
-     ORDER BY (p.puntos + p.ajuste_puntos) DESC, p.diferencia_gol DESC, p.goles_favor DESC`,
+     FROM equipos_del_grupo eg
+     JOIN equipo e ON e.id = eg.equipo_id
+     LEFT JOIN posicion p ON p.grupo_id = $1 AND p.equipo_id = eg.equipo_id
+     ORDER BY (coalesce(p.puntos, 0) + coalesce(p.ajuste_puntos, 0)) DESC,
+              coalesce(p.diferencia_gol, 0) DESC,
+              coalesce(p.goles_favor, 0) DESC,
+              e.nombre ASC`,
     [grupo.id],
   );
   let filas = rows.map(aFila);

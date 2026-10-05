@@ -68,7 +68,11 @@ function mockearDb(opciones: {
             ],
           };
         }
-        if (t.startsWith('SELECT p.equipo_id, e.nombre')) {
+        // La consulta arranca con el CTE que saca los equipos del grupo
+        // de `partido`: la tabla se arma desde ahí y no desde `posicion`,
+        // para que un torneo sin resultados todavía muestre a todos en
+        // cero en vez de aparecer vacío.
+        if (t.startsWith('WITH equipos_del_grupo')) {
           const grupoId = valores[0] as string;
           return { rows: opciones.posicionPorGrupo?.[grupoId] ?? [] };
         }

@@ -426,12 +426,14 @@ Esto es lo que hace que el plan de pruebas manual del documento hermano sea larg
 > corre no se ve, porque las superficies públicas están cacheadas a
 > propósito (T21).
 >
-> Hallazgo de paso, sin arreglar: **un torneo en curso sin ningún
-> resultado cargado muestra la tabla de posiciones vacía**. `posicion`
-> se llena a medida que llegan los resultados, no al confirmar el
-> fixture, así que entre el inicio del torneo y el primer resultado la
-> pantalla dice «Todavía no hay tabla de posiciones». Un usuario
-> esperaría ver a los equipos en cero.
+> Hallazgo de paso: ~~un torneo en curso sin ningún resultado cargado
+> muestra la tabla de posiciones vacía.~~ **Arreglado el 05/10.** La
+> tabla ahora parte de los equipos del grupo —que salen de `partido`, lo
+> único que sabe quién juega en cuál— y hace `LEFT JOIN` contra
+> `posicion`, así que los equipos sin fila aparecen en cero. Se resolvió
+> leyendo y no escribiendo filas en cero al confirmar el fixture, para
+> que valga también para los torneos que ya estaban en curso, sin
+> migración ni relleno.
 
 ---
 
