@@ -27,7 +27,7 @@
 | 15 | Estados `rechazada` / `suspendida` de organización, `tipo`, seguir a una organización | Puede esperar | Propuesta sin empezar |
 | 16 | Tema oscuro (D-71) | Puede esperar | Decidido para después |
 | 17 | No hay pruebas end-to-end | ~~Importante~~ | **Parcial** (`05/10`): 10 de punta a punta sobre las superficies públicas. Los recorridos con sesión siguen sin cubrir |
-| 18 | Plantilla de mail de Supabase sin actualizar | **Bloqueante** | Paso manual fuera del repo |
+| 18 | Plantilla de mail de Supabase sin actualizar | ~~Bloqueante~~ | **Hecho**, verificado contra el panel el `06/10`: las dos plantillas usan `token_hash` y la lista de Redirect URLs cubre todo con un globstar |
 | 19 | Comentarios desactualizados en el código | ~~Puede esperar~~ | **Cerrado** (`02/10`) |
 
 ---
@@ -469,7 +469,35 @@ Esto es lo que hace que el plan de pruebas manual del documento hermano sea larg
 
 ## 18. La plantilla de mail de Supabase
 
-**Paso manual, fuera del repositorio, bloqueante.**
+> **HECHO. Verificado contra el panel el 06/10**, y estaba resuelto de
+> una forma distinta a la que este punto proponía.
+>
+> Las dos plantillas usan `{{ .SiteURL }}` con la ruta escrita a mano, en
+> vez de `{{ .RedirectTo }}`:
+>
+> ```
+> {{ .SiteURL }}/acceso/confirmar?token_hash={{ .TokenHash }}&type=magiclink
+> {{ .SiteURL }}/restablecer-password/confirmar?token_hash={{ .TokenHash }}&type=recovery
+> ```
+>
+> **Funciona, y es más robusto.** `{{ .RedirectTo }}` valida la URL
+> contra la lista de Redirect URLs y, si no coincide, la reemplaza por el
+> Site URL en silencio; `{{ .SiteURL }}` no pasa por esa validación, así
+> que no se puede romper por un error en la lista. Las dos rutas escritas
+> a mano coinciden exactamente con lo que el código espera.
+>
+> Lo único que descarta es el `organizacion/<id>` que el código agrega al
+> pedir verificación de una organización, y eso ya no importa: desde el
+> 02/10 ese correo lo arma el producto y no pasa por esta plantilla.
+>
+> Las Redirect URLs son `https://www.invicta.com.ar/**`. Siguen haciendo
+> falta para las **invitaciones**, que son el único flujo que todavía sale
+> con la plantilla por defecto y vuelve por `/auth/callback`.
+>
+> El paso a paso de lo que queda fuera del repositorio está en
+> `pasos-pendientes-de-tu-lado.md`.
+
+**Lo que este punto proponía, para que quede el registro:**
 
 > **Actualización del 02/10.** La verificación de organización ya **no**
 > depende de esto: ese correo lo arma y lo manda el producto

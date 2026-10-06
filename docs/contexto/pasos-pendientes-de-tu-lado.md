@@ -1,130 +1,95 @@
 # Lo que queda de tu lado, paso a paso
 
-Todo esto pasa **fuera del repositorio**: en el panel de Supabase, en el
-de Vercel y en una terminal de SQL. Nada de esto lo puede hacer el
-código, y hasta que esté, dos flujos de la aplicación no funcionan.
-
-El orden importa en un solo lugar, y está marcado.
+> **Revisado el 06/10 contra el panel real.** Las tres cosas de Supabase
+> —las dos plantillas y las Redirect URLs— **ya están hechas**. Lo que
+> queda es desplegar, comprobar y probar.
 
 ---
 
-## 1. Plantilla de Magic Link, en Supabase
+## Lo que ya está, y por qué está bien
 
-**Dónde:** Supabase → *Authentication* → *Emails* → pestaña **Magic Link**.
-
-**Qué hacer:** que el enlace del correo apunte a esto, en vez del
-`{{ .ConfirmationURL }}` que viene por defecto:
+### Plantilla de Magic Link
 
 ```
-{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=magiclink
+{{ .SiteURL }}/acceso/confirmar?token_hash={{ .TokenHash }}&type=magiclink
 ```
 
-Si la plantilla es HTML, lo que cambia es el `href` del botón o del
-enlace. El texto del correo no hace falta tocarlo.
+### Plantilla de Reset Password
 
-**Para qué:** es el correo de **confirmación de cuenta**.
+```
+{{ .SiteURL }}/restablecer-password/confirmar?token_hash={{ .TokenHash }}&type=recovery
+```
 
-**Por qué, si el de ahora "anda":** con el enlace por defecto pasan dos
-cosas, las dos silenciosas.
+### Redirect URLs
 
-1. El enlace de Supabase es un `GET` que **consume el token** y recién
-   después redirige. Los escáneres de correo —los de Gmail corporativo,
-   los antivirus— abren los enlaces para revisarlos, así que el token se
-   gasta antes de que la persona haga clic y el enlace le llega vencido.
-   Con `token_hash` el enlace cae en una pantalla nuestra que **no canjea
-   nada**: muestra un botón, y el canje lo hace el `POST` de ese botón.
-   Los escáneres siguen enlaces, no completan formularios.
-2. El canje por código necesita una cookie que el navegador guardó al
-   pedir el enlace, y estos correos los emite un cliente que no escribe
-   cookies: esa cookie nunca existió.
+```
+https://www.invicta.com.ar/**
+```
 
-**Cómo saber que quedó bien:** pedí un reenvío de confirmación y mirá el
-`href` del correo. Tiene que empezar con
-`https://www.invicta.com.ar/acceso/confirmar`. Si empieza con
-`https://<algo>.supabase.co/auth/v1/verify`, no se guardó.
+**Las dos plantillas usan `token_hash`, que es lo que importaba.** Con
+eso quedan resueltos los dos problemas del enlace por defecto:
+
+1. **Los escáneres de correo ya no gastan el enlace.**
+   `{{ .ConfirmationURL }}` apunta a un `GET` de Supabase que consume el
+   token y recién después redirige; los escáneres abren los enlaces para
+   revisarlos, así que el token se quemaba antes de que la persona
+   hiciera clic. Con `token_hash` el enlace cae en una pantalla nuestra
+   que no canjea nada: muestra un botón, y el canje lo hace el `POST` de
+   ese botón. Los escáneres siguen enlaces, no completan formularios.
+2. **Ya no hace falta una cookie que no existía.** El canje por código
+   necesita un verificador PKCE guardado en el navegador donde se pidió
+   el enlace. Por eso recuperar la contraseña en la computadora y abrir
+   el correo en el teléfono no funcionaba.
+
+**Sobre `{{ .SiteURL }}` en vez de `{{ .RedirectTo }}`:** está bien, y
+tiene una ventaja. `{{ .RedirectTo }}` toma la URL que el código pide y
+**la valida contra la lista de Redirect URLs**: si no coincide, Supabase
+la reemplaza por el Site URL en silencio, y el enlace termina en la
+portada. `{{ .SiteURL }}` no pasa por esa validación, así que no se puede
+romper por un error en la lista. Como las dos rutas están escritas a
+mano en la plantilla y coinciden exactamente con lo que el código espera,
+no se pierde nada.
+
+Lo único que esa forma descarta es el `organizacion/<id>` del final, que
+el código agrega al pedir verificación de una organización. **No
+importa**: desde el 02/10 ese correo lo arma y lo manda el producto por
+Resend, con su propia URL, y no pasa por esta plantilla. El camino que sí
+la usaba quedó como respaldo, para si algún día faltan las variables de
+Resend, y aun ahí la verificación se resuelve del lado del servidor.
+
+**La lista `/**` sigue haciendo falta** aunque las dos plantillas no la
+usen: las **invitaciones** a administradores y colaboradores siguen
+saliendo con la plantilla por defecto de Supabase, que sí vuelve por
+`/auth/callback` validando contra esta lista. El globstar lo cubre. Y un
+comodín sobre el propio dominio no abre ningún riesgo: sólo permite
+volver a tu sitio.
+
+### Una sola cosa para mirar
+
+Que el **Site URL** no termine en barra. Si está cargado como
+`https://www.invicta.com.ar/`, las plantillas arman
+`https://www.invicta.com.ar//acceso/confirmar`, con doble barra. Tiene
+que ser `https://www.invicta.com.ar`, sin barra final.
 
 ---
 
-## 2. Plantilla de Reset Password, en Supabase
-
-**Dónde:** mismo lugar, pestaña **Reset Password**.
-
-```
-{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery
-```
-
-> ⚠️ **Este va junto con el despliegue del paso 4.** Mirá la nota al
-> final de ese paso antes de tocarlo.
-
-**Para qué:** recuperar la contraseña.
-
-**Por qué:** los mismos dos problemas de arriba, y uno más que se nota
-enseguida con usuarios reales: **pedir el reset en la computadora y abrir
-el correo en el teléfono no funcionaba**. La cookie que el canje por
-código necesita quedó en el otro dispositivo.
-
-**Cómo saber que quedó bien:** ese caso exacto. Pedí la recuperación en
-una pantalla y abrí el correo en otra. Vas a ver un paso nuevo —una
-pantalla con un botón «Continuar» antes de poder cambiar la contraseña—:
-eso es a propósito, es lo que impide que un escáner gaste el enlace.
-
----
-
-## 3. URLs de vuelta permitidas, en Supabase
-
-**Dónde:** Supabase → *Authentication* → *URL Configuration* → **Redirect URLs**.
-
-**Qué agregar** (las dos):
-
-```
-https://www.invicta.com.ar/acceso/confirmar
-https://www.invicta.com.ar/restablecer-password/confirmar
-```
-
-**Por qué:** Supabase consulta esa lista antes de redirigir y, **si la
-URL no está, usa el Site URL en su lugar — sin avisar y sin error**. El
-correo llega, el enlace anda, y la persona termina en la portada en vez
-de donde tenía que ir.
-
-**Opcional, por las dudas:**
-
-```
-https://www.invicta.com.ar/acceso/confirmar/organizacion/*
-```
-
-Esa sólo hace falta para el camino de respaldo de la verificación de
-organización, el que corre si alguna vez faltan las variables de Resend.
-Por el camino normal el enlace lo arma el producto y no pasa por esta
-lista.
-
----
-
-## 4. Desplegar
+## 1. Desplegar
 
 **Dónde:** Vercel.
 
-**Qué hace:** aplica las migraciones pendientes y deja corriendo el
-código nuevo. Las variables `RESEND_API_KEY` y `CORREO_REMITENTE` ya
-están cargadas desde el 02/10, así que no hay nada que agregar.
+Aplica las migraciones pendientes y deja corriendo el código nuevo. Las
+variables `RESEND_API_KEY` y `CORREO_REMITENTE` ya están desde el 02/10,
+así que no hay nada que agregar.
 
-> ⚠️ **El paso 2 y este van juntos, en el mismo rato.**
->
-> El código nuevo manda el enlace de recuperación a
-> `/restablecer-password/confirmar`, y la plantilla vieja arma ese enlace
-> con `?code=` en vez de `token_hash`: esa pantalla va a decir «El enlace
-> está incompleto». Al revés pasa lo simétrico, así que **no hay un orden
-> que evite el hueco**. Son minutos, pero no dejes el despliegue hecho y
-> la plantilla para el día siguiente.
->
-> Los enlaces de recuperación que ya salieron por correo antes del
-> despliegue siguen funcionando: el camino viejo no se borró.
+Ya no hay que coordinarlo con ningún cambio de plantilla: las dos están
+puestas de antes, y el código nuevo manda a las mismas rutas que ellas
+ya apuntan.
 
 ---
 
-## 5. Comprobar que el despliegue quedó sano
+## 2. Comprobar que el despliegue quedó sano
 
-Cuatro consultas en el editor SQL de Supabase. Si alguna no da lo
-esperado, el despliegue no terminó bien.
+Cuatro consultas en el editor SQL de Supabase.
 
 **a) Las migraciones corrieron.**
 
@@ -142,11 +107,11 @@ select jobname, schedule from cron.job order by jobname;
 
 Esperado, exactamente estas tres:
 
-| jobname | schedule |
-|---|---|
-| `confirmar-resultados-vencidos` | `0 * * * *` |
-| `limpiar-intentos-limitados` | `7 5 * * *` |
-| `recalcular-score` | `20 4 * * *` |
+| jobname                        | schedule    |
+| ------------------------------ | ----------- |
+| `confirmar-resultados-vencidos`| `0 * * * *` |
+| `limpiar-intentos-limitados`   | `7 5 * * *` |
+| `recalcular-score`             | `20 4 * * *`|
 
 **`despachar-correos` NO tiene que aparecer.** El correo de producto está
 apagado por decisión, y esa tarea quedó desagendada a propósito.
@@ -171,38 +136,40 @@ Esperado: `200` con `{"conectado":true}`.
 
 ---
 
-## 6. Correr el plan de pruebas
+## 3. Correr el plan de pruebas
 
 Está en `docs/contexto/plan-de-pruebas-usuarios-finales.md`.
 
-**Qué ya no hace falta probar a mano:** el descubrimiento con el selector
-de ciudad, la ficha del torneo con sus pestañas, el fixture, la tabla de
-posiciones, el perfil del jugador y las puertas de acceso. Todo eso lo
-cubren las pruebas de punta a punta desde el 05/10.
+**Qué ya no hace falta probar a mano:** descubrimiento con selector de
+ciudad, ficha del torneo con sus pestañas, fixture, tabla de posiciones,
+perfil del jugador y puertas de acceso. Todo eso lo cubren las pruebas de
+punta a punta desde el 05/10.
 
-**Qué sí hay que probar a mano:** todo lo que necesita sesión, que es la
-mayor parte. Ninguna prueba automática puede iniciar sesión, porque eso
-pasa por Supabase Auth y el entorno de pruebas no tiene credenciales.
+**Qué sí:** todo lo que necesita sesión, que es la mayor parte. Ninguna
+prueba automática puede iniciar sesión, porque eso pasa por Supabase Auth
+y el entorno de pruebas no tiene credenciales.
 
-**Los tres casos que yo probaría primero**, porque son los que cambiaron
-y los que fallan de forma silenciosa:
+**Los tres casos que probaría primero**, porque son los que cambiaron y
+los que fallan en silencio:
 
-1. Pedir verificación de una organización → el correo tiene que decir
-   **«Verificá \<nombre de tu organización\>»** en el asunto. Si dice algo
-   genérico, falta alguna variable de Resend.
-2. Recuperar la contraseña **desde otro dispositivo** (pedirla en la
-   computadora, abrir el correo en el teléfono).
-3. Confirmar una cuenta nueva de punta a punta.
+1. **Pedir verificación de una organización** → el asunto del correo
+   tiene que decir **«Verificá \<nombre de tu organización\>»**. Si dice
+   algo genérico, falta alguna variable de Resend.
+2. **Recuperar la contraseña desde otro dispositivo**: pedirla en la
+   computadora, abrir el correo en el teléfono. Era el caso que fallaba.
+3. **Confirmar una cuenta nueva** de punta a punta.
+
+En 2 y 3 vas a ver un paso nuevo —una pantalla con un botón «Continuar»
+antes de entrar—: es a propósito, es lo que impide que un escáner de
+correo gaste el enlace.
 
 ---
 
 ## Resumen
 
-| # | Dónde | Qué |
-|---|---|---|
-| 1 | Supabase → Emails → Magic Link | Cambiar el enlace a `token_hash` |
-| 2 | Supabase → Emails → Reset Password | Cambiar el enlace a `token_hash` ⚠️ junto con el 4 |
-| 3 | Supabase → URL Configuration | Agregar dos Redirect URLs |
-| 4 | Vercel | Desplegar |
-| 5 | SQL de Supabase | Cuatro comprobaciones |
-| 6 | La aplicación | Correr el plan de pruebas |
+| #   | Dónde            | Qué                                      |
+| --- | ---------------- | ---------------------------------------- |
+| ✅  | Supabase         | Las dos plantillas y las Redirect URLs    |
+| 1   | Vercel           | Desplegar                                 |
+| 2   | SQL de Supabase  | Cuatro comprobaciones                     |
+| 3   | La aplicación    | Correr el plan de pruebas                 |
