@@ -1,6 +1,7 @@
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
+import { publicarTorneosNoListados } from './_publicarTorneosNoListados';
 
 /**
  * UC-06 — Al volver de un enlace de correo, aplica la verificación
@@ -57,6 +58,11 @@ export const confirmarVerificacionesPendientes: Servicio<void, VerificacionAplic
      RETURNING id, nombre`,
     [contexto.usuarioId, String(HORAS_DE_VALIDEZ)],
   );
+
+  // Mismo cierre que `confirmarVerificacionBasica`: la verificación no
+  // termina en la organización, termina en que sus torneos publicados se
+  // puedan encontrar (D-51).
+  for (const fila of rows) await publicarTorneosNoListados(fila.id);
 
   return rows.map((fila) => ({ organizacionId: fila.id, nombre: fila.nombre }));
 };

@@ -3,6 +3,7 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
+import { publicarTorneosNoListados } from './_publicarTorneosNoListados';
 
 /**
  * UC-06 — Confirma la verificación básica. Se invoca desde
@@ -44,6 +45,11 @@ export const confirmarVerificacionBasica: Servicio<
      WHERE id = $1`,
     [datos.organizacionId],
   );
+
+  // Verificarse es lo que D-51 pide a cambio de aparecer en las
+  // búsquedas: los torneos que se publicaron sin verificación entran
+  // ahora al descubrimiento.
+  await publicarTorneosNoListados(datos.organizacionId);
 
   return { nivelVerificacion: 'basic' };
 };

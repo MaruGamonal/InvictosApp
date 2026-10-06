@@ -20,8 +20,10 @@ import {
  * **Solo `visibilidad = 'public'`** (`06`, D-21b): un `unlisted` nunca
  * aparece acá, solo por su link directo. Un `cancelled` tampoco — nadie
  * busca dónde jugar un torneo que no va a jugarse. `draft` queda afuera
- * por construcción: `visibilidad` solo pasa a `public` en el mismo paso
- * que `publicarTorneo` saca al torneo de `draft` (T10).
+ * por construcción: nace `unlisted` y solo `publicarTorneo` (T10) le
+ * pone la visibilidad, en el mismo paso que lo saca de `draft`. Un
+ * torneo publicado sin verificación entra después, cuando la
+ * organización se verifica (`_publicarTorneosNoListados`).
  *
  * **Orden** (`06`, D-26b, D-51), de mayor a menor prioridad:
  * 1. Inscripciones abiertas primero.
