@@ -97,7 +97,7 @@ Cuatro consultas en el editor SQL de Supabase.
 select name from pgmigrations order by run_on desc limit 1;
 ```
 
-Esperado: `1791257068260_alineacion-por-partido`.
+Esperado: `1791320122646_torneos-de-organizacion-verificada-al-descubrimiento`.
 
 **b) Las tareas programadas están donde tienen que estar.**
 
@@ -149,8 +149,8 @@ punta a punta desde el 05/10.
 prueba automática puede iniciar sesión, porque eso pasa por Supabase Auth
 y el entorno de pruebas no tiene credenciales.
 
-**Los tres casos que probaría primero**, porque son los que cambiaron y
-los que fallan en silencio:
+**Los casos que probaría primero**, porque son los que cambiaron y los
+que fallan en silencio:
 
 1. **Pedir verificación de una organización** → el asunto del correo
    tiene que decir **«Verificá \<nombre de tu organización\>»**. Si dice
@@ -158,10 +158,40 @@ los que fallan en silencio:
 2. **Recuperar la contraseña desde otro dispositivo**: pedirla en la
    computadora, abrir el correo en el teléfono. Era el caso que fallaba.
 3. **Confirmar una cuenta nueva** de punta a punta.
+4. **Verificar una organización que ya tiene un torneo publicado** → el
+   torneo tiene que aparecer en la búsqueda de su ciudad enseguida. Antes
+   no aparecía nunca (ver abajo).
+5. **Un torneo en borrador**: al entrar a gestionarlo, la primera
+   pestaña tiene que ser el bloque de publicar, con la lista de datos que
+   falten. Publicar ya no está en Configuración.
 
 En 2 y 3 vas a ver un paso nuevo —una pantalla con un botón «Continuar»
 antes de entrar—: es a propósito, es lo que impide que un escáner de
 correo gaste el enlace.
+
+---
+
+## Lo que repara el despliegue, sin que hagas nada
+
+Dos cosas reportadas el 06/10 que ya están arregladas en el código y se
+aplican solas al desplegar:
+
+**Los torneos de una organización verificada no aparecían en las
+búsquedas.** La visibilidad se decidía al publicar y nunca se volvía a
+mirar: un torneo publicado antes de verificar la organización quedaba
+fuera del descubrimiento para siempre. Ahora verificar los mete, y la
+migración `1791320122646` repara los que ya habían quedado afuera — no
+hay que volver a publicarlos ni tocar nada a mano. **Si después del
+despliegue tu torneo sigue sin aparecer**, revisá que la organización
+figure verificada y que el torneo no esté en borrador ni cancelado.
+
+**El aviso de "Reenviar enlace" se duplicaba y no decía qué pasaba.**
+Eran tres cosas: el reintento apilaba un segundo aviso idéntico; el
+motivo del servidor se descartaba y se mostraba "Probá de nuevo" junto a
+un botón que iba a volver a fallar; y el reenvío automático se comía
+entera la cuota del botón, así que tocar tres veces una acción bloqueada
+dejaba "Reenviar enlace" muerto antes del primer toque. Si volvés a ver
+un fallo ahí, ahora el aviso dice el motivo real.
 
 ---
 
