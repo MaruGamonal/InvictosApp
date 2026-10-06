@@ -96,6 +96,9 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
         equipoId: local.equipoId,
         tipoEvento: 'goal' as const,
       })),
+      // Y la alineación (UC-38): con esto el partido muestra quiénes
+      // jugaron y el historial del jugador cuenta un partido.
+      alineaciones: [{ perfilId: local.capitan.perfilId, equipoId: local.equipoId }],
     },
     escenario.titular.contexto,
   );

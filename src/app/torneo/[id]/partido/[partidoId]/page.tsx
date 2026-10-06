@@ -8,6 +8,7 @@ import { conNombreProducto } from '@/lib/nombreProducto';
 import { Marcador } from '@/components/Marcador';
 import { Escudo } from '@/components/Escudo';
 import { PanelResponderResultado } from './PanelResponderResultado';
+import { PanelAlineacion } from './PanelAlineacion';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Partido') };
@@ -117,6 +118,20 @@ export default async function PaginaPartido({
             <h2 className={styles.tituloObjecion}>Objetado por {equipoQueObjeto.nombre}</h2>
             <blockquote className={styles.motivo}>{partido.objecionAbierta.motivo}</blockquote>
           </section>
+        )}
+
+        {hayResultado && (
+          <PanelAlineacion
+            partidoId={partido.id}
+            version={partido.version}
+            golesLocal={partido.golesLocal!}
+            golesVisitante={partido.golesVisitante!}
+            local={partido.local}
+            visitante={partido.visitante}
+            alineacion={partido.alineacion}
+            habilitados={partido.habilitados}
+            puedeCargar={partido.puedeCargarAlineacion}
+          />
         )}
 
         <PanelResponderResultado

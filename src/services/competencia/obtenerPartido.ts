@@ -42,6 +42,22 @@ export interface ObjecionAbierta {
   fechaPresentacion: string;
 }
 
+/** Alguien que jugó este partido (UC-38). */
+export interface JugadorAlineado {
+  perfilId: string;
+  nombreVisible: string;
+  equipoId: string;
+  fueTitular: boolean;
+}
+
+/** Alguien que **podía** jugar: la lista de buena fe del torneo. */
+export interface JugadorHabilitado {
+  perfilId: string;
+  nombreVisible: string;
+  equipoId: string;
+  numeroCamiseta: number | null;
+}
+
 export interface PartidoDetallado {
   id: string;
   torneoId: string;
@@ -49,6 +65,12 @@ export interface PartidoDetallado {
   numeroFecha: number;
   estado: string;
   estadoResultado: 'pending' | 'loaded' | 'confirmed' | 'disputed';
+  /**
+   * Control de concurrencia optimista: quien vaya a escribir sobre este
+   * partido tiene que devolverla, y `cargarResultado` rechaza si cambió
+   * mientras tanto. Sin esto, la pantalla no puede guardar nada.
+   */
+  version: number;
   golesLocal: number | null;
   golesVisitante: number | null;
   local: EquipoDelPartido;
@@ -67,6 +89,19 @@ export interface PartidoDetallado {
   puedeResponder: boolean;
   /** Quien mira gestiona el torneo y hay una objeción esperando resolución. */
   puedeResolverObjecion: boolean;
+  /**
+   * Quiénes jugaron, los dos equipos juntos. Público: quién jugó un
+   * partido es un hecho del partido, como el marcador.
+   */
+  alineacion: JugadorAlineado[];
+  /** Quien mira gestiona el torneo y el partido admite cargar la alineación. */
+  puedeCargarAlineacion: boolean;
+  /**
+   * Quiénes podían jugar, para armar la alineación. Vacío salvo que
+   * `puedeCargarAlineacion`: la lista de buena fe tiene su propia
+   * pantalla y sus propios permisos, y no se filtra por acá.
+   */
+  habilitados: JugadorHabilitado[];
 }
 
 interface Fila {
@@ -76,6 +111,7 @@ interface Fila {
   numero_fecha: number;
   estado: string;
   estado_resultado: PartidoDetallado['estadoResultado'];
+  version: number;
   goles_local: number | null;
   goles_visitante: number | null;
   equipo_local_id: string;
@@ -100,7 +136,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
 
   const { rows } = await pool.query<Fila>(
     `SELECT p.id, p.torneo_id, t.nombre AS torneo_nombre, p.numero_fecha, p.estado,
-            p.estado_resultado, p.goles_local, p.goles_visitante,
+            p.estado_resultado, p.version, p.goles_local, p.goles_visitante,
             p.equipo_local_id, el.nombre AS equipo_local_nombre, el.escudo_url AS equipo_local_escudo,
             p.equipo_visitante_id, ev.nombre AS equipo_visitante_nombre,
             ev.escudo_url AS equipo_visitante_escudo,
@@ -147,16 +183,64 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
     equipoQueResponde !== null &&
     (await puedeResponderPorElEquipo(pool, contexto, equipoQueResponde));
 
-  let puedeResolverObjecion = false;
-  if (objecion && contexto.usuarioId) {
+  // Un solo chequeo para las dos cosas que dependen de gestionar el
+  // torneo: resolver una objeción y cargar la alineación.
+  let gestionaElTorneo = false;
+  if (contexto.usuarioId) {
     try {
       await verificarPermisoTorneo(contexto, fila.torneo_id, 'cargar_resultados');
-      puedeResolverObjecion = true;
+      gestionaElTorneo = true;
     } catch (error) {
-      // No gestiona el torneo: ve la objeción, no la resuelve. Un
-      // error distinto de permiso sí es un problema real.
+      // No lo gestiona: ve, no toca. Un error distinto de permiso sí es
+      // un problema real.
       if (!esErrorDeAplicacion(error) || error.codigo !== 'SIN_PERMISO') throw error;
     }
+  }
+  const puedeResolverObjecion = Boolean(objecion) && gestionaElTorneo;
+
+  // Sólo con el partido ya jugado. La alineación se guarda a través de
+  // `cargarResultado`, que escribe el marcador en la misma operación:
+  // ofrecerla antes obligaría a inventar un resultado para poder anotar
+  // quién jugó. Y tiene sentido al revés también — quién jugó se sabe
+  // cuando el partido terminó.
+  const puedeCargarAlineacion = gestionaElTorneo && fila.estado === 'played';
+
+  const { rows: alineados } = await pool.query<{
+    perfil_id: string;
+    nombre_visible: string;
+    equipo_id: string;
+    fue_titular: boolean;
+  }>(
+    `SELECT a.perfil_id, pd.nombre_visible, a.equipo_id, a.fue_titular
+     FROM alineacion_partido a
+     JOIN perfil_deportivo pd ON pd.id = a.perfil_id
+     WHERE a.partido_id = $1
+     ORDER BY a.fue_titular DESC, pd.nombre_visible ASC`,
+    [datos.partidoId],
+  );
+
+  let habilitados: JugadorHabilitado[] = [];
+  if (puedeCargarAlineacion) {
+    const { rows: elegibles } = await pool.query<{
+      perfil_id: string;
+      nombre_visible: string;
+      equipo_id: string;
+      numero_camiseta: number | null;
+    }>(
+      `SELECT ih.perfil_id, pd.nombre_visible, ih.equipo_id, ih.numero_camiseta
+       FROM integrante_habilitado ih
+       JOIN perfil_deportivo pd ON pd.id = ih.perfil_id
+       WHERE ih.torneo_id = $1 AND ih.equipo_id = ANY($2)
+         AND ih.rol_en_torneo = 'player' AND ih.estado = 'eligible'
+       ORDER BY ih.numero_camiseta ASC NULLS LAST, pd.nombre_visible ASC`,
+      [fila.torneo_id, [fila.equipo_local_id, fila.equipo_visitante_id]],
+    );
+    habilitados = elegibles.map((e) => ({
+      perfilId: e.perfil_id,
+      nombreVisible: e.nombre_visible,
+      equipoId: e.equipo_id,
+      numeroCamiseta: e.numero_camiseta,
+    }));
   }
 
   const confirmaSoloEl =
@@ -174,6 +258,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
     numeroFecha: fila.numero_fecha,
     estado: fila.estado,
     estadoResultado: fila.estado_resultado,
+    version: fila.version,
     golesLocal: fila.goles_local,
     golesVisitante: fila.goles_visitante,
     local: {
@@ -198,6 +283,14 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
           fechaPresentacion: objecion.fecha_presentacion.toISOString(),
         }
       : null,
+    alineacion: alineados.map((a) => ({
+      perfilId: a.perfil_id,
+      nombreVisible: a.nombre_visible,
+      equipoId: a.equipo_id,
+      fueTitular: a.fue_titular,
+    })),
+    puedeCargarAlineacion,
+    habilitados,
     equipoQueRespondeId: equipoQueResponde,
     puedeResponder,
     puedeResolverObjecion,

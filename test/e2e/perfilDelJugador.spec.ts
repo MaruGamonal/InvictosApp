@@ -24,6 +24,8 @@ test.describe('el perfil público del jugador', () => {
     await expect(page.getByRole('heading', { name: 'Torneos jugados' })).toBeVisible();
     await expect(page.getByText(escenario.torneoNombre)).toBeVisible();
     await expect(page.getByText('⚽ 3 goles')).toBeVisible();
+    // UC-38: el dato que no existía hasta que hubo alineación por partido.
+    await expect(page.getByText('1 partido', { exact: true })).toBeVisible();
   });
 
   test('el torneo del historial lleva a su ficha', async ({ page }) => {

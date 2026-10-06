@@ -21,12 +21,13 @@ import { validarEntrada } from '@/lib/validacion';
  * `unlisted` condiciona es el descubrimiento (D-51), no que el torneo
  * sea secreto — se abre por enlace directo igual.
  *
- * **No hay "partidos jugados".** La columna `estadistica_jugador.partidos_jugados`
- * existe pero **nadie la escribe**: el producto registra el resultado y
- * los eventos de cada partido, no quién entró a la cancha. Con lo que
- * hay no se puede saber en cuántos partidos jugó alguien, y un número
- * inventado en un historial es peor que no tenerlo. Para que exista hace
- * falta registrar la alineación de cada partido, que es otro ticket.
+ * **Los partidos jugados cuentan sólo lo que se cargó.** Desde que
+ * existe `alineacion_partido`, `cargarResultado` escribe
+ * `estadistica_jugador.partidos_jugados` — una columna que hasta
+ * entonces nadie tocaba—. Pero la alineación es **opcional**: un torneo
+ * donde nadie la carga deja ese número en cero aunque se hayan jugado
+ * todos los partidos. Por eso se muestra sólo cuando es mayor que cero,
+ * en vez de un "0 partidos" que se leería como "no jugó".
  */
 
 const esquemaEntrada = z.object({ perfilId: z.string().uuid() });
@@ -48,6 +49,11 @@ export interface TorneoDelHistorial {
   equipoEscudoUrl: string | null;
   /** `player`, `coach` o `delegate` — con qué rol estuvo habilitado. */
   rolEnTorneo: string;
+  /**
+   * Partidos en los que figura en la alineación. Cero también significa
+   * "nadie cargó la alineación en este torneo": es opcional.
+   */
+  partidosJugados: number;
   goles: number;
   tarjetasAmarillas: number;
   tarjetasRojas: number;
@@ -70,6 +76,7 @@ interface FilaCruda {
   equipo_nombre: string;
   equipo_escudo_url: string | null;
   rol_en_torneo: string;
+  partidos_jugados: number;
   goles: number;
   tarjetas_amarillas: number;
   tarjetas_rojas: number;
@@ -94,6 +101,7 @@ export const obtenerHistorialDelJugador: Servicio<
             t.fecha_inicio_estimada AS fecha_inicio, t.fecha_fin_estimada AS fecha_fin,
             ih.equipo_id, e.nombre AS equipo_nombre, e.escudo_url AS equipo_escudo_url,
             ih.rol_en_torneo,
+            coalesce(ej.partidos_jugados, 0) AS partidos_jugados,
             coalesce(ej.goles, 0) AS goles,
             coalesce(ej.tarjetas_amarillas, 0) AS tarjetas_amarillas,
             coalesce(ej.tarjetas_rojas, 0) AS tarjetas_rojas,
@@ -131,6 +139,7 @@ export const obtenerHistorialDelJugador: Servicio<
     equipoNombre: fila.equipo_nombre,
     equipoEscudoUrl: fila.equipo_escudo_url,
     rolEnTorneo: fila.rol_en_torneo,
+    partidosJugados: fila.partidos_jugados,
     goles: fila.goles,
     tarjetasAmarillas: fila.tarjetas_amarillas,
     tarjetasRojas: fila.tarjetas_rojas,

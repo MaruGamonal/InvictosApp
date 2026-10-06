@@ -162,11 +162,21 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
                         ceros no es un dato, es ruido. Y no hay
                         "partidos jugados": nadie registra quién entró a
                         la cancha, así que el número no existe. */}
-                    {(torneo.goles > 0 ||
+                    {(torneo.partidosJugados > 0 ||
+                      torneo.goles > 0 ||
                       torneo.tarjetasAmarillas > 0 ||
                       torneo.tarjetasRojas > 0 ||
                       torneo.vecesJugadorDelPartido > 0) && (
                       <span className={styles.torneoMarcas}>
+                        {/* Cero no se muestra: la alineación es opcional,
+                            y un "0 partidos" se leería como que no jugó
+                            en vez de como que nadie la cargó. */}
+                        {torneo.partidosJugados > 0 && (
+                          <span>
+                            {torneo.partidosJugados}{' '}
+                            {torneo.partidosJugados === 1 ? 'partido' : 'partidos'}
+                          </span>
+                        )}
                         {torneo.goles > 0 && (
                           <span>
                             ⚽ {torneo.goles} {torneo.goles === 1 ? 'gol' : 'goles'}

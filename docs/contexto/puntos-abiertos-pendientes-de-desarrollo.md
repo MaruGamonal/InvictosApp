@@ -18,7 +18,7 @@
 | 6 | Registrar partido no disputado (walkover, suspendido) | ~~Bloqueante~~ | **Resuelto** (`30/09`) |
 | 7 | El límite de frecuencia vive en memoria del proceso | ~~Importante~~ | **Resuelto** (`04/10`): cuenta en Postgres, compartido entre instancias |
 | 8 | `/api/admin/sembrar-demo` está en producción y borra datos | ~~Bloqueante~~ | **Resuelto** (`30/09`): la ruta y su pantalla se quitaron |
-| 9 | Historial del jugador torneo por torneo (UC-38) | ~~Importante~~ | **Resuelto** (`05/10`), sin «partidos jugados»: ese dato no existe en el modelo |
+| 9 | Historial del jugador torneo por torneo (UC-38) | ~~Importante~~ | **Resuelto** (`05/10`), y los «partidos jugados» existen desde el `06/10`: hay alineación por partido |
 | 10 | "Pedir sumarme sin cuenta" no se retoma tras registrarse | ~~Importante~~ | **Resuelto** (`02/10`), aunque no como decía este documento |
 | 11 | Notificaciones push (Web Push) | Puede esperar | No existe el canal |
 | 12 | Monetización: planes, pagos, comisión | Puede esperar | Etapas 2 a 4, no empezadas |
@@ -319,20 +319,60 @@ Es la pantalla que hace que un jugador vuelva a la app fuera de la semana de su 
 > arquero que jugó el torneo entero sin que le anotaran nada no
 > aparecería. Es el mismo error que tenía la tabla de posiciones.
 >
-> **No hay «8 partidos».** Este punto lo pedía, y no se puede: la columna
-> `estadistica_jugador.partidos_jugados` existe pero **nadie la
-> escribe**, porque el producto registra el resultado y los eventos de
-> cada partido, no quién entró a la cancha. Con lo que hay en la base no
-> se puede saber en cuántos partidos jugó alguien, y un número inventado
-> en un historial es peor que no tenerlo. Para que exista hace falta
-> registrar la alineación de cada partido —quién jugó, no sólo quién
-> estaba habilitado—, que es un ticket propio y toca la carga de
-> resultados.
+> ~~**No hay «8 partidos».**~~ **Lo hay desde el 06/10.** Cuando se
+> cerró este punto no se podía: `estadistica_jugador.partidos_jugados`
+> existía desde el esquema original y nadie la escribía, porque el
+> producto registraba el resultado y los eventos de cada partido, pero no
+> quién entró a la cancha. Se construyó la alineación por partido
+> (`alineacion_partido` + `cargarResultado`), y con eso la columna pasó a
+> tener valor real.
+>
+> **Es opcional**, así que el número cuenta sólo lo que se cargó: un
+> torneo donde nadie la carga lo deja en cero. Por eso la pantalla lo
+> muestra sólo cuando es mayor que cero — un «0 partidos» se leería como
+> «no jugó» en vez de «nadie la cargó».
 >
 > Tampoco se filtra por visibilidad: ni la del perfil (`02`, UC-04: un
 > perfil `restricted` oculta foto, posición y ciudad, nunca la
 > participación) ni la del torneo, siguiendo lo que ya hacía la ficha
 > pública del equipo, que lista todos sus torneos.
+
+---
+
+## 9 bis. Alineación por partido
+
+**Hecho el 06/10.** Nació como la deuda que dejó el punto 9: sin saber
+quién entró a la cancha, el historial no podía decir cuántos partidos
+jugó alguien.
+
+**Qué hay.** Una tabla `alineacion_partido` y un campo `alineaciones` en
+`cargarResultado`, con la misma regla que la planilla: sin mandarlo no se
+toca, mandándolo —aunque sea vacío— reemplaza lo anterior entero. La
+pantalla del partido (`/torneo/[id]/partido/[partidoId]`) muestra quiénes
+jugaron, y a quien gestiona el torneo le ofrece cargarlo.
+
+**Decisiones que vale la pena no volver a discutir:**
+
+- **La clave es `(partido_id, perfil_id)`**, sin el equipo. Nadie juega
+  un partido para los dos equipos; con el equipo en la clave esa fila
+  imposible sería legal. Hay una prueba de integración que lo comprueba
+  contra la base.
+- **No es obligatoria.** Esto es fútbol amateur: obligar a tildar once
+  nombres por equipo para anotar un 2 a 1 haría que no se cargue nada.
+- **Sólo con el partido ya jugado.** Se guarda a través de
+  `cargarResultado`, que escribe el marcador en la misma operación:
+  ofrecerla antes obligaría a inventar un resultado para poder anotar
+  quién jugó.
+- **Sólo jugadores.** El DT y la delegada están en la lista de buena fe
+  pero no entran a la cancha.
+- **Goles y alineación acumulan sobre el mismo mapa de diferencias** y
+  escriben una sola vez en `estadistica_jugador`. Con un `UPSERT` por
+  bloque, cargar las dos cosas juntas tocaba la misma fila dos veces.
+
+**Lo que queda abierto.** Sólo quien gestiona el torneo puede cargarla
+desde la pantalla. El servicio acepta que la cargue un capitán —hereda el
+permiso de `cargarResultado`—, pero no hay pantalla para eso, igual que
+no la hay para que un capitán cargue un resultado.
 
 ---
 

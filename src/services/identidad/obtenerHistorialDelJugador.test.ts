@@ -17,6 +17,7 @@ function filaCruda(overrides: Record<string, unknown> = {}) {
     equipo_nombre: 'Deportivo Pichincha',
     equipo_escudo_url: null,
     rol_en_torneo: 'player',
+    partidos_jugados: 5,
     goles: 3,
     tarjetas_amarillas: 1,
     tarjetas_rojas: 0,
@@ -46,6 +47,7 @@ describe('obtenerHistorialDelJugador', () => {
       equipoNombre: 'Deportivo Pichincha',
       fechaInicio: '2025-03-01T00:00:00.000Z',
       fechaFin: null,
+      partidosJugados: 5,
       goles: 3,
       vecesJugadorDelPartido: 2,
     });

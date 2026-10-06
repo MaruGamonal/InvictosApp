@@ -239,5 +239,24 @@ describe('la alineación por partido', () => {
     );
     expect(historial).toHaveLength(1);
     expect(historial[0]!.torneoId).toBe(escenario.torneoId);
+    // El dato que antes no existía.
+    expect(historial[0]!.partidosJugados).toBe(1);
+  });
+
+  /** Sin alineación cargada, el historial dice cero: la alineación es opcional. */
+  it('sin alineación cargada, el historial no inventa partidos', async () => {
+    const { escenario, partido, local } = await escenarioConPartido();
+
+    await cargarResultado(
+      { partidoId: partido.id, version: partido.version, golesLocal: 1, golesVisitante: 0 },
+      escenario.titular.contexto,
+    );
+
+    const historial = await obtenerHistorialDelJugador(
+      { perfilId: local.capitan.perfilId },
+      CONTEXTO_PUBLICO,
+    );
+    expect(historial).toHaveLength(1);
+    expect(historial[0]!.partidosJugados).toBe(0);
   });
 });
