@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { motivoDelFallo } from './motivoDelFallo';
 import styles from './Avisos.module.css';
 
 /**
@@ -186,28 +187,55 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
       cuentaNoConfirmada: (mensaje) => {
         const texto = mensaje ?? MENSAJE_CUENTA_NO_CONFIRMADA;
 
+        /**
+         * El id que el botón de reintentar le pasa a `pedirReenvio` tiene
+         * que ser el del aviso que **queda en pantalla**, y por eso se lee
+         * del `const` de acá abajo en vez de recibirse por parámetro:
+         * `mostrar` devuelve un id nuevo cada vez, y reemplazar un id que
+         * ya no existe no reemplaza nada, agrega. Pasando el id del aviso
+         * anterior —el que acababa de ser reemplazado— cada reintento
+         * apilaba otro «No pudimos reenviarlo» idéntico debajo del
+         * primero (reportado en vivo).
+         */
+        function mostrarFallo(motivo: string, enCurso: number, sePuedeReintentar: boolean) {
+          const id: number = mostrar(
+            'error',
+            motivo,
+            enCurso,
+            sePuedeReintentar
+              ? { etiqueta: 'Reenviar enlace', alTocar: () => pedirReenvio(id) }
+              : undefined,
+          );
+        }
+
         function pedirReenvio(idActual: number) {
           const enCurso = mostrar('cargando', 'Reenviando el enlace…', idActual);
           void fetch('/api/reenviar-confirmacion', { method: 'POST' })
-            .then((respuesta) => {
+            .then(async (respuesta) => {
               if (respuesta.ok) {
                 mostrar('exito', 'Te reenviamos el enlace — revisá tu correo.', enCurso);
                 return;
               }
-              mostrar('error', 'No pudimos reenviarlo. Probá de nuevo.', enCurso, {
-                etiqueta: 'Reenviar enlace',
-                alTocar: () => pedirReenvio(enCurso),
-              });
+              // El servidor sabe por qué no se pudo —el límite de reenvíos,
+              // sobre todo— y lo dice con precisión. Antes ese texto se
+              // descartaba y se mostraba «Probá de nuevo» con su botón al
+              // lado: justo la invitación a repetir lo que acababa de ser
+              // rechazado por repetirlo. Así que el motivo del servidor
+              // gana, y el botón solo queda cuando reintentar puede
+              // cambiar algo — un 5xx o una caída de red, no un rechazo.
+              const cuerpo = await respuesta.json().catch(() => null);
+              mostrarFallo(
+                motivoDelFallo(cuerpo, 'No pudimos reenviarlo. Probá de nuevo.'),
+                enCurso,
+                respuesta.status >= 500,
+              );
             })
             .catch(() => {
-              mostrar('error', 'No pudimos conectar. Probá de nuevo.', enCurso, {
-                etiqueta: 'Reenviar enlace',
-                alTocar: () => pedirReenvio(enCurso),
-              });
+              mostrarFallo('No pudimos conectar. Probá de nuevo.', enCurso, true);
             });
         }
 
-        const id = mostrar('advertencia', texto, undefined, {
+        const id: number = mostrar('advertencia', texto, undefined, {
           etiqueta: 'Reenviar enlace',
           // El id que reemplaza es el del aviso que se está mostrando,
           // así el «Reenviando…» ocupa su lugar en vez de apilarse.

@@ -109,21 +109,44 @@ describe('verificarCuentaConfirmada', () => {
     });
   });
 
-  it('agotado el límite de reenvíos, deja de mandar el correo pero sigue bloqueando (comparte el límite del botón "Reenviar enlace")', async () => {
+  /**
+   * Reportado en vivo: con la misma cuota que el botón, tocar la acción
+   * bloqueada tres veces dejaba "Reenviar enlace" agotado antes de que
+   * alguien lo tocara. El reenvío automático manda uno por ventana y le
+   * deja el resto de la cuota compartida al botón.
+   */
+  it('el reenvío automático manda un solo correo por ventana, no uno por intento', async () => {
     const signInWithOtp = mockearDb({ emailConfirmado: false });
     const { verificarCuentaConfirmada } = await import('./cuentaConfirmada');
     const contexto = contextoCon('usuario-1');
 
-    for (let intento = 0; intento < 3; intento++) {
+    for (let intento = 0; intento < 4; intento++) {
       await expect(verificarCuentaConfirmada(contexto)).rejects.toMatchObject({
         codigo: 'CUENTA_NO_CONFIRMADA',
       });
     }
-    expect(signInWithOtp).toHaveBeenCalledTimes(3);
+
+    expect(signInWithOtp).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * Y lo que manda sí consume la cuota compartida: el automático no es
+   * una vía paralela para saltarse el límite del botón.
+   */
+  it('el correo que manda el automático consume la cuota compartida con el botón', async () => {
+    mockearDb({ emailConfirmado: false });
+    const { verificarCuentaConfirmada } = await import('./cuentaConfirmada');
+    const { verificarLimite } = await import('./limiteFrecuencia');
+    const contexto = contextoCon('usuario-1');
 
     await expect(verificarCuentaConfirmada(contexto)).rejects.toMatchObject({
       codigo: 'CUENTA_NO_CONFIRMADA',
     });
-    expect(signInWithOtp).toHaveBeenCalledTimes(3);
+
+    // Quedan dos de los tres intentos compartidos, no tres.
+    const limite = { maximoIntentos: 3, ventanaMs: 15 * 60 * 1000 };
+    expect(await verificarLimite('reenviar-confirmacion:usuario-1', limite)).toBe(true);
+    expect(await verificarLimite('reenviar-confirmacion:usuario-1', limite)).toBe(true);
+    expect(await verificarLimite('reenviar-confirmacion:usuario-1', limite)).toBe(false);
   });
 });

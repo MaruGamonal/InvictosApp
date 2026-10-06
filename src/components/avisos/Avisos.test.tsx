@@ -175,8 +175,11 @@ describe('Avisos', () => {
       vi.unstubAllGlobals();
     });
 
-    it('si el reenvío falla, lo dice y deja volver a intentarlo', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    it('si falla de nuestro lado, lo dice y deja volver a intentarlo', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => ({}) }),
+      );
 
       const { queryByText, getByRole } = montar();
       act(() => avisador.cuentaNoConfirmada());
@@ -189,6 +192,78 @@ describe('Avisos', () => {
 
       expect(queryByText('No pudimos reenviarlo. Probá de nuevo.')).toBeTruthy();
       expect(getByRole('button', { name: 'Reenviar enlace' })).toBeTruthy();
+
+      vi.unstubAllGlobals();
+    });
+
+    /**
+     * El caso que se veía en vivo: el límite de reenvíos ya agotado. El
+     * servidor manda el motivo exacto y el aviso lo mostraba como «No
+     * pudimos reenviarlo. Probá de nuevo.» con el botón al lado — o sea,
+     * invitando a repetir justo lo que acababa de ser rechazado por
+     * repetirlo.
+     */
+    it('si el servidor explica el rechazo, muestra ese motivo y no ofrece reintentar', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 400,
+          json: async () => ({
+            ok: false,
+            error: {
+              codigo: 'DATOS_INVALIDOS',
+              mensaje: 'Hay datos que faltan o que no tienen el formato esperado.',
+              detalle: [
+                { campo: 'email', problema: 'Demasiados intentos. Probá de nuevo más tarde.' },
+              ],
+            },
+          }),
+        }),
+      );
+
+      const { queryByText, queryByRole } = montar();
+      act(() => avisador.cuentaNoConfirmada());
+      act(() => {
+        fireEvent.click(queryByRole('button', { name: 'Reenviar enlace' })!);
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(queryByText('Demasiados intentos. Probá de nuevo más tarde.')).toBeTruthy();
+      expect(queryByText('No pudimos reenviarlo. Probá de nuevo.')).toBeNull();
+      expect(queryByRole('button', { name: 'Reenviar enlace' })).toBeNull();
+
+      vi.unstubAllGlobals();
+    });
+
+    /**
+     * Reportado en vivo: al reintentar desde el aviso de error quedaban
+     * dos «No pudimos reenviarlo» idénticos, uno debajo del otro. El
+     * botón le pasaba a `pedirReenvio` el id del aviso **anterior** —el
+     * que ya había sido reemplazado—, y reemplazar un id que no existe
+     * no reemplaza nada: agrega.
+     */
+    it('reintentar desde el aviso de error no apila un segundo aviso', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => ({}) }),
+      );
+
+      const { getByRole, container } = montar();
+      act(() => avisador.cuentaNoConfirmada());
+
+      for (const _ of [0, 1]) {
+        act(() => {
+          fireEvent.click(getByRole('button', { name: 'Reenviar enlace' }));
+        });
+        await act(async () => {
+          await Promise.resolve();
+        });
+      }
+
+      expect(container.querySelectorAll('[role="status"], [role="alert"]')).toHaveLength(1);
 
       vi.unstubAllGlobals();
     });

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError } from '@/lib/errores';
@@ -33,7 +34,15 @@ export const reenviarConfirmacion: Servicio<void, { enviado: true }> = async (_i
 
   try {
     await enviarEmailConfirmacion(usuario.email);
-  } catch {
+  } catch (error) {
+    // `crearError` arma un error de aplicación, y `comoRespuestaHttp` no
+    // reporta esos a Sentry: son casos de negocio esperados. Este no lo
+    // es —es el proveedor de correo rechazando el envío, casi siempre por
+    // su propio límite— y sin este `captureException` el motivo real no
+    // quedaba en ningún lado: ni en pantalla (la respuesta es genérica, a
+    // propósito) ni en Sentry. Un fallo que no se ve en ninguna parte es
+    // un fallo que no se arregla.
+    Sentry.captureException(error);
     throw crearError('ERROR_INTERNO', { motivo: 'no se pudo reenviar el correo de confirmación' });
   }
 
