@@ -41,6 +41,7 @@ function mockearDb(opciones: {
   updateAfectaCeroFilas?: boolean;
   elegibles?: Array<{ perfil_id: string; equipo_id: string; rol_en_torneo: string }>;
   eventosPrevios?: Array<{ perfil_id: string; equipo_id: string; tipo_evento: string }>;
+  alineacionPrevia?: Array<{ perfil_id: string; equipo_id: string }>;
   elegiblePotm?: 'player' | 'coach' | 'delegate' | null;
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
@@ -113,6 +114,9 @@ function mockearDb(opciones: {
           }
           if (t.startsWith('SELECT perfil_id, equipo_id, tipo_evento FROM evento_partido')) {
             return { rows: opciones.eventosPrevios ?? [] };
+          }
+          if (t.startsWith('SELECT perfil_id, equipo_id FROM alineacion_partido')) {
+            return { rows: opciones.alineacionPrevia ?? [] };
           }
           return { rows: [] };
         },
@@ -393,6 +397,185 @@ describe('cargarResultado', () => {
     ).rejects.toThrow('falla simulada de conexión');
   });
 
+  /**
+   * UC-38 — La alineación es lo que hace existir `partidos_jugados`,
+   * una columna que estaba en el esquema desde el principio y que nadie
+   * escribía.
+   */
+  it('UC-38: la alineación se guarda y acredita un partido jugado a cada uno', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [
+        { perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' },
+        { perfil_id: PERFIL_CAPITAN_A, equipo_id: EQUIPO_A, rol_en_torneo: 'player' },
+      ],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 2,
+        golesVisitante: 1,
+        alineaciones: [
+          { perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A },
+          { perfilId: PERFIL_CAPITAN_A, equipoId: EQUIPO_A, fueTitular: false },
+        ],
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const inserts = consultas.filter((c) => c.texto.startsWith('INSERT INTO alineacion_partido'));
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0]!.valores).toEqual([PARTIDO, EQUIPO_A, PERFIL_JUGADOR, true]);
+    // Suplente que entró: también jugó, y se distingue para poder mostrarlo.
+    expect(inserts[1]!.valores).toEqual([PARTIDO, EQUIPO_A, PERFIL_CAPITAN_A, false]);
+
+    const estadisticas = consultas.filter((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    expect(estadisticas).toHaveLength(2);
+    // El cuarto parámetro es `partidos_jugados`: uno a cada uno.
+    expect(estadisticas[0]!.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 1, 0, 0, 0]);
+  });
+
+  /** Corregir la alineación tiene que descontar a quien ya no está. */
+  it('UC-38: al corregir la alineación, descuenta al que salió y suma al que entró', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      alineacionPrevia: [{ perfil_id: PERFIL_CAPITAN_A, equipo_id: EQUIPO_A }],
+      elegibles: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 2,
+        golesVisitante: 1,
+        alineaciones: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A }],
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const estadisticas = consultas.filter((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    const porPerfil = new Map(estadisticas.map((c) => [c.valores[1], c.valores[3]]));
+    expect(porPerfil.get(PERFIL_CAPITAN_A)).toBe(-1);
+    expect(porPerfil.get(PERFIL_JUGADOR)).toBe(1);
+  });
+
+  /**
+   * Goles y alineación en el mismo movimiento se acumulan sobre el mismo
+   * delta: una sola escritura por persona, no dos.
+   */
+  it('UC-38: con goles y alineación juntos, escribe una sola vez por persona', async () => {
+    const consultas = mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      {
+        partidoId: PARTIDO,
+        version: 1,
+        golesLocal: 2,
+        golesVisitante: 1,
+        eventos: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A, tipoEvento: 'goal' }],
+        alineaciones: [{ perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A }],
+      },
+      contextoCon('usuario-organizador'),
+    );
+
+    const estadisticas = consultas.filter((c) =>
+      c.texto.startsWith('INSERT INTO estadistica_jugador'),
+    );
+    expect(estadisticas).toHaveLength(1);
+    expect(estadisticas[0]!.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 1, 1, 0, 0]);
+  });
+
+  it('UC-38: no deja alinear a quien no está habilitado como jugador', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_DT, equipo_id: EQUIPO_A, rol_en_torneo: 'coach' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 2,
+          golesVisitante: 1,
+          alineaciones: [{ perfilId: PERFIL_DT, equipoId: EQUIPO_A }],
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('UC-38: no deja alinear a alguien de un equipo que no juega este partido', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', elegibles: [] });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 2,
+          golesVisitante: 1,
+          alineaciones: [
+            { perfilId: PERFIL_JUGADOR, equipoId: '00000000-0000-0000-0000-000000000000' },
+          ],
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  it('UC-38: la misma persona dos veces en la alineación se rechaza con un mensaje propio', async () => {
+    mockearDb({
+      rolEnOrganizacion: 'owner',
+      elegibles: [{ perfil_id: PERFIL_JUGADOR, equipo_id: EQUIPO_A, rol_en_torneo: 'player' }],
+    });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        {
+          partidoId: PARTIDO,
+          version: 1,
+          golesLocal: 2,
+          golesVisitante: 1,
+          alineaciones: [
+            { perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A },
+            { perfilId: PERFIL_JUGADOR, equipoId: EQUIPO_A },
+          ],
+        },
+        contextoCon('usuario-organizador'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+  });
+
+  /** Sin `alineaciones` en la entrada no se toca nada: corregir un marcador no borra quién jugó. */
+  it('UC-38: corregir el marcador sin mandar alineación no la borra', async () => {
+    const consultas = mockearDb({ rolEnOrganizacion: 'owner' });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await cargarResultado(
+      { partidoId: PARTIDO, version: 1, golesLocal: 3, golesVisitante: 1 },
+      contextoCon('usuario-organizador'),
+    );
+
+    expect(consultas.some((c) => c.texto.startsWith('DELETE FROM alineacion_partido'))).toBe(false);
+  });
+
   it('T30: gol de un jugador habilitado, escribe el evento y acredita estadistica_jugador', async () => {
     const consultas = mockearDb({
       rolEnOrganizacion: 'owner',
@@ -423,7 +606,7 @@ describe('cargarResultado', () => {
     const insertEstadistica = consultas.find((c) =>
       c.texto.startsWith('INSERT INTO estadistica_jugador'),
     );
-    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 1, 0, 0]);
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 0, 1, 0, 0]);
   });
 
   it('T30: tarjeta amarilla al cuerpo técnico se acepta, pero un gol no', async () => {
@@ -446,7 +629,7 @@ describe('cargarResultado', () => {
     const insertEstadistica = consultas.find((c) =>
       c.texto.startsWith('INSERT INTO estadistica_jugador'),
     );
-    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_DT, EQUIPO_A, 0, 1, 0]);
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_DT, EQUIPO_A, 0, 0, 1, 0]);
 
     mockearDb({
       rolEnOrganizacion: 'owner',
@@ -513,7 +696,8 @@ describe('cargarResultado', () => {
       c.texto.startsWith('INSERT INTO estadistica_jugador'),
     );
     // se revierte el gol anterior (-1) y se acredita la amarilla nueva (+1): un único delta neto.
-    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, -1, 1, 0]);
+    // El 0 de adelante son los partidos: sin `alineaciones` en la entrada, no se tocan.
+    expect(insertEstadistica?.valores).toEqual([TORNEO, PERFIL_JUGADOR, EQUIPO_A, 0, -1, 1, 0]);
   });
 
   it('T30: eventos indefinido no toca la planilla existente', async () => {

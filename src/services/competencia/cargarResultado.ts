@@ -49,12 +49,36 @@ import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosi
  *    revierte el acumulado anterior de `estadistica_jugador` y aplica el
  *    nuevo, en la misma transacción — mismo criterio que el marcador.
  *
+ * 7. **[UC-38]** `alineaciones` es opcional, con la misma regla que
+ *    `eventos`: quiénes jugaron, por equipo, entre los habilitados como
+ *    `player` de ese equipo. Es lo que hace que
+ *    `estadistica_jugador.partidos_jugados` exista: esa columna estaba
+ *    en el esquema desde el principio y **nadie la escribía**, porque no
+ *    había de dónde sacar el dato. `integrante_habilitado` dice quién
+ *    podía jugar, no quién jugó — un suplente que no entró está
+ *    habilitado igual.
+ *
+ *    No es obligatoria a propósito: esto es fútbol amateur y obligar a
+ *    cargar once nombres por equipo para anotar un 2 a 1 haría que no se
+ *    cargue nada. Quien la carga, tiene el historial; quien no, queda
+ *    como antes.
+ *
  * Fuera de alcance: confirmación/disputa del otro equipo (T29), partidos
  * no disputados (T16), sanciones automáticas por tarjetas (`06`, D-34b).
  */
 
 const TIPOS_EVENTO = ['goal', 'own_goal', 'yellow_card', 'red_card'] as const;
 type TipoEvento = (typeof TIPOS_EVENTO)[number];
+
+/** Lo que cambia en `estadistica_jugador` para una persona en un equipo. */
+interface DeltaDeEstadistica {
+  perfilId: string;
+  equipoId: string;
+  partidos: number;
+  goles: number;
+  amarillas: number;
+  rojas: number;
+}
 
 const esquemaEvento = z.object({
   perfilId: z.string().uuid(),
@@ -64,6 +88,14 @@ const esquemaEvento = z.object({
 });
 export type EventoResultadoInput = z.infer<typeof esquemaEvento>;
 
+const esquemaAlineacion = z.object({
+  perfilId: z.string().uuid(),
+  equipoId: z.string().uuid(),
+  /** Titular o suplente que entró: las dos cosas cuentan como jugado. */
+  fueTitular: z.boolean().optional(),
+});
+export type AlineacionResultadoInput = z.infer<typeof esquemaAlineacion>;
+
 const esquemaEntrada = z.object({
   partidoId: z.string().uuid(),
   version: z.number().int().positive(),
@@ -71,6 +103,12 @@ const esquemaEntrada = z.object({
   golesVisitante: z.number().int().min(0).max(GOLES_MAXIMOS_POR_EQUIPO),
   /** UC-34, opcional: si viene, reemplaza por completo la planilla de este partido. */
   eventos: z.array(esquemaEvento).optional(),
+  /**
+   * Quiénes jugaron, por equipo. Opcional y con la misma regla que
+   * `eventos`: sin mandarla no se toca, mandándola —aunque sea vacía—
+   * reemplaza la anterior entera.
+   */
+  alineaciones: z.array(esquemaAlineacion).optional(),
   /**
    * Opcional: `null` lo quita, sin mandarlo se deja como está. Igual que
    * `eventos`, solo alguien elegible (`integrante_habilitado`,
@@ -235,6 +273,56 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
     }
   }
 
+  if (datos.alineaciones !== undefined && datos.alineaciones.length > 0) {
+    const perfilIds = [...new Set(datos.alineaciones.map((jugador) => jugador.perfilId))];
+    const { rows: elegibles } = await pool.query<{
+      perfil_id: string;
+      equipo_id: string;
+      rol_en_torneo: 'player' | 'coach' | 'delegate';
+    }>(
+      `SELECT perfil_id, equipo_id, rol_en_torneo FROM integrante_habilitado
+       WHERE torneo_id = $1 AND equipo_id = ANY($2) AND perfil_id = ANY($3) AND estado = 'eligible'`,
+      [partido.torneo_id, [...equiposDelPartido], perfilIds],
+    );
+    const rolPorClave = new Map(
+      elegibles.map((fila) => [`${fila.equipo_id}:${fila.perfil_id}`, fila.rol_en_torneo]),
+    );
+
+    const vistos = new Set<string>();
+    for (const jugador of datos.alineaciones) {
+      if (!equiposDelPartido.has(jugador.equipoId)) {
+        throw crearError('DATOS_INVALIDOS', [
+          { campo: 'alineaciones', problema: 'El equipo indicado no juega este partido.' },
+        ]);
+      }
+      // La clave de la tabla ya lo impediría, pero un error de
+      // restricción en medio de la transacción se lee como un 500: acá
+      // se dice qué pasó.
+      if (vistos.has(jugador.perfilId)) {
+        throw crearError('DATOS_INVALIDOS', [
+          {
+            campo: 'alineaciones',
+            problema: 'Una misma persona no puede estar dos veces en la alineación de un partido.',
+          },
+        ]);
+      }
+      vistos.add(jugador.perfilId);
+
+      // Solo jugadores: el DT y la delegada están en la lista de buena
+      // fe pero no entran a la cancha, y contarles un partido jugado
+      // sería mentirle al historial.
+      if (rolPorClave.get(`${jugador.equipoId}:${jugador.perfilId}`) !== 'player') {
+        throw crearError('DATOS_INVALIDOS', [
+          {
+            campo: 'alineaciones',
+            problema:
+              'Solo puede jugar quien esté habilitado como jugador en la lista de buena fe de ese equipo.',
+          },
+        ]);
+      }
+    }
+  }
+
   if (datos.jugadorDelPartidoPerfilId) {
     const { rows: elegible } = await pool.query<{ rol_en_torneo: 'player' | 'coach' | 'delegate' }>(
       `SELECT rol_en_torneo FROM integrante_habilitado
@@ -336,6 +424,27 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       );
     }
 
+    // Los dos bloques de abajo —planilla y alineación— acumulan sobre
+    // el **mismo** mapa de diferencias, y recién después se escribe una
+    // vez en `estadistica_jugador`. Con un `UPSERT` por bloque, cargar
+    // goles y alineación en el mismo movimiento tocaría la misma fila
+    // dos veces, sumando bien pero escribiendo de más y dejando dos
+    // `ultima_actualizacion` para un solo hecho.
+    const deltas = new Map<string, DeltaDeEstadistica>();
+    const deltaDe = (perfilId: string, equipoId: string): DeltaDeEstadistica => {
+      const clave = `${equipoId}:${perfilId}`;
+      const acumulado = deltas.get(clave) ?? {
+        perfilId,
+        equipoId,
+        partidos: 0,
+        goles: 0,
+        amarillas: 0,
+        rojas: 0,
+      };
+      deltas.set(clave, acumulado);
+      return acumulado;
+    };
+
     if (datos.eventos !== undefined) {
       const { rows: previos } = await cliente.query<{
         perfil_id: string;
@@ -345,28 +454,16 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
         datos.partidoId,
       ]);
 
-      const deltas = new Map<
-        string,
-        { perfilId: string; equipoId: string; goles: number; amarillas: number; rojas: number }
-      >();
       const aplicarDelta = (
         perfilId: string,
         equipoId: string,
         tipoEvento: TipoEvento,
         signo: 1 | -1,
       ) => {
-        const clave = `${equipoId}:${perfilId}`;
-        const acumulado = deltas.get(clave) ?? {
-          perfilId,
-          equipoId,
-          goles: 0,
-          amarillas: 0,
-          rojas: 0,
-        };
+        const acumulado = deltaDe(perfilId, equipoId);
         if (tipoEvento === 'goal') acumulado.goles += signo;
         if (tipoEvento === 'yellow_card') acumulado.amarillas += signo;
         if (tipoEvento === 'red_card') acumulado.rojas += signo;
-        deltas.set(clave, acumulado);
       };
       for (const previo of previos)
         aplicarDelta(previo.perfil_id, previo.equipo_id, previo.tipo_evento, -1);
@@ -389,27 +486,55 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
           ],
         );
       }
+    }
 
-      for (const delta of deltas.values()) {
-        if (delta.goles === 0 && delta.amarillas === 0 && delta.rojas === 0) continue;
+    // La alineación, con la misma regla que la planilla: sin mandarla no
+    // se toca, mandándola (aunque sea vacía) reemplaza la anterior
+    // entera. Es lo que hace que `partidos_jugados` exista de verdad.
+    if (datos.alineaciones !== undefined) {
+      const { rows: previas } = await cliente.query<{ perfil_id: string; equipo_id: string }>(
+        'SELECT perfil_id, equipo_id FROM alineacion_partido WHERE partido_id = $1',
+        [datos.partidoId],
+      );
+      for (const previa of previas) deltaDe(previa.perfil_id, previa.equipo_id).partidos -= 1;
+      for (const jugador of datos.alineaciones)
+        deltaDe(jugador.perfilId, jugador.equipoId).partidos += 1;
+
+      await cliente.query('DELETE FROM alineacion_partido WHERE partido_id = $1', [
+        datos.partidoId,
+      ]);
+      for (const jugador of datos.alineaciones) {
         await cliente.query(
-          `INSERT INTO estadistica_jugador (torneo_id, perfil_id, equipo_id, goles, tarjetas_amarillas, tarjetas_rojas)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           ON CONFLICT (torneo_id, perfil_id, equipo_id) DO UPDATE SET
-             goles = estadistica_jugador.goles + excluded.goles,
-             tarjetas_amarillas = estadistica_jugador.tarjetas_amarillas + excluded.tarjetas_amarillas,
-             tarjetas_rojas = estadistica_jugador.tarjetas_rojas + excluded.tarjetas_rojas,
-             ultima_actualizacion = now()`,
-          [
-            partido.torneo_id,
-            delta.perfilId,
-            delta.equipoId,
-            delta.goles,
-            delta.amarillas,
-            delta.rojas,
-          ],
+          `INSERT INTO alineacion_partido (partido_id, equipo_id, perfil_id, fue_titular)
+           VALUES ($1, $2, $3, $4)`,
+          [datos.partidoId, jugador.equipoId, jugador.perfilId, jugador.fueTitular ?? true],
         );
       }
+    }
+
+    for (const delta of deltas.values()) {
+      if (delta.partidos === 0 && delta.goles === 0 && delta.amarillas === 0 && delta.rojas === 0) {
+        continue;
+      }
+      await cliente.query(
+        `INSERT INTO estadistica_jugador (torneo_id, perfil_id, equipo_id, partidos_jugados, goles, tarjetas_amarillas, tarjetas_rojas)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (torneo_id, perfil_id, equipo_id) DO UPDATE SET
+           partidos_jugados = estadistica_jugador.partidos_jugados + excluded.partidos_jugados,
+           goles = estadistica_jugador.goles + excluded.goles,
+           tarjetas_amarillas = estadistica_jugador.tarjetas_amarillas + excluded.tarjetas_amarillas,
+           tarjetas_rojas = estadistica_jugador.tarjetas_rojas + excluded.tarjetas_rojas,
+           ultima_actualizacion = now()`,
+        [
+          partido.torneo_id,
+          delta.perfilId,
+          delta.equipoId,
+          delta.partidos,
+          delta.goles,
+          delta.amarillas,
+          delta.rojas,
+        ],
+      );
     }
 
     await cliente.query('COMMIT');
