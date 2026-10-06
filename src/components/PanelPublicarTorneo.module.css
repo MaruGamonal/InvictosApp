@@ -1,0 +1,99 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.avisoExito {
+  margin: 0;
+  background: var(--exito-fondo);
+  color: var(--exito-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.avisoInfo {
+  margin: 0;
+  background: var(--informacion-fondo);
+  color: var(--informacion-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* La noticia y la salida juntas, como pide D-51. */
+.bloqueVerificacion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bloqueFaltantes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+}
+
+.tituloFaltantes {
+  margin: 0;
+  font: 700 13px/1.4 var(--fuente-texto);
+}
+
+.listaFaltantes {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-texto-secundario);
+}
+
+.error {
+  margin: 0;
+  background: var(--error-fondo);
+  border: 1px solid var(--error-borde);
+  color: var(--error-texto);
+  border-radius: var(--radio-boton);
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.filaAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 44px de área táctil, como cualquier acción (`08`, sección 10). */
+.enlaceSecundario {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 600 14px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.boton {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radio-boton);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

@@ -8,7 +8,6 @@ import styles from './pagina.module.css';
 export interface AccionesEstadoTorneoProps {
   torneoId: string;
   estado: string;
-  tieneFormatoDefinido: boolean;
   tienePartidos: boolean;
 }
 
@@ -16,53 +15,42 @@ type EstadoDestino =
   'registration_open' | 'registration_closed' | 'in_progress' | 'finished' | 'suspended';
 
 /**
- * UC-18/UC-20 — Publicar y avanzar el estado del torneo (`10`, 4.4).
+ * Estados en los que este panel tiene algo que ofrecer. Fuera de ellos
+ * —borrador, terminado, cancelado— no renderiza nada, y Configuración
+ * directamente no muestra la sección: un acordeón que se abre vacío es
+ * peor que no estar.
+ */
+export const ESTADOS_CON_ACCIONES_DE_ESTADO = new Set([
+  'registration_open',
+  'registration_closed',
+  'in_progress',
+  'suspended',
+]);
+
+/**
+ * UC-20 — Avanzar el estado de un torneo **ya publicado** (`10`, 4.4).
+ *
+ * Publicar ya no está acá. Vivía dentro de este acordeón, a tres toques
+ * de distancia y en una versión pobre —publicaba y tiraba un aviso, sin
+ * explicar la visibilidad que le quedaba al torneo ni ofrecer verificar
+ * la organización ni decir qué datos faltaban—, mientras el último paso
+ * del alta tenía la versión buena. Ahora hay una sola, en el Resumen
+ * (`PanelPublicarTorneo`): publicar no es un ajuste del torneo, es la
+ * decisión que lo pone en el mundo.
  *
  * El resultado va al avisador y no a un `<p>` acá arriba: este panel
  * vive dentro de un acordeón, y un mensaje que aparece adentro corre
  * hacia abajo todo lo que sigue justo cuando se acaba de tocar el
- * botón. Publicar sin verificar no falla —el torneo nace no listado
- * (`06`, D-51)—, así que eso se avisa como lo que es: una noticia, no
- * un error. Qué hacer al respecto está en el bloque de visibilidad de
- * esta misma pantalla, que no se va solo.
+ * botón.
  */
 export function AccionesEstadoTorneo({
   torneoId,
   estado,
-  tieneFormatoDefinido,
   tienePartidos,
 }: AccionesEstadoTorneoProps) {
   const router = useRouter();
   const avisos = useAvisos();
   const [enviando, setEnviando] = useState<string | null>(null);
-
-  async function publicar() {
-    setEnviando('publicar');
-    const enCurso = avisos.cargando('Publicando el torneo…');
-    try {
-      const respuesta = await fetch('/api/torneos/publicar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ torneoId }),
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos publicar el torneo.', enCurso);
-        return;
-      }
-      avisos.exito(
-        cuerpo.data?.motivoNoListado === 'organizacion_no_verificada'
-          ? 'Torneo publicado. Todavía no aparece en las búsquedas.'
-          : 'Torneo publicado.',
-        enCurso,
-      );
-      router.refresh();
-    } catch {
-      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
-    } finally {
-      setEnviando(null);
-    }
-  }
 
   async function avanzar(estadoDestino: EstadoDestino) {
     setEnviando(estadoDestino);
@@ -87,16 +75,10 @@ export function AccionesEstadoTorneo({
     }
   }
 
+  if (!ESTADOS_CON_ACCIONES_DE_ESTADO.has(estado)) return null;
+
   return (
     <div className={styles.formularioChico}>
-      {estado === 'draft' && (
-        <div className={styles.filaAcciones}>
-          <button type="button" onClick={publicar} disabled={enviando !== null}>
-            {enviando === 'publicar' ? 'Publicando…' : 'Publicar torneo'}
-          </button>
-        </div>
-      )}
-
       {estado === 'registration_open' && (
         <div className={styles.filaAcciones}>
           <button

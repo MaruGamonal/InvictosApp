@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerGestionCacheada } from '../_datos';
+import { obtenerResumenParaPublicar } from '@/services/torneos/obtenerResumenParaPublicar';
+import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
+import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Resumen del torneo') };
@@ -21,12 +23,54 @@ const ESTADOS_SIN_RESULTADO_AUN = new Set(['unscheduled', 'scheduled']);
 /**
  * Dashboard del torneo (diseño aprobado "Gestionar torneo" —
  * reemplaza a la pantalla única y larga de antes): de un vistazo,
- * cómo está el torneo, qué falta y qué hacer ahora. Todo se deriva de
- * `obtenerGestionCacheada` — nada nuevo que consultar.
+ * cómo está el torneo, qué falta y qué hacer ahora. Casi todo se
+ * deriva de `obtenerGestionCacheada` — nada nuevo que consultar.
+ *
+ * En borrador la pantalla **es otra**: lo único que importa es
+ * publicar. Esa acción vivía dentro del acordeón "Estado" de
+ * Configuración —tres toques desde acá, y en su versión pobre: sin
+ * explicar la visibilidad que le quedaba al torneo, sin ofrecer
+ * verificar y sin decir qué datos faltaban hasta que el intento
+ * fallaba—. Publicar no es un ajuste del torneo; es la decisión que lo
+ * pone en el mundo, y va donde se la ve.
+ *
+ * Por eso el borrador sale por su propio `return` en vez de ir
+ * salpicando condicionales: lo demás de esta pantalla —próximo partido,
+ * contadores, las tres acciones— no es que quede feo en borrador, es
+ * que miente. "0 / 8 equipos confirmados" cuando todavía no se puede
+ * inscribir nadie, y tres botones que llevan a pantallas que responden
+ * que primero hay que hacer otra cosa, le compiten a la única acción
+ * que sí se puede hacer.
  */
 export default async function PaginaResumen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const gestion = await obtenerGestionCacheada(id);
+
+  if (gestion.estado === 'draft') {
+    const paraPublicar = await obtenerResumenParaPublicar(
+      { torneoId: id },
+      await obtenerContextoCacheado(),
+    );
+    return (
+      <div className={styles.pagina}>
+        <section className={styles.bloquePublicar}>
+          <h2 className={styles.tituloPublicar}>Tu torneo todavía no está publicado</h2>
+          <p className={styles.textoPublicar}>
+            Mientras siga en borrador no lo ve nadie más que vos: no se puede inscribir ningún
+            equipo ni compartir el enlace.
+          </p>
+          <PanelPublicarTorneo
+            torneoId={id}
+            organizacionId={paraPublicar.organizacionId}
+            soyTitular={paraPublicar.soyTitular}
+            organizacionVerificada={paraPublicar.organizacionVerificada}
+            limitePublicadosAlcanzado={paraPublicar.limitePublicadosAlcanzado}
+            camposFaltantes={paraPublicar.camposFaltantes}
+          />
+        </section>
+      </div>
+    );
+  }
 
   const aprobados = gestion.inscripciones.filter((i) => i.estado === 'approved').length;
   const totalPartidos = gestion.partidos.length;

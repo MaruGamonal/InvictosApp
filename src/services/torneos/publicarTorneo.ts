@@ -34,7 +34,14 @@ export interface PublicarTorneoResultado {
   motivoNoListado: 'organizacion_no_verificada' | null;
 }
 
-const CAMPOS_MINIMOS: Array<[string, string]> = [
+/**
+ * Lo que tiene que estar cargado para poder publicar: columna de
+ * `torneo` y cómo se la nombra en pantalla. Se exporta porque
+ * `obtenerResumenParaPublicar` muestra lo que falta **antes** de tocar
+ * el botón, y las dos listas tienen que ser la misma — si se separan,
+ * la pantalla promete que está todo y el intento falla igual.
+ */
+export const CAMPOS_MINIMOS: Array<[string, string]> = [
   ['nombre', 'nombre'],
   ['modalidad', 'modalidad'],
   ['formato', 'formato'],

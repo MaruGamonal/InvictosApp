@@ -21,24 +21,25 @@ afterEach(() => {
 
 describe('AccionesEstadoTorneo', () => {
   /**
-   * Revisión de UX: avisaba «Podés publicar sin definir el formato
-   * todavía — solo hace falta antes de generar el fixture», o sea una
-   * restricción de otra acción, en una pantalla donde todavía no se
-   * está intentando esa acción. El bloqueo ya existe en el punto del
-   * intento (`fixture/page.tsx`), con su salida a Configuración.
+   * Publicar salió de acá: vive en el Resumen, donde se lo ve. En
+   * borrador este panel no tiene ninguna otra acción que ofrecer, así
+   * que no renderiza nada en vez de dejar un acordeón que se abre
+   * vacío.
    */
-  it('en borrador ofrece publicar, sin anticipar la restricción del fixture', () => {
-    const { getByText, queryByText } = render(
-      <AccionesEstadoTorneo
-        torneoId="t-1"
-        estado="draft"
-        tieneFormatoDefinido={false}
-        tienePartidos={false}
-      />,
+  it('en borrador no renderiza nada: publicar ya no vive acá', () => {
+    const { container, queryByText } = render(
+      <AccionesEstadoTorneo torneoId="t-1" estado="draft" tienePartidos={false} />,
     );
 
-    expect(getByText('Publicar torneo')).toBeTruthy();
-    expect(queryByText(/definir el formato/)).toBeNull();
+    expect(queryByText('Publicar torneo')).toBeNull();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it.each(['finished', 'cancelled'])('en %s tampoco renderiza nada', (estado) => {
+    const { container } = render(
+      <AccionesEstadoTorneo torneoId="t-1" estado={estado} tienePartidos={false} />,
+    );
+    expect(container.firstChild).toBeNull();
   });
 
   /**
@@ -48,12 +49,7 @@ describe('AccionesEstadoTorneo', () => {
    */
   it('sin partidos deshabilita iniciar y dice el motivo en una línea', () => {
     const { getByText } = render(
-      <AccionesEstadoTorneo
-        torneoId="t-1"
-        estado="registration_closed"
-        tieneFormatoDefinido
-        tienePartidos={false}
-      />,
+      <AccionesEstadoTorneo torneoId="t-1" estado="registration_closed" tienePartidos={false} />,
     );
 
     expect(getByText('Falta confirmar el fixture.')).toBeTruthy();
@@ -62,12 +58,7 @@ describe('AccionesEstadoTorneo', () => {
 
   it('con partidos habilita iniciar y no muestra el motivo', () => {
     const { getByText, queryByText } = render(
-      <AccionesEstadoTorneo
-        torneoId="t-1"
-        estado="registration_closed"
-        tieneFormatoDefinido
-        tienePartidos
-      />,
+      <AccionesEstadoTorneo torneoId="t-1" estado="registration_closed" tienePartidos />,
     );
 
     expect(queryByText('Falta confirmar el fixture.')).toBeNull();

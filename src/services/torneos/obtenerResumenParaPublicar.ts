@@ -5,6 +5,7 @@ import { crearError } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { CONFIGURACION } from '@/lib/configuracion';
+import { CAMPOS_MINIMOS } from './publicarTorneo';
 
 /**
  * UC-16/UC-18 — Datos para la pantalla "Listo para publicar" (Flujo 3
@@ -24,6 +25,12 @@ import { CONFIGURACION } from '@/lib/configuracion';
  * `publicarTorneo` lo vuelve a comprobar y rechaza con
  * `LIMITE_TORNEOS_PUBLICADOS`: esto es lo que se muestra, no lo que
  * decide. Quien llame a la API directamente choca igual con la regla.
+ *
+ * Por el mismo motivo devuelve `camposFaltantes`, leídos de la misma
+ * lista que usa `publicarTorneo` (`CAMPOS_MINIMOS`): qué falta para
+ * poder publicar se sabía recién **después** de que el intento fallara,
+ * que es el peor momento para enterarse de que había que ir a
+ * Configuración.
  */
 
 const esquemaEntrada = z.object({ torneoId: z.string().uuid() });
@@ -41,6 +48,8 @@ export interface ResumenParaPublicar {
    * a la vez (`06`, D-51). Si ya lo tiene, publicar este va a fallar.
    */
   limitePublicadosAlcanzado: boolean;
+  /** Datos mínimos todavía sin cargar, con el nombre que tienen en pantalla. Vacío si no falta ninguno. */
+  camposFaltantes: string[];
 }
 
 export const obtenerResumenParaPublicar: Servicio<
@@ -51,16 +60,22 @@ export const obtenerResumenParaPublicar: Servicio<
   await verificarPermisoTorneo(contexto, datos.torneoId, 'configurar_torneo');
 
   const pool = obtenerPool();
-  const { rows } = await pool.query<{
-    estado: string;
-    ciudad_nombre: string;
-    organizacion_id: string;
-    nivel_verificacion: 'unverified' | 'basic' | 'trusted';
-    usuario_titular_id: string;
-    publicados: string;
-  }>(
+  // Las columnas de `CAMPOS_MINIMOS` se piden por nombre desde la propia
+  // lista: agregar un dato obligatorio en `publicarTorneo` lo trae acá
+  // solo, sin una segunda lista que mantener en paralelo.
+  const columnasMinimas = CAMPOS_MINIMOS.map(([columna]) => `t.${columna}`).join(', ');
+  const { rows } = await pool.query<
+    Record<string, unknown> & {
+      estado: string;
+      ciudad_nombre: string;
+      organizacion_id: string;
+      nivel_verificacion: 'unverified' | 'basic' | 'trusted';
+      usuario_titular_id: string;
+      publicados: string;
+    }
+  >(
     `SELECT t.estado, c.nombre AS ciudad_nombre, o.id AS organizacion_id,
-            o.nivel_verificacion, o.usuario_titular_id,
+            o.nivel_verificacion, o.usuario_titular_id, ${columnasMinimas},
             (SELECT count(*) FROM torneo otro
               WHERE otro.organizacion_id = o.id
                 AND otro.estado NOT IN ('draft', 'cancelled')
@@ -85,5 +100,8 @@ export const obtenerResumenParaPublicar: Servicio<
     limitePublicadosAlcanzado:
       !organizacionVerificada &&
       Number(fila.publicados) >= CONFIGURACION.limiteTorneosPublicadosSinVerificar,
+    camposFaltantes: CAMPOS_MINIMOS.filter(([columna]) => fila[columna] === null).map(
+      ([, etiqueta]) => etiqueta,
+    ),
   };
 };

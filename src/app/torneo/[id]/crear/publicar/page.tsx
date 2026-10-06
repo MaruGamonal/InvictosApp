@@ -4,8 +4,7 @@ import { construirContexto } from '@/lib/contexto';
 import { obtenerResumenParaPublicar } from '@/services/torneos/obtenerResumenParaPublicar';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { BotonVerificarOrganizacion } from '@/components/BotonVerificarOrganizacion';
-import { PanelPublicarInicial } from './PanelPublicarInicial';
+import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
 import styles from '@/app/ingresar/pagina.module.css';
 import pasoStyles from './pagina.module.css';
 
@@ -16,6 +15,11 @@ export const metadata: Metadata = { title: conNombreProducto('Listo para publica
  * diseño): publicar pasa el torneo de `draft` a `registration_open`.
  * Si ya se publicó (por ejemplo, volviendo atrás en el navegador),
  * manda directo a la gestión en vez de repetir el paso.
+ *
+ * El panel es el mismo que ofrece el Resumen de la gestión: lo único
+ * propio de esta pantalla es ser el final de un recorrido —de ahí el
+ * título y la ciudad arriba, y que al publicar se vaya a la gestión en
+ * vez de quedarse donde está.
  */
 export default async function PaginaPublicarInicial({
   params,
@@ -42,31 +46,14 @@ export default async function PaginaPublicarInicial({
         <h1 className={`fuente-display ${styles.titulo}`}>Listo para publicar</h1>
         <p className={pasoStyles.breadcrumb}>· {resumen.ciudadNombre}</p>
 
-        {resumen.organizacionVerificada ? (
-          <p className={pasoStyles.avisoExito}>
-            Tu organización está verificada: aparece en el descubrimiento apenas publiques.
-          </p>
-        ) : (
-          <div className={pasoStyles.bloqueVerificacion}>
-            <p className={pasoStyles.avisoInfo}>
-              {resumen.limitePublicadosAlcanzado
-                ? 'Ya tenés un torneo publicado. Verificá tu organización para publicar más de uno a la vez.'
-                : 'Tu organización no está verificada: el torneo se comparte por enlace y funciona completo, pero no aparece en las búsquedas.'}
-            </p>
-            {/* D-51 pide ofrecer la verificación en el mismo lugar donde
-                se da la noticia, no mandar a buscarla a otra pantalla. */}
-            <BotonVerificarOrganizacion
-              organizacionId={resumen.organizacionId}
-              soyTitular={resumen.soyTitular}
-              variante="secundaria"
-            />
-          </div>
-        )}
-
-        <PanelPublicarInicial
+        <PanelPublicarTorneo
           torneoId={id}
           organizacionId={resumen.organizacionId}
           soyTitular={resumen.soyTitular}
+          organizacionVerificada={resumen.organizacionVerificada}
+          limitePublicadosAlcanzado={resumen.limitePublicadosAlcanzado}
+          camposFaltantes={resumen.camposFaltantes}
+          destinoAlPublicar={`/torneo/${id}/gestionar`}
         />
       </div>
     </div>

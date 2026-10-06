@@ -5,7 +5,7 @@ import { listarColaboradoresTorneo } from '@/services/organizadores/listarColabo
 import { listarMiembros } from '@/services/organizadores/listarMiembros';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
 import { FormularioEditarTorneo } from '../FormularioEditarTorneo';
-import { AccionesEstadoTorneo } from '../AccionesEstadoTorneo';
+import { AccionesEstadoTorneo, ESTADOS_CON_ACCIONES_DE_ESTADO } from '../AccionesEstadoTorneo';
 import { FormularioDefinirFormato } from '../FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganizador';
 import { PanelColaboradores } from '../PanelColaboradores';
@@ -18,13 +18,6 @@ import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Configuración del torneo') };
 
-const ESTADOS_CON_CANCELAR = new Set([
-  'registration_open',
-  'registration_closed',
-  'in_progress',
-  'suspended',
-]);
-
 /**
  * Todo lo administrativo del torneo, como acordeones (`<details>`, sin
  * JS): son muchas secciones que casi nunca se tocan todas juntas, así
@@ -32,6 +25,14 @@ const ESTADOS_CON_CANCELAR = new Set([
  * "Interrumpir el torneo" vive adentro de "Estado", no aparte: es la
  * misma pregunta ("¿en qué estado está esto?"), solo que con la
  * respuesta más drástica.
+ *
+ * Lo que **no** está acá es publicar. Vivía dentro de "Estado", que es
+ * el último acordeón de una pantalla larga, y en una versión más pobre
+ * que la del alta. Ahora está en el Resumen, que es la primera pestaña
+ * y la primera cosa que se ve. Y como en borrador este acordeón se
+ * quedaba sin ninguna acción, directamente no se muestra: uno que se
+ * abre vacío es peor que no estar — lo mismo para un torneo terminado o
+ * cancelado, donde ya pasaba antes de este cambio.
  */
 export default async function PaginaConfiguracion({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -107,21 +108,20 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
         />
       </SeccionAcordeon>
 
-      <SeccionAcordeon titulo="Estado">
-        <AccionesEstadoTorneo
-          torneoId={id}
-          estado={gestion.estado}
-          tieneFormatoDefinido={gestion.fases.length > 0}
-          tienePartidos={gestion.partidos.length > 0}
-        />
+      {ESTADOS_CON_ACCIONES_DE_ESTADO.has(gestion.estado) && (
+        <SeccionAcordeon titulo="Estado">
+          <AccionesEstadoTorneo
+            torneoId={id}
+            estado={gestion.estado}
+            tienePartidos={gestion.partidos.length > 0}
+          />
 
-        {ESTADOS_CON_CANCELAR.has(gestion.estado) && (
           <div className={stylesCompartidos.seccionPeligro}>
             <h3 className={stylesCompartidos.tituloSeccion}>Interrumpir el torneo</h3>
             <PanelCancelarTorneo torneoId={id} />
           </div>
-        )}
-      </SeccionAcordeon>
+        </SeccionAcordeon>
+      )}
     </div>
   );
 }

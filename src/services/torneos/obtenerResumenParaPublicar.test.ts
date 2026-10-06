@@ -9,6 +9,29 @@ const contextoCon = (usuarioId: string | null): Contexto => ({
 
 const TORNEO = '11111111-1111-1111-1111-111111111111';
 
+/**
+ * Los datos mínimos van en el mock como vienen de la base —columna por
+ * columna, `null` cuando faltan— porque `camposFaltantes` se arma
+ * leyéndolas con los mismos nombres que usa `publicarTorneo`. Un mock
+ * que las omitiera daría `undefined` y la lista saldría vacía siempre,
+ * que es justo lo que el test tiene que poder distinguir.
+ */
+const FILA_COMPLETA = {
+  estado: 'draft',
+  ciudad_nombre: 'San Isidro',
+  organizacion_id: 'org-1',
+  nivel_verificacion: 'basic',
+  usuario_titular_id: 'usuario-1',
+  publicados: '0',
+  nombre: 'Torneo de prueba',
+  modalidad: 'f5',
+  formato: 'league',
+  ciudad_id: 'ciudad-1',
+  direccion: 'Cancha 123',
+  fecha_inicio_estimada: new Date('2026-11-01T00:00:00Z'),
+  cupo_equipos: 8,
+};
+
 beforeEach(() => vi.resetModules());
 
 function mockearDb(opciones: {
@@ -28,17 +51,7 @@ function mockearDb(opciones: {
           return { rows: opciones.rolOrganizacion ? [{ rol: opciones.rolOrganizacion }] : [] };
         }
         if (texto.includes('FROM torneo t')) {
-          const fila =
-            opciones.fila === undefined
-              ? {
-                  estado: 'draft',
-                  ciudad_nombre: 'San Isidro',
-                  organizacion_id: 'org-1',
-                  nivel_verificacion: 'basic',
-                  usuario_titular_id: 'usuario-1',
-                  publicados: '0',
-                }
-              : opciones.fila;
+          const fila = opciones.fila === undefined ? { ...FILA_COMPLETA } : opciones.fila;
           return { rows: fila ? [fila] : [] };
         }
         return { rows: [] };
@@ -78,7 +91,29 @@ describe('obtenerResumenParaPublicar', () => {
       organizacionVerificada: true,
       soyTitular: true,
       limitePublicadosAlcanzado: false,
+      camposFaltantes: [],
     });
+  });
+
+  /**
+   * Qué falta para publicar se sabía recién cuando `publicarTorneo`
+   * rechazaba el intento. Ahora viaja con la pantalla, leído de la misma
+   * lista (`CAMPOS_MINIMOS`) que valida el servicio que publica: si se
+   * separaran, la pantalla podría prometer que está todo y el intento
+   * fallar igual.
+   */
+  it('lista los datos mínimos que todavía faltan, con el nombre que tienen en pantalla', async () => {
+    mockearDb({
+      organizacionId: 'org-1',
+      rolOrganizacion: 'owner',
+      fila: { ...FILA_COMPLETA, direccion: null, fecha_inicio_estimada: null },
+    });
+    const { obtenerResumenParaPublicar } = await import('./obtenerResumenParaPublicar');
+    const resultado = await obtenerResumenParaPublicar(
+      { torneoId: TORNEO },
+      contextoCon('usuario-1'),
+    );
+    expect(resultado.camposFaltantes).toEqual(['dirección', 'fecha estimada de inicio']);
   });
 
   it('con organización sin verificar, organizacionVerificada false', async () => {
