@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { CampanaNotificaciones } from './CampanaNotificaciones';
+import { PelotaDeFutbol } from './PelotaDeFutbol';
 import { EnlaceIngresar } from './EnlaceIngresar';
 import styles from './MarcaInvicta.module.css';
 
@@ -44,7 +45,7 @@ export function MarcaInvicta({
   return (
     <div className={styles.fila}>
       <span className={styles.marca}>
-        <span className={styles.punto} aria-hidden />
+        <PelotaDeFutbol />
         {NOMBRE_PRODUCTO}
       </span>
       <span className={styles.acciones}>

@@ -19,10 +19,11 @@
   text-transform: uppercase;
 }
 
-.punto {
-  width: 8px;
-  height: 8px;
-  background: var(--acento);
+/* 16px y no 8: a 8 los gajos de la pelota se empastan y vuelve a ser
+   una mancha. A 16 se lee, y acompaña al nombre, que va a 17. */
+.pelota {
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 
