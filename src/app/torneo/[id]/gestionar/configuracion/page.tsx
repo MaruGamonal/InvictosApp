@@ -5,7 +5,8 @@ import { listarColaboradoresTorneo } from '@/services/organizadores/listarColabo
 import { listarMiembros } from '@/services/organizadores/listarMiembros';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
 import { FormularioEditarTorneo } from '../FormularioEditarTorneo';
-import { AccionesEstadoTorneo, ESTADOS_CON_ACCIONES_DE_ESTADO } from '../AccionesEstadoTorneo';
+import { AccionesEstadoTorneo } from '../AccionesEstadoTorneo';
+import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../_estadosDeTorneo';
 import { FormularioDefinirFormato } from '../FormularioDefinirFormato';
 import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganizador';
 import { PanelColaboradores } from '../PanelColaboradores';

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAvisos } from '@/components/avisos/Avisos';
+import { ESTADOS_CON_ACCIONES_DE_ESTADO } from './_estadosDeTorneo';
 import styles from './pagina.module.css';
 
 export interface AccionesEstadoTorneoProps {
@@ -13,19 +14,6 @@ export interface AccionesEstadoTorneoProps {
 
 type EstadoDestino =
   'registration_open' | 'registration_closed' | 'in_progress' | 'finished' | 'suspended';
-
-/**
- * Estados en los que este panel tiene algo que ofrecer. Fuera de ellos
- * —borrador, terminado, cancelado— no renderiza nada, y Configuración
- * directamente no muestra la sección: un acordeón que se abre vacío es
- * peor que no estar.
- */
-export const ESTADOS_CON_ACCIONES_DE_ESTADO = new Set([
-  'registration_open',
-  'registration_closed',
-  'in_progress',
-  'suspended',
-]);
 
 /**
  * UC-20 — Avanzar el estado de un torneo **ya publicado** (`10`, 4.4).
