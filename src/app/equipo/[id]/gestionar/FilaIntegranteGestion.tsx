@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/Badge';
 import { useAvisos } from '@/components/avisos/Avisos';
 import { Escudo } from '@/components/Escudo';
+import { useDejarEquipo } from './useDejarEquipo';
 import styles from './pagina.module.css';
 
 interface Props {
@@ -46,6 +47,9 @@ export function FilaIntegranteGestion({
   const avisos = useAvisos();
   const [masOpciones, setMasOpciones] = useState(false);
   const esCapitan = rolesEquipo.includes('captain');
+  // Irse del equipo es la misma acción que ofrece `PanelDejarEquipo` a
+  // quien no gestiona nada: una sola implementación para las dos.
+  const { dejarEquipo, enviando: saliendo } = useDejarEquipo(equipoId, perfilId);
 
   async function llamar(clave: string, url: string, body: object, mensajeExito: string) {
     setEnviando(clave);
@@ -102,34 +106,6 @@ export function FilaIntegranteGestion({
     );
   }
 
-  async function dejarEquipo() {
-    if (enviando) return;
-    if (!window.confirm('¿Dejar el equipo? Vas a perder tu lugar en el plantel.')) return;
-    setEnviando('fuera');
-    const enCurso = avisos.cargando('Saliendo del equipo…');
-
-    try {
-      const respuesta = await fetch('/api/equipos/quitar-integrante', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ equipoId, perfilId }),
-      });
-      const cuerpo = await respuesta.json();
-      if (!respuesta.ok || !cuerpo.ok) {
-        avisos.error(cuerpo?.error?.mensaje ?? 'No pudimos dejar el equipo.', enCurso);
-        setEnviando(null);
-        return;
-      }
-      // El proveedor vive en el layout raíz, así que el aviso sobrevive
-      // a esta navegación y se lee ya en la ficha del equipo.
-      avisos.exito('Dejaste el equipo', enCurso);
-      router.push(`/equipo/${equipoId}`);
-    } catch {
-      avisos.error('No pudimos conectar. Probá de nuevo.', enCurso);
-      setEnviando(null);
-    }
-  }
-
   const rolesFaltantes = ROLES_DESIGNABLES.filter((opcion) => !rolesEquipo.includes(opcion.rol));
   const puedeQuitarRapido = esUnoMismo ? !esCapitan : esCapitanViewer && !esCapitan;
 
@@ -155,7 +131,7 @@ export function FilaIntegranteGestion({
             title={esUnoMismo ? 'Dejar el equipo' : `Quitar a ${nombreVisible} del plantel`}
             aria-label={esUnoMismo ? 'Dejar el equipo' : `Quitar a ${nombreVisible} del plantel`}
             onClick={esUnoMismo ? dejarEquipo : quitarDelPlantel}
-            disabled={enviando !== null}
+            disabled={enviando !== null || saliendo}
           >
             ×
           </button>

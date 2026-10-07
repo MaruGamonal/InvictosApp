@@ -267,3 +267,29 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* La pantalla de quien es integrante y nada más: una explicación corta
+   y la única acción que tiene. */
+.textoIntegrante {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-texto-secundario);
+}
+
+.botonDejarEquipo {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1.5px solid var(--error-texto);
+  border-radius: var(--radio-boton);
+  background: transparent;
+  color: var(--error-texto);
+  font: 700 15px/1 var(--fuente-texto);
+  cursor: pointer;
+}
+
+.botonDejarEquipo:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

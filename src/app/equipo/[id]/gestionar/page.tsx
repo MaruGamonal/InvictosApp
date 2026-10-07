@@ -14,6 +14,7 @@ import { FilaInvitacionPendiente } from './FilaInvitacionPendiente';
 import { PanelPendientes } from './PanelPendientes';
 import { FormularioEditarEquipo } from './FormularioEditarEquipo';
 import { BotonArchivarEquipo } from './BotonArchivarEquipo';
+import { PanelDejarEquipo } from './PanelDejarEquipo';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar equipo') };
@@ -24,6 +25,14 @@ export const metadata: Metadata = { title: conNombreProducto('Gestionar equipo')
  * cualquier visitante), esta pantalla sí puede leer quién la mira: es
  * autenticada, no pública. Por eso el "Dejar equipo" y las acciones de
  * Capitán/Delegado se resuelven acá y no en `/equipo/[id]`.
+ *
+ * **Quien no es Capitán ni Delegado ve otra pantalla.** Veía esta:
+ * titulada "Gestionar <equipo>", con el plantel entero —el mismo que
+ * acababa de ver en la ficha— y una × chiquita al lado de su propio
+ * nombre, que era "dejar el equipo" sin decirlo. Prometía una gestión
+ * que esa persona no tiene y escondía la única acción que sí tiene.
+ * Reportado en vivo. El permiso no cambia: cualquier integrante entra
+ * acá, pero lo que encuentra ahora es lo que puede hacer.
  */
 export default async function PaginaGestionarEquipo({
   params,
@@ -49,31 +58,40 @@ export default async function PaginaGestionarEquipo({
     throw error;
   }
 
-  const [gestion, provincias] = puedeGestionar
-    ? await Promise.all([
-        obtenerGestionEquipo({ equipoId: id }, contexto),
-        listarCiudadesCacheado(),
-      ])
-    : [null, []];
+  if (!puedeGestionar) {
+    return (
+      <div className={styles.pagina}>
+        <h1 className={`fuente-display ${styles.titulo}`}>{equipo.nombre}</h1>
+        <p className={styles.textoIntegrante}>
+          Sos parte del plantel. Quien lleva el equipo —capitán o delegado— es quien lo edita,
+          invita y arma las listas de buena fe.
+        </p>
+        <PanelDejarEquipo equipoId={id} perfilId={perfil.id} />
+      </div>
+    );
+  }
+
+  const [gestion, provincias] = await Promise.all([
+    obtenerGestionEquipo({ equipoId: id }, contexto),
+    listarCiudadesCacheado(),
+  ]);
 
   return (
     <div className={styles.pagina}>
       <h1 className={`fuente-display ${styles.titulo}`}>Gestionar {equipo.nombre}</h1>
 
-      {puedeGestionar && (
-        <section className={styles.seccion}>
-          <h2 className={styles.tituloSeccion}>Datos del equipo</h2>
-          <FormularioEditarEquipo
-            equipoId={id}
-            nombre={equipo.nombre}
-            categoriaGenero={equipo.categoriaGenero}
-            modalidadHabitual={equipo.modalidadHabitual}
-            ciudadId={equipo.ciudad?.id ?? ''}
-            escudoUrl={equipo.escudoUrl}
-            provincias={provincias}
-          />
-        </section>
-      )}
+      <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Datos del equipo</h2>
+        <FormularioEditarEquipo
+          equipoId={id}
+          nombre={equipo.nombre}
+          categoriaGenero={equipo.categoriaGenero}
+          modalidadHabitual={equipo.modalidadHabitual}
+          ciudadId={equipo.ciudad?.id ?? ''}
+          escudoUrl={equipo.escudoUrl}
+          provincias={provincias}
+        />
+      </section>
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Plantel</h2>
@@ -90,7 +108,7 @@ export default async function PaginaGestionarEquipo({
               esCapitanViewer={esCapitan}
             />
           ))}
-          {gestion?.invitacionesPendientes.map((invitacion) => (
+          {gestion.invitacionesPendientes.map((invitacion) => (
             <FilaInvitacionPendiente
               key={`${invitacion.perfilId}:${invitacion.rol}`}
               equipoId={id}
@@ -102,20 +120,16 @@ export default async function PaginaGestionarEquipo({
           ))}
         </div>
 
-        {puedeGestionar && (
-          <Link href={`/equipo/${id}/gestionar/invitar`} className={styles.enlaceInvitar}>
-            + Invitar integrante
-          </Link>
-        )}
+        <Link href={`/equipo/${id}/gestionar/invitar`} className={styles.enlaceInvitar}>
+          + Invitar integrante
+        </Link>
 
-        {gestion && (
-          <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />
-        )}
+        <PanelPendientes equipoId={id} solicitudesPendientes={gestion.solicitudesPendientes} />
       </section>
 
       {esCapitan && (
         <section className={styles.seccion}>
-          {gestion?.torneoEnCursoQueBloqueaArchivado ? (
+          {gestion.torneoEnCursoQueBloqueaArchivado ? (
             <p className={styles.avisoBloqueo}>
               No podés archivar el equipo: está jugando{' '}
               {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, un torneo en curso. Primero tenés
