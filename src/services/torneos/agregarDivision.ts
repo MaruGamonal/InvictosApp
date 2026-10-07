@@ -54,7 +54,15 @@ const COLUMNAS_COPIADAS = [
   'latitud',
   'longitud',
   'imagen_url',
-  'visibilidad',
+  // `visibilidad` NO se copia. La división nueva nace en `draft`, y
+  // copiarla de un torneo ya publicado la dejaba en `draft` + `public`:
+  // una combinación que no produce ninguna otra parte del código. Hoy no
+  // se filtra a ningún lado porque el descubrimiento también filtra por
+  // estado, pero es una mina esperando a la primera consulta que mire
+  // solo `visibilidad`. Sin copiarla queda el default de la columna
+  // (`unlisted`), y es `publicarTorneo` quien la decide al publicar,
+  // según la verificación de la organización (`06`, D-51) — igual que
+  // para cualquier otro torneo.
   'formato',
   'cupo_equipos',
   'min_jugadores_lista',
