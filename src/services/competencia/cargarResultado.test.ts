@@ -43,6 +43,7 @@ function mockearDb(opciones: {
   eventosPrevios?: Array<{ perfil_id: string; equipo_id: string; tipo_evento: string }>;
   alineacionPrevia?: Array<{ perfil_id: string; equipo_id: string }>;
   elegiblePotm?: 'player' | 'coach' | 'delegate' | null;
+  soloOrganizadorCargaResultados?: boolean;
 }) {
   const consultasCliente: { texto: string; valores: unknown[] }[] = [];
   vi.doMock('@/db/cliente', () => ({
@@ -65,6 +66,7 @@ function mockearDb(opciones: {
                 puntos_victoria: opciones.puntosVictoria ?? 3,
                 puntos_empate: opciones.puntosEmpate ?? 1,
                 puntos_derrota: opciones.puntosDerrota ?? 0,
+                solo_organizador_carga_resultados: opciones.soloOrganizadorCargaResultados ?? false,
               },
             ],
           };
@@ -202,6 +204,36 @@ describe('cargarResultado', () => {
       expect.objectContaining({ tipo: 'result_pending_confirmation' }),
       expect.anything(),
     );
+  });
+
+  /**
+   * `solo_organizador_carga_resultados` (`06`, D-07b) era un parámetro
+   * que el organizador podía configurar y que **nadie leía**: viajaba
+   * por `crearTorneo` y `actualizarTorneo`, se copiaba al crear una
+   * división, y no cambiaba nada. Un capitán cargaba igual.
+   */
+  it('con la regla puesta, el capitán no puede cargar', async () => {
+    mockearDb({ esCapitanDe: EQUIPO_A, soloOrganizadorCargaResultados: true });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    await expect(
+      cargarResultado(
+        { partidoId: PARTIDO, version: 1, golesLocal: 1, golesVisitante: 1 },
+        contextoCon('usuario-capitan'),
+      ),
+    ).rejects.toMatchObject({ codigo: 'SOLO_ORGANIZADOR_CARGA_RESULTADOS' });
+  });
+
+  /** La regla es sobre los capitanes, no sobre quien organiza. */
+  it('con la regla puesta, el organizador carga igual', async () => {
+    mockearDb({ rolEnOrganizacion: 'owner', soloOrganizadorCargaResultados: true });
+    const { cargarResultado } = await import('./cargarResultado');
+
+    const resultado = await cargarResultado(
+      { partidoId: PARTIDO, version: 1, golesLocal: 1, golesVisitante: 0 },
+      contextoCon('usuario-owner'),
+    );
+    expect(resultado.estadoResultado).toBe('confirmed');
   });
 
   it('carga fresca 2-1: aplica el efecto completo a la posición de los dos equipos', async () => {

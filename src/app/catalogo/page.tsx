@@ -188,7 +188,7 @@ export default function PaginaCatalogo() {
               minHeight: 90,
               display: 'grid',
               placeItems: 'center',
-              background: 'var(--fondo-aplicacion)',
+              background: 'var(--color-superficie)',
             }}
           >
             Acá iría el anuncio

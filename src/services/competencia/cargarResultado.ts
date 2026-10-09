@@ -133,6 +133,7 @@ interface FilaPartido {
   equipo_visitante_id: string;
   estado: string;
   estado_resultado: string;
+  solo_organizador_carga_resultados: boolean;
   goles_local: number | null;
   goles_visitante: number | null;
   version: number;
@@ -142,7 +143,13 @@ interface FilaPartido {
   puntos_derrota: number;
 }
 
-async function esCapitanDeAlgunEquipo(
+/**
+ * Se exporta porque `obtenerPartido` tiene que decidir si **muestra** el
+ * formulario de carga con el mismo criterio con el que este servicio
+ * decide si lo **acepta**. Con dos copias, la pantalla ofrece lo que la
+ * API rechaza, o esconde lo que aceptaría.
+ */
+export async function esCapitanDeAlgunEquipo(
   contexto: Contexto,
   equipoLocalId: string,
   equipoVisitanteId: string,
@@ -173,7 +180,8 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
   const { rows } = await pool.query<FilaPartido>(
     `SELECT p.torneo_id, p.grupo_id, p.equipo_local_id, p.equipo_visitante_id, p.estado,
             p.goles_local, p.goles_visitante, p.version, p.estado_resultado,
-            t.estado AS torneo_estado, t.puntos_victoria, t.puntos_empate, t.puntos_derrota
+            t.estado AS torneo_estado, t.puntos_victoria, t.puntos_empate, t.puntos_derrota,
+            t.solo_organizador_carga_resultados
      FROM partido p JOIN torneo t ON t.id = p.torneo_id
      WHERE p.id = $1`,
     [datos.partidoId],
@@ -193,6 +201,17 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
       partido.equipo_visitante_id,
     );
     if (!esCapitan) throw error;
+    // `solo_organizador_carga_resultados` (`06`, D-07b) es una regla que
+    // el organizador podía configurar desde el alta del torneo y que
+    // **nadie leía**: el parámetro existía en la tabla, viajaba por
+    // `crearTorneo` y `actualizarTorneo`, se copiaba al crear una
+    // división… y no cambiaba nada. Un capitán cargaba igual.
+    //
+    // El error es propio y no `SIN_PERMISO` porque no le falta un rol a
+    // esta persona: en el torneo de al lado, con el mismo rol, sí puede.
+    if (partido.solo_organizador_carga_resultados) {
+      throw crearError('SOLO_ORGANIZADOR_CARGA_RESULTADOS');
+    }
     estadoResultado = 'loaded';
   }
 

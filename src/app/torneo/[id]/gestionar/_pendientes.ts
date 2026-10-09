@@ -1,4 +1,5 @@
 import type { GestionTorneoResultado } from '@/services/torneos/obtenerGestionTorneo';
+import { ESTADOS_QUE_ESPERAN_RESULTADO } from '@/lib/marcador';
 
 /**
  * Qué está esperando al organizador, derivado del estado del torneo.
@@ -52,8 +53,6 @@ export interface LoQueEspera {
   porPestana: PendientesPorPestana;
 }
 
-/** Estados de partido que todavía pueden recibir un resultado (igual criterio que la pestaña Resultados). */
-const ESPERAN_RESULTADO = new Set(['unscheduled', 'scheduled', 'postponed']);
 /** Una solicitud sin resolver tiene a un equipo esperando respuesta. */
 const INSCRIPCIONES_SIN_RESOLVER = new Set(['pending', 'waitlisted']);
 
@@ -93,7 +92,7 @@ export function calcularLoQueEspera(
   //    desactualizada la tabla de posiciones.
   const sinCargar = gestion.partidos.filter(
     (p) =>
-      ESPERAN_RESULTADO.has(p.estado) &&
+      ESTADOS_QUE_ESPERAN_RESULTADO.has(p.estado) &&
       p.fechaHoraProgramada !== null &&
       new Date(p.fechaHoraProgramada).getTime() < ahora,
   ).length;
@@ -106,7 +105,7 @@ export function calcularLoQueEspera(
 
   // 4. Un partido sin fecha es un partido que nadie puede ir a jugar.
   const sinProgramar = gestion.partidos.filter(
-    (p) => p.fechaHoraProgramada === null && ESPERAN_RESULTADO.has(p.estado),
+    (p) => p.fechaHoraProgramada === null && ESTADOS_QUE_ESPERAN_RESULTADO.has(p.estado),
   ).length;
   if (sinProgramar > 0) {
     pendientes.push({
@@ -147,7 +146,7 @@ function calcularSiguiente(gestion: GestionTorneoResultado, base: string): Pendi
     case 'in_progress': {
       const todosResueltos =
         gestion.partidos.length > 0 &&
-        gestion.partidos.every((p) => !ESPERAN_RESULTADO.has(p.estado));
+        gestion.partidos.every((p) => !ESTADOS_QUE_ESPERAN_RESULTADO.has(p.estado));
       return todosResueltos ? { texto: 'Finalizar el torneo', href: estado } : null;
     }
     case 'suspended':

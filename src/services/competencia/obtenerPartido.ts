@@ -7,6 +7,8 @@ import { CONFIGURACION } from '@/lib/configuracion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { puedeResponderPorElEquipo, resolverEquipoQueResponde } from './_rival';
+import { esCapitanDeAlgunEquipo } from './cargarResultado';
+import { ESTADOS_QUE_ESPERAN_RESULTADO } from '@/lib/marcador';
 
 /**
  * Un partido, con lo que quien mira puede hacer con él.
@@ -97,6 +99,17 @@ export interface PartidoDetallado {
   /** Quien mira gestiona el torneo y el partido admite cargar la alineación. */
   puedeCargarAlineacion: boolean;
   /**
+   * Quien mira es capitán de alguno de los dos equipos y este partido
+   * todavía espera resultado (`06`, D-07b).
+   *
+   * Es el permiso que `cargarResultado` ya aceptaba desde siempre y que
+   * **ninguna pantalla ofrecía**: sin esto, un resultado nunca podía
+   * quedar en `loaded`, y entonces nada de lo que vive después —que el
+   * rival confirme u objete, que el plazo lo confirme solo— llegaba a
+   * ocurrir nunca.
+   */
+  puedeCargarResultado: boolean;
+  /**
    * Quiénes podían jugar, para armar la alineación. Vacío salvo que
    * `puedeCargarAlineacion`: la lista de buena fe tiene su propia
    * pantalla y sus propios permisos, y no se filtra por acá.
@@ -125,6 +138,8 @@ interface Fila {
   cargado_por_usuario_id: string | null;
   cargado_por_nombre: string | null;
   fecha_carga_resultado: Date | null;
+  torneo_estado: string;
+  solo_organizador_carga_resultados: boolean;
 }
 
 export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = async (
@@ -136,6 +151,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
 
   const { rows } = await pool.query<Fila>(
     `SELECT p.id, p.torneo_id, t.nombre AS torneo_nombre, p.numero_fecha, p.estado,
+            t.estado AS torneo_estado, t.solo_organizador_carga_resultados,
             p.estado_resultado, p.version, p.goles_local, p.goles_visitante,
             p.equipo_local_id, el.nombre AS equipo_local_nombre, el.escudo_url AS equipo_local_escudo,
             p.equipo_visitante_id, ev.nombre AS equipo_visitante_nombre,
@@ -204,6 +220,21 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
   // quién jugó. Y tiene sentido al revés también — quién jugó se sabe
   // cuando el partido terminó.
   const puedeCargarAlineacion = gestionaElTorneo && fila.estado === 'played';
+
+  // El capitán carga el resultado de su partido (`06`, D-07b). Sólo
+  // mientras el partido espera uno: corregir un resultado ya cargado es
+  // del organizador, y el rival tiene su propio camino —objetar— que
+  // sería absurdo duplicar con una recarga.
+  //
+  // `!gestionaElTorneo` no es por permiso sino por no ofrecer dos
+  // caminos a la misma persona: quien organiza carga desde su pestaña
+  // de Resultados, que además confirma de entrada (D-95).
+  const puedeCargarResultado =
+    !gestionaElTorneo &&
+    !fila.solo_organizador_carga_resultados &&
+    fila.torneo_estado === 'in_progress' &&
+    ESTADOS_QUE_ESPERAN_RESULTADO.has(fila.estado) &&
+    (await esCapitanDeAlgunEquipo(contexto, fila.equipo_local_id, fila.equipo_visitante_id));
 
   const { rows: alineados } = await pool.query<{
     perfil_id: string;
@@ -290,6 +321,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
       fueTitular: a.fue_titular,
     })),
     puedeCargarAlineacion,
+    puedeCargarResultado,
     habilitados,
     equipoQueRespondeId: equipoQueResponde,
     puedeResponder,

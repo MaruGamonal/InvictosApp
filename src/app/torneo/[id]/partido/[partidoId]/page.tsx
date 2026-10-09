@@ -9,6 +9,7 @@ import { Marcador } from '@/components/Marcador';
 import { Escudo } from '@/components/Escudo';
 import { PanelResponderResultado } from './PanelResponderResultado';
 import { PanelAlineacion } from './PanelAlineacion';
+import { PanelCargarResultado } from './PanelCargarResultado';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Partido') };
@@ -118,6 +119,15 @@ export default async function PaginaPartido({
             <h2 className={styles.tituloObjecion}>Objetado por {equipoQueObjeto.nombre}</h2>
             <blockquote className={styles.motivo}>{partido.objecionAbierta.motivo}</blockquote>
           </section>
+        )}
+
+        {partido.puedeCargarResultado && (
+          <PanelCargarResultado
+            partidoId={partido.id}
+            version={partido.version}
+            localNombre={partido.local.nombre}
+            visitanteNombre={partido.visitante.nombre}
+          />
         )}
 
         {hayResultado && (

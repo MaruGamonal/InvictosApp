@@ -179,6 +179,17 @@ export const CODIGOS_ERROR = {
     httpStatus: 409,
     mensaje: 'Este resultado está objetado: lo resuelve el organizador del torneo.',
   },
+  /**
+   * `solo_organizador_carga_resultados` (`06`, D-07b). Va aparte de
+   * `SIN_PERMISO` porque no es que a esta persona le falte un rol: es
+   * una regla de **este** torneo, y en el de al lado la misma persona
+   * con el mismo rol sí puede. "No tenés permiso" mandaría a buscar un
+   * permiso que no existe.
+   */
+  SOLO_ORGANIZADOR_CARGA_RESULTADOS: {
+    httpStatus: 403,
+    mensaje: 'En este torneo los resultados los carga solamente la organización.',
+  },
   FASE_CON_RESULTADOS_SIN_CONFIRMAR: {
     httpStatus: 409,
     mensaje:

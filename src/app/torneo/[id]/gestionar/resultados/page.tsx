@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { Badge } from '@/components/Badge';
+import { ESTADOS_QUE_ESPERAN_RESULTADO } from '@/lib/marcador';
 import { obtenerGestionCacheada } from '../_datos';
 import { PanelResultados } from '../PanelResultados';
 import styles from './pagina.module.css';
@@ -14,12 +15,9 @@ export default async function PaginaResultados({ params }: { params: Promise<{ i
   const { id } = await params;
   const gestion = await obtenerGestionCacheada(id);
 
-  // Pendiente es lo que todavía puede recibir un resultado. Un
-  // suspendido sí (se reprograma y se juega); un ganado por
-  // presentación o un anulado, no — y antes se quedaban acá, con los
-  // campos de goles al lado de un partido que ya estaba resuelto.
-  const ESPERAN_RESULTADO = new Set(['unscheduled', 'scheduled', 'postponed']);
-  const partidosSinJugar = gestion.partidos.filter((p) => ESPERAN_RESULTADO.has(p.estado));
+  const partidosSinJugar = gestion.partidos.filter((p) =>
+    ESTADOS_QUE_ESPERAN_RESULTADO.has(p.estado),
+  );
   const cargados = gestion.partidos.filter(
     (p) => p.estado === 'played' || p.estado === 'walkover' || p.estado === 'cancelled',
   );
