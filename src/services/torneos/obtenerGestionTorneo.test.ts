@@ -86,7 +86,11 @@ function mockearDb(opciones: {
         if (texto.includes('FROM fase f LEFT JOIN grupo')) {
           return { rows: opciones.fases ?? [] };
         }
-        if (texto.includes('FROM inscripcion i JOIN equipo e')) {
+        // Sin el `JOIN` en el patrón: la consulta sumó un `LEFT JOIN
+        // posicion` y pasó a varias líneas, y el matcher dejó de
+        // coincidir en silencio — las inscripciones volvían vacías y el
+        // test fallaba sin decir por qué.
+        if (texto.includes('FROM inscripcion i')) {
           return { rows: opciones.inscripciones ?? [] };
         }
         if (texto.includes('FROM partido p')) {
@@ -143,6 +147,9 @@ describe('obtenerGestionTorneo', () => {
           advertencia_categoria: false,
           advertencia_multiples_divisiones: false,
           fecha_solicitud: new Date('2026-01-01T00:00:00Z'),
+          tiene_tabla: false,
+          ajuste_puntos: null,
+          ultimo_ajuste_motivo: null,
         },
       ],
       partidos: [
@@ -180,6 +187,11 @@ describe('obtenerGestionTorneo', () => {
         advertenciaCategoria: false,
         advertenciaMultiplesDivisiones: false,
         fechaSolicitud: '2026-01-01T00:00:00.000Z',
+        tieneTabla: false,
+        // Sin fila de `posicion` todavía: `null` se lee como 0, que es
+        // lo que quiere decir "no tiene ninguna sanción".
+        ajustePuntos: 0,
+        ultimoAjusteMotivo: null,
       },
     ]);
     expect(resultado.partidos).toEqual([

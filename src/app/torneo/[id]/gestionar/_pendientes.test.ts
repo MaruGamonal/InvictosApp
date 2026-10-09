@@ -18,6 +18,9 @@ function inscripcion(estado: string, equipoId = `e-${estado}`): InscripcionGesti
     advertenciaCategoria: false,
     advertenciaMultiplesDivisiones: false,
     fechaSolicitud: AYER,
+    tieneTabla: false,
+    ajustePuntos: 0,
+    ultimoAjusteMotivo: null,
   };
 }
 

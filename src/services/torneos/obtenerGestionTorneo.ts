@@ -33,6 +33,16 @@ export interface InscripcionGestion {
   advertenciaCategoria: boolean;
   advertenciaMultiplesDivisiones: boolean;
   fechaSolicitud: string;
+  /**
+   * UC-35 — Si el equipo ya tiene una fila de tabla asignada
+   * (`confirmarFixture` le puso grupo). Antes de eso no hay nada que
+   * sancionar: el ajuste no tendría dónde guardarse.
+   */
+  tieneTabla: boolean;
+  /** Quita o bonificación acumulada (`06`, D-35b). 0 es lo normal. */
+  ajustePuntos: number;
+  /** El motivo del último ajuste, para que una sanción no sea un número sin explicación. */
+  ultimoAjusteMotivo: string | null;
 }
 
 export interface PartidoGestion {
@@ -223,10 +233,22 @@ export const obtenerGestionTorneo: Servicio<
     advertencia_categoria: boolean;
     advertencia_multiples_divisiones: boolean;
     fecha_solicitud: Date;
+    tiene_tabla: boolean;
+    ajuste_puntos: number | null;
+    ultimo_ajuste_motivo: string | null;
   }>(
+    // El ajuste de puntos viene de `posicion`, por el grupo que le
+    // asignó `confirmarFixture`: sin grupo todavía no hay tabla que
+    // ajustar, y por eso `tiene_tabla` viaja aparte de que el ajuste
+    // sea 0 — "no se puede sancionar todavía" y "no tiene sanciones"
+    // son dos cosas distintas.
     `SELECT i.equipo_id, e.nombre, i.estado, i.advertencia_categoria,
-            i.advertencia_multiples_divisiones, i.fecha_solicitud
-     FROM inscripcion i JOIN equipo e ON e.id = i.equipo_id
+            i.advertencia_multiples_divisiones, i.fecha_solicitud,
+            (i.grupo_id IS NOT NULL) AS tiene_tabla,
+            p.ajuste_puntos, p.ultimo_ajuste_motivo
+     FROM inscripcion i
+     JOIN equipo e ON e.id = i.equipo_id
+     LEFT JOIN posicion p ON p.grupo_id = i.grupo_id AND p.equipo_id = i.equipo_id
      WHERE i.torneo_id = $1
      ORDER BY i.fecha_solicitud ASC`,
     [datos.torneoId],
@@ -333,6 +355,9 @@ export const obtenerGestionTorneo: Servicio<
       advertenciaCategoria: fila.advertencia_categoria,
       advertenciaMultiplesDivisiones: fila.advertencia_multiples_divisiones,
       fechaSolicitud: fila.fecha_solicitud.toISOString(),
+      tieneTabla: fila.tiene_tabla,
+      ajustePuntos: fila.ajuste_puntos ?? 0,
+      ultimoAjusteMotivo: fila.ultimo_ajuste_motivo,
     })),
     partidos: partidos.map((fila) => ({
       id: fila.id,

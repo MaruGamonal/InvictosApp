@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { Badge } from '@/components/Badge';
+import { PanelAjustePuntos } from './PanelAjustePuntos';
 import styles from './pagina.module.css';
 
 export interface InscripcionGestion {
@@ -12,6 +13,11 @@ export interface InscripcionGestion {
   estado: string;
   advertenciaCategoria: boolean;
   advertenciaMultiplesDivisiones: boolean;
+  /** UC-35 — Si ya tiene fila de tabla: antes del fixture no hay nada que ajustar. */
+  tieneTabla: boolean;
+  /** Quita o bonificación acumulada (`06`, D-35b). */
+  ajustePuntos: number;
+  ultimoAjusteMotivo: string | null;
 }
 
 export interface DivisionDelCertamenProps {
@@ -191,22 +197,35 @@ export function PanelInscripciones({
             <span className={styles.contadorSeccion}> · {confirmados.length}</span>
           </span>
           {confirmados.map((inscripcion) => (
-            <div key={inscripcion.equipoId} className={styles.filaConfirmado}>
-              <svg
-                className={styles.iconoConfirmado}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <path d="m5 13 4 4L19 7" />
-              </svg>
-              <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+            <div key={inscripcion.equipoId}>
+              <div className={styles.filaConfirmado}>
+                <svg
+                  className={styles.iconoConfirmado}
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
+                <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+              </div>
+              {/* UC-35 — Sólo con tabla asignada: antes del fixture el
+                  ajuste no tendría dónde guardarse. */}
+              {inscripcion.tieneTabla && (
+                <PanelAjustePuntos
+                  torneoId={torneoId}
+                  equipoId={inscripcion.equipoId}
+                  nombreEquipo={inscripcion.nombreEquipo}
+                  ajustePuntos={inscripcion.ajustePuntos}
+                  ultimoAjusteMotivo={inscripcion.ultimoAjusteMotivo}
+                />
+              )}
             </div>
           ))}
         </div>

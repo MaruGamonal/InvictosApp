@@ -28,6 +28,9 @@ describe('PanelInscripciones', () => {
             estado: 'approved',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
           {
             equipoId: 'e-2',
@@ -35,6 +38,9 @@ describe('PanelInscripciones', () => {
             estado: 'approved',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
           {
             equipoId: 'e-3',
@@ -42,6 +48,9 @@ describe('PanelInscripciones', () => {
             estado: 'pending',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
@@ -61,6 +70,9 @@ describe('PanelInscripciones', () => {
             estado: 'approved',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
@@ -88,6 +100,9 @@ describe('PanelInscripciones', () => {
             estado: 'pending',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
           {
             equipoId: 'e-2',
@@ -95,6 +110,9 @@ describe('PanelInscripciones', () => {
             estado: 'approved',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
@@ -118,6 +136,9 @@ describe('PanelInscripciones', () => {
             estado: 'approved',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
           {
             equipoId: 'e-2',
@@ -125,6 +146,9 @@ describe('PanelInscripciones', () => {
             estado: 'rejected',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
@@ -153,6 +177,9 @@ describe('PanelInscripciones', () => {
             estado: 'pending',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
@@ -191,6 +218,9 @@ describe('PanelInscripciones', () => {
             estado: 'pending',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
         divisionesDelCertamen={[
@@ -235,6 +265,9 @@ describe('PanelInscripciones', () => {
             estado: 'pending',
             advertenciaCategoria: false,
             advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
           },
         ]}
       />,
