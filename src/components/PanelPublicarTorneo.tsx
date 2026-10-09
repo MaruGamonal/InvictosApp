@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BotonVerificarOrganizacion } from '@/components/BotonVerificarOrganizacion';
 import { motivoDelFallo } from '@/components/avisos/motivoDelFallo';
+import { BarraAccionFija } from '@/components/BarraAccionFija';
+import stylesBarra from '@/components/BarraAccionFija.module.css';
 import styles from './PanelPublicarTorneo.module.css';
 
 export interface PanelPublicarTorneoProps {
@@ -17,6 +19,16 @@ export interface PanelPublicarTorneoProps {
   camposFaltantes: string[];
   /** Adónde ir cuando el torneo entró al descubrimiento. Sin esto, se refresca donde está. */
   destinoAlPublicar?: string;
+  /**
+   * El botón va en una barra fija abajo en vez de al final del panel.
+   *
+   * Lo usa el Resumen, donde arriba del botón hay una explicación, el
+   * aviso de verificación y —si falta algo— la lista de datos
+   * pendientes: ahí publicar tiene que estar siempre a un toque. El
+   * último paso del alta no lo usa: es una tarjeta centrada y corta,
+   * donde una barra a lo ancho de la pantalla queda suelta.
+   */
+  accionFija?: boolean;
 }
 
 /**
@@ -53,6 +65,7 @@ export function PanelPublicarTorneo({
   limitePublicadosAlcanzado,
   camposFaltantes,
   destinoAlPublicar,
+  accionFija = false,
 }: PanelPublicarTorneoProps) {
   const router = useRouter();
   const [enviando, setEnviando] = useState(false);
@@ -124,6 +137,17 @@ export function PanelPublicarTorneo({
     );
   }
 
+  const boton = (
+    <button
+      type="button"
+      className={styles.boton}
+      onClick={publicar}
+      disabled={enviando || faltantes.length > 0}
+    >
+      {enviando ? 'Publicando…' : 'Publicar torneo'}
+    </button>
+  );
+
   return (
     <div className={styles.panel}>
       {organizacionVerificada ? (
@@ -180,14 +204,25 @@ export function PanelPublicarTorneo({
         </>
       )}
 
-      <button
-        type="button"
-        className={styles.boton}
-        onClick={publicar}
-        disabled={enviando || faltantes.length > 0}
-      >
-        {enviando ? 'Publicando…' : 'Publicar torneo'}
-      </button>
+      {!accionFija && boton}
+
+      {/* El mismo botón, el mismo estado: no hay una copia con su propia
+          lógica, está renderizado en un lugar o en el otro. */}
+      {accionFija && (
+        <BarraAccionFija>
+          {/* Por qué el botón está apagado, al lado del botón: desde
+              abajo de todo, subir a buscarlo sería el camino largo. Va
+              el número y no la lista, que está completa en el panel y
+              repetirla entera sería leer dos veces lo mismo. */}
+          {faltantes.length > 0 && (
+            <p className={stylesBarra.nota}>
+              Falta{faltantes.length === 1 ? '' : 'n'} {faltantes.length}{' '}
+              {faltantes.length === 1 ? 'dato' : 'datos'} para publicar
+            </p>
+          )}
+          {boton}
+        </BarraAccionFija>
+      )}
     </div>
   );
 }

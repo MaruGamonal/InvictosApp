@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerResumenParaPublicar } from '@/services/torneos/obtenerResumenParaPublicar';
 import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
+import { BarraAccionFija } from '@/components/BarraAccionFija';
+import stylesBarra from '@/components/BarraAccionFija.module.css';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
 import { calcularLoQueEspera } from '../_pendientes';
 import styles from './pagina.module.css';
@@ -63,7 +65,7 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
       await obtenerContextoCacheado(),
     );
     return (
-      <div className={styles.pagina}>
+      <div className={`${styles.pagina} ${stylesBarra.conBarraFija}`}>
         <section className={styles.bloquePublicar}>
           <h2 className={styles.tituloPublicar}>Tu torneo todavía no está publicado</h2>
           <p className={styles.textoPublicar}>
@@ -77,6 +79,7 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
             organizacionVerificada={paraPublicar.organizacionVerificada}
             limitePublicadosAlcanzado={paraPublicar.limitePublicadosAlcanzado}
             camposFaltantes={paraPublicar.camposFaltantes}
+            accionFija
           />
         </section>
       </div>
@@ -93,6 +96,15 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
 
   const ahora = Date.now();
   const { pendientes, siguiente } = calcularLoQueEspera(gestion, ahora);
+  // Nada trabado no siempre quiere decir lo mismo: con un paso siguiente
+  // disponible el torneo está listo para avanzar, y con las
+  // inscripciones abiertas está esperando equipos, que no es algo que el
+  // organizador pueda apurar.
+  const sinPendientes = siguiente
+    ? 'Nada trabado: el torneo está listo para el próximo paso.'
+    : gestion.estado === 'registration_open'
+      ? 'Nada por ahora: el torneo está esperando que se inscriban los equipos.'
+      : 'Nada por ahora.';
   const proximo = gestion.partidos
     .filter(
       (p) =>
@@ -106,7 +118,7 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
     )[0];
 
   return (
-    <div className={styles.pagina}>
+    <div className={`${styles.pagina} ${siguiente ? stylesBarra.conBarraFija : ''}`}>
       <p className={styles.subtitulo}>
         {aprobados} equipo{aprobados === 1 ? '' : 's'}
         {totalPartidos > 0 && ` · ${cantidadFechas} fecha${cantidadFechas === 1 ? '' : 's'}`}
@@ -114,12 +126,8 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
 
       <section className={styles.bloqueEspera}>
         <h2 className={styles.tituloEspera}>Para resolver</h2>
-        {pendientes.length === 0 && siguiente === null ? (
-          <p className={styles.nadaQueResolver}>
-            {gestion.estado === 'registration_open'
-              ? 'Nada por ahora: el torneo está esperando que se inscriban los equipos.'
-              : 'Nada por ahora.'}
-          </p>
+        {pendientes.length === 0 ? (
+          <p className={styles.nadaQueResolver}>{sinPendientes}</p>
         ) : (
           <div className={styles.listaEspera}>
             {pendientes.map((pendiente) => (
@@ -128,14 +136,6 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
                 <IconoFlecha />
               </Link>
             ))}
-            {/* La transición de estado va de último y como acción, no
-                como pendiente: es lo que destraba el torneo cuando ya no
-                queda nada trabado. */}
-            {siguiente && (
-              <Link href={siguiente.href} className={styles.accionSiguiente}>
-                {siguiente.texto}
-              </Link>
-            )}
           </div>
         )}
       </section>
@@ -192,6 +192,17 @@ export default async function PaginaResumen({ params }: { params: Promise<{ id: 
           <IconoFlecha />
         </Link>
       </div>
+
+      {/* La transición de estado que destraba el torneo cuando ya no
+          queda nada trabado: fija abajo, para no tener que volver
+          arriba desde los contadores. */}
+      {siguiente && (
+        <BarraAccionFija>
+          <Link href={siguiente.href} className={styles.accionSiguiente}>
+            {siguiente.texto}
+          </Link>
+        </BarraAccionFija>
+      )}
     </div>
   );
 }

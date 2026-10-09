@@ -1,0 +1,37 @@
+/* El hueco para la barra, en el contenedor de la pantalla: padding + 48
+   de botón + el borde. Lo pone la pantalla y no la barra, porque la
+   barra se monta donde está la acción —a veces en medio de una
+   tarjeta— y el espacio hace falta al final de todo. */
+.conBarraFija {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+}
+
+.barra {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Misma capa que `NavInferior`, con la que nunca convive. */
+  z-index: 10;
+  background: var(--color-fondo);
+  border-top: 1px solid var(--color-borde);
+  padding: 12px var(--espacio-pantalla-x) calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+}
+
+/* Una línea corta sobre el botón, para lo que haya que decir sin obligar
+   a subir — por ejemplo qué datos faltan para poder publicar. */
+.nota {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-texto-secundario);
+  text-align: center;
+}

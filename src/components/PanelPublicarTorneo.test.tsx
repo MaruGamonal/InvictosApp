@@ -143,6 +143,51 @@ describe('PanelPublicarTorneo — datos mínimos que faltan', () => {
   });
 });
 
+/**
+ * En el Resumen el botón se va a una barra fija abajo: arriba hay una
+ * explicación, el aviso de verificación y, si falta algo, la lista de
+ * datos pendientes, y publicar tiene que estar siempre a un toque. El
+ * último paso del alta no la usa — es una tarjeta corta y centrada.
+ */
+describe('PanelPublicarTorneo — con la acción fija', () => {
+  it('el botón sigue siendo uno solo, con el mismo estado', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getAllByRole, getByText } = montar({ accionFija: true });
+    expect(getAllByRole('button', { name: 'Publicar torneo' })).toHaveLength(1);
+
+    fireEvent.click(getByText('Publicar torneo'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+  });
+
+  /**
+   * Por qué el botón está apagado, al lado del botón. Va el número y no
+   * la lista: la lista completa está en el panel, y repetirla entera
+   * sería leer dos veces lo mismo cuando las dos cosas entran juntas.
+   */
+  it('dice cuántos datos faltan junto a la acción, sin repetir la lista', () => {
+    const { getByText, queryByText } = montar({
+      accionFija: true,
+      camposFaltantes: ['dirección', 'fecha estimada de inicio'],
+    });
+    expect(getByText('Faltan 2 datos para publicar')).toBeTruthy();
+    expect(queryByText(/Falta cargar: dirección, fecha/)).toBeNull();
+    expect((getByText('Publicar torneo') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('con un solo dato faltante, lo dice en singular', () => {
+    const { getByText } = montar({ accionFija: true, camposFaltantes: ['dirección'] });
+    expect(getByText('Falta 1 dato para publicar')).toBeTruthy();
+  });
+
+  it('sin la acción fija, el botón va dentro del panel y no hay nota', () => {
+    const { getAllByRole, queryByText } = montar({ camposFaltantes: ['dirección'] });
+    expect(getAllByRole('button', { name: 'Publicar torneo' })).toHaveLength(1);
+    expect(queryByText(/para publicar$/)).toBeNull();
+  });
+});
+
 describe('PanelPublicarTorneo — sin verificar (D-51)', () => {
   /** La noticia y la salida juntas, antes de publicar. */
   it('avisa que el torneo no va a aparecer en las búsquedas y ofrece verificar', () => {
