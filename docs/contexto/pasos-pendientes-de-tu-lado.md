@@ -168,7 +168,15 @@ que fallan en silencio:
    estado al lado ("Sin definir", "Versión 2 · 5 de octubre", "2
    asignados"), y cada sección en su propia pantalla. De cada una se
    vuelve con "‹ Configuración".
-7. **El Resumen de un torneo con cosas trabadas**: tiene que listar
+7. **Que un capitán cargue el resultado de su partido** → entrar al
+   partido con la cuenta del capitán de uno de los dos equipos: tiene
+   que aparecer el formulario de marcador. Al cargarlo, el capitán del
+   otro equipo tiene que poder confirmarlo u objetarlo. Esto no existía:
+   el servicio lo aceptaba pero ninguna pantalla lo ofrecía.
+8. **Configuración → Reglas del torneo**: puntaje, topes de plantel,
+   quién carga resultados, abandono y walkover. Con un partido ya
+   jugado, el puntaje tiene que verse apagado.
+9. **El Resumen de un torneo con cosas trabadas**: tiene que listar
    "Para resolver" — resultados objetados, equipos esperando respuesta,
    partidos jugados sin resultado, partidos sin programar — y los mismos
    números tienen que aparecer como burbuja en las pestañas Equipos,
