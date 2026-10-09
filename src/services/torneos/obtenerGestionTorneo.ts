@@ -68,6 +68,33 @@ export interface DivisionDelCertamen {
   estado: string;
 }
 
+/** `06`, D-07b / D-08b / D-26 / D-30b / D-33b — lo que decide cómo se juega y cómo se cuenta. */
+export interface ReglasDelTorneo {
+  /**
+   * `null` es lo normal: las columnas son nullable y sin valor por
+   * defecto, así que un torneo recién creado no tiene tope de plantel
+   * hasta que alguien se lo ponga. Tipearlas como `number` fue un error
+   * que el test de integración agarró — contra la base simulada habrían
+   * pasado por números para siempre.
+   */
+  minJugadoresLista: number | null;
+  maxJugadoresLista: number | null;
+  puntosVictoria: number;
+  puntosEmpate: number;
+  puntosDerrota: number;
+  /** D-26 — nadie puede estar en la lista de buena fe de dos equipos del mismo torneo. */
+  jugadorUnicoPorEquipo: boolean;
+  /** D-07b — con esto puesto, el capitán no carga resultados: sólo la organización. */
+  soloOrganizadorCargaResultados: boolean;
+  /** D-08b — qué pasa con los partidos que le quedaban a un equipo que abandona. */
+  partidosPendientesPorAbandono: 'ganados_por_rival' | 'anulados';
+  /** D-33b — el marcador con el que se registra un partido ganado por presentación. */
+  golesWalkoverGanador: number;
+  golesWalkoverPerdedor: number;
+  /** D-30b — después de esta fecha no se suma nadie más a ninguna lista de buena fe. */
+  fechaCierreListaBuenaFe: string | null;
+}
+
 export interface GestionTorneoResultado {
   id: string;
   organizacionId: string;
@@ -90,6 +117,13 @@ export interface GestionTorneoResultado {
   division: string | null;
   /** Las demás divisiones del mismo certamen, sin incluir esta — `[]` si no pertenece a ninguno. */
   divisionesDelCertamen: DivisionDelCertamen[];
+  /**
+   * Las reglas de competencia del torneo (migración
+   * `parametros-configurables-de-torneo`). Viajaban por `crearTorneo` y
+   * `actualizarTorneo` desde el principio y ninguna pantalla las leía ni
+   * las escribía: sólo se podían tocar pegándole a la API.
+   */
+  reglas: ReglasDelTorneo;
   fases: FaseGestion[];
   inscripciones: InscripcionGestion[];
   partidos: PartidoGestion[];
@@ -122,10 +156,26 @@ export const obtenerGestionTorneo: Servicio<
     organizacion_id: string;
     certamen_id: string | null;
     division: string | null;
+    min_jugadores_lista: number | null;
+    max_jugadores_lista: number | null;
+    puntos_victoria: number;
+    puntos_empate: number;
+    puntos_derrota: number;
+    jugador_unico_por_equipo: boolean;
+    solo_organizador_carga_resultados: boolean;
+    partidos_pendientes_por_abandono: 'ganados_por_rival' | 'anulados';
+    goles_walkover_ganador: number;
+    goles_walkover_perdedor: number;
+    fecha_cierre_lista_buena_fe: Date | null;
   }>(
     `SELECT id, nombre, descripcion, imagen_url, direccion, ciudad_id, costo_inscripcion, costo_planilla,
             cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id,
-            certamen_id, division
+            certamen_id, division,
+            min_jugadores_lista, max_jugadores_lista,
+            puntos_victoria, puntos_empate, puntos_derrota,
+            jugador_unico_por_equipo, solo_organizador_carga_resultados,
+            partidos_pendientes_por_abandono, goles_walkover_ganador, goles_walkover_perdedor,
+            fecha_cierre_lista_buena_fe
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
@@ -256,6 +306,19 @@ export const obtenerGestionTorneo: Servicio<
     certamenId: torneo.certamen_id,
     division: torneo.division,
     divisionesDelCertamen,
+    reglas: {
+      minJugadoresLista: torneo.min_jugadores_lista,
+      maxJugadoresLista: torneo.max_jugadores_lista,
+      puntosVictoria: torneo.puntos_victoria,
+      puntosEmpate: torneo.puntos_empate,
+      puntosDerrota: torneo.puntos_derrota,
+      jugadorUnicoPorEquipo: torneo.jugador_unico_por_equipo,
+      soloOrganizadorCargaResultados: torneo.solo_organizador_carga_resultados,
+      partidosPendientesPorAbandono: torneo.partidos_pendientes_por_abandono,
+      golesWalkoverGanador: torneo.goles_walkover_ganador,
+      golesWalkoverPerdedor: torneo.goles_walkover_perdedor,
+      fechaCierreListaBuenaFe: torneo.fecha_cierre_lista_buena_fe?.toISOString() ?? null,
+    },
     fases: fases.map((fila) => ({
       id: fila.id,
       nombre: fila.nombre,

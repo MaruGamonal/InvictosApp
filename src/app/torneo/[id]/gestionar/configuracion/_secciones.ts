@@ -16,6 +16,7 @@ export const SECCIONES_CONFIGURACION = {
   datos: 'Datos del torneo',
   formato: 'Formato',
   divisiones: 'Divisiones',
+  reglas: 'Reglas del torneo',
   reglamento: 'Reglamento',
   colaboradores: 'Colaboradores de este torneo',
   administradores: 'Equipo de trabajo de la organización',

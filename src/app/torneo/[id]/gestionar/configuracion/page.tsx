@@ -79,6 +79,16 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
         : 'Sin divisiones',
     },
     {
+      seccion: 'reglas',
+      // Lo que más se toca de esta sección y lo que más se nota: el
+      // puntaje. El resto se configura una vez y no se mira más.
+      estado: `${gestion.reglas.puntosVictoria}-${gestion.reglas.puntosEmpate}-${gestion.reglas.puntosDerrota} puntos · ${
+        gestion.reglas.soloOrganizadorCargaResultados
+          ? 'carga la organización'
+          : 'cargan los capitanes'
+      }`,
+    },
+    {
       seccion: 'reglamento',
       estado: reglamentoVigente
         ? `Versión ${reglamentoVigente.numeroVersion} · ${formatearFecha(reglamentoVigente.fechaPublicacion)}`
