@@ -1,39 +1,47 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { Badge } from '@/components/Badge';
 import { listarReglamentos } from '@/services/torneos/listarReglamentos';
 import { listarColaboradoresTorneo } from '@/services/organizadores/listarColaboradoresTorneo';
 import { listarMiembros } from '@/services/organizadores/listarMiembros';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
-import { FormularioEditarTorneo } from '../FormularioEditarTorneo';
-import { AccionesEstadoTorneo } from '../AccionesEstadoTorneo';
 import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../_estadosDeTorneo';
-import { FormularioDefinirFormato } from '../FormularioDefinirFormato';
-import { FormularioReglamentoOrganizador } from '../FormularioReglamentoOrganizador';
-import { PanelColaboradores } from '../PanelColaboradores';
-import { PanelDivisiones } from '../PanelDivisiones';
-import { PanelAdministradores } from '../PanelAdministradores';
-import { PanelCancelarTorneo } from '../PanelCancelarTorneo';
-import { SeccionAcordeon } from '../SeccionAcordeon';
-import stylesCompartidos from '../pagina.module.css';
+import { SECCIONES_CONFIGURACION, type SeccionConfiguracion } from './_secciones';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Configuración del torneo') };
 
+function formatearFecha(iso: string): string {
+  return new Date(iso).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+}
+
+function contar(cantidad: number, singular: string, plural: string, vacio: string): string {
+  if (cantidad === 0) return vacio;
+  return `${cantidad} ${cantidad === 1 ? singular : plural}`;
+}
+
 /**
- * Todo lo administrativo del torneo, como acordeones (`<details>`, sin
- * JS): son muchas secciones que casi nunca se tocan todas juntas, así
- * que solo "Datos del torneo" arranca abierta — el resto, a un toque.
- * "Interrumpir el torneo" vive adentro de "Estado", no aparte: es la
- * misma pregunta ("¿en qué estado está esto?"), solo que con la
- * respuesta más drástica.
+ * El menú de Configuración: una fila por sección, con el estado actual
+ * de cada una, y cada sección en su propia pantalla.
  *
- * Lo que **no** está acá es publicar. Vivía dentro de "Estado", que es
- * el último acordeón de una pantalla larga, y en una versión más pobre
- * que la del alta. Ahora está en el Resumen, que es la primera pestaña
- * y la primera cosa que se ve. Y como en borrador este acordeón se
- * quedaba sin ninguna acción, directamente no se muestra: uno que se
- * abre vacío es peor que no estar — lo mismo para un torneo terminado o
- * cancelado, donde ya pasaba antes de este cambio.
+ * **Qué reemplaza.** Siete acordeones en una sola página. Para llegar al
+ * último había que pasar por encima de los otros seis, el estado de cada
+ * uno estaba escondido hasta abrirlo —no se podía saber si el formato
+ * estaba definido sin abrir "Formato"— y la pantalla no tenía forma de
+ * decir qué faltaba configurar. Un acordeón es buena idea cuando el
+ * contenido es accesorio; acá cada sección es una tarea.
+ *
+ * **Por qué el estado va en la fila.** Es el resumen de progreso sin
+ * agregar una pantalla de resumen: "Sin definir" al lado de Formato
+ * dice lo mismo que diría un cartel aparte, pero en el lugar donde hay
+ * algo que hacer al respecto. "Datos del torneo" no lleva estado porque
+ * no tiene uno: lo que falta ahí para poder publicar lo dice el Resumen,
+ * que es donde está el botón de publicar.
+ *
+ * **Lo que cuesta.** Las mismas tres consultas que hacía la página
+ * larga, porque las necesita para los estados. Cada sección, en cambio,
+ * ahora consulta solo lo suyo.
  */
 export default async function PaginaConfiguracion({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,80 +57,99 @@ export default async function PaginaConfiguracion({ params }: { params: Promise<
   );
   const reglamentoVigente = reglamentos.find((r) => r.estado === 'current') ?? null;
 
+  const fasePrincipal = gestion.fases[0];
+  const filas: Array<{ seccion: SeccionConfiguracion; estado: string }> = [
+    { seccion: 'datos', estado: 'Nombre, sede, fechas y costos' },
+    {
+      seccion: 'formato',
+      estado: fasePrincipal
+        ? `${fasePrincipal.tipoFase === 'league' ? 'Liga' : 'Eliminación directa'}` +
+          (fasePrincipal.cantidadGrupos > 1 ? ` · ${fasePrincipal.cantidadGrupos} zonas` : '')
+        : 'Sin definir',
+    },
+    {
+      seccion: 'divisiones',
+      estado: gestion.certamenId
+        ? `${gestion.division ?? 'Sin etiqueta'} · ${contar(
+            gestion.divisionesDelCertamen.length + 1,
+            'división',
+            'divisiones',
+            '',
+          )}`
+        : 'Sin divisiones',
+    },
+    {
+      seccion: 'reglamento',
+      estado: reglamentoVigente
+        ? `Versión ${reglamentoVigente.numeroVersion} · ${formatearFecha(reglamentoVigente.fechaPublicacion)}`
+        : 'Sin publicar',
+    },
+    {
+      seccion: 'colaboradores',
+      estado: contar(colaboradores.length, 'asignado', 'asignados', 'Ninguno'),
+    },
+    {
+      seccion: 'administradores',
+      estado: contar(administradores.length, 'persona', 'personas', 'Nadie'),
+    },
+  ];
+
   return (
     <div className={styles.pagina}>
-      <SeccionAcordeon titulo="Datos del torneo" abiertoPorDefecto>
-        <FormularioEditarTorneo
-          torneoId={id}
-          nombre={gestion.nombre}
-          descripcion={gestion.descripcion}
-          imagenUrl={gestion.imagenUrl}
-          direccion={gestion.direccion}
-          costoInscripcion={gestion.costoInscripcion}
-          costoPlanilla={gestion.costoPlanilla}
-          cupoEquipos={gestion.cupoEquipos}
-          fechaInicioEstimada={gestion.fechaInicioEstimada}
-          fechaFinEstimada={gestion.fechaFinEstimada}
-        />
-      </SeccionAcordeon>
-
-      <SeccionAcordeon titulo="Formato">
-        {gestion.fases.length === 0 ? (
-          <FormularioDefinirFormato torneoId={id} formatoElegido={gestion.formato} />
-        ) : (
-          <div className={stylesCompartidos.lista}>
-            {gestion.fases.map((fase) => (
-              <div key={fase.id} className={stylesCompartidos.filaPendiente}>
-                <span>{fase.nombre}</span>
-                <span className={stylesCompartidos.rolIntegrante}>
-                  {fase.tipoFase === 'league' ? 'Liga' : 'Eliminación directa'}
-                  {fase.cantidadGrupos > 1 ? ` · ${fase.cantidadGrupos} zonas` : ''}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </SeccionAcordeon>
-
-      <SeccionAcordeon titulo="Divisiones">
-        <PanelDivisiones
-          torneoId={id}
-          certamenId={gestion.certamenId}
-          division={gestion.division}
-          divisionesDelCertamen={gestion.divisionesDelCertamen}
-        />
-      </SeccionAcordeon>
-
-      <SeccionAcordeon titulo="Reglamento">
-        <FormularioReglamentoOrganizador torneoId={id} vigente={reglamentoVigente} />
-      </SeccionAcordeon>
-
-      <SeccionAcordeon titulo="Colaboradores de este torneo">
-        <PanelColaboradores torneoId={id} colaboradores={colaboradores} />
-      </SeccionAcordeon>
-
-      <SeccionAcordeon titulo="Equipo de trabajo de la organización">
-        <PanelAdministradores
-          organizacionId={gestion.organizacionId}
-          administradores={administradores}
-          esTitular={gestion.miRolEnOrganizacion === 'owner'}
-        />
-      </SeccionAcordeon>
-
-      {ESTADOS_CON_ACCIONES_DE_ESTADO.has(gestion.estado) && (
-        <SeccionAcordeon titulo="Estado">
-          <AccionesEstadoTorneo
+      <nav className={styles.menu} aria-label="Secciones de configuración">
+        {filas.map((fila) => (
+          <FilaDeSeccion
+            key={fila.seccion}
             torneoId={id}
-            estado={gestion.estado}
-            tienePartidos={gestion.partidos.length > 0}
+            seccion={fila.seccion}
+            estado={fila.estado}
           />
+        ))}
 
-          <div className={stylesCompartidos.seccionPeligro}>
-            <h3 className={stylesCompartidos.tituloSeccion}>Interrumpir el torneo</h3>
-            <PanelCancelarTorneo torneoId={id} />
-          </div>
-        </SeccionAcordeon>
-      )}
+        {/* La sección de estado solo existe mientras haya una transición
+            posible: en borrador se publica desde el Resumen, y un torneo
+            terminado o cancelado ya no se mueve. */}
+        {ESTADOS_CON_ACCIONES_DE_ESTADO.has(gestion.estado) && (
+          <FilaDeSeccion
+            torneoId={id}
+            seccion="estado"
+            estado={<Badge campo="torneo.estado" valor={gestion.estado} />}
+          />
+        )}
+      </nav>
     </div>
+  );
+}
+
+function FilaDeSeccion({
+  torneoId,
+  seccion,
+  estado,
+}: {
+  torneoId: string;
+  seccion: SeccionConfiguracion;
+  estado: React.ReactNode;
+}) {
+  return (
+    <Link href={`/torneo/${torneoId}/gestionar/configuracion/${seccion}`} className={styles.fila}>
+      <span className={styles.textoFila}>
+        <span className={styles.nombreFila}>{SECCIONES_CONFIGURACION[seccion]}</span>
+        <span className={styles.estadoFila}>{estado}</span>
+      </span>
+      <svg
+        className={styles.flechaFila}
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </Link>
   );
 }

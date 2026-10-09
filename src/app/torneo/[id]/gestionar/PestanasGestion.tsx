@@ -26,7 +26,10 @@ export function PestanasGestion({ torneoId }: { torneoId: string }) {
     <nav className={styles.nav} aria-label="Secciones de gestión">
       {PESTANAS.map((pestana) => {
         const href = `/torneo/${torneoId}/gestionar/${pestana.segmento}`;
-        const activa = pathname === href;
+        // `startsWith` y no `===`: Configuración tiene una pantalla por
+        // sección (`configuracion/formato`, …) y la pestaña tiene que
+        // seguir marcada adentro de cualquiera de ellas.
+        const activa = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={pestana.segmento}

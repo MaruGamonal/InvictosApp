@@ -23,8 +23,8 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
     return (
       <EstadoVacio
         mensaje="Todavía no definiste el formato del torneo — hace falta antes de generar el fixture."
-        textoAccion="Ir a Configuración"
-        hrefAccion={`/torneo/${id}/gestionar/configuracion`}
+        textoAccion="Definir el formato"
+        hrefAccion={`/torneo/${id}/gestionar/configuracion/formato`}
       />
     );
   }
@@ -33,8 +33,8 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
     return (
       <EstadoVacio
         mensaje="Cerrá las inscripciones antes de generar el fixture — un equipo que entra después obliga a rehacerlo."
-        textoAccion="Ir a Configuración"
-        hrefAccion={`/torneo/${id}/gestionar/configuracion`}
+        textoAccion="Cerrar las inscripciones"
+        hrefAccion={`/torneo/${id}/gestionar/configuracion/estado`}
       />
     );
   }

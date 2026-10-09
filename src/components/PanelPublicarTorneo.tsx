@@ -156,10 +156,10 @@ export function PanelPublicarTorneo({
             ))}
           </ul>
           <Link
-            href={`/torneo/${torneoId}/gestionar/configuracion`}
+            href={`/torneo/${torneoId}/gestionar/configuracion/datos`}
             className={styles.enlaceSecundario}
           >
-            Completar en Configuración
+            Completar los datos del torneo
           </Link>
         </div>
       )}

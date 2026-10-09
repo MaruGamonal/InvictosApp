@@ -109,7 +109,7 @@ export function PanelDivisiones({
       {creada && (
         <p className={styles.avisoChico}>
           División {creada.division} creada, en borrador.{' '}
-          <Link href={`/torneo/${creada.id}/gestionar/configuracion`}>Configurarla →</Link>
+          <Link href={`/torneo/${creada.id}/gestionar/configuracion/datos`}>Configurarla →</Link>
         </p>
       )}
 

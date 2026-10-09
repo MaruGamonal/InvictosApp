@@ -1,6 +1,81 @@
 .pagina {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-/* D-51 — el estado de visibilidad y su salida, juntos y sin irse solos. */
+/* ---- El menú ---- */
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  /* 44px de área táctil (`08`, sección 10) — el padding ya llega, pero
+     esto lo sostiene si el texto se achica. */
+  min-height: 44px;
+}
+
+.textoFila {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.nombreFila {
+  font: 700 15px/1.2 var(--fuente-texto);
+}
+
+/* El estado de la sección: es lo que convierte el menú en un resumen de
+   progreso, así que se lee, pero nunca le gana al nombre. */
+.estadoFila {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 400 13px/1.3 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}
+
+.flechaFila {
+  flex: none;
+  color: var(--color-texto-terciario);
+}
+
+/* ---- Dentro de una sección ---- */
+
+.cabeceraSeccion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* La salida del callejón: el `‹` del hero vuelve a la ficha pública, no
+   al menú, y en una aplicación instalada no hay botón de atrás. */
+.volverAlMenu {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: -10px;
+  font: 600 14px/1 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.tituloDeSeccion {
+  margin: 0;
+  font: 700 18px/1.25 var(--fuente-texto);
+}

@@ -103,9 +103,11 @@ describe('PanelPublicarTorneo — datos mínimos que faltan', () => {
 
     expect(getByText('dirección')).toBeTruthy();
     expect(getByText('fecha estimada de inicio')).toBeTruthy();
-    expect(getByRole('link', { name: 'Completar en Configuración' })).toHaveAttribute(
+    expect(getByRole('link', { name: 'Completar los datos del torneo' })).toHaveAttribute(
       'href',
-      '/torneo/t-1/gestionar/configuracion',
+      // Derecho a la sección donde se cargan, no al menú: los datos
+      // mínimos que pueden faltar viven todos en "Datos del torneo".
+      '/torneo/t-1/gestionar/configuracion/datos',
     );
 
     const boton = getByText('Publicar torneo') as HTMLButtonElement;
