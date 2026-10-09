@@ -164,6 +164,15 @@ que fallan en silencio:
 5. **Un torneo en borrador**: al entrar a gestionarlo, la primera
    pestaña tiene que ser el bloque de publicar, con la lista de datos que
    falten. Publicar ya no está en Configuración.
+6. **Configuración**: ahora es un menú de siete filas, cada una con su
+   estado al lado ("Sin definir", "Versión 2 · 5 de octubre", "2
+   asignados"), y cada sección en su propia pantalla. De cada una se
+   vuelve con "‹ Configuración".
+7. **El Resumen de un torneo con cosas trabadas**: tiene que listar
+   "Para resolver" — resultados objetados, equipos esperando respuesta,
+   partidos jugados sin resultado, partidos sin programar — y los mismos
+   números tienen que aparecer como burbuja en las pestañas Equipos,
+   Fixture y Resultados.
 
 En 2 y 3 vas a ver un paso nuevo —una pantalla con un botón «Continuar»
 antes de entrar—: es a propósito, es lo que impide que un escáner de
