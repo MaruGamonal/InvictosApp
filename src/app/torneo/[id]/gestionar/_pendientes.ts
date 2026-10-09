@@ -26,6 +26,13 @@ export interface Pendiente {
   href: string;
 }
 
+/** Cuántos pendientes hay detrás de cada pestaña de gestión. */
+export interface PendientesPorPestana {
+  equipos: number;
+  fixture: number;
+  resultados: number;
+}
+
 export interface LoQueEspera {
   /** Lo que ya está trabado, en orden de urgencia. Vacío es una respuesta válida. */
   pendientes: Pendiente[];
@@ -36,6 +43,13 @@ export interface LoQueEspera {
    * esperando equipos, y apurarlo no es una acción, es un error.
    */
   siguiente: Pendiente | null;
+  /**
+   * Los mismos pendientes, repartidos por pestaña. El Resumen los
+   * muestra en detalle, pero alguien parado en Fixture no tiene por qué
+   * volver al Resumen para enterarse de que hay tres equipos esperando
+   * respuesta: el número va en la pestaña.
+   */
+  porPestana: PendientesPorPestana;
 }
 
 /** Estados de partido que todavía pueden recibir un resultado (igual criterio que la pestaña Resultados). */
@@ -101,7 +115,17 @@ export function calcularLoQueEspera(
     });
   }
 
-  return { pendientes, siguiente: calcularSiguiente(gestion, base) };
+  // Las pestañas se cuentan de las mismas listas y no de `pendientes`,
+  // que ya está formateado para leerse: dos pendientes distintos pueden
+  // caer en la misma pestaña (un objetado y uno sin cargar, los dos en
+  // Resultados) y ahí lo que se quiere es la suma, no dos renglones.
+  const porPestana: PendientesPorPestana = {
+    equipos: solicitudes,
+    fixture: sinProgramar,
+    resultados: objetados + sinCargar,
+  };
+
+  return { pendientes, siguiente: calcularSiguiente(gestion, base), porPestana };
 }
 
 function calcularSiguiente(gestion: GestionTorneoResultado, base: string): Pendiente | null {

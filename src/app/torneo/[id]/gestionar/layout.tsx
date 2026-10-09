@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { Badge } from '@/components/Badge';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from './_datos';
+import { calcularLoQueEspera } from './_pendientes';
 import { PestanasGestion } from './PestanasGestion';
 import styles from './layout.module.css';
 
@@ -71,7 +72,7 @@ export default async function LayoutGestionar({
           </span>
         </div>
         <h1 className={`fuente-display ${styles.titulo}`}>{gestion.nombre}</h1>
-        <PestanasGestion torneoId={id} />
+        <PestanasGestion torneoId={id} pendientes={calcularLoQueEspera(gestion).porPestana} />
       </header>
 
       <main className={styles.contenido}>{children}</main>

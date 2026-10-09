@@ -4,7 +4,7 @@ import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerResumenParaPublicar } from '@/services/torneos/obtenerResumenParaPublicar';
 import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
-import { calcularLoQueEspera } from './_pendientes';
+import { calcularLoQueEspera } from '../_pendientes';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Resumen del torneo') };

@@ -54,6 +54,8 @@
 
 .pestana,
 .pestanaActiva {
+  display: inline-flex;
+  align-items: center;
   padding: 10px 12px;
   font-family: var(--fuente-texto);
   font-weight: 700;
@@ -73,4 +75,33 @@
   max-width: var(--ancho-aplicacion);
   margin: 0 auto;
   padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
+}
+
+/* El contador de pendientes de una pestaña: la señal de estado que se
+   ve desde las cinco, sin gastar una franja de alto en un teléfono. */
+.contadorPestana {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+  font: 700 11px/1 var(--fuente-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
