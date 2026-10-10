@@ -150,6 +150,7 @@ describe('obtenerGestionTorneo', () => {
           tiene_tabla: false,
           ajuste_puntos: null,
           ultimo_ajuste_motivo: null,
+          motivo_estado: null,
         },
       ],
       partidos: [
@@ -192,6 +193,7 @@ describe('obtenerGestionTorneo', () => {
         // lo que quiere decir "no tiene ninguna sanción".
         ajustePuntos: 0,
         ultimoAjusteMotivo: null,
+        motivoEstado: null,
       },
     ]);
     expect(resultado.partidos).toEqual([

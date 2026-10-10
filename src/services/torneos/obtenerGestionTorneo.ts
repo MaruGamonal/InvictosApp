@@ -43,6 +43,14 @@ export interface InscripcionGestion {
   ajustePuntos: number;
   /** El motivo del último ajuste, para que una sanción no sea un número sin explicación. */
   ultimoAjusteMotivo: string | null;
+  /**
+   * Por qué se rechazó o se dio de baja. Lo traía `listarInscripciones`,
+   * un segundo lector de la misma tabla que nadie llamaba; lo único que
+   * tenía y acá faltaba era esto, así que se mudó y ese servicio se
+   * borró. Sin el motivo, "Rechazada" es un estado que ni el
+   * organizador que lo decidió puede explicar una semana después.
+   */
+  motivoEstado: string | null;
 }
 
 export interface PartidoGestion {
@@ -236,6 +244,7 @@ export const obtenerGestionTorneo: Servicio<
     tiene_tabla: boolean;
     ajuste_puntos: number | null;
     ultimo_ajuste_motivo: string | null;
+    motivo_estado: string | null;
   }>(
     // El ajuste de puntos viene de `posicion`, por el grupo que le
     // asignó `confirmarFixture`: sin grupo todavía no hay tabla que
@@ -245,7 +254,7 @@ export const obtenerGestionTorneo: Servicio<
     `SELECT i.equipo_id, e.nombre, i.estado, i.advertencia_categoria,
             i.advertencia_multiples_divisiones, i.fecha_solicitud,
             (i.grupo_id IS NOT NULL) AS tiene_tabla,
-            p.ajuste_puntos, p.ultimo_ajuste_motivo
+            p.ajuste_puntos, p.ultimo_ajuste_motivo, i.motivo_estado
      FROM inscripcion i
      JOIN equipo e ON e.id = i.equipo_id
      LEFT JOIN posicion p ON p.grupo_id = i.grupo_id AND p.equipo_id = i.equipo_id
@@ -358,6 +367,7 @@ export const obtenerGestionTorneo: Servicio<
       tieneTabla: fila.tiene_tabla,
       ajustePuntos: fila.ajuste_puntos ?? 0,
       ultimoAjusteMotivo: fila.ultimo_ajuste_motivo,
+      motivoEstado: fila.motivo_estado,
     })),
     partidos: partidos.map((fila) => ({
       id: fila.id,

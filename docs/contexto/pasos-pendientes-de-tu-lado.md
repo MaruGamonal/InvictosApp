@@ -176,7 +176,15 @@ que fallan en silencio:
 8. **Configuración → Reglas del torneo**: puntaje, topes de plantel,
    quién carga resultados, abandono y walkover. Con un partido ya
    jugado, el puntaje tiene que verse apagado.
-9. **El Resumen de un torneo con cosas trabadas**: tiene que listar
+9. **Cargar un equipo a mano** (Equipos → "Agregar un equipo a mano"):
+   escribí un nombre que ya exista para ver que lo ofrece en vez de
+   duplicarlo, y después uno nuevo para crearlo. Es lo que necesitás
+   para armar un torneo con los equipos que ya tenés.
+10. **Descontarle puntos a un equipo** (Equipos → "Ajustar puntos", sólo
+    con el fixture ya confirmado): poné −3 con un motivo y mirá la tabla
+    de posiciones. Los puntos ganados en la cancha no tienen que
+    moverse; lo que cambia es el total.
+11. **El Resumen de un torneo con cosas trabadas**: tiene que listar
    "Para resolver" — resultados objetados, equipos esperando respuesta,
    partidos jugados sin resultado, partidos sin programar — y los mismos
    números tienen que aparecer como burbuja en las pestañas Equipos,

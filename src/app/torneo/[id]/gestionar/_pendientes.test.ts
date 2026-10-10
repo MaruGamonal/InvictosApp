@@ -21,6 +21,7 @@ function inscripcion(estado: string, equipoId = `e-${estado}`): InscripcionGesti
     tieneTabla: false,
     ajustePuntos: 0,
     ultimoAjusteMotivo: null,
+    motivoEstado: null,
   };
 }
 

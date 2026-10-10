@@ -18,6 +18,8 @@ export interface InscripcionGestion {
   /** Quita o bonificación acumulada (`06`, D-35b). */
   ajustePuntos: number;
   ultimoAjusteMotivo: string | null;
+  /** Por qué se rechazó o se dio de baja (`inscripcion.motivoEstado`). */
+  motivoEstado: string | null;
 }
 
 export interface DivisionDelCertamenProps {
@@ -237,6 +239,12 @@ export function PanelInscripciones({
           {otrosResueltos.map((inscripcion) => (
             <div key={inscripcion.equipoId} className={styles.filaIntegranteCabecera}>
               <span className={styles.nombreIntegrante}>{inscripcion.nombreEquipo}</span>
+              {/* El motivo al lado del estado: "Rechazada" a secas es
+                  algo que ni quien lo decidió puede explicar una semana
+                  después. */}
+              {inscripcion.motivoEstado && (
+                <Badge campo="inscripcion.motivoEstado" valor={inscripcion.motivoEstado} />
+              )}
               <Badge campo="inscripcion.estado" valor={inscripcion.estado} />
             </div>
           ))}

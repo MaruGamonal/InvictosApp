@@ -31,6 +31,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
           {
             equipoId: 'e-2',
@@ -41,6 +42,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
           {
             equipoId: 'e-3',
@@ -51,6 +53,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
@@ -73,6 +76,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
@@ -103,6 +107,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
           {
             equipoId: 'e-2',
@@ -113,6 +118,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
@@ -139,6 +145,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
           {
             equipoId: 'e-2',
@@ -149,6 +156,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
@@ -160,6 +168,35 @@ describe('PanelInscripciones', () => {
     expect(getByText('Se Retiró FC')).toBeTruthy();
     expect(getByText('Rechazada')).toBeTruthy();
     expect(queryByText('No hay inscripciones pendientes de resolver.')).not.toBeInTheDocument();
+  });
+
+  /**
+   * "Rechazada" a secas es un estado que ni quien lo decidió puede
+   * explicar una semana después. El motivo lo traía un segundo lector
+   * de la misma tabla que ninguna pantalla llamaba.
+   */
+  it('una solicitud resuelta muestra por qué', () => {
+    const { getByText } = render(
+      <PanelInscripciones
+        torneoId="t-1"
+        cupoEquipos={16}
+        inscripciones={[
+          {
+            equipoId: 'e-2',
+            nombreEquipo: 'Se Retiró FC',
+            estado: 'rejected',
+            advertenciaCategoria: false,
+            advertenciaMultiplesDivisiones: false,
+            tieneTabla: false,
+            ajustePuntos: 0,
+            ultimoAjusteMotivo: null,
+            motivoEstado: 'wrong_division',
+          },
+        ]}
+      />,
+    );
+    expect(getByText('Rechazada')).toBeTruthy();
+    expect(getByText('División equivocada')).toBeTruthy();
   });
 
   it('aprobar una pendiente llama a la API y refresca', async () => {
@@ -180,6 +217,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
@@ -221,6 +259,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
         divisionesDelCertamen={[
@@ -268,6 +307,7 @@ describe('PanelInscripciones', () => {
             tieneTabla: false,
             ajustePuntos: 0,
             ultimoAjusteMotivo: null,
+            motivoEstado: null,
           },
         ]}
       />,
