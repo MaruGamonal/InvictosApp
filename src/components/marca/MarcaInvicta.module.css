@@ -19,11 +19,14 @@
   text-transform: uppercase;
 }
 
-/* 16px y no 8: a 8 los gajos de la pelota se empastan y vuelve a ser
-   una mancha. A 16 se lee, y acompaña al nombre, que va a 17. */
+/* 18px, elegido mirándola a 16, 18, 20 y 22 sobre el hero real. A 16
+   los gajos todavía se tocan y la figura tira a estrella; a 20 le
+   compite al nombre, que va a 17. A 18 se separan y sigue estando
+   abajo del texto en peso visual. (A los 8 originales, cualquier
+   detalle interno desaparecía.) */
 .pelota {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
