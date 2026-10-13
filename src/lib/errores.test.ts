@@ -42,7 +42,9 @@ describe('CODIGOS_ERROR', () => {
     // (D-07b) que antes nadie leía. No es SIN_PERMISO porque no le
     // falta un rol a nadie — en el torneo de al lado, el mismo capitán
     // con el mismo rol sí carga.
-    expect(codigos).toHaveLength(39);
+    // Más TORNEO_YA_TIENE_EQUIPOS: volver a borrador es sólo antes de
+    // que se anote nadie, y el mensaje nombra las salidas que sí hay.
+    expect(codigos).toHaveLength(40);
   });
 
   it.each(codigos)(

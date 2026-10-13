@@ -62,6 +62,8 @@ function gestion(parcial: Partial<GestionTorneoResultado> = {}): GestionTorneoRe
     fechaInicioEstimada: null,
     fechaFinEstimada: null,
     estado: 'in_progress',
+    visibilidad: 'public',
+    organizacionVerificada: true,
     formato: 'league',
     certamenId: null,
     division: null,

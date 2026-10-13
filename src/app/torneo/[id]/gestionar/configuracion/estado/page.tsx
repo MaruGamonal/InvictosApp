@@ -5,6 +5,7 @@ import { obtenerGestionCacheada } from '../../_datos';
 import { AccionesEstadoTorneo } from '../../AccionesEstadoTorneo';
 import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../../_estadosDeTorneo';
 import { PanelCancelarTorneo } from '../../PanelCancelarTorneo';
+import { PanelDondeSeVe } from '../../PanelDondeSeVe';
 import { CabeceraDeSeccion } from '../CabeceraDeSeccion';
 import { SECCIONES_CONFIGURACION } from '../_secciones';
 import stylesCompartidos from '../../pagina.module.css';
@@ -41,6 +42,16 @@ export default async function PaginaEstado({ params }: { params: Promise<{ id: s
         estado={gestion.estado}
         tienePartidos={gestion.partidos.length > 0}
       />
+
+      <div className={stylesCompartidos.seccion}>
+        <h3 className={stylesCompartidos.tituloSeccion}>Dónde se ve</h3>
+        <PanelDondeSeVe
+          torneoId={id}
+          estado={gestion.estado}
+          visibilidad={gestion.visibilidad}
+          organizacionVerificada={gestion.organizacionVerificada}
+        />
+      </div>
 
       <div className={stylesCompartidos.seccionPeligro}>
         <h3 className={stylesCompartidos.tituloSeccion}>Interrumpir el torneo</h3>

@@ -184,7 +184,13 @@ que fallan en silencio:
     con el fixture ya confirmado): poné −3 con un motivo y mirá la tabla
     de posiciones. Los puntos ganados en la cancha no tienen que
     moverse; lo que cambia es el total.
-11. **El Resumen de un torneo con cosas trabadas**: tiene que listar
+11. **Sacar un torneo de las búsquedas** (Configuración → Estado →
+    "Dónde se ve"): esto es lo que necesitás para los torneos de prueba
+    que aparecen en `/torneos`. Si todavía no se anotó ningún equipo,
+    "Volver a borrador" lo despublica del todo; si ya hay equipos,
+    "Quitar de las búsquedas" lo saca del listado sin tocar nada más —
+    el enlace sigue funcionando y los equipos lo siguen viendo.
+12. **El Resumen de un torneo con cosas trabadas**: tiene que listar
    "Para resolver" — resultados objetados, equipos esperando respuesta,
    partidos jugados sin resultado, partidos sin programar — y los mismos
    números tienen que aparecer como burbuja en las pestañas Equipos,

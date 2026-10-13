@@ -129,6 +129,14 @@ export interface GestionTorneoResultado {
   fechaInicioEstimada: string | null;
   fechaFinEstimada: string | null;
   estado: string;
+  /** `06`, D-21b — `unlisted` se sirve por link pero no aparece en las búsquedas. */
+  visibilidad: 'public' | 'unlisted';
+  /**
+   * Hace falta para saber si el torneo **puede** volver a las
+   * búsquedas: `public` exige la organización verificada (D-51), igual
+   * que al publicar.
+   */
+  organizacionVerificada: boolean;
   formato: 'league' | 'knockout' | 'groups_knockout';
   /** `06`, D-103 — null en el caso normal (torneo suelto, sin categorías competitivas). */
   certamenId: string | null;
@@ -174,6 +182,8 @@ export const obtenerGestionTorneo: Servicio<
     organizacion_id: string;
     certamen_id: string | null;
     division: string | null;
+    visibilidad: 'public' | 'unlisted';
+    organizacion_verificada: boolean;
     min_jugadores_lista: number | null;
     max_jugadores_lista: number | null;
     puntos_victoria: number;
@@ -188,7 +198,9 @@ export const obtenerGestionTorneo: Servicio<
   }>(
     `SELECT id, nombre, descripcion, imagen_url, direccion, ciudad_id, costo_inscripcion, costo_planilla,
             cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id,
-            certamen_id, division,
+            certamen_id, division, visibilidad,
+            (SELECT o.nivel_verificacion != 'unverified' FROM organizacion o WHERE o.id = organizacion_id)
+              AS organizacion_verificada,
             min_jugadores_lista, max_jugadores_lista,
             puntos_victoria, puntos_empate, puntos_derrota,
             jugador_unico_por_equipo, solo_organizador_carga_resultados,
@@ -333,6 +345,8 @@ export const obtenerGestionTorneo: Servicio<
     fechaInicioEstimada: torneo.fecha_inicio_estimada?.toISOString() ?? null,
     fechaFinEstimada: torneo.fecha_fin_estimada?.toISOString() ?? null,
     estado: torneo.estado,
+    visibilidad: torneo.visibilidad,
+    organizacionVerificada: torneo.organizacion_verificada,
     formato: torneo.formato,
     certamenId: torneo.certamen_id,
     division: torneo.division,

@@ -186,6 +186,18 @@ export const CODIGOS_ERROR = {
    * con el mismo rol sí puede. "No tenés permiso" mandaría a buscar un
    * permiso que no existe.
    */
+  /**
+   * Volver un torneo a borrador con equipos ya anotados le sacaría el
+   * torneo de encima a gente que se inscribió: desde su lado
+   * desaparecería sin explicación. El mensaje nombra las dos salidas
+   * que sí existen, porque un "no se puede" sin alternativa deja a
+   * alguien adivinando.
+   */
+  TORNEO_YA_TIENE_EQUIPOS: {
+    httpStatus: 409,
+    mensaje:
+      'Ya hay equipos en este torneo, así que no se puede volver a borrador. Podés suspenderlo o cancelarlo.',
+  },
   SOLO_ORGANIZADOR_CARGA_RESULTADOS: {
     httpStatus: 403,
     mensaje: 'En este torneo los resultados los carga solamente la organización.',

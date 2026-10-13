@@ -11,6 +11,30 @@ const TORNEO = '11111111-1111-1111-1111-111111111111';
 
 beforeEach(() => vi.resetModules());
 
+/** Lo que la base contesta cuando nadie tocó nada. */
+const TORNEO_POR_DEFECTO = {
+  visibilidad: 'public' as const,
+  organizacion_verificada: false,
+  min_jugadores_lista: null,
+  max_jugadores_lista: null,
+  puntos_victoria: 3,
+  puntos_empate: 1,
+  puntos_derrota: 0,
+  jugador_unico_por_equipo: true,
+  solo_organizador_carga_resultados: false,
+  partidos_pendientes_por_abandono: 'ganados_por_rival' as const,
+  goles_walkover_ganador: 3,
+  goles_walkover_perdedor: 0,
+  fecha_cierre_lista_buena_fe: null,
+};
+
+const INSCRIPCION_POR_DEFECTO = {
+  tiene_tabla: false,
+  ajuste_puntos: null,
+  ultimo_ajuste_motivo: null,
+  motivo_estado: null,
+};
+
 function mockearDb(opciones: {
   organizacionId?: string;
   rolOrganizacion?: 'owner' | 'admin';
@@ -25,6 +49,8 @@ function mockearDb(opciones: {
     ciudad_id?: string;
     costo_inscripcion?: string | null;
     costo_planilla?: string | null;
+    visibilidad?: 'public' | 'unlisted';
+    organizacion_verificada?: boolean;
     cupo_equipos?: number;
     fecha_inicio_estimada?: Date | null;
     organizacion_id?: string;
@@ -46,6 +72,10 @@ function mockearDb(opciones: {
     advertencia_categoria: boolean;
     advertencia_multiples_divisiones: boolean;
     fecha_solicitud: Date;
+    tiene_tabla?: boolean;
+    ajuste_puntos?: number | null;
+    ultimo_ajuste_motivo?: string | null;
+    motivo_estado?: string | null;
   }>;
   partidos?: Array<{
     id: string;
@@ -81,7 +111,10 @@ function mockearDb(opciones: {
           return { rows: opciones.rolOrganizacion ? [{ rol: opciones.rolOrganizacion }] : [] };
         }
         if (texto.includes('SELECT id, nombre, descripcion, imagen_url, direccion')) {
-          return { rows: opciones.torneo ? [opciones.torneo] : [] };
+          // Con los valores de la base por defecto: así un test dice
+          // sólo lo que le importa, y sumar una columna al servicio no
+          // rompe los nueve fixtures que no la miran.
+          return { rows: opciones.torneo ? [{ ...TORNEO_POR_DEFECTO, ...opciones.torneo }] : [] };
         }
         if (texto.includes('FROM fase f LEFT JOIN grupo')) {
           return { rows: opciones.fases ?? [] };
@@ -91,7 +124,12 @@ function mockearDb(opciones: {
         // coincidir en silencio — las inscripciones volvían vacías y el
         // test fallaba sin decir por qué.
         if (texto.includes('FROM inscripcion i')) {
-          return { rows: opciones.inscripciones ?? [] };
+          return {
+            rows: (opciones.inscripciones ?? []).map((fila) => ({
+              ...INSCRIPCION_POR_DEFECTO,
+              ...fila,
+            })),
+          };
         }
         if (texto.includes('FROM partido p')) {
           return { rows: opciones.partidos ?? [] };
