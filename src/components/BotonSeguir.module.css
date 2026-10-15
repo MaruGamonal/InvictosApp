@@ -2,6 +2,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  /* El mensaje de "ya pediste sumarte" mide hasta 220px y va al lado del
+     botón: en un teléfono angosto los dos juntos no entran en la fila.
+     Que baje en vez de desbordar a lo ancho. */
+  flex-wrap: wrap;
 }
 
 .cantidad {
@@ -36,4 +40,23 @@
   background: var(--acento);
   color: var(--acento-texto-sobre);
   border-color: var(--acento);
+}
+
+/* Los dos mensajes que acompañan a "Pedir sumarme" (`BotonPedirSumarme`).
+   `mensajeError` se usaba desde antes y no estaba definido acá: el error
+   salía sin estilo, que es lo que pasa siempre que una clase de un módulo
+   CSS no existe — `styles.loQueSea` es `undefined` y nadie se queja. */
+.mensajeEspera,
+.mensajeError {
+  font: 400 12px/1.4 var(--fuente-texto);
+  text-align: center;
+  max-width: 220px;
+}
+
+.mensajeEspera {
+  color: var(--color-texto-secundario);
+}
+
+.mensajeError {
+  color: var(--error-texto);
 }

@@ -51,7 +51,10 @@ export function BarraDescubrimiento({
       </details>
 
       <details className={styles.desplegable}>
-        <summary className={`${styles.resumen} ${styles.resumenFiltros}`}>
+        {/* Sin `resumenFiltros`: esa clase nunca existió en el módulo,
+            así que no hacía nada, y lo que iba a hacer —separar los dos
+            desplegables— ya lo hace el `space-between` de `.barra`. */}
+        <summary className={styles.resumen}>
           <Embudo />
           <span className={styles.textoResumen}>
             {filtrosActivos > 0 ? `Filtros · ${filtrosActivos}` : 'Filtros'}

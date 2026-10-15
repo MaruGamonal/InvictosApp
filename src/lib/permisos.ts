@@ -58,6 +58,32 @@ export async function obtenerRolesEnEquipo(
 }
 
 /**
+ * ¿Esta persona tiene un pedido de ingreso sin responder en este
+ * equipo? No es un rol —quien pidió sumarse todavía no es nada del
+ * equipo— pero es el mismo vínculo, leído de la misma tabla.
+ *
+ * Vive acá y no en el servicio que lo muestra porque la regla de T4 es
+ * que las tablas de vínculo las lee este módulo: un servicio que las
+ * consulta por su cuenta termina, tarde o temprano, decidiendo un
+ * permiso con esa lectura. Mismo vínculo que mira
+ * `retirarSolicitudIngreso`: `requested` sobre el rol `player`, que es
+ * lo único que `solicitarIngreso` pide (`06`, D-85).
+ */
+export async function tieneSolicitudDeIngresoPendiente(
+  usuarioPerfilId: string,
+  equipoId: string,
+): Promise<boolean> {
+  const pool = obtenerPool();
+  const { rows } = await pool.query(
+    `SELECT 1 FROM integrante_equipo
+     WHERE perfil_id = $1 AND equipo_id = $2
+       AND rol_equipo = 'player' AND estado_vinculo = 'requested'`,
+    [usuarioPerfilId, equipoId],
+  );
+  return rows.length > 0;
+}
+
+/**
  * Ids de los equipos donde la persona es Capitana o Delegada — los
  * únicos roles que pueden actuar administrativamente sobre un equipo
  * (`verificarPermisoEquipo`). Alimenta selectores de "a cuál de mis
