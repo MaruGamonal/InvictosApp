@@ -86,6 +86,13 @@ export interface DivisionDelCertamen {
   estado: string;
 }
 
+/**
+ * Cómo se desempata en la tabla, **en orden**. El primer criterio se
+ * aplica antes que el segundo, y así. Los puntos van siempre primero y
+ * no son un criterio: son el orden mismo.
+ */
+export type CriterioDesempate = 'goal_difference' | 'goals_for' | 'head_to_head';
+
 /** `06`, D-07b / D-08b / D-26 / D-30b / D-33b — lo que decide cómo se juega y cómo se cuenta. */
 export interface ReglasDelTorneo {
   /**
@@ -111,6 +118,12 @@ export interface ReglasDelTorneo {
   golesWalkoverPerdedor: number;
   /** D-30b — después de esta fecha no se suma nadie más a ninguna lista de buena fe. */
   fechaCierreListaBuenaFe: string | null;
+  /**
+   * El orden de desempate que aplica `obtenerTabla`. Decide quién
+   * termina arriba en un grupo empatado —o sea quién clasifica— y
+   * hasta ahora sólo se podía elegir al crear el torneo, desde la API.
+   */
+  criteriosDesempate: CriterioDesempate[];
 }
 
 export interface GestionTorneoResultado {
@@ -195,6 +208,7 @@ export const obtenerGestionTorneo: Servicio<
     goles_walkover_ganador: number;
     goles_walkover_perdedor: number;
     fecha_cierre_lista_buena_fe: Date | null;
+    criterios_desempate: CriterioDesempate[];
   }>(
     `SELECT id, nombre, descripcion, imagen_url, direccion, ciudad_id, costo_inscripcion, costo_planilla,
             cupo_equipos, fecha_inicio_estimada, fecha_fin_estimada, estado, formato, organizacion_id,
@@ -205,7 +219,7 @@ export const obtenerGestionTorneo: Servicio<
             puntos_victoria, puntos_empate, puntos_derrota,
             jugador_unico_por_equipo, solo_organizador_carga_resultados,
             partidos_pendientes_por_abandono, goles_walkover_ganador, goles_walkover_perdedor,
-            fecha_cierre_lista_buena_fe
+            fecha_cierre_lista_buena_fe, criterios_desempate
      FROM torneo WHERE id = $1`,
     [datos.torneoId],
   );
@@ -363,6 +377,7 @@ export const obtenerGestionTorneo: Servicio<
       golesWalkoverGanador: torneo.goles_walkover_ganador,
       golesWalkoverPerdedor: torneo.goles_walkover_perdedor,
       fechaCierreListaBuenaFe: torneo.fecha_cierre_lista_buena_fe?.toISOString() ?? null,
+      criteriosDesempate: torneo.criterios_desempate,
     },
     fases: fases.map((fila) => ({
       id: fila.id,

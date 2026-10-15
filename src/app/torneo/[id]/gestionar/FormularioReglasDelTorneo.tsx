@@ -4,7 +4,8 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAvisos } from '@/components/avisos/Avisos';
 import { motivoDelFallo } from '@/components/avisos/motivoDelFallo';
-import type { ReglasDelTorneo } from '@/services/torneos/obtenerGestionTorneo';
+import type { CriterioDesempate, ReglasDelTorneo } from '@/services/torneos/obtenerGestionTorneo';
+import { SelectorCriteriosDesempate } from './SelectorCriteriosDesempate';
 import styles from './pagina.module.css';
 
 export interface FormularioReglasDelTorneoProps {
@@ -43,8 +44,10 @@ function paraInput(iso: string | null): string {
  * las nuevas. El campo se apaga y la pantalla dice por qué, en vez de
  * aceptar el cambio y producir una tabla que nadie puede auditar.
  *
- * `criteriosDesempate` no está: es una lista **ordenada** y su pantalla
- * es reordenar, no completar un campo. Queda para su propio ticket.
+ * El orden de desempate entra con su propio control
+ * (`SelectorCriteriosDesempate`): es una lista ordenada, no un campo, y
+ * decide quién termina arriba en un grupo empatado — o sea quién
+ * clasifica.
  */
 export function FormularioReglasDelTorneo({
   torneoId,
@@ -66,6 +69,7 @@ export function FormularioReglasDelTorneo({
   const [jugadorUnico, setJugadorUnico] = useState(reglas.jugadorUnicoPorEquipo);
   const [soloOrganizador, setSoloOrganizador] = useState(reglas.soloOrganizadorCargaResultados);
   const [abandono, setAbandono] = useState(reglas.partidosPendientesPorAbandono);
+  const [criterios, setCriterios] = useState<CriterioDesempate[]>(reglas.criteriosDesempate);
   const [enviando, setEnviando] = useState(false);
 
   function cambiar(campo: keyof typeof valores) {
@@ -84,6 +88,7 @@ export function FormularioReglasDelTorneo({
       jugadorUnicoPorEquipo: jugadorUnico,
       soloOrganizadorCargaResultados: soloOrganizador,
       partidosPendientesPorAbandono: abandono,
+      criteriosDesempate: criterios,
       golesWalkoverGanador: Number(valores.golesWalkoverGanador),
       golesWalkoverPerdedor: Number(valores.golesWalkoverPerdedor),
     };
@@ -183,6 +188,13 @@ export function FormularioReglasDelTorneo({
           con las reglas viejas y otra con las nuevas.
         </p>
       )}
+
+      <span className={styles.tituloSeccion}>Orden de desempate</span>
+      <SelectorCriteriosDesempate
+        valor={criterios}
+        alCambiar={setCriterios}
+        deshabilitado={enviando}
+      />
 
       <label className={styles.filaCheckbox}>
         <input

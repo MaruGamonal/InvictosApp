@@ -23,13 +23,25 @@ import { validarEntrada } from '@/lib/validacion';
  * sin migración ni relleno.
  *
  * Orden: `puntos + ajuste_puntos` DESC y después los criterios de
- * desempate configurados del torneo, en su orden (`torneo.criterios_desempate`,
- * default `goal_difference → goals_for → head_to_head`). Los dos
- * primeros salen directo del índice `posicion (grupo_id, puntos DESC,
- * diferencia_gol DESC, goles_favor DESC)` (`11`, T15); `head_to_head`
- * solo entra a jugar dentro de un grupo de equipos que sigue empatado
- * después de los dos anteriores, y se resuelve con los puntos que esos
- * equipos sacaron **entre sí** en los partidos ya jugados de ese grupo.
+ * desempate configurados del torneo, **en su orden**
+ * (`torneo.criterios_desempate`, default
+ * `goal_difference → goals_for → head_to_head`).
+ *
+ * Eso es lo que este comentario decía y lo que el código **no hacía**:
+ * el `ORDER BY` tenía `diferencia_gol DESC, goles_favor DESC` fijo, y
+ * de `criterios_desempate` sólo se miraba si contenía `head_to_head`.
+ * O sea: cambiar el orden entre los dos primeros no hacía nada, sacar
+ * uno de la lista tampoco, y `head_to_head` se aplicaba siempre último
+ * aunque estuviera configurado primero. Se notó al construir la
+ * pantalla que deja elegir ese orden: el formulario guardaba algo que
+ * no tenía efecto.
+ *
+ * Ahora el orden se aplica criterio por criterio sobre los que siguen
+ * empatados, en el orden configurado. El SQL ordena por puntos —que es
+ * donde el índice `posicion (grupo_id, puntos DESC, …)` sirve— y el
+ * resto se resuelve sobre los empatados, que en un grupo son unos
+ * pocos. `head_to_head` se resuelve con los puntos que esos equipos
+ * sacaron **entre sí** en los partidos ya jugados del grupo.
  *
  * `provisorio` marca si hay algún resultado `disputed` en el grupo —
  * sigue computando (`06`, D-95) pero avisa que puede cambiar. Con T15
@@ -111,13 +123,17 @@ function aFila(fila: FilaPosicionCruda): FilaTabla {
   };
 }
 
-/** Agrupa filas consecutivas ya ordenadas por puntos+ajuste y diferencia_gol/goles_favor que siguen empatadas en las tres. */
-function agruparEmpates(filas: FilaTabla[]): FilaTabla[][] {
+/**
+ * Agrupa filas consecutivas empatadas en puntos. Antes agrupaba también
+ * por diferencia de gol y goles a favor, porque esos dos ya venían
+ * aplicados desde el `ORDER BY` fijo: con el orden configurable, el
+ * único empate que el SQL puede dar por resuelto es el de puntos.
+ */
+function agruparPorPuntos(filas: FilaTabla[]): FilaTabla[][] {
   const grupos: FilaTabla[][] = [];
   for (const fila of filas) {
     const anterior = grupos[grupos.length - 1];
-    const clave = (f: FilaTabla) =>
-      `${f.puntos + f.ajustePuntos}|${f.diferenciaGol}|${f.golesFavor}`;
+    const clave = (f: FilaTabla) => f.puntos + f.ajustePuntos;
     if (anterior && clave(anterior[0]!) === clave(fila)) {
       anterior.push(fila);
     } else {
@@ -127,11 +143,12 @@ function agruparEmpates(filas: FilaTabla[]): FilaTabla[][] {
   return grupos;
 }
 
+/** Los puntos que los empatados sacaron **entre sí**, por equipo. */
 async function desempatarPorEnfrentamientoDirecto(
   grupoId: string,
   empatados: FilaTabla[],
   puntajes: { puntosVictoria: number; puntosEmpate: number; puntosDerrota: number },
-): Promise<FilaTabla[]> {
+): Promise<Map<string, number>> {
   const pool = obtenerPool();
   const equipoIds = empatados.map((f) => f.equipoId);
   const { rows: partidos } = await pool.query<{
@@ -179,9 +196,70 @@ async function desempatarPorEnfrentamientoDirecto(
     }
   }
 
-  return [...empatados].sort(
-    (a, b) => (puntosEntreSi.get(b.equipoId) ?? 0) - (puntosEntreSi.get(a.equipoId) ?? 0),
+  return puntosEntreSi;
+}
+
+/**
+ * El valor comparable de cada equipo para un criterio: más alto, más
+ * arriba. Unificar los tres en una sola forma es lo que deja aplicarlos
+ * en cualquier orden sin un `if` por combinación.
+ */
+async function valoresDelCriterio(
+  criterio: CriterioDesempate,
+  grupoId: string,
+  empatados: FilaTabla[],
+  puntajes: { puntosVictoria: number; puntosEmpate: number; puntosDerrota: number },
+): Promise<Map<string, number>> {
+  if (criterio === 'head_to_head') {
+    return desempatarPorEnfrentamientoDirecto(grupoId, empatados, puntajes);
+  }
+  const de = criterio === 'goal_difference' ? 'diferenciaGol' : 'golesFavor';
+  return new Map(empatados.map((fila) => [fila.equipoId, fila[de]]));
+}
+
+/** Los que quedan con el mismo valor siguen empatados y pasan al criterio siguiente. */
+function agruparPorValor(filas: FilaTabla[], valor: Map<string, number>): FilaTabla[][] {
+  const grupos: FilaTabla[][] = [];
+  for (const fila of filas) {
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && valor.get(ultimo[0]!.equipoId) === valor.get(fila.equipoId)) {
+      ultimo.push(fila);
+    } else {
+      grupos.push([fila]);
+    }
+  }
+  return grupos;
+}
+
+/**
+ * Aplica los criterios configurados, en orden, a un conjunto que ya
+ * está empatado en puntos. Cada criterio ordena y vuelve a agrupar: los
+ * que siguen iguales pasan al siguiente. Agotados los criterios, el
+ * nombre decide — no para ser justo, sino para que la tabla no cambie
+ * de orden sola entre dos lecturas.
+ */
+async function ordenarPorCriterios(
+  grupoId: string,
+  empatados: FilaTabla[],
+  criterios: CriterioDesempate[],
+  puntajes: { puntosVictoria: number; puntosEmpate: number; puntosDerrota: number },
+): Promise<FilaTabla[]> {
+  if (empatados.length < 2) return empatados;
+  const [criterio, ...resto] = criterios;
+  if (!criterio) {
+    return [...empatados].sort((a, b) => a.equipoNombre.localeCompare(b.equipoNombre, 'es'));
+  }
+
+  const valor = await valoresDelCriterio(criterio, grupoId, empatados, puntajes);
+  const ordenadas = [...empatados].sort(
+    (a, b) => (valor.get(b.equipoId) ?? 0) - (valor.get(a.equipoId) ?? 0),
   );
+
+  const salida: FilaTabla[] = [];
+  for (const subgrupo of agruparPorValor(ordenadas, valor)) {
+    salida.push(...(await ordenarPorCriterios(grupoId, subgrupo, resto, puntajes)));
+  }
+  return salida;
 }
 
 async function construirTablaDeGrupo(
@@ -221,31 +299,24 @@ async function construirTablaDeGrupo(
      FROM equipos_del_grupo eg
      JOIN equipo e ON e.id = eg.equipo_id
      LEFT JOIN posicion p ON p.grupo_id = $1 AND p.equipo_id = eg.equipo_id
+     -- Sólo por puntos: el desempate lo deciden los criterios
+     -- configurados, en su orden, y hacerlo acá los dejaría fijos. El
+     -- nombre va de último para que dos lecturas seguidas devuelvan
+     -- siempre lo mismo antes de desempatar.
      ORDER BY (coalesce(p.puntos, 0) + coalesce(p.ajuste_puntos, 0)) DESC,
-              coalesce(p.diferencia_gol, 0) DESC,
-              coalesce(p.goles_favor, 0) DESC,
               e.nombre ASC`,
     [grupo.id],
   );
-  let filas = rows.map(aFila);
-
-  if (torneo.criterios_desempate.includes('head_to_head')) {
-    const gruposEmpatados = agruparEmpates(filas);
-    const resultado: FilaTabla[] = [];
-    for (const empatados of gruposEmpatados) {
-      if (empatados.length < 2) {
-        resultado.push(...empatados);
-        continue;
-      }
-      resultado.push(
-        ...(await desempatarPorEnfrentamientoDirecto(grupo.id, empatados, {
-          puntosVictoria: torneo.puntos_victoria,
-          puntosEmpate: torneo.puntos_empate,
-          puntosDerrota: torneo.puntos_derrota,
-        })),
-      );
-    }
-    filas = resultado;
+  const puntajes = {
+    puntosVictoria: torneo.puntos_victoria,
+    puntosEmpate: torneo.puntos_empate,
+    puntosDerrota: torneo.puntos_derrota,
+  };
+  const filas: FilaTabla[] = [];
+  for (const empatados of agruparPorPuntos(rows.map(aFila))) {
+    filas.push(
+      ...(await ordenarPorCriterios(grupo.id, empatados, torneo.criterios_desempate, puntajes)),
+    );
   }
 
   const { rows: disputados } = await pool.query(

@@ -23,6 +23,7 @@ const REGLAS: ReglasDelTorneo = {
   golesWalkoverGanador: 3,
   golesWalkoverPerdedor: 0,
   fechaCierreListaBuenaFe: null,
+  criteriosDesempate: ['goal_difference', 'goals_for', 'head_to_head'],
 };
 
 afterEach(() => {
@@ -129,6 +130,27 @@ describe('FormularioReglasDelTorneo', () => {
     const cuerpo = cuerpoDe(fetchMock);
     expect(cuerpo).not.toHaveProperty('minJugadoresLista');
     expect(cuerpo).not.toHaveProperty('maxJugadoresLista');
+  });
+
+  /**
+   * El orden de desempate decide quién termina arriba en un grupo
+   * empatado — quién clasifica. Hasta ahora sólo se podía elegir al
+   * crear el torneo, desde la API.
+   */
+  it('manda el orden de desempate como quedó en pantalla', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { getByText, getByLabelText } = montar();
+    fireEvent.click(getByLabelText('Bajar Diferencia de gol'));
+    fireEvent.click(getByText('Guardar reglas'));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(cuerpoDe(fetchMock).criteriosDesempate).toEqual([
+      'goals_for',
+      'goal_difference',
+      'head_to_head',
+    ]);
   });
 
   it('sin fecha de cierre cargada, no manda el campo', async () => {

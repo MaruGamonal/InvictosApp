@@ -80,6 +80,7 @@ function gestion(parcial: Partial<GestionTorneoResultado> = {}): GestionTorneoRe
       golesWalkoverGanador: 3,
       golesWalkoverPerdedor: 0,
       fechaCierreListaBuenaFe: null,
+      criteriosDesempate: ['goal_difference', 'goals_for', 'head_to_head'],
     },
     fases: [],
     inscripciones: [],

@@ -8,6 +8,9 @@ const EQUIPO_X = '55555555-5555-5555-5555-555555555555';
 const EQUIPO_Y = '66666666-6666-6666-6666-666666666666';
 const EQUIPO_Z = '77777777-7777-7777-7777-777777777777';
 
+/** Estas lecturas son públicas: `obtenerTabla` no mira la sesión. */
+const CONTEXTO = { usuarioId: null, permisos: {}, esSistema: false };
+
 beforeEach(() => vi.resetModules());
 
 function filaPosicion(equipoId: string, over: Partial<Record<string, unknown>> = {}) {
@@ -240,6 +243,82 @@ describe('obtenerTabla', () => {
     );
 
     expect(tabla!.filas.map((f) => f.equipoId)).toEqual([EQUIPO_Z, EQUIPO_Y, EQUIPO_X]);
+  });
+
+  /**
+   * El `ORDER BY` tenía `diferencia_gol DESC, goles_favor DESC` fijo y
+   * de `criterios_desempate` sólo se miraba si contenía `head_to_head`.
+   * Cambiar el orden entre los dos primeros no hacía nada — y la
+   * pantalla que deja elegirlo habría guardado algo sin efecto.
+   */
+  it('respeta el orden configurado entre diferencia de gol y goles a favor', async () => {
+    // X: mejor diferencia (+3) y menos goles (3). Y: al revés.
+    const filas = [
+      filaPosicion(EQUIPO_X, { diferencia_gol: 3, goles_favor: 3 }),
+      filaPosicion(EQUIPO_Y, { diferencia_gol: 1, goles_favor: 5 }),
+    ];
+
+    mockearDb({
+      grupoUnico: { id: GRUPO_A, nombre: 'Zona A', torneo_id: TORNEO },
+      criteriosDesempate: ['goal_difference', 'goals_for'],
+      posicionPorGrupo: { [GRUPO_A]: filas },
+    });
+    const { obtenerTabla } = await import('./obtenerTabla');
+    const porDiferencia = await obtenerTabla({ grupoId: GRUPO_A }, CONTEXTO);
+    expect(porDiferencia[0]!.filas.map((f) => f.equipoId)).toEqual([EQUIPO_X, EQUIPO_Y]);
+
+    vi.resetModules();
+    mockearDb({
+      grupoUnico: { id: GRUPO_A, nombre: 'Zona A', torneo_id: TORNEO },
+      criteriosDesempate: ['goals_for', 'goal_difference'],
+      posicionPorGrupo: { [GRUPO_A]: filas },
+    });
+    const { obtenerTabla: otra } = await import('./obtenerTabla');
+    const porGoles = await otra({ grupoId: GRUPO_A }, CONTEXTO);
+    expect(porGoles[0]!.filas.map((f) => f.equipoId)).toEqual([EQUIPO_Y, EQUIPO_X]);
+  });
+
+  /** Un criterio que no está en la lista no se aplica. Antes se aplicaba igual. */
+  it('no aplica un criterio que no está configurado', async () => {
+    mockearDb({
+      grupoUnico: { id: GRUPO_A, nombre: 'Zona A', torneo_id: TORNEO },
+      criteriosDesempate: ['goals_for'],
+      posicionPorGrupo: {
+        [GRUPO_A]: [
+          filaPosicion(EQUIPO_X, { diferencia_gol: 9, goles_favor: 1 }),
+          filaPosicion(EQUIPO_Y, { diferencia_gol: 0, goles_favor: 4 }),
+        ],
+      },
+    });
+    const { obtenerTabla } = await import('./obtenerTabla');
+    const tabla = await obtenerTabla({ grupoId: GRUPO_A }, CONTEXTO);
+    // La diferencia de gol de X es abrumadora y no cuenta: no está configurada.
+    expect(tabla[0]!.filas.map((f) => f.equipoId)).toEqual([EQUIPO_Y, EQUIPO_X]);
+  });
+
+  /** `head_to_head` se aplicaba siempre último, aunque estuviera configurado primero. */
+  it('con head_to_head primero, gana el que ganó el partido entre ellos', async () => {
+    mockearDb({
+      grupoUnico: { id: GRUPO_A, nombre: 'Zona A', torneo_id: TORNEO },
+      criteriosDesempate: ['head_to_head', 'goal_difference'],
+      posicionPorGrupo: {
+        [GRUPO_A]: [
+          filaPosicion(EQUIPO_X, { diferencia_gol: 7, goles_favor: 7 }),
+          filaPosicion(EQUIPO_Y, { diferencia_gol: 1, goles_favor: 2 }),
+        ],
+      },
+      partidosEntreSi: [
+        {
+          equipo_local_id: EQUIPO_Y,
+          equipo_visitante_id: EQUIPO_X,
+          goles_local: 1,
+          goles_visitante: 0,
+        },
+      ],
+    });
+    const { obtenerTabla } = await import('./obtenerTabla');
+    const tabla = await obtenerTabla({ grupoId: GRUPO_A }, CONTEXTO);
+    expect(tabla[0]!.filas.map((f) => f.equipoId)).toEqual([EQUIPO_Y, EQUIPO_X]);
   });
 
   it('con un resultado disputed en el grupo, la tabla se marca provisoria', async () => {

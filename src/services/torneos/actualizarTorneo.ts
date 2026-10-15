@@ -127,7 +127,10 @@ export const actualizarTorneo: Servicio<ActualizarTorneoInput, { id: string }> =
   for (const [campoEntrada, columna] of CAMPOS) {
     const valor = datos[campoEntrada];
     if (valor !== undefined) {
-      valores.push(campoEntrada === 'criteriosDesempate' ? JSON.stringify(valor) : valor);
+      // `criteriosDesempate` no está en CAMPOS: va en jsonb y se arma
+      // aparte, abajo. Acá había un ternario que lo contemplaba y que
+      // no se podía ejecutar nunca.
+      valores.push(valor);
       asignaciones.push(`${columna} = $${valores.length}`);
     }
   }

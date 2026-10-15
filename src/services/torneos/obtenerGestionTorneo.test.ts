@@ -26,6 +26,7 @@ const TORNEO_POR_DEFECTO = {
   goles_walkover_ganador: 3,
   goles_walkover_perdedor: 0,
   fecha_cierre_lista_buena_fe: null,
+  criterios_desempate: ['goal_difference', 'goals_for', 'head_to_head'],
 };
 
 const INSCRIPCION_POR_DEFECTO = {
