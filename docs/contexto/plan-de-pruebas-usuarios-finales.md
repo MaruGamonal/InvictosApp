@@ -169,6 +169,7 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | # | Caso | Pasos | Esperado |
 |---|---|---|---|
 | 4.1 | Crear torneo | Con todos los datos | Se crea en borrador |
+| 4.1b | Desde dónde se crea | Entrar al panel y buscar «Crear torneo» | Está **solo en Torneos**, no en Inicio: la misma acción estaba repetida en las dos pantallas |
 | 4.2 | Borrador incompleto | Crear sin fecha ni dirección e intentar publicar | Lo bloquea diciendo qué falta |
 | 4.3 | Imagen del torneo | Subir la portada | Se ve en la ficha y en la tarjeta de descubrimiento |
 | 4.4 | Dirección y geocodificación | Escribir una sede real | El buscador la encuentra y guarda las coordenadas |

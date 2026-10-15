@@ -27,8 +27,10 @@
   margin: 0;
 }
 
-/* 44px de área táctil aunque el texto mida 13px (`08`, sección 10). */
-.enlaceCrear {
+/* 44px de área táctil aunque el texto mida 13px (`08`, sección 10).
+   Se llamaba `enlaceCrear` de cuando al lado había un "Crear torneo";
+   ese botón se fue a Torneos y el nombre quedó mintiendo. */
+.enlaceVerTodos {
   display: inline-flex;
   align-items: center;
   min-height: 44px;

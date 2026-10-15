@@ -6,7 +6,6 @@ import {
   obtenerOrganizacionActivaCacheada,
   obtenerPanelCacheado,
 } from './_datos';
-import { BotonCrearTorneo } from './BotonCrearTorneo';
 import { ListaMisOrganizaciones } from './ListaMisOrganizaciones';
 import { ResumenOrganizacion } from './ResumenOrganizacion';
 import { TabsTorneosPanel } from './TabsTorneosPanel';
@@ -30,10 +29,12 @@ export const metadata: Metadata = { title: conNombreProducto('Modo organizador')
  * - Los números eran una línea corrida ("0 activos · 1 por comenzar ·
  *   0 finalizados") que hay que leer entera para sacar un dato. Ahora
  *   son tres cifras con su etiqueta, en el resumen de la organización.
- * - "Crear torneo" estaba siempre habilitado aunque la organización no
- *   pudiera publicar otro (`06`, D-51). Ahora dice que está bloqueado
- *   y explica por qué al tocarlo, en vez de dejar completar el
- *   formulario para fallar al final.
+ * - "Crear torneo" ya no está acá. Estaba repetido: la misma acción, el
+ *   mismo botón, en Inicio y en Torneos. Vive en Torneos, que es la
+ *   sección de los torneos y está siempre a un toque en el nav; esta
+ *   pantalla es el resumen de la organización, no el lugar donde se
+ *   crea. (Allá sigue bloqueándose cuando la organización no puede
+ *   publicar otro, `06`, D-51.)
  * - El estado de verificación se mezclaba con la cantidad de torneos.
  *   Son preguntas distintas y ahora viven en filas distintas.
  */
@@ -90,12 +91,10 @@ export default async function PaginaInicioOrganizador() {
       <section className={styles.seccion}>
         <div className={styles.filaTituloSeccion}>
           <h2 className={styles.tituloSeccion}>Torneos</h2>
-          <Link href="/organizador/gestionar/torneos" className={styles.enlaceCrear}>
+          <Link href="/organizador/gestionar/torneos" className={styles.enlaceVerTodos}>
             Ver todos →
           </Link>
         </div>
-
-        <BotonCrearTorneo bloqueado={panel.limitePublicadosAlcanzado} />
 
         <TabsTorneosPanel
           activos={panel.activos}
