@@ -57,3 +57,16 @@
     gap: 6px;
   }
 }
+
+/* La fila de abajo de la cabecera: la organización que se está
+   gestionando, a todo el ancho. Solo aparece con más de una — con una
+   sola, cuál es no es una elección y va como etiqueta al lado del
+   nombre. El modo no está acá: es el chip de la fila de la marca. */
+.filaDeOrganizacion {
+  /* `block` y no `flex`: adentro va un `<details>`, que como ítem flex
+     encogería al ancho de su contenido en vez de tomar la fila. */
+  display: block;
+  width: 100%;
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+}

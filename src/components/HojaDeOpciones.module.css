@@ -1,0 +1,247 @@
+/* La hoja de abajo: un `<details>` cuyo panel se ancla al borde
+   inferior de la pantalla.
+
+   Sobre por qué `<details>` y no `<dialog>`: el `<details>` abre sin
+   JavaScript, así que el cambio de modo sigue funcionando aunque el
+   bundle no haya cargado todavía — es el control que saca a la persona
+   de donde está, no puede depender de la hidratación. Cerrar tocando
+   afuera y con Escape se agrega encima, como mejora. */
+
+.disparador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  /* 44px de área táctil (`08`, sección 10). */
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radio-pill);
+  font: 700 12px/1 var(--fuente-texto);
+  /* Sobre el hero oscuro de los dos modos. */
+  color: var(--gris-claro-sobre-oscuro);
+  cursor: pointer;
+  list-style: none;
+  min-width: 0;
+}
+
+/* El triángulo nativo del `summary` sobra: la fila es `display: flex`
+   para centrar el texto en los 44px y varios navegadores dejan de
+   pintarlo igual. El chevron lo dibujamos nosotros. */
+.disparador::-webkit-details-marker {
+  display: none;
+}
+
+.disparador:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Abierto, el disparador queda encendido arriba del velo: sin
+   JavaScript es la única salida sin elegir nada (tocar afuera y Escape
+   los agrega la mejora del cliente). Queda **debajo del panel**, no
+   arriba: en las dos cabeceras va arriba de todo y el panel abajo, así
+   que no se tocan, pero si alguna pantalla los cruzara, un control
+   flotando por encima de las tarjetas se ve roto. */
+.hoja[open] > .disparador {
+  position: relative;
+  z-index: 36;
+  color: var(--blanco);
+  border-color: var(--blanco);
+}
+
+/* El aspecto chip: la píldora chica de la fila de la marca, al lado de
+   la campana. Dice en qué modo estás y se lee como rótulo, no como
+   botón — por eso no tiene el borde de 1.5px del control de barra.
+
+   El alto visible son 26px, pero el blanco táctil son los 44px de
+   `08`, sección 10: los pone el `::after`, igual que la campana resuelve
+   lo mismo con márgenes negativos. Agrandar la píldora a 44 la
+   convertiría en un botón grande, que es justo lo que no es. */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radio-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--identidad-texto);
+  font: 700 11px/1 var(--fuente-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  list-style: none;
+  max-width: 140px;
+}
+
+.chip::-webkit-details-marker {
+  display: none;
+}
+
+.chip::after {
+  content: '';
+  position: absolute;
+  inset: -9px -4px;
+}
+
+.chip:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.hoja[open] > .chip {
+  z-index: 36;
+  border-color: var(--blanco);
+}
+
+.etiqueta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  transition: transform 120ms ease;
+}
+
+.hoja[open] .chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+.velo {
+  position: fixed;
+  inset: 0;
+  /* Arriba de las bottom nav (10) y abajo de los avisos (40): un error
+     tiene que poder verse aunque la hoja esté abierta. */
+  z-index: 34;
+  background: rgba(14, 23, 32, 0.72);
+}
+
+.panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 37;
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--ink-900);
+  color: var(--blanco);
+  border-radius: 18px 18px 0 0;
+  padding: 10px var(--espacio-pantalla-x) calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.manija {
+  flex: none;
+  align-self: center;
+  width: 38px;
+  height: 4px;
+  border-radius: var(--radio-pill);
+  background: var(--ink-600);
+  margin-bottom: 6px;
+}
+
+.titulo {
+  font-size: 21px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.bajada {
+  font: 400 13px/1.35 var(--fuente-texto);
+  color: var(--gris-claro-sobre-oscuro);
+  margin: 0;
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------- */
+/* Las tarjetas de opción (`_opcionesDeHoja.tsx`).                   */
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border: 1.5px solid var(--ink-700);
+  border-radius: var(--radio-tarjeta);
+  background: var(--ink-800);
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.opcion:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* La elegida no se toca: elegir dónde ya estás no lleva a ningún lado
+   —y un `<Link>` a la ruta actual dejaría la hoja abierta—. Se marca
+   y se desactiva, como ya hace el selector de organización. */
+.opcionElegida {
+  composes: opcion;
+  border-color: var(--acento);
+  background: var(--ink-900);
+  cursor: default;
+}
+
+.textoOpcion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tituloOpcion {
+  font-size: 17px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.detalleOpcion {
+  font: 400 12px/1.35 var(--fuente-texto);
+  color: var(--gris-claro-sobre-oscuro);
+}
+
+/* El punto de radio. Es decorativo: lo que dice cuál está elegida para
+   quien no lo ve es `aria-current`, no el círculo. */
+.radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-600);
+}
+
+.radioElegido {
+  composes: radio;
+  border-color: var(--acento);
+  background: radial-gradient(circle, var(--acento) 0 4px, transparent 4px);
+}

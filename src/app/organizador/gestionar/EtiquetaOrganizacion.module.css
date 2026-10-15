@@ -1,0 +1,22 @@
+/* Vive en el hero oscuro, así que usa los tokens de identidad y no los
+   del tema (`08`, 6.1). */
+.unica {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radio-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--identidad-texto);
+}
+
+.nombre {
+  font: 700 14px/1.2 var(--fuente-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

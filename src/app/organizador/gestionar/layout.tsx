@@ -9,6 +9,7 @@ import {
   obtenerOrganizacionActivaCacheada,
 } from './_datos';
 import { SelectorOrganizacionActiva } from './SelectorOrganizacionActiva';
+import { EtiquetaOrganizacion } from './EtiquetaOrganizacion';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
 import styles from './layout.module.css';
 
@@ -51,18 +52,26 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
     obtenerMisOrganizacionesCacheadas(),
   ]);
   const activa = organizaciones.find((o) => o.organizacionId === organizacion?.organizacionId);
+  // Con una sola organización, cuál es no es una elección: es un dato,
+  // y va como etiqueta al lado del nombre. Con más de una se gana su
+  // propio control, en la fila del modo.
+  const hayVariasOrganizaciones = Boolean(organizacion) && organizaciones.length > 1;
 
   return (
     <div className={styles.pagina}>
-      {/* En grande va quien mira; la organización activa, al lado, como
-          selector. La palabra "Organizador" salió de ahí: el modo ya lo
-          dice el botón de cambiarlo, a todo el ancho más abajo. */}
+      {/* En grande va quien mira. La palabra "Organizador" salió de ahí:
+          el modo lo dice su propio selector, en la fila de abajo. */}
       <CabeceraDeModo
         modo="organizador"
         nombreUsuario={nombreUsuario}
         puedeCambiarDeModo
         alCostadoDelNombre={
-          organizacion ? (
+          organizacion && !hayVariasOrganizaciones ? (
+            <EtiquetaOrganizacion nombre={organizacion.nombre} logoUrl={activa?.logoUrl ?? null} />
+          ) : null
+        }
+        controlDeOrganizacion={
+          organizacion && hayVariasOrganizaciones ? (
             <SelectorOrganizacionActiva
               organizaciones={organizaciones}
               activaId={organizacion.organizacionId}

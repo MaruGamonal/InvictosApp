@@ -156,6 +156,9 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 3.11 | Quitar administradora | Quitarla | Pierde el acceso al panel de inmediato |
 | 3.12 | Varias organizaciones | Crear una segunda | Aparecen las dos en «Mis organizaciones» |
 | 3.13 | Cambiar de organización activa | Cambiar con el selector | El panel entero cambia: resumen, torneos, todo |
+| 3.13b | Con una sola organización no hay selector | Entrar al panel con una cuenta de una sola organización | El nombre va como etiqueta chica al lado del tuyo, **sin flecha y sin fila propia**: no hay entre qué elegir |
+| 3.13c | Con varias, el selector toma la fila | Entrar con una cuenta de dos o más organizaciones | Debajo del nombre, una fila de 44px con la organización activa. Tocarla sube la hoja con todas |
+| 3.13d | Nombre largo | Usar una organización de nombre largo, en un teléfono angosto | El nombre se recorta con «…» dentro de la fila; no desborda ni empuja nada |
 | 3.14 | La organización activa no da acceso | Ver el Bloque 11, caso 11.4 | — |
 | 3.15 | Perfil público de la organización | Verlo sin sesión | Se ve con sus torneos |
 
@@ -290,6 +293,10 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 10.2 | Marcar leída | Tocar una | Se marca y el contador baja |
 | 10.3 | El enlace lleva bien | Tocar una notificación de cada tipo | Cada una cae en la pantalla correcta. Las cuatro de partido llevan a la pantalla del partido |
 | 10.4 | El modo no cambia solo | Estando en modo organizador, tocar una notificación de un torneo propio | Queda en **modo organizador**, no lo pasa a jugador |
+| 10.4b | El chip dice en qué modo estás | Con una cuenta que juega **y** organiza, mirar arriba a la derecha en los dos modos | Un chip al lado de la campana que dice «Jugador» u «Organizador», según dónde estés |
+| 10.4c | El chip cambia de modo | Tocar el chip | Sube una hoja desde abajo con los dos modos y lo que hay en cada uno; el actual marcado y sin tocar. Elegir el otro lleva a su pantalla |
+| 10.4d | La hoja se cierra sin elegir | Abrir la hoja y tocar afuera, o apretar Escape, o tocar el chip de nuevo | Se cierra y no cambia nada |
+| 10.4e | Sin los dos roles no hay chip | Entrar con una cuenta que solo juega | **No** hay chip de modo: no hay a dónde cambiar |
 | 10.5 | El modo no da permisos | Ver Bloque 11, caso 11.5 | — |
 | 10.6 | Preferencias | Apagar una categoría y provocar ese aviso | No llega |
 | 10.7 | Preferencias por usuario | Dos usuarios con preferencias distintas, mismo evento | A cada uno lo que eligió |

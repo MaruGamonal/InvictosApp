@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Escudo } from '@/components/Escudo';
-import { CambiarDeModo } from './CambiarDeModo';
+import { SelectorDeModo } from './SelectorDeModo';
 import { MarcaInvicta } from './MarcaInvicta';
 import styles from './CabeceraDeModo.module.css';
 
@@ -15,14 +15,25 @@ export interface CabeceraDeModoProps {
   /** Solo se ofrece el cambio a quien tiene los dos roles. */
   puedeCambiarDeModo?: boolean;
   /**
-   * Al lado del nombre, en la misma línea: en modo organizador, cuál de
-   * las organizaciones se está gestionando.
+   * Al lado del nombre, en la misma línea: en modo organizador con una
+   * sola organización, cuál es.
    *
    * Va al lado y no debajo para no sumar un tercer renglón a la
    * cabecera — el saludo, el nombre y la organización uno arriba del
    * otro empujaban todo el contenido hacia abajo.
    */
   alCostadoDelNombre?: ReactNode;
+  /**
+   * La fila de 44px de abajo de la cabecera: en modo organizador con
+   * más de una organización, cuál se está gestionando.
+   *
+   * Esa fila es **solo** de la organización. El modo se fue de ahí al
+   * chip de arriba: cambiar de modo es poco frecuente y un control a
+   * todo el ancho le daba el peso de una acción principal, además de
+   * dejar la cabecera del panel en ~190px antes de que empiece el
+   * contenido. Cambiar de organización sí se hace seguido.
+   */
+  controlDeOrganizacion?: ReactNode;
 }
 
 /**
@@ -53,10 +64,18 @@ export function CabeceraDeModo({
   fotoUrl,
   puedeCambiarDeModo = false,
   alCostadoDelNombre,
+  controlDeOrganizacion,
 }: CabeceraDeModoProps) {
   return (
     <header className={styles.cabecera}>
-      <MarcaInvicta conEnlaceIngresar={false} modo={modo} />
+      {/* El chip del modo va en `acciones`, que es el hueco de antes de
+          la campana: "Jugador" o "Organizador", al lado de la
+          campanita. Solo lo ve quien tiene los dos roles. */}
+      <MarcaInvicta
+        conEnlaceIngresar={false}
+        modo={modo}
+        acciones={puedeCambiarDeModo ? <SelectorDeModo modoActual={modo} /> : null}
+      />
 
       <div className={styles.filaUsuario}>
         <Escudo src={fotoUrl ?? null} nombre={nombreUsuario} tamano={44} />
@@ -69,7 +88,9 @@ export function CabeceraDeModo({
         </div>
       </div>
 
-      {puedeCambiarDeModo && <CambiarDeModo modoActual={modo} />}
+      {controlDeOrganizacion && (
+        <div className={styles.filaDeOrganizacion}>{controlDeOrganizacion}</div>
+      )}
     </header>
   );
 }
