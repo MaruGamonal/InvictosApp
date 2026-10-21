@@ -7,7 +7,7 @@ import { CONFIGURACION } from '@/lib/configuracion';
 import { verificarPermisoTorneo } from '@/lib/permisos';
 import { esErrorDeAplicacion } from '@/lib/errores';
 import { puedeResponderPorElEquipo, resolverEquipoQueResponde } from './_rival';
-import { esCapitanDeAlgunEquipo } from './cargarResultado';
+import { puedeCargarPorAlgunEquipo } from './cargarResultado';
 import { ESTADOS_QUE_ESPERAN_RESULTADO } from '@/lib/marcador';
 
 /**
@@ -234,7 +234,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
     !fila.solo_organizador_carga_resultados &&
     fila.torneo_estado === 'in_progress' &&
     ESTADOS_QUE_ESPERAN_RESULTADO.has(fila.estado) &&
-    (await esCapitanDeAlgunEquipo(contexto, fila.equipo_local_id, fila.equipo_visitante_id));
+    (await puedeCargarPorAlgunEquipo(contexto, fila.equipo_local_id, fila.equipo_visitante_id));
 
   const { rows: alineados } = await pool.query<{
     perfil_id: string;

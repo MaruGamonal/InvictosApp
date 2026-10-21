@@ -25,6 +25,24 @@ import type { Contexto } from './contexto';
 export type RolOrganizacion = 'owner' | 'admin' | null;
 export type RolEquipo = 'captain' | 'delegate' | 'player' | 'coach';
 
+/**
+ * Los dos roles que **hablan por el equipo** hacia afuera: cargar el
+ * resultado de un partido, confirmarlo u objetarlo, gestionar el
+ * plantel.
+ *
+ * Está acá y no repetido en cada servicio porque ya estuvo repetido y
+ * se desincronizó: `_rival.ts` aceptaba capitán y delegado para
+ * responder un resultado, `cargarResultado` sólo capitán para
+ * cargarlo, y el mismo servicio le **notificaba** a los dos. Un
+ * delegado se enteraba del partido, podía discutir el resultado y no
+ * podía cargarlo — y UC-31 y UC-34 lo nombran desde siempre.
+ *
+ * La excepción deliberada es `accion_de_capitan` (`02`, UC-13): hay
+ * cosas que son del capitán y de nadie más, y ésas piden `'captain'`
+ * explícito, no esta lista.
+ */
+export const ROLES_QUE_HABLAN_POR_EL_EQUIPO: readonly RolEquipo[] = ['captain', 'delegate'];
+
 export type AccionOrganizacion =
   | 'actualizar_organizacion'
   | 'solicitar_verificacion'
@@ -297,7 +315,7 @@ export async function verificarPermisoEquipo(
     return;
   }
 
-  const puedeGestionar = roles.includes('captain') || roles.includes('delegate');
+  const puedeGestionar = roles.some((rol) => ROLES_QUE_HABLAN_POR_EL_EQUIPO.includes(rol));
   if (!puedeGestionar) throw crearError('SIN_PERMISO');
 }
 

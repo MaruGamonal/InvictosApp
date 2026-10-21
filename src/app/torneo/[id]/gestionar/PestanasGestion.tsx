@@ -14,6 +14,15 @@ const PESTANAS = [
 ] as const;
 
 /**
+ * Las dos que le tocan a un Colaborador: sus permisos son fijos
+ * (`06`, D-32) y cubren la operación de la fecha —cargar resultados y
+ * eventos, programar partidos, registrar no disputados—, no las
+ * condiciones bajo las que se compite. En Fixture ve sólo la parte de
+ * programar; la de generar es del organizador.
+ */
+const PESTANAS_DE_COLABORADOR = new Set(['fixture', 'resultados']);
+
+/**
  * Navegación entre las cinco secciones de gestión (reemplaza la
  * pantalla única y larga que era `/gestionar`, diseño aprobado
  * "Navegación Unificada"). Cliente porque necesita saber cuál pestaña
@@ -31,15 +40,21 @@ const PESTANAS = [
 export function PestanasGestion({
   torneoId,
   pendientes,
+  rolEnTorneo,
 }: {
   torneoId: string;
   pendientes: PendientesPorPestana;
+  rolEnTorneo: 'organizacion' | 'colaborador';
 }) {
   const pathname = usePathname();
+  const visibles =
+    rolEnTorneo === 'organizacion'
+      ? PESTANAS
+      : PESTANAS.filter((p) => PESTANAS_DE_COLABORADOR.has(p.segmento));
 
   return (
     <nav className={styles.nav} aria-label="Secciones de gestión">
-      {PESTANAS.map((pestana) => {
+      {visibles.map((pestana) => {
         const href = `/torneo/${torneoId}/gestionar/${pestana.segmento}`;
         // `startsWith` y no `===`: Configuración tiene una pantalla por
         // sección (`configuracion/formato`, …) y la pestaña tiene que

@@ -170,6 +170,10 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 |---|---|---|---|
 | 4.1 | Crear torneo | Con todos los datos | Se crea en borrador |
 | 4.1b | Desde dónde se crea | Entrar al panel y buscar «Crear torneo» | Está **solo en Torneos**, no en Inicio: la misma acción estaba repetida en las dos pantallas |
+| 4.1c | El colaborador carga la planilla | Asignar a alguien como Colaborador del torneo y entrar con esa cuenta a la gestión | Entra y ve **dos** pestañas: Fixture y Resultados. Desde Resultados carga marcador, goleadores y tarjetas |
+| 4.1d | …y nada más | Con esa misma cuenta, buscar Resumen, Equipos y Configuración | No están. Escribiendo la URL a mano tampoco: rebota a Resultados |
+| 4.1e | El colaborador programa pero no genera | Entrar a Fixture con la cuenta de colaborador | Ve «Programar partidos». **No** ve generar ni confirmar el fixture |
+| 4.1f | El delegado carga el resultado | Con una cuenta que es Delegado (no Capitán) de un equipo, abrir su partido | Le ofrece cargar el resultado, y queda esperando respuesta del rival, igual que la carga de un capitán |
 | 4.2 | Borrador incompleto | Crear sin fecha ni dirección e intentar publicar | Lo bloquea diciendo qué falta |
 | 4.3 | Imagen del torneo | Subir la portada | Se ve en la ficha y en la tarjeta de descubrimiento |
 | 4.4 | Dirección y geocodificación | Escribir una sede real | El buscador la encuentra y guarda las coordenadas |

@@ -51,6 +51,7 @@ function gestion(parcial: Partial<GestionTorneoResultado> = {}): GestionTorneoRe
     id: 't-1',
     organizacionId: 'o-1',
     miRolEnOrganizacion: 'owner',
+    miRolEnTorneo: 'organizacion',
     nombre: 'Torneo',
     descripcion: null,
     imagenUrl: null,

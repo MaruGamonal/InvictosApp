@@ -16,10 +16,14 @@ import styles from './layout.module.css';
  * el estado para las cinco, sin repetir la consulta (`cache()` de
  * React en `_datos.ts`).
  *
- * Mismo guard que la pantalla anterior: sin sesión, a `/ingresar`; con
- * sesión pero sin permiso sobre este torneo, a la ficha pública — un
- * Colaborador asignado tiene sus tres acciones fijas (`06`, D-32) pero
- * no esta pantalla completa.
+ * Sin sesión, a `/ingresar`; con sesión pero sin ningún permiso sobre
+ * este torneo, a la ficha pública.
+ *
+ * El **Colaborador** asignado sí entra, y ve dos de las cinco
+ * pestañas: Fixture —sólo la parte de programar— y Resultados, que son
+ * sus permisos fijos (`06`, D-32). Antes no entraba, y como la única
+ * pantalla que carga goles y tarjetas está acá adentro, el rol existía
+ * sin poder hacer su trabajo.
  */
 export default async function LayoutGestionar({
   children,
@@ -72,7 +76,11 @@ export default async function LayoutGestionar({
           </span>
         </div>
         <h1 className={`fuente-display ${styles.titulo}`}>{gestion.nombre}</h1>
-        <PestanasGestion torneoId={id} pendientes={calcularLoQueEspera(gestion).porPestana} />
+        <PestanasGestion
+          torneoId={id}
+          pendientes={calcularLoQueEspera(gestion).porPestana}
+          rolEnTorneo={gestion.miRolEnTorneo}
+        />
       </header>
 
       <main className={styles.contenido}>{children}</main>

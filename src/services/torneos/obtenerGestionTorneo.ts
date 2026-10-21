@@ -10,9 +10,27 @@ import { obtenerRolEnOrganizacion, verificarPermisoTorneo } from '@/lib/permisos
  * `obtenerFichaTorneo`/`obtenerFixturePublico` no traen porque son de
  * lectura pública — fases ya definidas, inscripciones pendientes de
  * resolver, y los partidos con su `version` (para el optimistic
- * concurrency de `cargarResultado`, T15). Solo para quien administra la
- * organización (Titular/Administrador) — un Colaborador asignado tiene
- * sus tres acciones fijas (`06`, D-32) pero no esta pantalla completa.
+ * concurrency de `cargarResultado`, T15).
+ *
+ * **Quién entra.** El Titular y el Administrador de la organización, y
+ * también el **Colaborador** asignado a este torneo. Antes la puerta
+ * era `configurar_torneo`, que es justo lo que `06` D-32 le niega al
+ * colaborador: tenía sus tres acciones fijas —cargar resultados y
+ * eventos, programar partidos, registrar no disputados— y **ninguna
+ * pantalla desde donde ejercerlas**, porque la única que carga goles y
+ * tarjetas vive detrás de este guard. El planillero contratado para el
+ * torneo, que es el caso que motiva el rol entero (`01`), no podía
+ * cargar nada.
+ *
+ * Ahora la puerta es `cargar_resultados`, que deja pasar exactamente al
+ * personal del torneo, y `miRolEnTorneo` dice con qué alcance mira:
+ * `'organizacion'` ve las cinco pestañas, `'colaborador'` sólo Fixture
+ * —la parte de programar— y Resultados. **Las pestañas que no le tocan
+ * no se esconden solamente**: cada pantalla vuelve a mirar el rol, y
+ * debajo cada servicio verifica su propio permiso (`publicarTorneo`,
+ * `resolverInscripcion`, `actualizarTorneo` y compañía siguen pidiendo
+ * `configurar_torneo` o `resolver_inscripciones`). Esconder el botón no
+ * alcanza: la API se puede llamar directo.
  */
 
 const esquemaEntrada = z.object({ torneoId: z.string().uuid() });
@@ -131,6 +149,15 @@ export interface GestionTorneoResultado {
   organizacionId: string;
   /** UC-07 — con qué rol de organización mira esta pantalla quien la abre; determina si puede gestionar Administradores. */
   miRolEnOrganizacion: 'owner' | 'admin' | null;
+  /**
+   * Con qué alcance gestiona este torneo quien abre la pantalla.
+   *
+   * `'colaborador'` tiene permisos **fijos** (`06`, D-32), no
+   * configurables: cargar resultados y eventos, programar partidos y
+   * registrar no disputados. Por eso alcanza con dos valores y no hace
+   * falta una matriz — lo que puede un colaborador no depende de nada.
+   */
+  miRolEnTorneo: 'organizacion' | 'colaborador';
   nombre: string;
   descripcion: string | null;
   imagenUrl: string | null;
@@ -175,7 +202,12 @@ export const obtenerGestionTorneo: Servicio<
   GestionTorneoResultado
 > = async (input, contexto) => {
   const datos = validarEntrada(esquemaEntrada, input);
-  await verificarPermisoTorneo(contexto, datos.torneoId, 'configurar_torneo');
+  // `cargar_resultados` y no `configurar_torneo`: es el permiso más
+  // amplio de los tres fijos del colaborador, así que deja pasar al
+  // personal del torneo entero —Titular, Administrador y Colaborador
+  // asignado— y a nadie más. Quién ve qué adentro lo decide
+  // `miRolEnTorneo`.
+  await verificarPermisoTorneo(contexto, datos.torneoId, 'cargar_resultados');
 
   const pool = obtenerPool();
   const { rows: torneoRows } = await pool.query<{
@@ -226,11 +258,17 @@ export const obtenerGestionTorneo: Servicio<
   const torneo = torneoRows[0];
   if (!torneo) throw crearError('NO_ENCONTRADO');
 
-  // Titular o Administrador: `verificarPermisoTorneo` de arriba ya descartó a
-  // cualquier otro caso (`06`, D-64) — salvo `esSistema`, sin usuario real.
+  // Titular o Administrador de la organización, o `null` si quien mira
+  // llegó hasta acá por ser colaborador de este torneo puntual.
   const miRolEnOrganizacion = contexto.usuarioId
     ? await obtenerRolEnOrganizacion(contexto.usuarioId, torneo.organizacion_id)
     : null;
+
+  // Sin rol de organización y habiendo pasado la puerta, sólo queda el
+  // colaborador. `esSistema` entra sin usuario real y no es colaborador
+  // de nada: cuenta como la organización, que es lo que es.
+  const miRolEnTorneo: 'organizacion' | 'colaborador' =
+    miRolEnOrganizacion || contexto.esSistema ? 'organizacion' : 'colaborador';
 
   let divisionesDelCertamen: DivisionDelCertamen[] = [];
   if (torneo.certamen_id) {
@@ -348,6 +386,7 @@ export const obtenerGestionTorneo: Servicio<
     id: torneo.id,
     organizacionId: torneo.organizacion_id,
     miRolEnOrganizacion,
+    miRolEnTorneo,
     nombre: torneo.nombre,
     descripcion: torneo.descripcion,
     imagenUrl: torneo.imagen_url,

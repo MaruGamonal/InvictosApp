@@ -5,7 +5,11 @@ import type { Servicio } from '@/lib/servicio';
 import { obtenerPool } from '@/db/cliente';
 import { crearError, esErrorDeAplicacion } from '@/lib/errores';
 import { validarEntrada } from '@/lib/validacion';
-import { obtenerRolesEnEquipo, verificarPermisoTorneo } from '@/lib/permisos';
+import {
+  obtenerRolesEnEquipo,
+  verificarPermisoTorneo,
+  ROLES_QUE_HABLAN_POR_EL_EQUIPO,
+} from '@/lib/permisos';
 import { invalidarCacheEquipo, invalidarCacheTorneo } from '@/lib/cache';
 import { notificar } from '@/services/notificaciones/notificar';
 import { aplicarResultadoAPosicion } from '@/services/posiciones/_recalcularPosicion';
@@ -144,12 +148,24 @@ interface FilaPartido {
 }
 
 /**
+ * Si quien mira habla por alguno de los dos equipos del partido, a los
+ * efectos de cargar el resultado.
+ *
+ * **Capitán o Delegado**, no sólo capitán. UC-31 y UC-34 nombran a los
+ * dos desde siempre, y el producto ya los trataba como uno solo en
+ * todos lados menos acá: este mismo servicio le **notifica** a capitán
+ * y delegado que hay un resultado por responder (`_notificarCambio`),
+ * y `_rival.ts` acepta a los dos para confirmarlo u objetarlo. O sea
+ * que a un delegado se le avisaba del partido, podía discutir el
+ * resultado… y no podía cargarlo. En un equipo amateur, además, el
+ * delegado suele ser justo el que está con el teléfono en la mano.
+ *
  * Se exporta porque `obtenerPartido` tiene que decidir si **muestra** el
  * formulario de carga con el mismo criterio con el que este servicio
  * decide si lo **acepta**. Con dos copias, la pantalla ofrece lo que la
  * API rechaza, o esconde lo que aceptaría.
  */
-export async function esCapitanDeAlgunEquipo(
+export async function puedeCargarPorAlgunEquipo(
   contexto: Contexto,
   equipoLocalId: string,
   equipoVisitanteId: string,
@@ -167,7 +183,9 @@ export async function esCapitanDeAlgunEquipo(
     obtenerRolesEnEquipo(perfilId, equipoLocalId),
     obtenerRolesEnEquipo(perfilId, equipoVisitanteId),
   ]);
-  return rolesLocal.includes('captain') || rolesVisitante.includes('captain');
+  return [...rolesLocal, ...rolesVisitante].some((rol) =>
+    ROLES_QUE_HABLAN_POR_EL_EQUIPO.includes(rol),
+  );
 }
 
 export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResultado> = async (
@@ -195,12 +213,12 @@ export const cargarResultado: Servicio<CargarResultadoInput, CargarResultadoResu
     estadoResultado = 'confirmed';
   } catch (error) {
     if (!esErrorDeAplicacion(error) || error.codigo !== 'SIN_PERMISO') throw error;
-    const esCapitan = await esCapitanDeAlgunEquipo(
+    const hablaPorUnEquipo = await puedeCargarPorAlgunEquipo(
       contexto,
       partido.equipo_local_id,
       partido.equipo_visitante_id,
     );
-    if (!esCapitan) throw error;
+    if (!hablaPorUnEquipo) throw error;
     // `solo_organizador_carga_resultados` (`06`, D-07b) es una regla que
     // el organizador podía configurar desde el alta del torneo y que
     // **nadie leía**: el parámetro existía en la tabla, viajaba por

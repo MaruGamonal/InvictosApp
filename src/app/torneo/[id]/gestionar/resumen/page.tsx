@@ -5,7 +5,7 @@ import { obtenerResumenParaPublicar } from '@/services/torneos/obtenerResumenPar
 import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
 import { BarraAccionFija } from '@/components/BarraAccionFija';
 import stylesBarra from '@/components/BarraAccionFija.module.css';
-import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
+import { obtenerContextoCacheado, exigirQueOrganice } from '../_datos';
 import { calcularLoQueEspera } from '../_pendientes';
 import styles from './pagina.module.css';
 
@@ -27,7 +27,7 @@ const ESTADOS_SIN_RESULTADO_AUN = new Set(['unscheduled', 'scheduled']);
  * Dashboard del torneo (diseño aprobado "Gestionar torneo" —
  * reemplaza a la pantalla única y larga de antes): de un vistazo,
  * cómo está el torneo, qué falta y qué hacer ahora. Casi todo se
- * deriva de `obtenerGestionCacheada` — nada nuevo que consultar.
+ * deriva de la misma gestión ya leída — nada nuevo que consultar.
  *
  * En borrador la pantalla **es otra**: lo único que importa es
  * publicar. Esa acción vivía dentro del acordeón "Estado" de
@@ -57,7 +57,7 @@ const ESTADOS_SIN_RESULTADO_AUN = new Set(['unscheduled', 'scheduled']);
  */
 export default async function PaginaResumen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const gestion = await obtenerGestionCacheada(id);
+  const gestion = await exigirQueOrganice(id);
 
   if (gestion.estado === 'draft') {
     const paraPublicar = await obtenerResumenParaPublicar(

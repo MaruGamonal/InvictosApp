@@ -18,7 +18,9 @@ const SIN_PENDIENTES = { equipos: 0, fixture: 0, resultados: 0 };
 
 describe('PestanasGestion', () => {
   it('marca la pestaña de la pantalla en la que se está', () => {
-    const { getByRole } = render(<PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} />);
+    const { getByRole } = render(
+      <PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} rolEnTorneo="organizacion" />,
+    );
     expect(getByRole('link', { name: 'Resumen' })).toHaveAttribute('aria-current', 'page');
     expect(getByRole('link', { name: 'Equipos' })).not.toHaveAttribute('aria-current');
   });
@@ -30,7 +32,9 @@ describe('PestanasGestion', () => {
    */
   it('la pestaña de Configuración sigue marcada dentro de una sección', () => {
     rutaActual = '/torneo/t-1/gestionar/configuracion/formato';
-    const { getByRole } = render(<PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} />);
+    const { getByRole } = render(
+      <PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} rolEnTorneo="organizacion" />,
+    );
     expect(getByRole('link', { name: 'Config.' })).toHaveAttribute('aria-current', 'page');
   });
 
@@ -40,7 +44,11 @@ describe('PestanasGestion', () => {
    */
   it('muestra el contador de pendientes en la pestaña que corresponde', () => {
     const { getByRole } = render(
-      <PestanasGestion torneoId="t-1" pendientes={{ equipos: 3, fixture: 0, resultados: 1 }} />,
+      <PestanasGestion
+        torneoId="t-1"
+        pendientes={{ equipos: 3, fixture: 0, resultados: 1 }}
+        rolEnTorneo="organizacion"
+      />,
     );
 
     expect(getByRole('link', { name: 'Equipos 3 pendientes' })).toBeTruthy();
@@ -50,7 +58,40 @@ describe('PestanasGestion', () => {
   });
 
   it('sin ningún pendiente, ninguna pestaña lleva número', () => {
-    const { container } = render(<PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} />);
+    const { container } = render(
+      <PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} rolEnTorneo="organizacion" />,
+    );
     expect(container.textContent).toBe('ResumenEquiposFixtureResultadosConfig.');
+  });
+
+  /**
+   * El Colaborador tiene permisos fijos (`06`, D-32) que cubren la
+   * operación de la fecha. Resumen, Equipos y Configuración no son
+   * suyas: ofrecerle la pestaña sería ofrecerle una pantalla que lo
+   * rebota.
+   */
+  it('al colaborador le muestra sólo Fixture y Resultados', () => {
+    const { container, queryByRole, getByRole } = render(
+      <PestanasGestion torneoId="t-1" pendientes={SIN_PENDIENTES} rolEnTorneo="colaborador" />,
+    );
+
+    expect(container.textContent).toBe('FixtureResultados');
+    expect(getByRole('link', { name: 'Resultados' })).toBeTruthy();
+    for (const oculta of ['Resumen', 'Equipos', 'Config.']) {
+      expect(queryByRole('link', { name: oculta })).toBeNull();
+    }
+  });
+
+  it('al colaborador igual le llega el contador de las que ve', () => {
+    const { getByRole, queryByRole } = render(
+      <PestanasGestion
+        torneoId="t-1"
+        pendientes={{ equipos: 3, fixture: 0, resultados: 2 }}
+        rolEnTorneo="colaborador"
+      />,
+    );
+    expect(getByRole('link', { name: 'Resultados 2 pendientes' })).toBeTruthy();
+    // El de Equipos no aparece por ningún lado: esa pestaña no existe para él.
+    expect(queryByRole('link', { name: /Equipos/ })).toBeNull();
   });
 });
