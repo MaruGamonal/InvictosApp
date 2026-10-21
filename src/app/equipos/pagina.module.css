@@ -6,7 +6,7 @@
 /* Superficie de identidad: tokens oscuros directos (`08`, 6.1) — mismo
    tratamiento que /torneos e /inicio (navegación unificada). */
 .hero {
-  background: var(--ink-900);
+  background: var(--cabecera-jugador);
   color: var(--blanco);
   padding: 20px var(--espacio-pantalla-x) 18px;
   display: flex;

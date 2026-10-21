@@ -6,7 +6,7 @@
 /* Superficie de identidad: tokens oscuros directos (`08`, 6.1) — mismo
    tratamiento que las demás cabeceras oscuras de la app. */
 .hero {
-  background: var(--ink-900);
+  background: var(--cabecera-organizador);
   color: var(--blanco);
   padding: 16px var(--espacio-pantalla-x) 0;
 }

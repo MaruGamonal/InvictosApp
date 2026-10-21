@@ -7,7 +7,7 @@
 
 /* Mismo tratamiento oscuro que Inicio/Equipos/Torneos (navegación unificada). */
 .hero {
-  background: var(--ink-900);
+  background: var(--cabecera-jugador);
   color: var(--blanco);
   padding: 18px var(--espacio-pantalla-x) 18px;
   flex: none;

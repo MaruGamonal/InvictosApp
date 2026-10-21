@@ -5,7 +5,7 @@
 
 /* Superficie de identidad (`08`, 6.1): siempre oscura, en cualquier tema. */
 .hero {
-  background: var(--identidad-fondo);
+  background: var(--cabecera-jugador);
   color: var(--identidad-texto);
   padding: 18px var(--espacio-pantalla-x) 22px;
   display: flex;

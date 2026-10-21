@@ -341,6 +341,10 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 |---|---|---|---|
 | 12.1 | Ancho en el teléfono | Recorrer todas las pantallas en Android y en iPhone | Ninguna se sale del ancho. Sin scroll horizontal |
 | 12.2 | Ancho en la computadora | Abrir la app maximizada | Columna de 480px centrada, con fondo a los costados. **En todas las secciones, también en modo organizador** |
+| 12.6 | El color dice el modo | Recorrer Inicio, Equipos, Torneos, un equipo, un jugador, un partido y el perfil | Todas las cabeceras del **mismo azul**, sin que ninguna desentone |
+| 12.7 | …y el otro lado, del otro color | Entrar al panel de organizador y a la gestión de un torneo | Las dos cabeceras del **mismo verdeazulado**, distinto del azul de jugador |
+| 12.8 | Se nota al cambiar | Cambiar de modo con el chip | El color de la banda cambia; es la señal de que cambiaste de lado |
+| 12.9 | Legible al sol | Mirar el «Hola,» de la cabecera de organizador en un teléfono al aire libre | Se lee. Es el texto con menos contraste de esa banda (4.73:1) y por eso el verdeazulado no es más fuerte |
 | 12.3 | Área táctil | Intentar tocar los controles más chicos con el pulgar | Nada por debajo de 44px de alto |
 | 12.4 | Al sol | Salir afuera con el teléfono | Se lee. Es el escenario real del organizador un domingo |
 | 12.5 | Con una mano | Cargar un resultado completo con una sola mano | Se puede sin malabares |

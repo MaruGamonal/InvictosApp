@@ -5,7 +5,7 @@
 
 /* Superficie de identidad (`08`, 6.1): oscura, como las demás cabeceras. */
 .hero {
-  background: var(--identidad-fondo);
+  background: var(--cabecera-jugador);
   color: var(--identidad-texto);
   padding: 16px var(--espacio-pantalla-x);
 }

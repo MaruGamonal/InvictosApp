@@ -5,7 +5,7 @@
 
 /* Superficie de identidad: tokens oscuros directos, sin depender del tema (`08`, 6.1). */
 .hero {
-  background: var(--ink-900);
+  background: var(--cabecera-jugador);
   color: var(--blanco);
   padding: 18px var(--espacio-pantalla-x) 16px;
   display: flex;

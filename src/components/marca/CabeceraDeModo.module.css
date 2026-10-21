@@ -1,7 +1,11 @@
 /* Mismo ritmo vertical en los dos modos: antes cada uno tenía el suyo y
-   el salto se notaba al cambiar. */
+   el salto se notaba al cambiar.
+
+   Lo que **sí** cambia es el color de la banda, y es lo único que
+   cambia: azul en jugador, verdeazulado en organizador, igual que el
+   resto de las cabeceras de cada lado. Antes los dos modos usaban el
+   mismo fondo, así que el color no decía nada. */
 .cabecera {
-  background: var(--identidad-fondo);
   color: var(--identidad-texto);
   padding: 18px var(--espacio-pantalla-x) 20px;
   flex: none;
@@ -9,6 +13,16 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 14px;
+}
+
+.cabeceraJugador {
+  composes: cabecera;
+  background: var(--cabecera-jugador);
+}
+
+.cabeceraOrganizador {
+  composes: cabecera;
+  background: var(--cabecera-organizador);
 }
 
 .filaUsuario {

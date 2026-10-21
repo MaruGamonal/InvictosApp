@@ -224,6 +224,31 @@ export default function PaginaCatalogo() {
       </section>
 
       <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Los dos colores de cabecera, uno al lado del otro</h2>
+        {/* El punto es compararlos: cada uno solo se ve bien, y así fue
+            como se desparramaron cinco cabeceras de cada color sin que
+            el color significara nada. */}
+        <div style={{ display: 'grid', gap: 10 }}>
+          {(['--cabecera-jugador', '--cabecera-organizador'] as const).map((token) => (
+            <div
+              key={token}
+              style={{
+                background: `var(${token})`,
+                color: 'var(--identidad-texto)',
+                borderRadius: 'var(--radio-tarjeta)',
+                padding: '18px var(--espacio-pantalla-x)',
+                font: '700 13px/1 var(--fuente-texto)',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {token.replace('--cabecera-', '')}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Cabecera de modo — modo jugador</h2>
         {/* Sin organización, el control del modo ocupa la fila entera.
             Está puesto acá porque esa regla es un `:only-child`, y una

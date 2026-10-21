@@ -57,6 +57,13 @@ export interface CabeceraDeModoProps {
  * En modo organizador, la organización activa va al lado del nombre
  * (`alCostadoDelNombre`): esa sí es información que cambia y que hay
  * que poder cambiar.
+ *
+ * **El color de la banda dice el modo.** Azul del lado del jugador,
+ * verdeazulado del lado del organizador, y lo mismo en todas las
+ * pantallas de cada lado (`--cabecera-jugador` / `--cabecera-organizador`
+ * en `globals.css`). Antes los dos modos usaban el mismo fondo y, de
+ * las diez cabeceras de la aplicación, cinco usaban un degradé y cinco
+ * un plano sin que eso significara nada.
  */
 export function CabeceraDeModo({
   modo,
@@ -67,7 +74,7 @@ export function CabeceraDeModo({
   controlDeOrganizacion,
 }: CabeceraDeModoProps) {
   return (
-    <header className={styles.cabecera}>
+    <header className={modo === 'jugador' ? styles.cabeceraJugador : styles.cabeceraOrganizador}>
       {/* El chip del modo va en `acciones`, que es el hueco de antes de
           la campana: "Jugador" o "Organizador", al lado de la
           campanita. Solo lo ve quien tiene los dos roles. */}

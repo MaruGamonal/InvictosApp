@@ -61,10 +61,35 @@
   --color-texto-terciario: var(--gris-terciario);
   --color-borde: var(--borde-sutil);
 
-  /* Superficies de identidad: siempre oscuras, en cualquier tema */
+  /* Superficies de identidad: siempre oscuras, en cualquier tema.
+     `--identidad-fondo` es la superficie oscura **dentro** de una
+     pantalla clara —el marcador, la tarjeta del próximo partido, la
+     bienvenida—. No cambia con el modo: un marcador no es de quien
+     mira, es del partido. */
   --identidad-fondo: linear-gradient(165deg, #0e1720 0%, #142230 65%, #1b2a38 100%);
   --identidad-texto: var(--blanco);
   --identidad-texto-secundario: var(--gris-claro-sobre-oscuro);
+
+  /* La banda de cabecera, que **sí** dice en qué modo estás.
+     Eran dos fondos repartidos sin criterio —la mitad de las pantallas
+     con el degradé de identidad y la otra mitad con `--ink-900` plano—
+     y `CabeceraDeModo` usaba el mismo en los dos modos, así que el
+     color no significaba nada. Ahora significa una sola cosa: azul es
+     jugador, verdeazulado es organizador.
+
+     El organizador se corre hacia el cian del acento en vez de a un
+     gris neutro: sigue siendo Invicta, pero al lado del azul no hay
+     duda de que es otro lugar.
+
+     El teal llega hasta donde lo deja el contraste, no hasta donde
+     queda lindo. El texto secundario de estas bandas es
+     `--gris-claro-sobre-oscuro` (#a9b4bc) a 13px —el "Hola,"—, así que
+     la parada más clara del degradé tiene que darle 4.5:1. Con
+     #084c66, que era la versión que mejor se distinguía, quedaba en
+     4.45:1: reprobaba por nada. #07485f da 4.73:1 y se distingue
+     igual. Un teal más fuerte (#065f78) baja a 3.41:1. */
+  --cabecera-jugador: linear-gradient(165deg, #0e1720 0%, #142230 65%, #1b2a38 100%);
+  --cabecera-organizador: linear-gradient(165deg, #042a38 0%, #063d52 65%, #07485f 100%);
 
   /* Tipografía */
   --fuente-display: var(--font-barlow-condensed), sans-serif;
