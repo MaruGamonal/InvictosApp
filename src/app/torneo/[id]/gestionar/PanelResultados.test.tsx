@@ -251,3 +251,77 @@ describe('PanelResultados: partido no disputado', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe('PanelResultados: la suma de goles (UC-34)', () => {
+  /**
+   * UC-34: avisar **sin bloquear**. La mitad que importa es la segunda
+   * — cargar la planilla es opcional, y un formulario que se traba
+   * hasta que cuadre empuja a no cargar ningún goleador.
+   */
+  describe('cuando los goles cargados no dan el marcador', () => {
+    function montarConUnGolDeTres() {
+      const resultado = render(
+        <PanelResultados
+          partidos={[PARTIDO]}
+          elegiblesPorEquipo={{
+            'equipo-local': [
+              { perfilId: 'perfil-1', nombreVisible: 'Juan', rolEnTorneo: 'player' },
+            ],
+          }}
+        />,
+      );
+      fireEvent.change(resultado.getByLabelText('Goles de Los Pibes'), {
+        target: { value: '3' },
+      });
+      fireEvent.change(resultado.getByLabelText('Goles de Racing del Barrio'), {
+        target: { value: '0' },
+      });
+      fireEvent.click(resultado.getByText('Goleadores y tarjetas (opcional)'));
+      fireEvent.click(resultado.getByText('+ Agregar gol o tarjeta'));
+      return resultado;
+    }
+
+    it('avisa, nombrando el equipo y las dos cuentas', () => {
+      const { getByRole } = montarConUnGolDeTres();
+      expect(getByRole('status').textContent).toContain(
+        'Los Pibes: 3 en el marcador y 1 atribuido',
+      );
+    });
+
+    it('no bloquea: el botón de cargar sigue habilitado y manda igual', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const { getByText } = montarConUnGolDeTres();
+      const boton = getByText('Cargar') as HTMLButtonElement;
+      expect(boton.disabled).toBe(false);
+
+      fireEvent.click(boton);
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      const cuerpo = JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string);
+      expect(cuerpo.golesLocal).toBe(3);
+      expect(cuerpo.eventos).toHaveLength(1);
+    });
+
+    it('al completar la planilla el aviso se va', () => {
+      const { getByText, queryByRole } = montarConUnGolDeTres();
+      fireEvent.click(getByText('+ Agregar gol o tarjeta'));
+      fireEvent.click(getByText('+ Agregar gol o tarjeta'));
+      expect(queryByRole('status')).toBeNull();
+    });
+  });
+
+  it('sin cargar ningún gol no avisa nada: la planilla es opcional', () => {
+    const { getByLabelText, queryByRole } = render(
+      <PanelResultados
+        partidos={[PARTIDO]}
+        elegiblesPorEquipo={{
+          'equipo-local': [{ perfilId: 'perfil-1', nombreVisible: 'Juan', rolEnTorneo: 'player' }],
+        }}
+      />,
+    );
+    fireEvent.change(getByLabelText('Goles de Los Pibes'), { target: { value: '3' } });
+    fireEvent.change(getByLabelText('Goles de Racing del Barrio'), { target: { value: '0' } });
+    expect(queryByRole('status')).toBeNull();
+  });
+});

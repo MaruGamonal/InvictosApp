@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { useAvisos } from '@/components/avisos/Avisos';
 import { GOLES_MAXIMOS_POR_EQUIPO } from '@/lib/marcador';
+import { descuadreDeGoles, textoDelDescuadre } from './_sumaDeGoles';
 import styles from './pagina.module.css';
 
 export interface IntegranteElegible {
@@ -245,6 +246,15 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
         );
         const hayJugadores = jugadoresLocal.length > 0 || jugadoresVisitante.length > 0;
 
+        // UC-34 — avisa, no bloquea: el botón de guardar sigue igual.
+        const marcadorCompleto = valores.local !== '' && valores.visitante !== '';
+        const descuadre = marcadorCompleto
+          ? descuadreDeGoles(eventosPartido, partido.equipoLocalId, partido.equipoVisitanteId, {
+              local: Number(valores.local),
+              visitante: Number(valores.visitante),
+            })
+          : null;
+
         return (
           <div key={partido.id} className={styles.filaPartido}>
             <span className={styles.nombresPartido}>
@@ -413,6 +423,16 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                   </div>
                 )}
               </div>
+            )}
+
+            {descuadre && (
+              <p className={styles.avisoDescuadre} role="status">
+                {textoDelDescuadre(
+                  descuadre,
+                  partido.equipoLocalNombre,
+                  partido.equipoVisitanteNombre,
+                )}
+              </p>
             )}
 
             {/* UC-33 — Abajo de todo y como acción secundaria: lo

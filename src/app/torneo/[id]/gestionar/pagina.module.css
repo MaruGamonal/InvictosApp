@@ -578,3 +578,15 @@
   opacity: 0.4;
   cursor: default;
 }
+
+/* UC-34 — el aviso de que los goles cargados no dan el marcador. Es un
+   aviso, no un error: el guardado sigue habilitado, así que usa los
+   tokens de advertencia y no los de error. */
+.avisoDescuadre {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radio-boton);
+  background: var(--advertencia-fondo);
+  color: var(--advertencia-texto);
+  font: 500 12px/1.4 var(--fuente-texto);
+}

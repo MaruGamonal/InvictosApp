@@ -224,6 +224,25 @@ export default function PaginaCatalogo() {
       </section>
 
       <section className={styles.seccion}>
+        <h2 className={styles.tituloSeccion}>Aviso de goles que no cuadran (UC-34)</h2>
+        {/* Avisa y no bloquea, así que va en tono de advertencia y no de
+            error: el botón de guardar sigue habilitado al lado. */}
+        <p
+          style={{
+            margin: 0,
+            padding: '8px 10px',
+            borderRadius: 'var(--radio-boton)',
+            background: 'var(--advertencia-fondo)',
+            color: 'var(--advertencia-texto)',
+            font: '500 12px/1.4 var(--fuente-texto)',
+          }}
+        >
+          Los goles cargados no coinciden con el marcador — Los Pibes: 3 en el marcador y 1
+          atribuido. Podés guardar igual.
+        </p>
+      </section>
+
+      <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Los dos colores de cabecera, uno al lado del otro</h2>
         {/* El punto es compararlos: cada uno solo se ve bien, y así fue
             como se desparramaron cinco cabeceras de cada color sin que

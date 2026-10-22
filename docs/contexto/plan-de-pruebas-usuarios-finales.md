@@ -174,6 +174,9 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 4.1d | …y nada más | Con esa misma cuenta, buscar Resumen, Equipos y Configuración | No están. Escribiendo la URL a mano tampoco: rebota a Resultados |
 | 4.1e | El colaborador programa pero no genera | Entrar a Fixture con la cuenta de colaborador | Ve «Programar partidos». **No** ve generar ni confirmar el fixture |
 | 4.1f | El delegado carga el resultado | Con una cuenta que es Delegado (no Capitán) de un equipo, abrir su partido | Le ofrece cargar el resultado, y queda esperando respuesta del rival, igual que la carga de un capitán |
+| 4.1g | Goles que no cuadran | Cargar un 3 a 0 y atribuir **un** solo gol | Avisa en amarillo que no coinciden, diciendo las dos cuentas. **El botón de cargar sigue habilitado** y guarda igual |
+| 4.1h | Gol en contra | Cargar un 1 a 1 con un gol del local y un **gol en contra** del local | **No** avisa nada: el gol en contra es del visitante y la cuenta cierra |
+| 4.1i | Sólo tarjetas | Cargar un 2 a 0 y anotar sólo una amarilla, sin goleadores | No avisa: una planilla de tarjetas no es una planilla de goles incompleta |
 | 4.2 | Borrador incompleto | Crear sin fecha ni dirección e intentar publicar | Lo bloquea diciendo qué falta |
 | 4.3 | Imagen del torneo | Subir la portada | Se ve en la ficha y en la tarjeta de descubrimiento |
 | 4.4 | Dirección y geocodificación | Escribir una sede real | El buscador la encuentra y guarda las coordenadas |
