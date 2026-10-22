@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { esErrorDeAplicacion } from '@/lib/errores';
 import { Badge } from '@/components/Badge';
 import { obtenerContextoCacheado, obtenerGestionCacheada } from './_datos';
 import { calcularLoQueEspera } from './_pendientes';
@@ -36,18 +35,10 @@ export default async function LayoutGestionar({
   const contexto = await obtenerContextoCacheado();
   if (!contexto.usuarioId) redirect('/ingresar');
 
-  let gestion;
-  try {
-    gestion = await obtenerGestionCacheada(id);
-  } catch (error) {
-    if (
-      esErrorDeAplicacion(error) &&
-      (error.codigo === 'SIN_PERMISO' || error.codigo === 'NO_ENCONTRADO')
-    ) {
-      redirect(`/torneo/${id}`);
-    }
-    throw error;
-  }
+  // Sin permiso sobre este torneo, `obtenerGestionCacheada` redirige
+  // sola a la ficha pública: tiene que estar ahí y no acá porque la
+  // página corre en paralelo con este layout y la llama por su cuenta.
+  const gestion = await obtenerGestionCacheada(id);
 
   return (
     <div className={styles.pagina}>

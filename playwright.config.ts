@@ -18,6 +18,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PUERTO = Number(process.env.PUERTO_E2E ?? 3100);
 const BASE_URL = `http://127.0.0.1:${PUERTO}`;
+/** El doble de GoTrue (`test/e2e/_gotrueFalso.mjs`), para las pruebas con sesión. */
+const PUERTO_GOTRUE = Number(process.env.PUERTO_GOTRUE_FALSO ?? 3101);
 
 const ejecutable = process.env.CHROMIUM_EJECUTABLE;
 
@@ -49,17 +51,29 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: `npm run start -- --port ${PUERTO}`,
-    url: `${BASE_URL}/api/salud`,
-    // Nunca reusar: `pretest:e2e` reconstruye la aplicación, y un
-    // servidor que quedó de una corrida anterior seguiría sirviendo el
-    // build viejo. Costó un rato descubrirlo —las pruebas de una
-    // pantalla recién agregada fallaban porque el servidor no la
-    // tenía—. Levantarlo de nuevo tarda un segundo.
-    reuseExistingServer: false,
-    timeout: 120_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: [
+    // El doble de GoTrue, para las pruebas con sesión. Arranca primero
+    // porque la aplicación le pregunta por cada petición autenticada.
+    {
+      command: 'node test/e2e/_gotrueFalso.mjs',
+      url: `http://127.0.0.1:${PUERTO_GOTRUE}/salud`,
+      reuseExistingServer: false,
+      timeout: 20_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      command: `npm run start -- --port ${PUERTO}`,
+      url: `${BASE_URL}/api/salud`,
+      // Nunca reusar: `pretest:e2e` reconstruye la aplicación, y un
+      // servidor que quedó de una corrida anterior seguiría sirviendo el
+      // build viejo. Costó un rato descubrirlo —las pruebas de una
+      // pantalla recién agregada fallaban porque el servidor no la
+      // tenía—. Levantarlo de nuevo tarda un segundo.
+      reuseExistingServer: false,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+  ],
 });

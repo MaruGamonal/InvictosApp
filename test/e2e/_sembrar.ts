@@ -3,8 +3,10 @@ import { join } from 'node:path';
 import { obtenerPool } from '@/db/cliente';
 import { cargarResultado } from '@/services/competencia/cargarResultado';
 import { confirmarPlantel } from '@/services/inscripciones/confirmarPlantel';
+import { asignarColaborador } from '@/services/organizadores/asignarColaborador';
 import {
   crearTorneoDePrueba,
+  crearUsuarioDePrueba,
   inscribirEquipos,
   generarYConfirmarFixture,
 } from '../integracion/_escenarios';
@@ -39,6 +41,21 @@ export interface EscenarioSembrado {
   /** El capitán del equipo local de ese partido: tiene historial con goles (UC-38). */
   perfilConHistorialId: string;
   perfilConHistorialNombre: string;
+  /**
+   * Los `usuario_id` de las cuentas del escenario, para las pruebas con
+   * sesión (`_sesion.ts`). Son el `sub` que viaja en la cookie: el
+   * producto resuelve el resto —perfil, roles, permisos— como siempre.
+   */
+  usuarios: {
+    /** Titular de la organización: ve la gestión entera del torneo. */
+    titularId: string;
+    /** Capitán del equipo local: carga el resultado de su partido. */
+    capitanId: string;
+    /** Asignado como colaborador del torneo: Fixture y Resultados, nada más. */
+    colaboradorId: string;
+    /** Sin ningún vínculo: la cuenta contra la que se prueba que algo NO se puede. */
+    ajenoId: string;
+  };
 }
 
 export async function sembrarEscenario(): Promise<EscenarioSembrado> {
@@ -123,6 +140,15 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
     [equipos.map((equipo) => equipo.equipoId)],
   );
 
+  // Una cuenta de colaborador y una ajena, para probar que la gestión
+  // abre distinto según quién mire (`06`, D-32).
+  const colaborador = await crearUsuarioDePrueba('Planillero de punta a punta');
+  await asignarColaborador(
+    { torneoId: escenario.torneoId, usuarioId: colaborador.usuarioId },
+    escenario.titular.contexto,
+  );
+  const ajeno = await crearUsuarioDePrueba('Alguien sin vínculo');
+
   const sembrado: EscenarioSembrado = {
     torneoId: escenario.torneoId,
     torneoNombre: torneo[0]!.nombre,
@@ -134,6 +160,12 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
     partidoConResultadoId: primerPartido[0]!.id,
     perfilConHistorialId: local.capitan.perfilId,
     perfilConHistorialNombre: perfilLocal[0]!.nombre_visible,
+    usuarios: {
+      titularId: escenario.titular.usuarioId,
+      capitanId: local.capitan.usuarioId,
+      colaboradorId: colaborador.usuarioId,
+      ajenoId: ajeno.usuarioId,
+    },
   };
 
   writeFileSync(ARCHIVO_ESCENARIO, JSON.stringify(sembrado, null, 2));

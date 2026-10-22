@@ -43,7 +43,7 @@ correr('npx', ['vite-node', '--config', 'vite.scripts.config.ts', 'scripts/sembr
 console.log('[preparar-e2e] construyendo la aplicación…');
 correr('npm', ['run', 'build'], {
   DATABASE_URL: urlE2E,
-  NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9/supabase-inexistente',
+  NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${process.env.PUERTO_GOTRUE_FALSO ?? 3101}`,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-de-mentira',
   NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${process.env.PUERTO_E2E ?? 3100}`,
 });

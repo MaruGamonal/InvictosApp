@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { conNombreProducto } from '@/lib/nombreProducto';
-import { obtenerGestionCacheada } from '../../_datos';
+import { exigirQueOrganice } from '../../_datos';
 import { AccionesEstadoTorneo } from '../../AccionesEstadoTorneo';
 import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../../_estadosDeTorneo';
 import { PanelCancelarTorneo } from '../../PanelCancelarTorneo';
@@ -26,7 +26,13 @@ export const metadata: Metadata = { title: conNombreProducto(SECCIONES_CONFIGURA
  */
 export default async function PaginaEstado({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const gestion = await obtenerGestionCacheada(id);
+  // El guard va acá y no sólo en el layout: en el App Router el
+  // layout y la página se renderizan **en paralelo**, así que el
+  // redirect del layout no llega a evitar que la página consulte. Lo
+  // mostró la suite con sesión: un colaborador entrando por URL dejaba
+  // un SIN_PERMISO en el log del servidor —el servicio hacía bien su
+  // trabajo, pero el error viajaba a Sentry igual.
+  const gestion = await exigirQueOrganice(id);
 
   // El menú no ofrece esta fila fuera de esos estados, pero la URL se
   // puede escribir a mano: sin acciones que ofrecer, de vuelta al menú.

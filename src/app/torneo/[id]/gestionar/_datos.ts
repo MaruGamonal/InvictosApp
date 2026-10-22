@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
+import { esErrorDeAplicacion } from '@/lib/errores';
 import { construirContexto } from '@/lib/contexto';
 import {
   obtenerGestionTorneo,
@@ -20,9 +21,34 @@ import {
 
 export const obtenerContextoCacheado = cache(() => construirContexto());
 
+/**
+ * Sin permiso sobre este torneo, a la ficha pública — y el redirect va
+ * **acá**, no en el layout.
+ *
+ * El layout ya lo hacía, pero no alcanzaba: en el App Router el layout
+ * y la página se renderizan en paralelo, así que mientras el layout
+ * redirigía, la página llamaba a esto por su cuenta y el `SIN_PERMISO`
+ * salía sin atrapar. La navegación terminaba bien y el log del
+ * servidor quedaba con un error por visita — en producción, un Sentry
+ * con ruido que después nadie mira. Lo descubrió la suite con sesión,
+ * en su primera corrida.
+ *
+ * Resuelto en la lectura compartida, cualquiera que la llame hereda el
+ * redirect y no hay un `try` repetido en catorce pantallas.
+ */
 export const obtenerGestionCacheada = cache(async (torneoId: string) => {
   const contexto = await obtenerContextoCacheado();
-  return obtenerGestionTorneo({ torneoId }, contexto);
+  try {
+    return await obtenerGestionTorneo({ torneoId }, contexto);
+  } catch (error) {
+    if (
+      esErrorDeAplicacion(error) &&
+      (error.codigo === 'SIN_PERMISO' || error.codigo === 'NO_ENCONTRADO')
+    ) {
+      redirect(`/torneo/${torneoId}`);
+    }
+    throw error;
+  }
 });
 
 /**

@@ -17,23 +17,58 @@ no cambió el código.
 
 ## Qué cubre, y qué no
 
-Cubre las **superficies públicas** (D-04b): descubrimiento con selector
+Cubre las **superficies públicas** (D-04b) —descubrimiento con selector
 de ciudad, ficha del torneo con sus pestañas, fixture, tabla de
-posiciones, y las puertas de acceso —qué se sirve sin cuenta y qué
-redirige—.
+posiciones, y las puertas de acceso— **y las pantallas con sesión**:
+la gestión de un torneo entera, con sus cinco pestañas y las ocho
+secciones de Configuración, vista por el titular, por un colaborador y
+por alguien sin vínculo.
 
-**No cubre nada que necesite sesión.** Las sesiones las resuelve Supabase
-Auth contra su servidor, y este entorno no tiene credenciales de
-Supabase: `obtenerUsuarioIdDeSesion` llama a `getUser()`, que sin cookie
-de sesión devuelve `null` sin salir siquiera a la red. Por eso las
-variables de Supabase van en falso en los scripts.
+## Cómo hay sesión, si no hay Supabase
 
-Para cubrir los recorridos con sesión —crear un torneo, inscribir un
-equipo, cargar un resultado— hacen falta credenciales reales de un
-proyecto de Supabase de pruebas, o un servidor que imite su API de
-autenticación. Lo que **no** hay que hacer es abrirle una puerta al
-código de producción para saltarse la sesión en pruebas: eso es
-exactamente la clase de atajo que después queda.
+Este entorno no tiene credenciales de Supabase, y durante mucho tiempo
+eso dejó afuera todo lo que necesita estar logueado. Era el agujero más
+grande de la verificación: cuando
+`/torneo/[id]/gestionar/configuracion` rompió en producción, los tipos,
+el lint, las unitarias, las de integración y el build estaban todos en
+verde. Era un `Set` exportado desde un módulo cliente, que Next
+reemplaza por una referencia sin métodos. Nada de eso lo ve, porque la
+prueba unitaria importa el módulo directo y ahí no hay frontera
+cliente/servidor. Sólo lo agarraba abrir la pantalla.
+
+La solución tiene dos piezas y **ninguna toca el producto**:
+
+- `_gotrueFalso.mjs` — un servidor de nada que responde
+  `GET /auth/v1/user`, que es a lo único que `getUser()` sale. Playwright
+  lo levanta como segundo `webServer`, y `NEXT_PUBLIC_SUPABASE_URL`
+  apunta ahí durante la suite.
+- `_sesion.ts` — escribe la cookie que `@supabase/ssr` escribiría
+  después de un login real (`sb-127-auth-token`, con el JSON de la
+  sesión en `base64-`).
+
+El código que decide quién sos y qué podés hacer —`obtenerUsuarioIdDeSesion`,
+`construirContexto`, cada `verificarPermiso*`— es el mismo que en
+producción. Lo único falso es el servidor del otro lado del `fetch`.
+
+Lo que **no** se hizo es abrirle una puerta al código de producción
+para saltarse la sesión en pruebas: eso es exactamente la clase de
+atajo que después queda, y encima en el peor lugar posible.
+
+El token no se firma. Es un doble de prueba: lleva el `usuario_id`
+adentro y el servidor falso lo devuelve. Firmarlo de verdad no agregaría
+ninguna garantía sobre el producto —que es lo que estamos probando— y sí
+un criptosistema de mentira que mantener.
+
+### Lo primero que encontró
+
+En su primera corrida: en el App Router el layout y la página **se
+renderizan en paralelo**, así que un `redirect` en el layout no evita
+que la página haga sus consultas. Un colaborador entrando por URL a
+`/configuracion` terminaba bien —redirigido— pero dejaba un
+`SIN_PERMISO` sin atrapar en el log del servidor, o sea en Sentry. Por
+eso cada pantalla de Configuración pide el rol por su cuenta
+(`_guardDeSeccion.arquitectura.test.ts` lo hace cumplir) y el redirect
+por falta de permiso vive en `obtenerGestionCacheada`, no en el layout.
 
 ## El escenario
 

@@ -5,7 +5,7 @@ import { Badge } from '@/components/Badge';
 import { listarReglamentos } from '@/services/torneos/listarReglamentos';
 import { listarColaboradoresTorneo } from '@/services/organizadores/listarColaboradoresTorneo';
 import { listarMiembros } from '@/services/organizadores/listarMiembros';
-import { obtenerContextoCacheado, obtenerGestionCacheada } from '../_datos';
+import { exigirQueOrganice, obtenerContextoCacheado } from '../_datos';
 import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../_estadosDeTorneo';
 import { SECCIONES_CONFIGURACION, type SeccionConfiguracion } from './_secciones';
 import styles from './pagina.module.css';
@@ -45,9 +45,15 @@ function contar(cantidad: number, singular: string, plural: string, vacio: strin
  */
 export default async function PaginaConfiguracion({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // El guard va acá y no sólo en el layout: en el App Router el
+  // layout y la página se renderizan **en paralelo**, así que el
+  // redirect del layout no llega a evitar que la página consulte. Lo
+  // mostró la suite con sesión: un colaborador entrando por URL dejaba
+  // un SIN_PERMISO en el log del servidor —el servicio hacía bien su
+  // trabajo, pero el error viajaba a Sentry igual.
+  const gestion = await exigirQueOrganice(id);
   const contexto = await obtenerContextoCacheado();
-  const [gestion, reglamentos, colaboradores] = await Promise.all([
-    obtenerGestionCacheada(id),
+  const [reglamentos, colaboradores] = await Promise.all([
     listarReglamentos({ torneoId: id }, contexto),
     listarColaboradoresTorneo({ torneoId: id }, contexto),
   ]);
