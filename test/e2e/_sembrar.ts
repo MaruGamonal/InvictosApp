@@ -4,6 +4,8 @@ import { obtenerPool } from '@/db/cliente';
 import { cargarResultado } from '@/services/competencia/cargarResultado';
 import { confirmarPlantel } from '@/services/inscripciones/confirmarPlantel';
 import { asignarColaborador } from '@/services/organizadores/asignarColaborador';
+import { invitarIntegrante } from '@/services/equipos/invitarIntegrante';
+import { responderInvitacion } from '@/services/equipos/responderInvitacion';
 import {
   crearTorneoDePrueba,
   crearUsuarioDePrueba,
@@ -38,6 +40,10 @@ export interface EscenarioSembrado {
   equipoNombres: string[];
   /** El partido que quedó con resultado cargado, 3 a 1. */
   partidoConResultadoId: string;
+  /** El equipo que capitanea `usuarios.capitanId`. */
+  equipoDelCapitanId: string;
+  /** Un partido de ese equipo que **todavía espera resultado**: es el que el capitán carga. */
+  partidoSinResultadoId: string;
   /** El capitán del equipo local de ese partido: tiene historial con goles (UC-38). */
   perfilConHistorialId: string;
   perfilConHistorialNombre: string;
@@ -149,6 +155,38 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
   );
   const ajeno = await crearUsuarioDePrueba('Alguien sin vínculo');
 
+  // El titular también juega. No es un capricho del escenario: en el
+  // fútbol amateur quien organiza el torneo suele jugarlo, y sobre todo
+  // **es la única cuenta que ve el chip de modo** —se ofrece sólo a
+  // quien tiene los dos roles—. Sin esto, `/inicio` le rebota al panel
+  // (organiza y no juega) y las pruebas del chip pasarían a probar la
+  // pantalla equivocada.
+  const { rows: perfilTitular } = await pool.query<{ id: string }>(
+    'SELECT id FROM perfil_deportivo WHERE usuario_id = $1',
+    [escenario.titular.usuarioId],
+  );
+  await invitarIntegrante(
+    { equipoId: local.equipoId, roles: ['player'], perfilId: perfilTitular[0]!.id },
+    local.capitan.contexto,
+  );
+  await responderInvitacion(
+    { equipoId: local.equipoId, aceptar: true },
+    escenario.titular.contexto,
+  );
+
+  // Un partido del equipo del capitán que todavía espera resultado: es
+  // el que prueba el formulario de carga del capitán (`06`, D-07b).
+  const { rows: pendiente } = await pool.query<{ id: string }>(
+    // Los tres estados que esperan resultado (`lib/marcador.ts`): recién
+    // confirmado el fixture los partidos nacen `unscheduled`, no
+    // `scheduled`, así que filtrar por uno solo dejaba esto vacío.
+    `SELECT id FROM partido
+     WHERE torneo_id = $1 AND estado IN ('unscheduled', 'scheduled', 'postponed')
+       AND (equipo_local_id = $2 OR equipo_visitante_id = $2)
+     ORDER BY numero_fecha ASC, id ASC LIMIT 1`,
+    [escenario.torneoId, local.equipoId],
+  );
+
   const sembrado: EscenarioSembrado = {
     torneoId: escenario.torneoId,
     torneoNombre: torneo[0]!.nombre,
@@ -158,6 +196,8 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
     equipoIds: nombresEquipos.map((fila) => fila.id),
     equipoNombres: nombresEquipos.map((fila) => fila.nombre),
     partidoConResultadoId: primerPartido[0]!.id,
+    equipoDelCapitanId: local.equipoId,
+    partidoSinResultadoId: pendiente[0]!.id,
     perfilConHistorialId: local.capitan.perfilId,
     perfilConHistorialNombre: perfilLocal[0]!.nombre_visible,
     usuarios: {

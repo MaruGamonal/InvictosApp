@@ -19,10 +19,12 @@ no cambió el código.
 
 Cubre las **superficies públicas** (D-04b) —descubrimiento con selector
 de ciudad, ficha del torneo con sus pestañas, fixture, tabla de
-posiciones, y las puertas de acceso— **y las pantallas con sesión**:
-la gestión de un torneo entera, con sus cinco pestañas y las ocho
-secciones de Configuración, vista por el titular, por un colaborador y
-por alguien sin vínculo.
+posiciones, y las puertas de acceso— **y las dieciocho rutas que exigen
+sesión**: el inicio del jugador, su perfil y sus notificaciones, el
+panel de organizador entero, la gestión de un equipo, la gestión de un
+torneo con sus cinco pestañas y las ocho secciones de Configuración, y
+los formularios de crear equipo y torneo. Cada una vista por quien
+corresponde, y varias por quien **no** corresponde.
 
 ## Cómo hay sesión, si no hay Supabase
 
@@ -58,6 +60,14 @@ El token no se firma. Es un doble de prueba: lleva el `usuario_id`
 adentro y el servidor falso lo devuelve. Firmarlo de verdad no agregaría
 ninguna garantía sobre el producto —que es lo que estamos probando— y sí
 un criptosistema de mentira que mantener.
+
+### Que atrapa lo que tiene que atrapar
+
+Se verificó devolviendo el bug: poniéndole `'use client'` de nuevo al
+módulo que exporta `ESTADOS_CON_ACCIONES_DE_ESTADO`, la suite falla con
+el mismo mensaje que llegó de producción —`.has is not a function`—, en
+dos pruebas. Una suite de punta a punta que nunca se probó contra un
+bug real es una suite que se cree.
 
 ### Lo primero que encontró
 

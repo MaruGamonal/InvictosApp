@@ -348,6 +348,8 @@ Esto va primero porque si algo de acá está mal, todo lo demás da resultados q
 | 12.7 | …y el otro lado, del otro color | Entrar al panel de organizador y a la gestión de un torneo | Las dos cabeceras del **mismo verdeazulado**, distinto del azul de jugador |
 | 12.8 | Se nota al cambiar | Cambiar de modo con el chip | El color de la banda cambia; es la señal de que cambiaste de lado |
 | 12.9 | Legible al sol | Mirar el «Hola,» de la cabecera de organizador en un teléfono al aire libre | Se lee. Es el texto con menos contraste de esa banda (4.73:1) y por eso el verdeazulado no es más fuerte |
+| 12.10 | El chip sólo si tenés los dos roles | Entrar con una cuenta que **sólo** juega | No hay chip de modo. Con una que juega y organiza, sí |
+| 12.11 | Organiza pero no juega | Entrar con una cuenta que sólo organiza y abrir `/inicio` | Cae en el panel de organizador, no en una pantalla de jugador vacía |
 | 12.3 | Área táctil | Intentar tocar los controles más chicos con el pulgar | Nada por debajo de 44px de alto |
 | 12.4 | Al sol | Salir afuera con el teléfono | Se lee. Es el escenario real del organizador un domingo |
 | 12.5 | Con una mano | Cargar un resultado completo con una sola mano | Se puede sin malabares |

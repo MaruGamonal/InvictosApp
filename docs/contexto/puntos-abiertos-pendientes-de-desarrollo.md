@@ -26,7 +26,7 @@
 | 14 | Despublicación automática por inactividad (D-80) | Puede esperar | Decidido no construir en MVP |
 | 15 | Estados `rechazada` / `suspendida` de organización, `tipo`, seguir a una organización | Puede esperar | Propuesta sin empezar |
 | 16 | Tema oscuro (D-71) | Puede esperar | Decidido para después |
-| 17 | No hay pruebas end-to-end | ~~Importante~~ | **Resuelto** (`22/10`): 36 de punta a punta. 13 sobre las superficies públicas y 23 **con sesión** —la gestión del torneo entera, vista por el titular, por un colaborador y por alguien sin vínculo—. Lo destrabó un doble de GoTrue (`test/e2e/_gotrueFalso.mjs`), sin tocar el código de producción |
+| 17 | No hay pruebas end-to-end | ~~Importante~~ | **Resuelto** (`23/10`): 63 de punta a punta. 13 sobre las superficies públicas y 50 **con sesión**, que cubren las dieciocho rutas que exigen una. Lo destrabó un doble de GoTrue (`test/e2e/_gotrueFalso.mjs`), sin tocar el código de producción. Verificado devolviendo el bug que motivó todo: la suite falla con el mismo error que llegó de producción |
 | 18 | Plantilla de mail de Supabase sin actualizar | ~~Bloqueante~~ | **Hecho**, verificado contra el panel el `06/10`: las dos plantillas usan `token_hash` y la lista de Redirect URLs cubre todo con un globstar |
 | 19 | Comentarios desactualizados en el código | ~~Puede esperar~~ | **Cerrado** (`02/10`) |
 
