@@ -35,7 +35,14 @@ export interface TorneoPanelOrganizador {
   fechaFinEstimada: string | null;
   inscripcionesPendientes: number;
   resultadosSinCargar: number;
-  progreso: { fechaActual: number; fechaTotal: number } | null;
+  /**
+   * En qué fecha va el torneo. `fechaActual` es la primera fecha con
+   * algún partido todavía por jugarse —sin programar, programado o
+   * postergado—, o la última si ya no queda ninguno. `fechasCompletas`
+   * es cuántas fechas no tienen nada pendiente: es lo que llena la
+   * barra, que sólo se completa cuando se jugó todo.
+   */
+  progreso: { fechaActual: number; fechaTotal: number; fechasCompletas: number } | null;
   proximoPartido: {
     equipoLocalNombre: string;
     equipoVisitanteNombre: string;
@@ -178,13 +185,24 @@ export const obtenerPanelOrganizador: Servicio<
     resultadosSinCargarRows.map((f) => [f.torneo_id, Number(f.cantidad)]),
   );
 
+  // Pendiente es todo lo que todavía se tiene que jugar: `unscheduled`
+  // (sin fecha), `scheduled` y `postponed` (`04`, estados del partido).
+  // Contaba sólo `scheduled`, y un torneo con la fecha 1 sin cerrar y el
+  // resto sin programar aparecía como "Fecha 3 de 3" con la barra llena.
   const { rows: progresoRows } = await pool.query<{
     torneo_id: string;
     fecha_total: number;
     proxima_fecha_pendiente: number | null;
+    fechas_completas: string;
   }>(
-    `SELECT torneo_id, max(numero_fecha) AS fecha_total,
-            min(numero_fecha) FILTER (WHERE estado = 'scheduled') AS proxima_fecha_pendiente
+    `SELECT torneo_id,
+            max(numero_fecha) AS fecha_total,
+            min(numero_fecha) FILTER (WHERE estado IN ('unscheduled', 'scheduled', 'postponed'))
+              AS proxima_fecha_pendiente,
+            count(DISTINCT numero_fecha)
+              - count(DISTINCT numero_fecha)
+                  FILTER (WHERE estado IN ('unscheduled', 'scheduled', 'postponed'))
+              AS fechas_completas
      FROM partido
      WHERE torneo_id = ANY($1)
      GROUP BY torneo_id`,
@@ -193,7 +211,11 @@ export const obtenerPanelOrganizador: Servicio<
   const progresoPorTorneo = new Map(
     progresoRows.map((f) => [
       f.torneo_id,
-      { fechaActual: f.proxima_fecha_pendiente ?? f.fecha_total, fechaTotal: f.fecha_total },
+      {
+        fechaActual: f.proxima_fecha_pendiente ?? f.fecha_total,
+        fechaTotal: f.fecha_total,
+        fechasCompletas: Number(f.fechas_completas),
+      },
     ]),
   );
 

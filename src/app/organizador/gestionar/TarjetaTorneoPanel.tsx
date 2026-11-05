@@ -59,7 +59,9 @@ export function TarjetaTorneoPanel({ torneo }: { torneo: TorneoPanelOrganizador 
             <div
               className={styles.progresoBarra}
               style={{
-                width: `${Math.min(100, (torneo.progreso.fechaActual / torneo.progreso.fechaTotal) * 100)}%`,
+                // Fechas completas, no la fecha en curso: estar en la
+                // fecha 1 sin nada jugado no es un tercio del torneo.
+                width: `${Math.min(100, (torneo.progreso.fechasCompletas / torneo.progreso.fechaTotal) * 100)}%`,
               }}
             />
           </div>
