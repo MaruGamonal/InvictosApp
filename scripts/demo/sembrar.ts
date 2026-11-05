@@ -908,14 +908,31 @@ export async function sembrarDemo(): Promise<ResumenSiembra> {
   console.log(`Borrador de equipo sin plantel: ${sinPlantel.nombre}`);
   console.log(`Cuenta sin confirmar (para probar el bloqueo): ${sinConfirmar.email}`);
   if (hayCredencialesDeAuth()) {
+    // Las cuentas se listan **desde los usuarios creados**, no de una
+    // lista escrita a mano. La que había estaba mal: imprimía
+    // `demo.organizador@…` cuando la cuenta creada es `organizador@…`,
+    // un `demo.` de más. Nada falla cuando una lista así se
+    // desactualiza —el seed termina en verde y el dataset está bien— y
+    // el error aparece recién cuando alguien intenta entrar con lo que
+    // le pasaste, que es la peor forma de enterarse.
+    const CUENTAS: Array<[string, UsuarioDemo]> = [
+      ['organizador', organizador],
+      ['administrador', adminOrg],
+      ['capitana', capitana],
+      ['capitán', capitan],
+      ['jugador', jugador],
+      ['delegada', delegada],
+      ['seguidor', seguidor],
+      ['solicitante', solicitante],
+      ['capitana Rosario', capitanRosario],
+      ['capitán Posadas', capitanPosadas],
+      ['sin confirmar', sinConfirmar],
+    ];
+    const ancho = Math.max(...CUENTAS.map(([etiqueta]) => etiqueta.length));
     console.log(`\nTodas las cuentas demo entran con la contraseña: ${PASSWORD_DEMO}`);
-    console.log('  organizador → demo.organizador@demo.invicta.com.ar');
-    console.log('  capitana    → demo.capitana@demo.invicta.com.ar');
-    console.log('  capitán     → demo.capitan@demo.invicta.com.ar');
-    console.log('  jugador     → demo.jugador@demo.invicta.com.ar');
-    console.log('  delegada    → demo.delegada@demo.invicta.com.ar');
-    console.log('  seguidor    → demo.seguidor@demo.invicta.com.ar');
-    console.log('  sin confirmar → demo.sinconfirmar@demo.invicta.com.ar');
+    for (const [etiqueta, persona] of CUENTAS) {
+      console.log(`  ${etiqueta.padEnd(ancho)} → ${persona.email}  (${persona.nombre})`);
+    }
   }
 
   return { cuentasEnAuth: hayCredencialesDeAuth(), torneos: torneosCreados.length };
