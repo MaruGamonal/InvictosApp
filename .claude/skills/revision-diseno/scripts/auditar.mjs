@@ -83,6 +83,10 @@ function medirEnPagina() {
   };
 
   const visible = (el) => {
+    // Dentro de un <details> cerrado o de un ancestro oculto, el rect puede
+    // no ser cero pero el elemento no se ve: checkVisibility lo resuelve.
+    if (el.checkVisibility && !el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+      return false;
     const r = el.getBoundingClientRect();
     const cs = getComputedStyle(el);
     return (
@@ -205,6 +209,7 @@ function medirEnPagina() {
           .map((id) => document.getElementById(id)?.innerText || '')
           .join(' ')) ||
       el.innerText ||
+      el.textContent ||
       el.getAttribute('title') ||
       [...el.querySelectorAll('img[alt]')].map((i) => i.alt).join(' ') ||
       el.querySelector('svg title')?.textContent ||
