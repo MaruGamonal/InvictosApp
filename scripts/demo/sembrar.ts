@@ -18,6 +18,7 @@ import { generarFixture } from '@/services/fixture/generarFixture';
 import { confirmarFixture } from '@/services/fixture/confirmarFixture';
 import { cargarResultado, type EventoResultadoInput } from '@/services/competencia/cargarResultado';
 import { seguir } from '@/services/notificaciones/seguir';
+import { exigirAmbienteDePruebas } from './_guarda';
 import {
   crearUsuarioDemo,
   DOMINIO_DEMO,
@@ -923,6 +924,7 @@ export async function sembrarDemo(): Promise<ResumenSiembra> {
 // `--ejecutar` lo pone el script de npm. Sin ese flag el módulo solo
 // exporta (así la ruta de API puede importarlo sin dispararlo al cargar).
 if (process.argv.includes('--ejecutar')) {
+  exigirAmbienteDePruebas('sembrar datos demo');
   sembrarDemo()
     .then(() => obtenerPool().end())
     .catch((error) => {

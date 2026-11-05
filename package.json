@@ -26,6 +26,7 @@
     "demo:limpiar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/limpiar.ts -- --ejecutar",
     "demo:sembrar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/sembrar.ts -- --ejecutar",
     "demo:validar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/validar.ts -- --ejecutar",
+    "demo:auditar": "dotenv -e .env -q -- vite-node --config vite.scripts.config.ts scripts/demo/auditar.ts -- --ejecutar",
     "demo:reset": "npm run demo:limpiar -- --confirmar && npm run demo:sembrar && npm run demo:validar"
   },
   "dependencies": {

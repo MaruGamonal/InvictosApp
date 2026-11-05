@@ -45,6 +45,10 @@ correr('npm', ['run', 'build'], {
   DATABASE_URL: urlE2E,
   NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${process.env.PUERTO_GOTRUE_FALSO ?? 3101}`,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-de-mentira',
+  // Explícito y no heredado del `.env` de quien corra: la suite
+  // verifica que la banda de "ambiente de pruebas" esté, y eso no
+  // puede depender de cómo tenga configurada la máquina cada uno.
+  NEXT_PUBLIC_AMBIENTE: 'pruebas',
   NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${process.env.PUERTO_E2E ?? 3100}`,
 });
 

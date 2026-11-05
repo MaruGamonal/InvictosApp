@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Barlow, Barlow_Condensed } from 'next/font/google';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { ProveedorAvisos } from '@/components/avisos/Avisos';
+import { BandaDeAmbiente } from '@/components/BandaDeAmbiente';
 import './globals.css';
 
 const barlow = Barlow({
@@ -50,6 +51,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable}`}>
       <body>
+        {/* Arriba de todo, antes que cualquier pantalla: en el ambiente
+            de pruebas avisa que los datos no son reales. En producción
+            no renderiza nada. */}
+        <BandaDeAmbiente />
         {/* Los avisos de una acción salen siempre del mismo lugar, en
             cualquier pantalla, así que el proveedor vive acá arriba. */}
         <ProveedorAvisos>{children}</ProveedorAvisos>

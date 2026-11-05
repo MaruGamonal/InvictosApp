@@ -1,5 +1,6 @@
 import { obtenerPool } from '@/db/cliente';
 import { DOMINIO_DEMO, hayCredencialesDeAuth } from './_identidad';
+import { exigirAmbienteDePruebas } from './_guarda';
 
 /**
  * Borra **solo** los datos demo, respetando el orden de dependencias.
@@ -280,6 +281,7 @@ export async function limpiarDemo(): Promise<void> {
 // `--ejecutar` lo pone el script de npm. Sin ese flag el módulo solo
 // exporta (así la ruta de API puede importarlo sin dispararlo al cargar).
 if (process.argv.includes('--ejecutar')) {
+  exigirAmbienteDePruebas('borrar datos demo');
   if (!process.argv.includes('--confirmar')) {
     console.error(
       'Esto borra datos. Revisá contra qué base apunta DATABASE_URL y volvé a correrlo con --confirmar.',
