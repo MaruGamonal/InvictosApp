@@ -1,23 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
-import { Barlow, Barlow_Condensed } from 'next/font/google';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { ProveedorAvisos } from '@/components/avisos/Avisos';
+import { clasesDeFuentes } from './fuentes';
 import './globals.css';
-
-const barlow = Barlow({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-barlow',
-  display: 'swap',
-});
-
-const barlowCondensed = Barlow_Condensed({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-barlow-condensed',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: NOMBRE_PRODUCTO,
@@ -48,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+    <html lang="es" className={clasesDeFuentes}>
       <body>
         {/* Los avisos de una acción salen siempre del mismo lugar, en
             cualquier pantalla, así que el proveedor vive acá arriba. */}
