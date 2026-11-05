@@ -53,7 +53,7 @@
 }
 
 .campo input:focus {
-  border: 2px solid var(--acento);
+  border: 2px solid var(--acento-oscuro);
   padding: 12px 13px;
 }
 

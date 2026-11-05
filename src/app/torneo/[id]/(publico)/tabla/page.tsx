@@ -49,7 +49,11 @@ export default async function PaginaTabla({ params }: { params: Promise<{ id: st
               Tabla provisoria: hay un resultado en revisión que todavía puede cambiarla.
             </p>
           )}
-          <div className={styles.tabla}>
+          <div
+            className={styles.tabla}
+            role="table"
+            aria-label={tabla.length > 1 ? `Posiciones — ${grupo.nombre}` : 'Tabla de posiciones'}
+          >
             <EncabezadoTabla />
             {grupo.filas.map((fila, indice) => (
               <FilaTabla
@@ -61,6 +65,8 @@ export default async function PaginaTabla({ params }: { params: Promise<{ id: st
                 ganadosPorPresentacion={fila.ganadosPorPresentacion}
                 empatados={fila.empatados}
                 perdidos={fila.perdidos}
+                golesFavor={fila.golesFavor}
+                golesContra={fila.golesContra}
                 diferenciaGol={fila.diferenciaGol}
                 puntos={fila.puntos}
                 ajustePuntos={fila.ajustePuntos}

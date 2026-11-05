@@ -134,7 +134,11 @@ export default function PaginaCatalogo() {
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Tabla de posiciones — números de distinto largo</h2>
-        <div>
+        <div
+          className={styles.tablaEjemplo}
+          role="table"
+          aria-label="Tabla de posiciones de ejemplo"
+        >
           <EncabezadoTabla />
           <FilaTabla
             posicion={1}
@@ -143,6 +147,8 @@ export default function PaginaCatalogo() {
             ganados={8}
             empatados={1}
             perdidos={1}
+            golesFavor={22}
+            golesContra={7}
             diferenciaGol={15}
             puntos={25}
             clasifica
@@ -154,6 +160,8 @@ export default function PaginaCatalogo() {
             ganados={2}
             empatados={3}
             perdidos={5}
+            golesFavor={9}
+            golesContra={17}
             diferenciaGol={-8}
             puntos={9}
           />
@@ -164,6 +172,8 @@ export default function PaginaCatalogo() {
             ganados={3}
             empatados={2}
             perdidos={5}
+            golesFavor={12}
+            golesContra={14}
             diferenciaGol={-2}
             puntos={11}
             ajustePuntos={-3}

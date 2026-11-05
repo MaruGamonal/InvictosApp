@@ -20,7 +20,7 @@
 .secundaria {
   border: 1.5px solid currentColor;
   background: transparent;
-  color: var(--acento);
+  color: var(--acento-oscuro);
 }
 
 .principal:disabled,

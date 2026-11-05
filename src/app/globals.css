@@ -17,7 +17,14 @@
   --ink-700: #2c383f;
   --ink-600: #414e57;
   --gris-secundario: #5c6a74;
-  --gris-terciario: #7e8b95;
+  /* Más oscuro que el #7e8b95 del handoff: ése daba 3.49:1 sobre blanco
+     y 3.11:1 sobre `--fondo-sutil`, y se usa como color de texto en ~40
+     lugares (títulos de sección, ayudas de campos, encabezados de
+     tabla), casi siempre a 11–13px. #616d77 da 5.30:1 sobre blanco y
+     4.71:1 sobre `--fondo-sutil`, el fondo claro más oscuro donde
+     aparece: pasa AA en todos. Sigue siendo distinguible del
+     secundario (#5c6a74) por tamaño y peso, que es como se usa. */
+  --gris-terciario: #616d77;
   --gris-claro-sobre-oscuro: #a9b4bc;
   --borde-neutro: #cbd3d8;
   --borde-sutil: #e3e8eb;
@@ -27,6 +34,9 @@
 
   /* Acento único de marca — ni verde ni éxito ni rojo de error (`06`, D-74) */
   --acento: #00a8cc;
+  /* Para texto, íconos y bordes de foco sobre fondo claro: `--acento`
+     ahí da 2.81:1 y no pasa ni para texto grande. `--acento` queda para
+     rellenos (con `--acento-texto-sobre`) y para usar sobre oscuro. */
   --acento-oscuro: #007d99;
   --acento-texto-sobre: var(--ink-900);
 

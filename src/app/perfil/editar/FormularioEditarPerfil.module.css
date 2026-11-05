@@ -79,7 +79,7 @@
   background: none;
   border: none;
   padding: 0;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font: 700 13px/1 var(--fuente-texto);
   cursor: pointer;
 }
