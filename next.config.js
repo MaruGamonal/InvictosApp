@@ -3,6 +3,17 @@ const { withSentryConfig } = require('@sentry/nextjs/config');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  /**
+   * Las fuentes que lee la imagen para compartir un torneo
+   * (`src/app/torneo/[id]/(publico)/_imagenParaCompartir.tsx`). Se leen
+   * con `readFile` y un nombre armado en tiempo de ejecución, así que el
+   * rastreo de archivos de Next no las ve y no las sube con la función:
+   * en Vercel la imagen fallaría por un archivo que no está, aunque en
+   * local funcione.
+   */
+  outputFileTracingIncludes: {
+    '/torneo/[id]/**/*': ['./assets/fuentes/*.ttf'],
+  },
 };
 
 /**

@@ -38,11 +38,8 @@ export async function generateMetadata({
   return {
     title: conNombreProducto(ficha.nombre),
     description: descripcion,
-    openGraph: {
-      title: ficha.nombre,
-      description: descripcion,
-      images: ficha.imagenUrl ? [{ url: ficha.imagenUrl }] : undefined,
-    },
+    // La imagen la pone `opengraph-image.tsx`, con o sin imagen propia.
+    openGraph: { title: ficha.nombre, description: descripcion },
   };
 }
 
