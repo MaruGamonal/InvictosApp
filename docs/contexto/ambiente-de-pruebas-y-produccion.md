@@ -37,19 +37,69 @@ Y entendé una cosa antes de tocar nada, porque explica media guía:
 
 ---
 
+## Paso 0 — Comprobar que producción no está expuesta por la Data API
+
+Antes que nada, porque si está mal es más urgente que todo lo demás.
+
+**Dos hechos de este producto:** la aplicación usa Supabase **sólo para
+Auth y para subir imágenes** —no hay una sola llamada a la Data API
+(PostgREST)— y **ninguna tabla tiene RLS**, porque la aplicación se
+conecta a Postgres directo con `DATABASE_URL`.
+
+Si el proyecto de producción se creó con «Enable Data API» y
+«Automatically expose new tables» prendidas (los valores por defecto),
+esas dos cosas juntas significan que **cualquiera con la anon key puede
+leer todas las tablas**, `usuario` y sus mails incluidos. La anon key no
+es secreta: viaja en el bundle del navegador, es una `NEXT_PUBLIC_`.
+
+Con los valores de **Project Settings → Data API** de producción:
+
+```bash
+curl -s "https://TU-PROYECTO.supabase.co/rest/v1/usuario?select=email&limit=1" \
+  -H "apikey: TU-ANON-KEY"
+```
+
+- Devuelve `[]` o un error de permisos → está bien, seguí al paso 1.
+- **Devuelve un mail** → está expuesto. Se cierra en
+  **Project Settings → Data API**, apagando la Data API (la aplicación
+  no la usa) o, si preferís dejarla, quitándole los permisos al rol
+  `anon` sobre el esquema `public`.
+
+---
+
 ## Paso 1 — Crear el proyecto de Supabase de pruebas
 
 **Dónde:** panel de Supabase → New project.
 
-1. Nombre: algo que no se confunda, por ejemplo `invicta-pruebas`.
-2. Región: la misma que producción (`South America (São Paulo)` si es la
-   que usás) — no por rendimiento, sino para que si algo se comporta
-   distinto no sea por esto.
-3. Anotá la contraseña de la base que te pide al crearlo. La vas a
-   necesitar en el paso 3 y no se puede volver a ver.
+| Campo | Qué poner |
+|---|---|
+| **Organization** | La que ya tenés |
+| **GitHub (optional)** | **No conectar** (ver abajo) |
+| **Project name** | `invicta-pruebas` |
+| **Database password** | «Generate a password», y **guardala ya**: no se puede volver a ver y la necesitás para el `DATABASE_URL` |
+| **Region** | «Need a specific region?» → **South America (São Paulo)**. Vercel corre en `gru1`, que es São Paulo. Si producción está en otra, usá la misma |
 
-**Cuando termine de crearse**, andá a **Project Settings → Data API** y
-copiá a un lado:
+**Por qué no conectar GitHub:** esa opción hace que Supabase despliegue
+cambios de esquema desde el repositorio, y las migraciones ya las corre
+el build de Vercel (`vercel.json` → `migrate:deploy && next build`). Dos
+cosas desplegando el mismo esquema se pisan.
+
+### Security — las dos casillas que importan
+
+| Opción | Qué poner | Por qué |
+|---|---|---|
+| **Enable Data API** | **destildar** | La aplicación no la usa. Es una API REST pública sobre el esquema que no le sirve a nadie acá, y es superficie de ataque gratis |
+| **Automatically expose new tables** | **destildar** | Es la que concede permisos al rol público sobre cada tabla nueva. Sin RLS, eso es lectura abierta de todo. Supabase mismo recomienda apagarla |
+| **Enable automatic RLS** | dejar destildada | Con la Data API apagada no cambia nada, y la aplicación se conecta como dueña de las tablas, que saltea RLS igual |
+
+> **Si el Table Editor del panel no anda** con la Data API apagada,
+> volvé a prenderla y dejá **«Automatically expose new tables» apagada**,
+> que es la que realmente abre la puerta. El **SQL Editor funciona de
+> las dos formas**, que es lo que hace falta para el paso 3.
+
+### Cuando termine de crearse
+
+Andá a **Project Settings → Data API** y copiá a un lado:
 
 - `Project URL` → es tu `NEXT_PUBLIC_SUPABASE_URL`
 - `anon public` → es tu `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -60,6 +110,10 @@ Y en **Project Settings → Database → Connection string → URI**, la
 cadena de conexión con la contraseña del punto 3 → es tu `DATABASE_URL`.
 
 > Si la cadena trae `[YOUR-PASSWORD]`, reemplazalo por la contraseña real.
+
+> Las claves siguen estando en esa pantalla aunque la Data API esté
+> apagada: `anon` y `service_role` son claves de Auth y Storage también,
+> no sólo de PostgREST.
 
 **Cómo saber que salió bien:** el proyecto figura como *Active* y tenés
 las cuatro cosas anotadas.
