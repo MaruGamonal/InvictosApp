@@ -110,31 +110,59 @@ al apagar la Data API, y no debería.
 
 ## A4. Dejar producción sin datos demo
 
-**Dónde:** tu máquina.
+Hay **dos formas**. La primera no necesita tener el proyecto instalado.
 
-`.env` apuntando a producción, **sin** la línea `NEXT_PUBLIC_AMBIENTE`:
+### Forma 1 — desde el SQL Editor (más simple)
+
+Pegá entero el contenido de **`db/consultas/auditoria-de-datos-demo.sql`**
+en el SQL Editor de producción y ejecutalo. Sólo lee, no modifica nada.
+
+Devuelve ocho filas. Las seis primeras tienen que dar **0**. Las dos
+últimas son para comparar: dicen cuántas filas **no** demo hay, así
+"todo en cero" no puede confundirse con "la base está vacía".
+
+### Forma 2 — desde tu máquina
+
+Sólo si ya tenés el proyecto clonado y `npm install` hecho. Con un
+archivo `.env` en la raíz que tenga **una sola línea**:
+
+```
+DATABASE_URL=<la cadena de conexión de producción>
+```
+
+Importa que **no** esté `NEXT_PUBLIC_AMBIENTE`: esa ausencia es lo que
+hace que el script se reconozca en producción y se niegue a escribir.
 
 ```bash
 npm run demo:auditar
 ```
 
-Sólo lee, no escribe. Dice cuántas filas demo hay y, aparte, cuántas
-**no** demo — así "limpio" no puede querer decir "la base está vacía".
+Imprime el ambiente y el host **antes** de mirar nada, y termina con
+código 1 si encuentra algo, así que también sirve en un paso
+automático.
 
-- Dice `Sin rastros de datos demo.` → listo, pasá al bloque B.
-- Encuentra algo → se limpia así:
+### Si aparece algo
+
+Son datos de alguna corrida vieja del seed. Para borrarlos hace falta
+la forma 2, porque la limpieza respeta el orden de dependencias entre
+tablas y eso no es una consulta suelta:
 
 ```bash
-# 1. Agregá temporalmente la línea al .env de producción:
-#    NEXT_PUBLIC_AMBIENTE=pruebas
+# 1. Agregá al .env:  NEXT_PUBLIC_AMBIENTE=pruebas
 npm run demo:limpiar -- --confirmar
-# 2. Sacá la línea del .env.
+# 2. Sacá esa línea del .env
 npm run demo:auditar   # tiene que dar cero
 ```
 
 > Que haya que poner esa variable a mano para borrar en producción es a
 > propósito: tiene que ser un acto deliberado, no algo que pase por
 > tener el archivo equivocado abierto.
+
+**Ojo con una distinción.** `demo:limpiar` borra **sólo** lo marcado
+como demo: cuentas `@demo.invicta.com.ar` y entidades con `[DEMO]` en
+el nombre. Las cuentas de prueba que hayas creado a mano con un mail
+real no las ve el auditor ni las toca la limpieza — ésas se deciden
+aparte.
 
 ---
 
