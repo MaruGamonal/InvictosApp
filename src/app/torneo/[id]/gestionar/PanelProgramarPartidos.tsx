@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export interface PartidoProgramable {
   id: string;
@@ -23,6 +24,8 @@ export interface PanelProgramarPartidosProps {
 function formatearFecha(iso: string | null): string | null {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
+    hourCycle: 'h23',
     weekday: 'short',
     day: 'numeric',
     month: 'short',

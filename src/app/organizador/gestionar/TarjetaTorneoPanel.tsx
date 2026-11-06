@@ -4,8 +4,11 @@ import { Badge } from '@/components/Badge';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import type { TorneoPanelOrganizador } from '@/services/organizadores/obtenerPanelOrganizador';
 import styles from './TarjetaTorneoPanel.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 const FORMATO_FECHA = new Intl.DateTimeFormat('es-AR', {
+  timeZone: ZONA_HORARIA,
+  hourCycle: 'h23',
   weekday: 'short',
   day: 'numeric',
   month: 'numeric',

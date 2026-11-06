@@ -4,6 +4,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../../_datos';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 /**
  * UC-51 — Reglamento vigente (`10`, sección 5): siempre el que rige
@@ -27,6 +28,7 @@ export async function generateMetadata({
 
 function formatearFecha(iso: string): string {
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
     day: 'numeric',
     month: 'long',
     year: 'numeric',
