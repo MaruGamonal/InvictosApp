@@ -81,19 +81,21 @@ Este deploy lleva dos cosas que importan acá:
 
 **Dónde:** Supabase de producción → SQL Editor.
 
-```sql
--- 1) Los permisos quedaron cerrados. Tiene que dar CERO filas.
-select table_name, grantee
-from information_schema.role_table_grants
-where grantee in ('anon', 'authenticated') and table_schema = 'public';
+Pegá entero el contenido de **`db/consultas/diagnostico-de-ambiente.sql`**
+y ejecutalo. Devuelve cuatro filas, siempre — y eso es a propósito: tres
+consultas sueltas que devuelven cero filas son ambiguas, porque cero es
+la respuesta correcta para una y la equivocada para otra.
 
--- 2) La migración le creó el secreto del host. Una fila.
-select name from vault.decrypted_secrets where name = 'host_canonico';
+En un ambiente desplegado y sano dice:
 
--- 3) Las tareas ya no tienen el host escrito adentro.
---    El `command` tiene que leer `host_canonico`, no `www.invicta.com.ar`.
-select jobname, command from cron.job;
-```
+| chequeo | resultado |
+|---|---|
+| permisos de anon/authenticated | `OK — cero permisos (cerrado)` |
+| secreto host_canonico | `OK — apunta a https://www.invicta.com.ar` |
+| tareas programadas | `... => lee host_canonico (OK)` |
+| migración de permisos | `OK — aplicada DD/MM HH:MM` |
+
+La misma consulta sirve para el ambiente de pruebas (paso B8).
 
 Si (2) no devuelve nada, cargalo a mano y las tareas vuelven a andar:
 
