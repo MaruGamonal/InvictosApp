@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export interface PanelResponderResultadoProps {
   partidoId: string;
@@ -24,6 +25,8 @@ type Paso =
 const MINIMO_MOTIVO = 10;
 
 const FORMATO_PLAZO = new Intl.DateTimeFormat('es-AR', {
+  timeZone: ZONA_HORARIA,
+  hourCycle: 'h23',
   weekday: 'long',
   day: 'numeric',
   month: 'long',

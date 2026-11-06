@@ -42,7 +42,7 @@ for (const hoja of hojas) {
 // `next/font` define los suyos en tiempo de ejecución, con la clase que
 // pone en `<html>`: en el CSS no aparecen declarados en ningún lado,
 // pero existen.
-for (const coincidencia of readFileSync(join(RAIZ, 'app', 'layout.tsx'), 'utf8').matchAll(
+for (const coincidencia of readFileSync(join(RAIZ, 'app', 'fuentes.ts'), 'utf8').matchAll(
   /variable:\s*'(--[\w-]+)'/g,
 )) {
   definidos.add(coincidencia[1]!);

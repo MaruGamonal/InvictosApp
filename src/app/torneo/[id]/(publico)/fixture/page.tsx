@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { Fragment } from 'react';
+import Link from 'next/link';
 import { FilaPartido, type EstadoPartido } from '@/components/FilaPartido';
 import { ContenedorPublicidad } from '@/components/ContenedorPublicidad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerFixtureCacheado } from '../../_datos';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 /** UC-23 — Fixture y resultados (`10`, sección 5): agrupado por fecha, con la fecha vigente destacada. */
 
@@ -27,9 +29,26 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * La fecha original, sólo si el partido se movió. `fecha_hora_original`
+ * se escribe la primera vez que se programa —igual a la vigente—, así
+ * que "tiene original" no alcanza: tiene que ser distinta.
+ */
+function fechaOriginalSiSeMovio(partido: {
+  fechaHoraProgramada: string | null;
+  fechaHoraOriginal: string | null;
+}): string | undefined {
+  const { fechaHoraProgramada: vigente, fechaHoraOriginal: original } = partido;
+  if (!original || !vigente) return undefined;
+  if (new Date(original).getTime() === new Date(vigente).getTime()) return undefined;
+  return formatearFecha(original);
+}
+
 function formatearFecha(iso: string | null): string | undefined {
   if (!iso) return undefined;
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
+    hourCycle: 'h23',
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -96,7 +115,14 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
             </h2>
             <div className={styles.listaPartidos}>
               {grupo.partidos.map((partido) => (
-                <div key={partido.id} className={styles.filaConSede}>
+                // Cada partido lleva a su detalle: goleadores, quién cargó
+                // el resultado y desde cuándo rige (`08`, 11.4). Desde el
+                // fixture público no había forma de llegar.
+                <Link
+                  key={partido.id}
+                  href={`/torneo/${id}/partido/${partido.id}`}
+                  className={styles.enlacePartido}
+                >
                   <FilaPartido
                     estado={partido.estado as EstadoPartido}
                     equipoLocal={partido.equipoLocal}
@@ -104,10 +130,12 @@ export default async function PaginaFixture({ params }: { params: Promise<{ id: 
                     golesLocal={partido.golesLocal}
                     golesVisitante={partido.golesVisitante}
                     fechaProgramadaTexto={formatearFecha(partido.fechaHoraProgramada)}
+                    fechaOriginalTexto={fechaOriginalSiSeMovio(partido)}
+                    sedeNombre={partido.sedeNombre}
                     jugadorDelPartido={partido.jugadorDelPartido}
+                    conLineaDeDatos
                   />
-                  {partido.sedeNombre && <span className={styles.sede}>{partido.sedeNombre}</span>}
-                </div>
+                </Link>
               ))}
             </div>
           </section>

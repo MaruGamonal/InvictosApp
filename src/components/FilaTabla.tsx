@@ -8,6 +8,8 @@ export interface FilaTablaProps {
   ganados: number;
   empatados: number;
   perdidos: number;
+  golesFavor: number;
+  golesContra: number;
   diferenciaGol: number;
   puntos: number;
   /**
@@ -25,27 +27,67 @@ export interface FilaTablaProps {
   clasifica?: boolean;
 }
 
-/** Encabezado de la tabla — mismas columnas, fondo oscuro (Design System, sección 07). */
+/**
+ * Encabezado de la tabla — mismas columnas, fondo oscuro (Design System,
+ * sección 07).
+ *
+ * Cada título es una celda de la grilla, incluido "Equipo". Estaba como
+ * texto sólo para lector de pantalla, con `position: absolute`: eso lo
+ * sacaba de la grilla y corría todos los títulos una columna — "PJ"
+ * quedaba sobre el escudo y "Pts" sobre los ajustes.
+ */
 export function EncabezadoTabla() {
   return (
-    <div className={`${styles.fila} ${styles.encabezado}`}>
-      <span>#</span>
-      <span className={styles.srOnly}>Equipo</span>
-      <span className={styles.numero}>PJ</span>
-      <span className={styles.numero}>G</span>
-      <span className={styles.numero}>E</span>
-      <span className={styles.numero}>P</span>
-      <span className={styles.numero}>DG</span>
-      <span className={styles.numero}>Aj.</span>
-      <span className={styles.puntos}>Pts</span>
+    <div className={`${styles.fila} ${styles.encabezado}`} role="row">
+      <span className={styles.posicion} role="columnheader">
+        #
+      </span>
+      <span className={styles.equipo} role="columnheader">
+        Equipo
+      </span>
+      <abbr className={styles.numero} title="Partidos jugados" role="columnheader">
+        PJ
+      </abbr>
+      <abbr className={styles.numero} title="Ganados" role="columnheader">
+        G
+      </abbr>
+      <abbr className={styles.numero} title="Empatados" role="columnheader">
+        E
+      </abbr>
+      <abbr className={styles.numero} title="Perdidos" role="columnheader">
+        P
+      </abbr>
+      <abbr className={styles.numero} title="Goles a favor" role="columnheader">
+        GF
+      </abbr>
+      <abbr className={styles.numero} title="Goles en contra" role="columnheader">
+        GC
+      </abbr>
+      <abbr className={styles.numero} title="Diferencia de gol" role="columnheader">
+        DG
+      </abbr>
+      <abbr className={styles.numero} title="Ajuste de puntos" role="columnheader">
+        Aj.
+      </abbr>
+      <abbr className={styles.puntos} title="Puntos" role="columnheader">
+        Pts
+      </abbr>
     </div>
   );
 }
 
 /**
- * Fila de la tabla de posiciones (`08`, 11.10), con cifras tabulares
- * obligatorias para que las columnas numéricas queden alineadas
- * (`08`, sección 7) — el criterio de descarte, no de preferencia.
+ * Fila de la tabla de posiciones (`08`, 11.4 y 11.10), con cifras
+ * tabulares obligatorias para que las columnas numéricas queden
+ * alineadas (`08`, sección 7) — el criterio de descarte, no de
+ * preferencia.
+ *
+ * El nombre del equipo se ve siempre: posición y equipo quedan fijos a
+ * la izquierda y los puntos fijos a la derecha, y lo que scrollea
+ * horizontal son las columnas de detalle del medio. Antes la fila
+ * mostraba sólo el escudo, con el nombre en un tooltip; como casi
+ * ningún equipo amateur tiene escudo, todas las filas eran el mismo
+ * círculo con una inicial y la tabla no decía quién era quién.
  */
 export function FilaTabla({
   posicion,
@@ -54,6 +96,8 @@ export function FilaTabla({
   ganados,
   empatados,
   perdidos,
+  golesFavor,
+  golesContra,
   diferenciaGol,
   puntos,
   ajustePuntos = 0,
@@ -61,18 +105,20 @@ export function FilaTabla({
   clasifica,
 }: FilaTablaProps) {
   return (
-    <div className={`${styles.fila} ${clasifica ? styles.clasifica : ''}`}>
-      <span className={styles.posicion}>{posicion}</span>
-      <span className={styles.equipo}>
-        <button type="button" className={styles.botonEquipo}>
-          <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={22} />
-          <span className={styles.tooltipNombre} aria-hidden="true">
-            {equipo.nombre}
-          </span>
-        </button>
+    <div className={`${styles.fila} ${clasifica ? styles.clasifica : ''}`} role="row">
+      <span className={styles.posicion} role="cell">
+        {posicion}
       </span>
-      <span className={styles.numero}>{partidosJugados}</span>
-      <span className={styles.numero}>
+      <span className={styles.equipo} role="rowheader">
+        <Escudo src={equipo.escudoUrl} nombre={equipo.nombre} tamano={22} />
+        <span className={styles.nombreEquipo} title={equipo.nombre}>
+          {equipo.nombre}
+        </span>
+      </span>
+      <span className={styles.numero} role="cell">
+        {partidosJugados}
+      </span>
+      <span className={styles.numero} role="cell">
         {ganados}
         {ganadosPorPresentacion > 0 && (
           <sup
@@ -87,15 +133,30 @@ export function FilaTabla({
           </sup>
         )}
       </span>
-      <span className={styles.numero}>{empatados}</span>
-      <span className={styles.numero}>{perdidos}</span>
-      <span className={styles.numero}>
+      <span className={styles.numero} role="cell">
+        {empatados}
+      </span>
+      <span className={styles.numero} role="cell">
+        {perdidos}
+      </span>
+      <span className={styles.numero} role="cell">
+        {golesFavor}
+      </span>
+      <span className={styles.numero} role="cell">
+        {golesContra}
+      </span>
+      <span className={styles.numero} role="cell">
         {diferenciaGol > 0 ? `+${diferenciaGol}` : diferenciaGol}
       </span>
-      <span className={`${styles.numero} ${ajustePuntos < 0 ? styles.ajusteNegativo : ''}`}>
+      <span
+        className={`${styles.numero} ${ajustePuntos < 0 ? styles.ajusteNegativo : ''}`}
+        role="cell"
+      >
         {ajustePuntos === 0 ? '—' : ajustePuntos > 0 ? `+${ajustePuntos}` : ajustePuntos}
       </span>
-      <span className={styles.puntos}>{puntos}</span>
+      <span className={styles.puntos} role="cell">
+        {puntos}
+      </span>
     </div>
   );
 }

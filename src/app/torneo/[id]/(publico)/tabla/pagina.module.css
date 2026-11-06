@@ -25,19 +25,13 @@
   padding: 8px 12px;
 }
 
-/* Las nueve columnas de FilaTabla no entran en un ancho de mano angosto
-   (`08`, 11.10, columnas fijas): en vez de recortarlas en silencio,
-   scrollea horizontal solo la tabla, nunca la página entera. */
+/* Las once columnas de FilaTabla no entran en un ancho de mano angosto:
+   en vez de recortarlas, scrollea horizontal sólo la tabla, nunca la
+   página entera. Equipo y puntos quedan fijos (ver FilaTabla.module.css). */
 .tabla {
   background: var(--color-superficie);
   border-radius: var(--radio-tarjeta);
   box-shadow: var(--sombra-tarjeta);
   overflow-x: auto;
-  /* Fijar overflow-x fuerza overflow-y a "auto" también (aunque acá
-     nunca se pida scroll vertical) — sin este margen, el tooltip
-     flotante del nombre de equipo de la última fila queda recortado:
-     su posición es absoluta y excede la altura del contenido en
-     flujo, así que sin espacio propio haría falta scrollear para
-     verlo. */
-  padding-bottom: 32px;
+  overscroll-behavior-x: contain;
 }

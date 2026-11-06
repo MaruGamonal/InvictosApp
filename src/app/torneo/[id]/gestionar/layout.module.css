@@ -66,8 +66,13 @@
   color: var(--gris-claro-sobre-oscuro);
 }
 
+/* Blanca, no cian: la banda es `--cabecera-organizador`, y el cian
+   sobre su parada más clara (#07485f) da 3.56:1 — no alcanza para texto
+   de 13px. La marca de activa la lleva el subrayado, que como indicador
+   no textual sí pasa (3:1), más el peso y el blanco contra el gris de
+   las inactivas. */
 .pestanaActiva {
-  color: var(--acento);
+  color: var(--identidad-texto);
   border-bottom-color: var(--acento);
 }
 

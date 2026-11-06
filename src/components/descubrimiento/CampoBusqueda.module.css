@@ -15,6 +15,13 @@
   color: var(--gris-terciario);
 }
 
+/* El campo de adentro no dibuja foco (no tiene borde propio): lo marca
+   la caja entera. Va sobre el hero oscuro, donde el acento da 6.4:1. */
+.busqueda:focus-within {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
 .lupa {
   flex: none;
 }

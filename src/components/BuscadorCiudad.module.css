@@ -16,7 +16,7 @@
 }
 
 .contenedor input:focus {
-  border: 2px solid var(--acento);
+  border: 2px solid var(--acento-oscuro);
   padding: 12px 13px;
 }
 
@@ -97,12 +97,26 @@
   color: var(--color-texto);
 }
 
-.opcion:hover {
-  background: var(--fondo-sutil);
-}
-
 .opcionActiva {
   background: var(--fondo-sutil);
   color: var(--acento-oscuro);
   font-weight: 600;
+}
+
+/* La opción que recorren las flechas (`aria-activedescendant`). El foco
+   real queda en el input, así que el navegador no dibuja nada: lo
+   dibuja esto, con el mismo color que el borde de foco del campo. */
+.opcionEnFoco {
+  background: var(--fondo-sutil);
+  box-shadow: inset 0 0 0 2px var(--acento-oscuro);
+}
+
+/* Anuncio de la cantidad de coincidencias, sólo para lector de pantalla. */
+.anuncio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

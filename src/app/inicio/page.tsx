@@ -13,10 +13,13 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export const metadata: Metadata = { title: conNombreProducto('Inicio') };
 
 const FORMATO_FECHA = new Intl.DateTimeFormat('es-AR', {
+  timeZone: ZONA_HORARIA,
+  hourCycle: 'h23',
   weekday: 'short',
   day: 'numeric',
   month: 'numeric',

@@ -8,11 +8,14 @@ import stylesBarra from '@/components/BarraAccionFija.module.css';
 import { obtenerContextoCacheado, exigirQueOrganice } from '../_datos';
 import { calcularLoQueEspera } from '../_pendientes';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export const metadata: Metadata = { title: conNombreProducto('Resumen del torneo') };
 
 function formatearFechaHora(iso: string): string {
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
+    hourCycle: 'h23',
     weekday: 'short',
     day: 'numeric',
     month: 'short',

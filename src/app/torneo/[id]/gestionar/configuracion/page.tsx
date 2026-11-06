@@ -9,11 +9,16 @@ import { exigirQueOrganice, obtenerContextoCacheado } from '../_datos';
 import { ESTADOS_CON_ACCIONES_DE_ESTADO } from '../_estadosDeTorneo';
 import { SECCIONES_CONFIGURACION, type SeccionConfiguracion } from './_secciones';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export const metadata: Metadata = { title: conNombreProducto('Configuración del torneo') };
 
 function formatearFecha(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+  return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
+    day: 'numeric',
+    month: 'long',
+  });
 }
 
 function contar(cantidad: number, singular: string, plural: string, vacio: string): string {

@@ -21,10 +21,13 @@ import { formatearCantidadSeguidores } from '@/lib/seguidores';
 import { obtenerEquipoPublico, type EquipoPublico } from '@/services/equipos/obtenerEquipoPublico';
 import { ListaPlantelPublico } from './ListaPlantelPublico';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 function formatearFecha(iso: string | null): string | undefined {
   if (!iso) return undefined;
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
+    hourCycle: 'h23',
     weekday: 'short',
     day: 'numeric',
     month: 'short',

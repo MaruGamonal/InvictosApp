@@ -65,14 +65,16 @@
 }
 
 .enlaceMapa {
+  composes: area-tactil from global;
   align-self: flex-start;
   font-size: 13px;
   font-weight: 600;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   text-decoration: none;
 }
 
 .enlaceSecundario {
+  composes: area-tactil from global;
   align-self: flex-start;
   background: none;
   border: none;

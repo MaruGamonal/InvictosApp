@@ -78,6 +78,11 @@ export interface PartidoDetallado {
   local: EquipoDelPartido;
   visitante: EquipoDelPartido;
   fechaHoraProgramada: string | null;
+  /**
+   * La primera fecha que tuvo, si después se movió (`06`, D-30): la
+   * pantalla la muestra junto a la vigente, nunca en su lugar.
+   */
+  fechaHoraOriginal: string | null;
   sedeNombre: string | null;
   /** Nombre de quien cargó el resultado. `null` si todavía no hay resultado. */
   cargadoPor: string | null;
@@ -134,6 +139,7 @@ interface Fila {
   equipo_visitante_nombre: string;
   equipo_visitante_escudo: string | null;
   fecha_hora_programada: Date | null;
+  fecha_hora_original: Date | null;
   sede_nombre: string | null;
   cargado_por_usuario_id: string | null;
   cargado_por_nombre: string | null;
@@ -156,7 +162,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
             p.equipo_local_id, el.nombre AS equipo_local_nombre, el.escudo_url AS equipo_local_escudo,
             p.equipo_visitante_id, ev.nombre AS equipo_visitante_nombre,
             ev.escudo_url AS equipo_visitante_escudo,
-            p.fecha_hora_programada, s.nombre AS sede_nombre,
+            p.fecha_hora_programada, p.fecha_hora_original, s.nombre AS sede_nombre,
             p.cargado_por_usuario_id, pd.nombre_visible AS cargado_por_nombre,
             p.fecha_carga_resultado
      FROM partido p
@@ -303,6 +309,7 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
       escudoUrl: fila.equipo_visitante_escudo,
     },
     fechaHoraProgramada: fila.fecha_hora_programada?.toISOString() ?? null,
+    fechaHoraOriginal: fila.fecha_hora_original?.toISOString() ?? null,
     sedeNombre: fila.sede_nombre,
     cargadoPor: fila.cargado_por_nombre,
     fechaCargaResultado: fila.fecha_carga_resultado?.toISOString() ?? null,

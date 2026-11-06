@@ -54,3 +54,27 @@ test.describe('la ficha pública del torneo', () => {
     await expect(page.getByRole('heading', { name: escenario.torneoNombre })).toBeVisible();
   });
 });
+
+/**
+ * La vista previa al pegar el link en un grupo (`08`, 11.4). La ficha
+ * tenía imagen sólo si el torneo había cargado una, y las subrutas
+ * nunca: cada una define su `openGraph` y Next lo reemplaza entero,
+ * imagen incluida. Esto es lo que se rompería sin que nada avise.
+ */
+test.describe('la imagen al compartir el torneo', () => {
+  for (const sufijo of ['', '/fixture', '/tabla']) {
+    test(`/torneo/[id]${sufijo} publica una imagen que se puede bajar`, async ({
+      page,
+      request,
+    }) => {
+      await page.goto(`/torneo/${escenario.torneoId}${sufijo}`);
+      const url = await page.locator('meta[property="og:image"]').getAttribute('content');
+      expect(url, 'sin og:image').toBeTruthy();
+      expect(url).not.toContain('localhost');
+
+      const imagen = await request.get(url!);
+      expect(imagen.status()).toBe(200);
+      expect(imagen.headers()['content-type']).toBe('image/png');
+    });
+  }
+});

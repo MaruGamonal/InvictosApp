@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { normalizarParaBuscar } from '@/lib/normalizarParaBuscar';
 import styles from './SelectorDeCiudad.module.css';
 
 /**
@@ -43,13 +44,13 @@ export function SelectorDeCiudad({
   const [busqueda, setBusqueda] = useState('');
 
   const provinciasFiltradas = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase();
+    const termino = normalizarParaBuscar(busqueda);
     if (!termino) return provincias;
     return provincias
       .map((provincia) => ({
         ...provincia,
         ciudades: provincia.ciudades.filter((ciudad) =>
-          ciudad.nombre.toLowerCase().includes(termino),
+          normalizarParaBuscar(ciudad.nombre).includes(termino),
         ),
       }))
       .filter((provincia) => provincia.ciudades.length > 0);

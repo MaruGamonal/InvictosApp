@@ -14,3 +14,6 @@ coverage/
 playwright-report/
 test-results/
 test/e2e/.escenario.json
+
+# Salida de la skill revision-diseno (capturas e informes)
+.revision-diseno/
