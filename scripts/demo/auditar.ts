@@ -107,6 +107,29 @@ export async function auditarDemo(): Promise<number> {
   return total;
 }
 
+/**
+ * Un error de base acá sale como 16 líneas de internals de Postgres
+ * —`parse_relation.c`, `internalPosition`, `dataType: undefined`— que
+ * no le dicen nada a quien está corriendo esto contra producción con el
+ * `.env` a medio armar. Los dos casos que de verdad pasan tienen
+ * mensaje propio; el resto se muestra entero, porque inventarle un
+ * texto amable a un error que no esperábamos es peor.
+ */
+function explicar(error: unknown): string {
+  const codigo = (error as { code?: string })?.code;
+  if (codigo === '42P01') {
+    return (
+      'Esta base no tiene el esquema de INVICTA (le falta alguna tabla).\n' +
+      '¿DATABASE_URL apunta a la base correcta? Si es una base nueva,\n' +
+      'le faltan las migraciones: "npm run migrate:up".'
+    );
+  }
+  if (codigo === 'ECONNREFUSED' || codigo === 'ENOTFOUND') {
+    return `No pude conectarme a ${describirBase()}. Revisá DATABASE_URL.`;
+  }
+  return String(error);
+}
+
 if (process.argv.includes('--ejecutar')) {
   auditarDemo()
     .then(async (total) => {
@@ -114,7 +137,7 @@ if (process.argv.includes('--ejecutar')) {
       process.exit(total === 0 ? 0 : 1);
     })
     .catch((error) => {
-      console.error(error);
+      console.error(`\n${explicar(error)}`);
       process.exit(1);
     });
 }
