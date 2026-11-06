@@ -60,10 +60,46 @@ curl -s "https://TU-PROYECTO.supabase.co/rest/v1/usuario?select=email&limit=1" \
 ```
 
 - Devuelve `[]` o un error de permisos → está bien, seguí al paso 1.
-- **Devuelve un mail** → está expuesto. Se cierra en
-  **Project Settings → Data API**, apagando la Data API (la aplicación
-  no la usa) o, si preferís dejarla, quitándole los permisos al rol
-  `anon` sobre el esquema `public`.
+- **Devuelve un mail** → está expuesto.
+
+### Qué se encontró en producción (06/11)
+
+Estaba expuesto, y no sólo para leer. Esta consulta, en el SQL Editor,
+lo muestra:
+
+```sql
+select table_name, string_agg(privilege_type, ', ') as permisos
+from information_schema.role_table_grants
+where grantee = 'anon' and table_schema = 'public'
+group by table_name
+order by table_name;
+```
+
+Devolvía **todas** las tablas con `SELECT, INSERT, UPDATE, DELETE,
+TRUNCATE` para el rol `anon`. O sea: con la anon key —que es pública,
+viaja en el bundle del navegador— se podía leer la tabla `usuario`
+entera, y también escribirla y vaciarla.
+
+**Se cerró en dos capas:**
+
+1. **Apagar la Data API** en Project Settings → Data API. Cierra el
+   camino HTTP en el acto. Es lo primero que hay que hacer, y es
+   seguro: la aplicación usa Supabase sólo para Auth (`/auth/v1`) y
+   Storage (`/storage/v1`), que son endpoints distintos y no se tocan.
+   Hay 14 llamadas a `.auth` y 1 a `.storage` en todo el código, y
+   **ninguna** a la Data API.
+2. **La migración `cerrar-permisos-de-los-roles-publicos`**, que le
+   quita a `anon` y `authenticated` todo permiso sobre `public` y
+   —esto es lo que más importa— **arregla los default privileges**,
+   para que las tablas que cree la próxima migración no vuelvan a nacer
+   concedidas. Sin eso, revocar lo de hoy duraría hasta la próxima
+   tabla.
+
+La migración corre sola en cada deploy y en cada ambiente, así que el
+proyecto de pruebas nace cerrado sin que haya que acordarse de nada.
+
+Después de desplegar, comprobalo con la misma consulta: tiene que
+devolver **cero filas**.
 
 ---
 
