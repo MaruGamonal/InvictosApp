@@ -123,6 +123,7 @@
 }
 
 .enlaceEscudo {
+  composes: area-tactil from global;
   background: none;
   border: none;
   padding: 0;
@@ -222,6 +223,7 @@
 }
 
 .enlaceChico {
+  composes: area-tactil from global;
   font-weight: 600;
   font-size: 13px;
   color: var(--acento-oscuro);
@@ -235,6 +237,11 @@
 }
 
 .textoCentrado a {
+  /* Va al final de una línea corta, no dentro de un párrafo: necesita
+     su área táctil (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--acento-oscuro);
   font-weight: 600;
   text-decoration: none;

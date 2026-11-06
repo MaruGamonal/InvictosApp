@@ -1,5 +1,9 @@
 .enlace {
-  display: block;
+  /* 44px de alto (WCAG 2.5.8): medía 13. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   text-align: center;
   margin-top: 14px;
   font: 600 13px/1 var(--fuente-texto);

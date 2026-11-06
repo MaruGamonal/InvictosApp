@@ -65,6 +65,7 @@
 }
 
 .enlaceMapa {
+  composes: area-tactil from global;
   align-self: flex-start;
   font-size: 13px;
   font-weight: 600;
@@ -73,6 +74,7 @@
 }
 
 .enlaceSecundario {
+  composes: area-tactil from global;
   align-self: flex-start;
   background: none;
   border: none;

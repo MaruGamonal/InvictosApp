@@ -111,6 +111,7 @@
 }
 
 .enlaceRanking {
+  composes: area-tactil from global;
   align-self: flex-start;
   color: var(--acento-oscuro);
   font: 700 13px/1 var(--fuente-texto);

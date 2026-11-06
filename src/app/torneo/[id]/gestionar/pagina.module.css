@@ -453,6 +453,7 @@
 }
 
 .enlaceImagen {
+  composes: area-tactil from global;
   background: none;
   border: none;
   padding: 0;
