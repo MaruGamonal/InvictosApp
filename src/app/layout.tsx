@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
 import { ProveedorAvisos } from '@/components/avisos/Avisos';
+import { BandaDeAmbiente } from '@/components/BandaDeAmbiente';
 import { clasesDeFuentes } from './fuentes';
 import './globals.css';
 
@@ -43,6 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={clasesDeFuentes}>
       <body>
+        {/* Arriba de todo, antes que cualquier pantalla: en el ambiente
+            de pruebas avisa que los datos no son reales. En producción
+            no renderiza nada. */}
+        <BandaDeAmbiente />
         {/* Los avisos de una acción salen siempre del mismo lugar, en
             cualquier pantalla, así que el proveedor vive acá arriba. */}
         <ProveedorAvisos>{children}</ProveedorAvisos>

@@ -38,4 +38,20 @@ test.describe('puertas de acceso', () => {
       .click();
     await expect(page).toHaveURL(/\/torneos/);
   });
+
+  /**
+   * La banda que separa este sitio del real.
+   *
+   * Es la comprobación más barata de que las variables quedaron de cada
+   * lado: en el ambiente de pruebas se ve, en producción no existe. Y
+   * es la que un humano hace al final del runbook — tenerla acá
+   * significa que, si un deploy la rompe, se entera la suite y no la
+   * primera persona que abra el sitio equivocado.
+   */
+  test('en el ambiente de pruebas avisa que los datos no son reales', async ({ page }) => {
+    await page.goto('/torneos');
+    const banda = page.getByRole('status').filter({ hasText: /ambiente de pruebas/i });
+    await expect(banda).toBeVisible();
+    await expect(banda).toContainText('los datos no son reales');
+  });
 });
