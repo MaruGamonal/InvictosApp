@@ -23,29 +23,37 @@ base necesita saber a qué sitio pegarle. Antes esa dirección estaba
 escrita en el código —con lo cual un Supabase nuevo le hubiera disparado
 al sitio real— y ahora sale de un secreto del Vault de cada proyecto.
 
-**2. Supabase nace con la Data API prendida y concediéndole `ALL` al rol
-público sobre cada tabla.** En un proyecto que usa Supabase para todo,
-eso se compensa con RLS. Acá no: la aplicación habla con Postgres
-**directo** por `DATABASE_URL` y usa Supabase sólo para Auth y Storage,
-así que nunca hubo una política de RLS porque nunca hizo falta. Las dos
-cosas juntas dejaban todas las tablas al alcance de la anon key, que es
-pública: viaja en el bundle del navegador.
+**2. Supabase le concede `ALL` al rol público sobre cada tabla nueva.**
+En un proyecto que usa Supabase para todo, eso se compensa con RLS. Acá
+no: la aplicación habla con Postgres **directo** por `DATABASE_URL` y
+usa Supabase sólo para Auth y Storage, así que nunca hubo una política
+de RLS porque nunca hizo falta.
+
+Eso sería alcanzable con la anon key —que es pública, viaja en el bundle
+del navegador— **si la Data API estuviera prendida**. En producción
+estaba apagada, así que no hubo exposición: no había camino HTTP. Pero
+dejaba toda la protección colgando de un toggle del panel, y los
+*default privileges* iban a seguir concediendo cada tabla nueva. Por eso
+se cierra por abajo, con una migración.
 
 ---
 
 # Bloque A — Producción
 
-## A1. Apagar la Data API ✅ (hecho el 06/11)
+## A1. La Data API ✅ (verificado el 06/11: ya estaba apagada)
 
-**Dónde:** Supabase de producción → Project Settings → Data API →
-*Enable Data API* en off.
+**Dónde:** Supabase de producción → Project Settings → Data API.
 
-Cierra el camino HTTP en el acto. Es seguro: la aplicación tiene 14
-llamadas a `.auth` y 1 a `.storage` —endpoints distintos, `/auth/v1` y
-`/storage/v1`— y **ninguna** a la Data API.
+Confirmado en off, y así tiene que quedar. Es lo correcto: la
+aplicación tiene 14 llamadas a `.auth` y 1 a `.storage` —endpoints
+distintos, `/auth/v1` y `/storage/v1`— y **ninguna** a la Data API.
 
 El cartel «No schemas can be queried» es esperado y, para esta
 aplicación, inofensivo.
+
+Que estuviera apagada es lo que hizo que los permisos de `anon` no
+fueran alcanzables desde afuera. Lo que A2 agrega es que dejen de
+depender de este toggle.
 
 ## A2. Desplegar
 
