@@ -123,8 +123,9 @@ Devuelve ocho filas. Las seis primeras tienen que dar **0**. Las dos
 
 ### Forma 2 — desde tu máquina
 
-Sólo si ya tenés el proyecto clonado y `npm install` hecho. Con un
-archivo `.env` en la raíz que tenga **una sola línea**:
+Necesita el proyecto instalado: ver
+**`preparar-la-maquina-windows.md`**. Con un archivo `.env` en la raíz
+que tenga **una sola línea**:
 
 ```
 DATABASE_URL=<la cadena de conexión de producción>
@@ -326,7 +327,10 @@ Preview: volvé a B5.
 
 ## B7. Sembrar los datos demo
 
-**Dónde:** tu máquina.
+**Dónde:** tu máquina. Si todavía no la preparaste, empezá por
+**`preparar-la-maquina-windows.md`** — este paso no se puede hacer
+desde el panel de Supabase: el seed pasa por los servicios reales del
+producto y crea las cuentas en Supabase Auth.
 
 `.env` con **esto y sólo esto**:
 
