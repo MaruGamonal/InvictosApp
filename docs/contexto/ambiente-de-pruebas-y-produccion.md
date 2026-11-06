@@ -92,7 +92,7 @@ En un ambiente desplegado y sano dice:
 |---|---|
 | permisos de anon/authenticated | `OK — cero permisos (cerrado)` |
 | secreto host_canonico | `OK — apunta a https://www.invicta.com.ar` |
-| tareas programadas | `... => lee host_canonico (OK)` |
+| tareas programadas | `confirmar-resultados-vencidos => lee host_canonico (OK)`, lo mismo `recalcular-score`, y `limpiar-intentos-limitados => no sale a la red (SQL local)` |
 | migración de permisos | `OK — aplicada DD/MM HH:MM` |
 
 La misma consulta sirve para el ambiente de pruebas (paso B8).

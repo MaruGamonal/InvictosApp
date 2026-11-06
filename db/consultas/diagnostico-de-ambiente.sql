@@ -46,10 +46,19 @@ begin
   if to_regclass('cron.job') is null then
     valor := 'sin pg_cron (no es un proyecto de Supabase)';
   else
+    -- Tres casos, no dos. "No menciona el dominio" no es lo mismo que
+    -- "lee el Vault": `limpiar-intentos-limitados` es un DELETE local
+    -- que no sale a la red, y la versión anterior de esto lo etiquetaba
+    -- como OK por descarte. Habría dicho lo mismo de una tarea
+    -- apuntando a otro host escrito a fuego.
     execute $q$ select string_agg(jobname || ' => ' ||
-                  case when command like '%invicta.com.ar%'
-                       then 'HOST ESCRITO ADENTRO (falta desplegar)'
-                       else 'lee host_canonico (OK)' end, '  |  ' order by jobname)
+                  case
+                    when command not ilike '%net.http_post%'
+                      then 'no sale a la red (SQL local)'
+                    when command ilike '%host_canonico%'
+                      then 'lee host_canonico (OK)'
+                    else 'HOST ESCRITO ADENTRO (falta desplegar)'
+                  end, '  |  ' order by jobname)
                   from cron.job $q$ into valor;
     valor := coalesce(valor, 'ninguna agendada');
   end if;
