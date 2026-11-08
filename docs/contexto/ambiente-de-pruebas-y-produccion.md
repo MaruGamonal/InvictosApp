@@ -203,8 +203,27 @@ destildarlas deja el proyecto cerrado desde el minuto cero.
 - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `service_role` → `SUPABASE_SERVICE_ROLE_KEY` (**secreta**)
 
-Y de **Project Settings → Database → Connection string → URI**, la
-cadena con la contraseña puesta → `DATABASE_URL`.
+Y las **cadenas de conexión**: botón **Connect**, arriba de todo en la
+página del proyecto. Ahí hay tres y **no son equivalentes** — hay que
+anotar dos:
+
+| La que dice | Puerto | Para qué |
+|---|---|---|
+| **Transaction pooler** | `6543` | La aplicación (`DATABASE_URL`) |
+| **Session pooler** | `5432` | Las migraciones (`DATABASE_URL_MIGRACIONES`) y tu `.env` local |
+| ~~Direct connection~~ | `5432` | **No usar.** En los proyectos nuevos resuelve sólo por IPv6, y ni el build de Vercel ni tu máquina lo hablan |
+
+Las dos traen `[YOUR-PASSWORD]`: reemplazalo por la contraseña, los
+corchetes incluidos.
+
+> **Por qué dos.** La aplicación corre en funciones sin servidor y
+> necesita el modo transacción, donde el lugar en el pooler se ocupa
+> sólo mientras dura una consulta; con el modo sesión se agota el cupo
+> y ya causó una caída real en producción. Las migraciones, en cambio,
+> **no pueden** ir por modo transacción: `node-pg-migrate` se protege
+> de dos despliegues simultáneos con un advisory lock, que es de
+> sesión, y por el pooler se tomaría en una conexión y se liberaría en
+> otra — dejando el despliegue siguiente colgado.
 
 > Las claves siguen ahí aunque la Data API esté apagada: `anon` y
 > `service_role` son claves de Auth y Storage también.
@@ -290,7 +309,8 @@ Production y Development).
 | Variable | Valor |
 |---|---|
 | `NEXT_PUBLIC_AMBIENTE` | `pruebas` |
-| `DATABASE_URL` | la de B1 |
+| `DATABASE_URL` | la del **Transaction pooler**, puerto `6543` |
+| `DATABASE_URL_MIGRACIONES` | la del **Session pooler**, puerto `5432` |
 | `NEXT_PUBLIC_SUPABASE_URL` | la de B1 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la de B1 |
 | `SUPABASE_SERVICE_ROLE_KEY` | la de B1 |
@@ -299,6 +319,11 @@ Production y Development).
 | `RESEND_API_KEY` | la misma de producción, o una de prueba |
 | `CORREO_REMITENTE` | el mismo de producción |
 | `SENTRY_DSN` | uno aparte, o dejarla sin definir |
+
+**Las dos cadenas son obligatorias.** Si falta
+`DATABASE_URL_MIGRACIONES`, el despliegue **falla en el build** con un
+mensaje que lo explica — no se rompe en silencio, pero te traba hasta
+que la cargues.
 
 **`CRON_SECRET` tiene que ser idéntico al del Vault de B3.** Son los dos
 lados de la misma cerradura: la base lo manda en la cabecera y la
@@ -336,11 +361,15 @@ producto y crea las cuentas en Supabase Auth.
 
 ```
 NEXT_PUBLIC_AMBIENTE=pruebas
-DATABASE_URL=<la de B1>
+DATABASE_URL=<la del Session pooler, puerto 5432>
 NEXT_PUBLIC_SUPABASE_URL=<la de B1>
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<la de B1>
-SUPABASE_SERVICE_ROLE_KEY=<la de B1>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<la publishable, de B1>
+SUPABASE_SERVICE_ROLE_KEY=<la secreta, de B1>
 ```
+
+> Acá va la del **Session pooler**, no la de transacción: `migrate:up`
+> necesita la sesión fija del advisory lock, igual que el despliegue. Y
+> el seed anda bien por ahí.
 
 ```bash
 npm run migrate:up      # si el deploy de la rama ya corrió, no hace nada

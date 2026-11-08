@@ -121,7 +121,7 @@ de Supabase de pruebas:
 ```powershell
 @"
 NEXT_PUBLIC_AMBIENTE=pruebas
-DATABASE_URL=la-cadena-de-conexion-de-pruebas
+DATABASE_URL=la-cadena-del-session-pooler-puerto-5432
 NEXT_PUBLIC_SUPABASE_URL=la-url-del-proyecto-de-pruebas
 NEXT_PUBLIC_SUPABASE_ANON_KEY=la-anon-key-de-pruebas
 SUPABASE_SERVICE_ROLE_KEY=la-service-role-de-pruebas
