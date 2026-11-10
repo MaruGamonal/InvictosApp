@@ -437,19 +437,41 @@ pero el día que abras una rama para probar algo, ese preview también va
 a escribir en la base de pruebas, que es la que están mirando los
 dueños. Poné `pruebas` en las once.
 
-| Variable | Valor |
-|---|---|
-| `NEXT_PUBLIC_AMBIENTE` | `pruebas` |
-| `DATABASE_URL` | la del **Transaction pooler**, puerto `6543` |
-| `DATABASE_URL_MIGRACIONES` | la del **Session pooler**, puerto `5432` |
-| `NEXT_PUBLIC_SUPABASE_URL` | la de B1 |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la de B1 |
-| `SUPABASE_SERVICE_ROLE_KEY` | la de B1 |
-| `NEXT_PUBLIC_SITE_URL` | `https://pruebas.invicta.com.ar` |
-| `CRON_SECRET` | el de B3, **idéntico** |
-| `RESEND_API_KEY` | la misma de producción, o una de prueba |
-| `CORREO_REMITENTE` | el mismo de producción, **entero**: `INVICTA <avisos@invicta.com.ar>` |
-| `SENTRY_DSN` | uno aparte, o dejarla sin definir |
+| Variable | Tipo | Valor |
+|---|---|---|
+| `NEXT_PUBLIC_AMBIENTE` | Config | `pruebas` |
+| `DATABASE_URL` | **Secret** | la del **Transaction pooler**, puerto `6543` |
+| `DATABASE_URL_MIGRACIONES` | **Secret** | la del **Session pooler**, puerto `5432` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Config | la de B1 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Config | la de B1 |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | la de B1 |
+| `NEXT_PUBLIC_SITE_URL` | Config | `https://pruebas.invicta.com.ar` |
+| `CRON_SECRET` | **Secret** | el de B3, **idéntico** |
+| `RESEND_API_KEY` | **Secret** | la misma de producción, o una de prueba |
+| `CORREO_REMITENTE` | Config | el mismo de producción, **entero**: `INVICTA <avisos@invicta.com.ar>` |
+| `SENTRY_DSN` | — | dejarla sin definir |
+
+**La regla del tipo es la misma que la del nombre.** Vercel pide elegir
+entre `Secret` —que no se puede volver a leer— y `Config` —que sí—, y
+avisa si marcás `Secret` algo que empieza con `NEXT_PUBLIC_`. Tiene
+razón, y conviene entender por qué: Next.js **escribe el valor de toda
+variable `NEXT_PUBLIC_` adentro del JavaScript que baja al navegador**.
+Marcarla `Secret` no la esconde de nadie; sólo te impide a vos volver a
+leerla desde el panel, mientras cualquiera la ve en el bundle. Si una
+variable `NEXT_PUBLIC_` llevara algo que no puede ser público, el
+problema no sería el tipo en Vercel: sería que ese dato no va en una
+variable `NEXT_PUBLIC_`.
+
+Las cuatro `NEXT_PUBLIC_` de esta tabla son públicas a propósito: el
+nombre del ambiente, la URL del proyecto de Supabase, la URL del sitio
+y la anon key, que Supabase diseñó para viajar en el navegador. Las
+cinco `Secret` son las que llevan una contraseña o una llave: las dos
+cadenas de conexión, la service_role, el `CRON_SECRET` y la de Resend.
+
+> Que la anon key sea pública no quiere decir que no haga nada: es la
+> llave con la que cualquiera entraría por la Data API. Por eso está
+> apagada (A1) y por eso la migración del bloque A le saca todos los
+> permisos a `anon`. La llave es pública; la puerta está cerrada.
 
 **Las dos cadenas son obligatorias.** Si falta
 `DATABASE_URL_MIGRACIONES`, el despliegue **falla en el build** con un
