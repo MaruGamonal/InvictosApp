@@ -17,7 +17,14 @@
   --ink-700: #2c383f;
   --ink-600: #414e57;
   --gris-secundario: #5c6a74;
-  --gris-terciario: #7e8b95;
+  /* Más oscuro que el #7e8b95 del handoff: ése daba 3.49:1 sobre blanco
+     y 3.11:1 sobre `--fondo-sutil`, y se usa como color de texto en ~40
+     lugares (títulos de sección, ayudas de campos, encabezados de
+     tabla), casi siempre a 11–13px. #616d77 da 5.30:1 sobre blanco y
+     4.71:1 sobre `--fondo-sutil`, el fondo claro más oscuro donde
+     aparece: pasa AA en todos. Sigue siendo distinguible del
+     secundario (#5c6a74) por tamaño y peso, que es como se usa. */
+  --gris-terciario: #616d77;
   --gris-claro-sobre-oscuro: #a9b4bc;
   --borde-neutro: #cbd3d8;
   --borde-sutil: #e3e8eb;
@@ -27,6 +34,9 @@
 
   /* Acento único de marca — ni verde ni éxito ni rojo de error (`06`, D-74) */
   --acento: #00a8cc;
+  /* Para texto, íconos y bordes de foco sobre fondo claro: `--acento`
+     ahí da 2.81:1 y no pasa ni para texto grande. `--acento` queda para
+     rellenos (con `--acento-texto-sobre`) y para usar sobre oscuro. */
   --acento-oscuro: #007d99;
   --acento-texto-sobre: var(--ink-900);
 
@@ -191,4 +201,36 @@ body,
   50% {
     opacity: 0.35;
   }
+}
+
+/**
+ * Área táctil mínima para enlaces y botones de texto sueltos ("← Volver",
+ * "Ver tabla", "Subir escudo"…): 44px de alto, con el texto centrado.
+ * Medían entre 12 y 19px de alto —menos que los 24 de WCAG 2.5.8— y el
+ * organizador usa la app parado, con una mano (`05`, 2.1; `08`, 6.5:
+ * "áreas táctiles nunca menores al mínimo accesible").
+ *
+ * Los módulos la toman con `composes: area-tactil from global;`, así la
+ * regla vive en un solo lugar. Un enlace dentro de un párrafo no la
+ * necesita: WCAG exceptúa los que van en línea con el texto.
+ */
+.area-tactil {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/**
+ * Checkboxes y radios nativos: 24px (WCAG 2.5.8) en vez de los 13 del
+ * navegador, y con el acento en lugar del azul del sistema. Ningún
+ * componente los estiliza por su cuenta; los que se ven como chips o
+ * filas usan su propio marcado.
+ */
+input[type='checkbox'],
+input[type='radio'] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--acento-oscuro);
 }

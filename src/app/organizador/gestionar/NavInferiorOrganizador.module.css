@@ -35,6 +35,6 @@
 }
 
 .pestanaActiva {
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font-weight: 700;
 }

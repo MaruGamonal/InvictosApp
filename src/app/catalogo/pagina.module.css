@@ -51,3 +51,8 @@
   border-radius: 6px;
   border: 1px solid var(--borde-sutil);
 }
+
+/* Misma contención que la tabla real: scrollea la tabla, no la página. */
+.tablaEjemplo {
+  overflow-x: auto;
+}

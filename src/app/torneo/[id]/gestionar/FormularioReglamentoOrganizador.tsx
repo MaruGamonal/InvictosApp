@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 export interface ReglamentoVigenteProps {
   numeroVersion: number;
@@ -17,6 +18,7 @@ export interface FormularioReglamentoOrganizadorProps {
 
 function formatearFecha(iso: string): string {
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
     day: 'numeric',
     month: 'long',
     year: 'numeric',

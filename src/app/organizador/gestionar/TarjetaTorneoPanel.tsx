@@ -4,8 +4,11 @@ import { Badge } from '@/components/Badge';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import type { TorneoPanelOrganizador } from '@/services/organizadores/obtenerPanelOrganizador';
 import styles from './TarjetaTorneoPanel.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 const FORMATO_FECHA = new Intl.DateTimeFormat('es-AR', {
+  timeZone: ZONA_HORARIA,
+  hourCycle: 'h23',
   weekday: 'short',
   day: 'numeric',
   month: 'numeric',
@@ -59,7 +62,9 @@ export function TarjetaTorneoPanel({ torneo }: { torneo: TorneoPanelOrganizador 
             <div
               className={styles.progresoBarra}
               style={{
-                width: `${Math.min(100, (torneo.progreso.fechaActual / torneo.progreso.fechaTotal) * 100)}%`,
+                // Fechas completas, no la fecha en curso: estar en la
+                // fecha 1 sin nada jugado no es un tercio del torneo.
+                width: `${Math.min(100, (torneo.progreso.fechasCompletas / torneo.progreso.fechaTotal) * 100)}%`,
               }}
             />
           </div>

@@ -1,85 +1,102 @@
+/*
+ * Tabla de posiciones (`08`, 11.4 y 11.10).
+ *
+ * Once columnas no entran en un teléfono. En vez de esconder el nombre
+ * del equipo —que es lo que hacía la tabla antes: sólo el escudo, y
+ * todos los equipos sin escudo se veían iguales— se fijan las dos
+ * cosas que la gente busca: **quién** (posición y equipo, a la
+ * izquierda) y **cuántos puntos** (a la derecha). Lo que scrollea
+ * horizontal, dentro de `.tabla` de la página, es el detalle del medio.
+ * En una pantalla ancha entra todo y no scrollea nada (`08`, 9).
+ *
+ * Las celdas fijas necesitan fondo propio: si no, las columnas que
+ * pasan por debajo se ven a través.
+ */
 .fila {
+  --ancho-posicion: 28px;
+  --ancho-equipo-minimo: 120px;
+  --ancho-numero: 28px;
+  --ancho-puntos: 36px;
+  --hueco: 3px;
+
   display: grid;
-  grid-template-columns: 28px 36px repeat(7, 32px);
+  grid-template-columns:
+    var(--ancho-posicion) minmax(var(--ancho-equipo-minimo), 1fr)
+    repeat(8, var(--ancho-numero)) var(--ancho-puntos);
+  column-gap: var(--hueco);
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  /*
+   * Todas las filas miden lo mismo: cada fila es su propia grilla, así
+   * que con un ancho que dependiera del contenido (`max-content`) cada
+   * una calcularía otra columna de equipo y las columnas dejarían de
+   * alinearse entre filas. El mínimo es la suma de las columnas con el
+   * equipo en su mínimo: 438px, que entra justo en la tarjeta a 480px
+   * de pantalla (440px útiles) — ahí no scrollea nada. Más angosto,
+   * scrollea el detalle del medio.
+   */
+  width: 100%;
+  min-width: calc(
+    var(--ancho-posicion) + var(--ancho-equipo-minimo) + 8 * var(--ancho-numero) +
+      var(--ancho-puntos) + 10 * var(--hueco)
+  );
+  min-height: 44px;
+  padding: 6px 0;
   background: var(--color-superficie);
-  border-left: 3px solid transparent;
   border-bottom: 1px solid var(--borde-sutil);
   font-family: var(--fuente-texto);
   font-size: 13px;
 }
 
-.clasifica {
-  border-left-color: var(--acento);
+.posicion,
+.equipo,
+.puntos {
+  position: sticky;
+  z-index: 1;
+  /* Mismo fondo que la fila, y estirado a su alto, para tapar lo que
+     scrollea por debajo. */
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  background: inherit;
 }
 
 .posicion {
+  left: 0;
+  justify-content: center;
   font-weight: 700;
   color: var(--color-texto-secundario);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Clasifica: la marca va en la celda fija, no en el borde de la fila —
+   la fila entera se desplaza al scrollear y la marca se iría con ella. */
+.clasifica .posicion {
+  box-shadow: inset 3px 0 0 var(--acento);
 }
 
 .equipo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: calc(var(--ancho-posicion) + var(--hueco));
+  gap: 8px;
+  min-width: 0;
+  padding-right: 6px;
+  /* La línea que separa lo fijo de lo que scrollea. */
+  box-shadow: 1px 0 0 var(--borde-sutil);
 }
 
-/* Solo el escudo en la fila (`08`, 11.10) — el nombre del equipo, en
-   una tabla de muchas columnas numéricas angostas, no tenía espacio
-   digno: se pisaba con el resto. El nombre completo sigue accesible
-   al tocar/pasar el mouse, como tooltip flotante. */
-.botonEquipo {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.tooltipNombre {
-  position: absolute;
-  top: calc(100% + 6px);
-  /* Alineado a la izquierda del escudo, no centrado: el escudo suele
-     estar cerca del borde izquierdo de la tabla, y esa tabla scrollea
-     horizontal (`08`, 11.10) — no hay cómo scrollear hacia la
-     izquierda del origen, así que centrar recortaría el tooltip ahí. */
-  left: 0;
-  max-width: min(70vw, 260px);
-  background: var(--ink-900);
-  color: var(--blanco);
-  font: 600 12px/1.3 var(--fuente-texto);
-  padding: 4px 8px;
-  border-radius: 6px;
-  white-space: normal;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s ease;
-  z-index: 5;
-}
-
-.botonEquipo:hover .tooltipNombre,
-.botonEquipo:focus .tooltipNombre {
-  opacity: 1;
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+.nombreEquipo {
+  min-width: 0;
+  font-weight: 600;
+  color: var(--color-texto);
+  line-height: 1.25;
+  /* Dos líneas antes que una con elipsis: los nombres de equipo
+     amateur empiezan parecido ("Deportivo…", "Club…") y lo que los
+     distingue suele estar al final. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  overflow-wrap: anywhere;
 }
 
 .numero {
@@ -87,6 +104,8 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
   color: var(--color-texto-secundario);
+  /* `abbr` en el encabezado: sin el subrayado punteado del navegador. */
+  text-decoration: none;
 }
 
 .marcaPresentacion {
@@ -102,14 +121,19 @@
 }
 
 .puntos {
-  text-align: center;
+  right: 0;
+  justify-content: center;
   font-weight: 700;
+  font-size: 15px;
   color: var(--color-texto);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
+  text-decoration: none;
+  box-shadow: -1px 0 0 var(--borde-sutil);
 }
 
 .encabezado {
+  min-height: 36px;
   background: var(--ink-900);
   color: var(--identidad-texto-secundario);
   font-weight: 600;
@@ -119,6 +143,16 @@
   border-bottom: none;
 }
 
-.encabezado .puntos {
+.encabezado .posicion,
+.encabezado .equipo,
+.encabezado .numero {
   color: inherit;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.encabezado .puntos {
+  font-size: 11px;
+  color: var(--identidad-texto);
+  box-shadow: none;
 }

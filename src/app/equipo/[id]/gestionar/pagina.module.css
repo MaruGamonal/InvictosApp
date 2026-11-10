@@ -41,7 +41,7 @@
   padding: 12px 14px;
   text-align: center;
   font: 700 13px/1 var(--fuente-texto);
-  color: var(--acento);
+  color: var(--acento-oscuro);
   text-decoration: none;
 }
 
@@ -55,7 +55,7 @@
   border-radius: var(--radio-tarjeta);
   padding: 14px;
   font: 700 14px/1 var(--fuente-texto);
-  color: var(--acento);
+  color: var(--acento-oscuro);
   text-decoration: none;
 }
 
@@ -147,11 +147,12 @@
 }
 
 .enlaceChico {
+  composes: area-tactil from global;
   align-self: flex-start;
   background: none;
   border: none;
   padding: 0;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font: 600 13px/1 var(--fuente-texto);
   cursor: pointer;
 }
@@ -255,10 +256,11 @@
 }
 
 .enlaceEscudo {
+  composes: area-tactil from global;
   background: none;
   border: none;
   padding: 0;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font: 700 13px/1 var(--fuente-texto);
   cursor: pointer;
 }

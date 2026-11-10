@@ -37,6 +37,7 @@
 }
 
 .enlaceIngresar {
+  composes: area-tactil from global;
   flex: none;
   font-weight: 600;
   font-size: 12px;

@@ -2,6 +2,7 @@ import { Badge } from './Badge';
 import { Escudo } from './Escudo';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import styles from './TarjetaTorneoDescubrimiento.module.css';
+import { ZONA_DE_FECHAS_DE_CALENDARIO } from '@/lib/zonaHoraria';
 
 export interface TarjetaTorneoDescubrimientoProps {
   nombre: string;
@@ -20,7 +21,11 @@ export interface TarjetaTorneoDescubrimientoProps {
 
 function formatearFecha(iso: string | null): string | null {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+  return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_DE_FECHAS_DE_CALENDARIO,
+    day: 'numeric',
+    month: 'long',
+  });
 }
 
 /**

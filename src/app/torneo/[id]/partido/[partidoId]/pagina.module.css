@@ -470,3 +470,25 @@
   opacity: 0.6;
   cursor: default;
 }
+
+.estado {
+  display: flex;
+  justify-content: center;
+}
+
+/* Se movió (`06`, D-30): la fecha de antes, marcada como cambio. */
+.dato dd.fechaOriginal {
+  color: var(--advertencia-texto);
+  font-weight: 600;
+}
+
+/* El título del partido, para lector de pantalla: a la vista ya lo dicen
+   los dos equipos del marcador. */
+.soloLector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

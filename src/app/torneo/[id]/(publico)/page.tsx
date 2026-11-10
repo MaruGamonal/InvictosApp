@@ -10,6 +10,7 @@ import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerFichaOFallar, obtenerReglamentosCacheados } from '../_datos';
 import styles from './pagina.module.css';
+import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
 /**
  * UC-23 — La ficha del torneo (`10`, sección 5): **la ruta más
@@ -37,11 +38,8 @@ export async function generateMetadata({
   return {
     title: conNombreProducto(ficha.nombre),
     description: descripcion,
-    openGraph: {
-      title: ficha.nombre,
-      description: descripcion,
-      images: ficha.imagenUrl ? [{ url: ficha.imagenUrl }] : undefined,
-    },
+    // La imagen la pone `opengraph-image.tsx`, con o sin imagen propia.
+    openGraph: { title: ficha.nombre, description: descripcion },
   };
 }
 
@@ -54,6 +52,7 @@ const FORMATO_MONEDA = new Intl.NumberFormat('es-AR', {
 function formatearFecha(iso: string | null): string | null {
   if (!iso) return null;
   return new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: ZONA_HORARIA,
     day: 'numeric',
     month: 'long',
     year: 'numeric',

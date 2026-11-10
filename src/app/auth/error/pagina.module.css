@@ -16,6 +16,7 @@
 }
 
 .enlace {
+  composes: area-tactil from global;
   margin-top: 8px;
   font-weight: 700;
   color: var(--acento-oscuro);

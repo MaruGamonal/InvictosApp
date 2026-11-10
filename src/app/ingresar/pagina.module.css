@@ -104,7 +104,7 @@
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus {
-  border: 2px solid var(--acento);
+  border: 2px solid var(--acento-oscuro);
   padding: 12px 13px;
 }
 
@@ -123,10 +123,11 @@
 }
 
 .enlaceEscudo {
+  composes: area-tactil from global;
   background: none;
   border: none;
   padding: 0;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font: 700 13px/1 var(--fuente-texto);
   cursor: pointer;
 }
@@ -154,7 +155,7 @@
   border-radius: var(--radio-boton);
   padding: 14px;
   font: 700 14px/1 var(--fuente-texto);
-  color: var(--acento);
+  color: var(--acento-oscuro);
   cursor: pointer;
 }
 
@@ -167,7 +168,7 @@
   background: none;
   border: none;
   padding: 8px;
-  color: var(--acento);
+  color: var(--acento-oscuro);
   font: 700 14px/1 var(--fuente-texto);
   cursor: pointer;
   text-align: center;
@@ -222,6 +223,7 @@
 }
 
 .enlaceChico {
+  composes: area-tactil from global;
   font-weight: 600;
   font-size: 13px;
   color: var(--acento-oscuro);
@@ -235,6 +237,11 @@
 }
 
 .textoCentrado a {
+  /* Va al final de una línea corta, no dentro de un párrafo: necesita
+     su área táctil (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--acento-oscuro);
   font-weight: 600;
   text-decoration: none;

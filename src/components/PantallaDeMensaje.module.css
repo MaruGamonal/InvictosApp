@@ -1,0 +1,81 @@
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+/* La banda de marca, con el color del modo jugador: es lo que ve
+   cualquiera, con o sin sesión (`cabecerasPorModo`). */
+.cabecera {
+  background: var(--cabecera-jugador);
+  color: var(--identidad-texto);
+  padding: 18px var(--espacio-pantalla-x) 16px;
+}
+
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+  padding: 48px var(--espacio-pantalla-x);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.texto {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-texto-secundario);
+}
+
+.acciones {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Las salidas: `EnlaceDeSalida` y `BotonDeSalida`. */
+.principal,
+.secundaria {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.principal {
+  border: none;
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+}
+
+.secundaria {
+  border: 1px solid var(--borde-neutro);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+
+.principal:focus-visible,
+.secundaria:focus-visible {
+  outline: 2px solid var(--acento-oscuro);
+  outline-offset: 2px;
+}

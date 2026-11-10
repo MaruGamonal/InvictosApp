@@ -20,6 +20,7 @@
 }
 
 .enlaceTabla {
+  composes: area-tactil from global;
   font: 700 12px/1 var(--fuente-texto);
   color: var(--acento-oscuro);
   text-decoration: none;
