@@ -605,10 +605,51 @@ sola vez al terminar B6.
 > **Sin dominio fijo no sirve:** la URL de un Preview cambia en cada
 > deploy y no se la podés pasar a nadie.
 
-**Comprobación:** abrís `https://pruebas.invicta.com.ar` y carga, con
-**una banda amarilla arriba** que dice «Ambiente de pruebas — los datos
-no son reales». Si la banda no está, `NEXT_PUBLIC_AMBIENTE` no quedó en
-Preview: volvé a B5.
+**Comprobación — en una ventana de incógnito.** Abrís
+`https://pruebas.invicta.com.ar` y carga, con **una banda amarilla
+arriba** que dice «Ambiente de pruebas — los datos no son reales». Si
+la banda no está, `NEXT_PUBLIC_AMBIENTE` no quedó en Preview: volvé a
+B5.
+
+**Que sea de incógnito no es un detalle.** En tu navegador normal tenés
+sesión iniciada en Vercel, y eso alcanza para pasar la protección de
+despliegues del paso siguiente. Comprobado así, el paso da «anda» y
+después no anda para nadie más. Es el único punto de toda la guía donde
+el resultado depende de quién mira.
+
+## B6.1. Apagar la protección de despliegues
+
+**Dónde:** Settings → Deployment Protection.
+
+Vercel protege las vistas previas por defecto con **Vercel
+Authentication**: quien entra sin sesión en tu equipo de Vercel es
+redirigido a `vercel.com/sso-api` y cae en un login. La rama `pruebas`
+es una vista previa, así que el ambiente entero queda detrás de esa
+puerta — y los dueños de los torneos no tienen cuenta en tu equipo.
+
+Dos formas, de mejor a peor:
+
+1. **Deployment Protection Exceptions** (en todos los planes, sin
+   costo). Agregás `pruebas.invicta.com.ar` a la lista de excepciones.
+   Sólo ese dominio queda público; las URLs generadas
+   (`...vercel.app`) de esa misma rama siguen protegidas, y cualquier
+   otra rama también.
+2. **Apagar Vercel Authentication** entera. Deja públicas todas las
+   vistas previas. Hoy eso es casi teórico —cualquier otra rama no
+   tiene `DATABASE_URL` en su alcance, así que `migrate:deploy` corta
+   el build y no llega a existir un despliegue que exponer— pero es más
+   de lo necesario.
+
+Tomá la 1 si el panel te la ofrece; la 2 si no.
+
+> Que el ambiente quede público es el objetivo, no un efecto
+> secundario: se lo vas a pasar a gente que no tiene cuenta en Vercel.
+> Lo que lo hace aceptable es que los datos de ahí son inventados. No
+> cargues nada real en pruebas.
+
+**Comprobación:** de nuevo en incógnito, `https://pruebas.invicta.com.ar`
+muestra INVICTA con la banda amarilla, sin pasar por ningún login de
+Vercel.
 
 ## B7. Sembrar los datos demo ✅ (10/11 — 24 chequeos pasados)
 
@@ -673,9 +714,12 @@ torneos con `[DEMO]`.
 
 ## B8. La comprobación final, la más barata ✅ (10/11)
 
-Las dos pestañas, una al lado de la otra:
+Las dos pestañas, una al lado de la otra, **en una ventana de
+incógnito** (por lo de B6.1: con tu sesión de Vercel puesta, la de
+pruebas abre aunque esté protegida para todos los demás):
 
-- `https://pruebas.invicta.com.ar` → **se ve la banda amarilla**.
+- `https://pruebas.invicta.com.ar` → **se ve la banda amarilla**, y no
+  aparece ningún login de Vercel.
 - `https://www.invicta.com.ar` → **no se ve ninguna banda**.
 
 Si las dos se ven iguales, algo quedó mal en B5 y hay que arreglarlo
