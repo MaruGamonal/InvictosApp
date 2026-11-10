@@ -290,14 +290,29 @@ Tiene que devolver **las dos filas**.
 
 ## B4. Crear la rama
 
-**Dónde:** tu máquina.
+**Dónde:** tu máquina (PowerShell, en la carpeta del proyecto).
 
-```bash
-git checkout <la-rama-por-defecto>
+La rama por defecto del repositorio hoy es
+`claude/invictos-proyecto-analysis-211omo` — es la única que existe, y
+es la que Vercel despliega como producción. De ahí sale `pruebas`.
+
+```powershell
+cd ~\InvictosApp
+git checkout claude/invictos-proyecto-analysis-211omo
 git pull
 git checkout -b pruebas
 git push -u origin pruebas
 ```
+
+**Comprobación:** `git branch` muestra `* pruebas`, y el `push` termina
+con `branch 'pruebas' set up to track 'origin/pruebas'`.
+
+> **Por qué una rama aparte.** Vercel despliega la rama por defecto como
+> **Production** y cualquier otra rama como **Preview**. Las variables
+> que cargás en B5 están tildadas sólo en `Preview`, así que es la rama
+> `pruebas` —y no producción— la que va a tomar el Supabase de pruebas y
+> el cartel amarillo. Mientras no toques esta rama, producción sigue
+> exactamente como está.
 
 ## B5. Variables en Vercel
 
