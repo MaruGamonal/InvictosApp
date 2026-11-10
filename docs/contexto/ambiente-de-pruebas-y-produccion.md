@@ -409,10 +409,33 @@ con `branch 'pruebas' set up to track 'origin/pruebas'`.
 
 ## B5. Variables en Vercel
 
-**Dónde:** proyecto de Vercel → Settings → Environment Variables.
+**Dónde:** **el mismo** proyecto de Vercel que ya tenés, el de INVICTA
+→ Settings → Environment Variables.
+
+**No se crea un proyecto nuevo en Vercel.** Un proyecto de Vercel ya
+tiene dos ambientes adentro: despliega la rama por defecto como
+**Production** y cualquier otra rama como **Preview**. El ambiente de
+pruebas es la rama `pruebas` corriendo como Preview, con estas
+variables tildadas sólo ahí. Lo que separa los dos ambientes no es el
+proyecto de Vercel: es el proyecto de **Supabase**, que sí es nuevo, y
+estas variables que lo apuntan.
+
+Un proyecto aparte en Vercel significaría dos proyectos siguiendo el
+mismo repositorio, dos listas de variables que se desincronizan, y el
+dominio y los despliegues partidos en dos tableros. No hay nada que
+ganar.
 
 Por cada una: nombre, valor, y **tildar sólo `Preview`** (destildar
 Production y Development).
+
+**Mejor todavía: atalas a la rama.** Al tildar `Preview`, Vercel deja
+poner un nombre de rama en el campo *Git Branch*. Si ponés `pruebas`,
+la variable vale **sólo** para esa rama; si lo dejás vacío, vale para
+**cualquier** rama que no sea la de producción. Con el campo vacío
+funciona igual hoy —`pruebas` es la única rama que no es producción—,
+pero el día que abras una rama para probar algo, ese preview también va
+a escribir en la base de pruebas, que es la que están mirando los
+dueños. Poné `pruebas` en las once.
 
 | Variable | Valor |
 |---|---|
@@ -439,14 +462,26 @@ aplicación lo compara. Si no coinciden, las tareas dan 403.
 
 **Revisá que Production quedó como estaba:** filtrá por `Production` y
 confirmá que `NEXT_PUBLIC_AMBIENTE` **no está**, o está en `produccion`.
-Nunca en `pruebas`.
+Nunca en `pruebas`. Y que `DATABASE_URL` de Production siga apuntando a
+la base de producción.
+
+**Las variables no entran solas:** sólo las toman los despliegues
+**nuevos**. El Preview que Vercel ya construyó al subir la rama en B4
+—el que falló por no tener nada de esto— no se arregla al guardarlas.
+Hay que redesplegar: Deployments → el de la rama `pruebas` → menú `···`
+→ Redeploy. B6 y B7 vienen después, así que si preferís, redesplegá una
+sola vez al terminar B6.
 
 ## B6. El dominio
 
 **Dónde:** Settings → Domains → Add.
 
 1. Agregá `pruebas.invicta.com.ar`.
-2. Cuando pregunte a qué rama, elegí `pruebas`.
+2. **Asignalo a la rama `pruebas`.** Vercel asigna todo dominio nuevo a
+   la rama de producción primero: hay que entrar a `Edit` en el
+   dominio, elegir `Preview` como ambiente y escribir `pruebas` en el
+   campo *Git Branch*. Si esto queda sin hacer, el dominio apunta a
+   producción.
 3. Cargá en tu DNS el registro que Vercel indique (suele ser un `CNAME`
    a `cname.vercel-dns.com`).
 
