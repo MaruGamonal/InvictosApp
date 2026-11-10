@@ -103,6 +103,16 @@ Si (2) no devuelve nada, cargalo a mano y las tareas vuelven a andar:
 select vault.create_secret('https://www.invicta.com.ar', 'host_canonico');
 ```
 
+**Revisá también el SMTP de producción.** Authentication → Emails →
+SMTP Settings: tiene que decir que el SMTP propio está **habilitado**.
+Si está en el remitente de Supabase, los correos de Auth —confirmar
+cuenta y recuperar contraseña— **sólo llegan a los miembros del
+proyecto de Supabase**; a cualquier otra dirección Supabase se niega a
+mandarlos. Es un límite del servicio, no del plan, y no avisa en el
+producto: la persona pide el enlace, la aplicación responde "te lo
+mandamos", y el correo nunca sale. Dos minutos de mirar una pantalla
+contra un problema que no se ve desde adentro.
+
 **Y que el sitio siga sano:** entrá a `www.invicta.com.ar`, iniciá
 sesión y abrí una ficha de torneo. Si el login anda, Auth está bien; si
 se ven las fotos, Storage está bien. Es todo lo que podría haberse roto
@@ -237,6 +247,50 @@ corchetes incluidos.
 - **Site URL**: `https://pruebas.invicta.com.ar`
 - **Redirect URLs**: agregá `https://pruebas.invicta.com.ar/**`
 
+### B2.1 — SMTP propio, **primero**
+
+**Dónde:** Authentication → Emails → SMTP Settings → Enable custom SMTP.
+
+Sin esto, la pantalla de plantillas dice *"Set up custom SMTP to edit
+templates"* y no deja editar nada. No es un capricho del panel: desde el
+3 de junio de 2026 los proyectos nuevos del plan gratuito que usan el
+remitente propio de Supabase **no pueden modificar las plantillas de
+Auth**. Los proyectos viejos conservan las suyas; por eso producción
+tiene las dos con `token_hash` y el proyecto de pruebas, recién creado,
+no te deja ponerlas.
+
+Pero el remitente de Supabase tiene dos límites peores que ese, y los
+dos se levantan con SMTP propio:
+
+| | remitente de Supabase | con SMTP propio |
+|---|---|---|
+| a quién le manda | **sólo a los miembros del proyecto**; cualquier otra dirección falla con *"Email address not authorized"* | a cualquiera |
+| cuántos | 2 por hora | 30 por hora (ajustable en Rate Limits) |
+| plantillas | no se editan (proyectos nuevos, plan gratuito) | se editan |
+
+El de "sólo miembros del proyecto" es el que importa acá: los dueños de
+los torneos no son miembros del proyecto de Supabase, así que cualquier
+correo de Auth que les toque **no les va a llegar**.
+
+Con la misma cuenta de Resend que ya usás para los correos de producto:
+
+| campo | valor |
+|---|---|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` (literal, esa palabra) |
+| Password | tu API key de Resend, la que empieza con `re_` |
+| Sender email | el mismo de `CORREO_REMITENTE` |
+| Sender name | `INVICTA (pruebas)` |
+
+La dirección del remitente tiene que estar en un dominio verificado en
+Resend — si usás el mismo que producción, ya lo está.
+
+**Comprobación:** la pantalla de Templates deja escribir. Si sigue
+diciendo que necesitás SMTP, no quedó guardado.
+
+### B2.2 — Las plantillas
+
 **Dónde:** Authentication → Emails → Templates. Dos plantillas, con
 `token_hash`:
 
@@ -258,6 +312,27 @@ corchetes incluidos.
 
 **Comprobación:** las dos plantillas muestran `token_hash`, y la lista
 de Redirect URLs tiene la línea con `/**`.
+
+### Si decidís abrir pruebas sin SMTP propio
+
+Se puede, porque **las cuentas demo no necesitan ningún correo**: el
+seed las crea ya confirmadas de los dos lados —en Supabase Auth y en
+`usuario.email_confirmado`— y se entra con email y contraseña. Para lo
+que vas a mostrar en el bloque C, alcanza.
+
+Lo que queda roto, para que no te sorprenda:
+
+| flujo | sin SMTP propio |
+|---|---|
+| entrar con una cuenta demo | **anda** (contraseña, sin correo) |
+| verificar una organización | **anda** — ese correo lo escribimos nosotros y sale por Resend, no por Supabase, así que no depende ni de la plantilla ni del remitente |
+| registrar una cuenta nueva | el correo no llega (dirección no autorizada), y si llega, el enlace por defecto cae en `/acceso/confirmar` sin `token_hash` y la pantalla dice **"El enlace está incompleto"** |
+| "Reenviar enlace de confirmación" | lo mismo |
+| "Olvidé mi contraseña" | lo mismo |
+
+Ojo con uno: el seed deja **una cuenta demo sin confirmar** a propósito,
+para poder ver el bloqueo de `verificarCuentaConfirmada`. Si un dueño
+entra con ésa y toca "Reenviar enlace", cae justo en el flujo roto.
 
 ## B3. Cargar los dos secretos del Vault
 
