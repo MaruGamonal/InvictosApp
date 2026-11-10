@@ -157,6 +157,8 @@ function medirEnPagina() {
     const minimo = grande ? 3 : 4.5;
     const detras = fondos(el);
     if (!detras) continue;
+    // WCAG 1.4.3 exceptúa los controles deshabilitados.
+    if (el.closest(':disabled, [aria-disabled="true"]')) continue;
     const peor = Math.min(...detras.map((f) => ratio(color.a < 1 ? mezclar(color, f) : color, f)));
     if (peor < minimo) {
       anotar(
@@ -291,6 +293,14 @@ function medirEnPagina() {
     );
   }
   for (const el of conTexto) {
+    const estilo = getComputedStyle(el);
+    // Oculto a propósito para lector de pantalla (1px, recortado), o
+    // cortado con `line-clamp`, que ya dibuja la elipsis.
+    const soloLector =
+      el.clientWidth <= 1 ||
+      /inset\(50%\)/.test(estilo.clipPath) ||
+      estilo.clip.startsWith('rect(0');
+    if (soloLector || estilo.webkitLineClamp !== 'none') continue;
     if (
       el.scrollWidth > el.clientWidth + 1 &&
       getComputedStyle(el).overflow === 'hidden' &&
@@ -329,7 +339,16 @@ for (const ancho of anchos) {
       estado = r?.status() ?? null;
       await pagina.evaluate(() => document.fonts?.ready);
       if (estado && estado >= 400)
-        hallazgos.push({ severidad: 'alta', regla: 'http', detalle: `Respondió ${estado}.` });
+        hallazgos.push(
+          estado === 404
+            ? {
+                severidad: 'baja',
+                regla: 'http',
+                detalle:
+                  'Respondió 404: correcto si la ruta no existe a propósito; si no, falta la página.',
+              }
+            : { severidad: 'alta', regla: 'http', detalle: `Respondió ${estado}.` },
+        );
       if (!pagina.url().startsWith(base + ruta.split('?')[0])) {
         hallazgos.push({
           severidad: 'baja',
@@ -345,10 +364,33 @@ for (const ancho of anchos) {
         const foco = await pagina.evaluate(() => {
           const el = document.activeElement;
           if (!el || el === document.body) return null;
+          // Lo que dibuja el foco puede ser outline, sombra, un cambio de
+          // borde o de fondo, o el `:focus-within` del contenedor (un
+          // buscador que marca la caja entera). Se compara el elemento y
+          // sus dos ancestros con foco y sin foco.
+          const cadena = [el, el.parentElement, el.parentElement?.parentElement].filter(Boolean);
+          const foto = () =>
+            cadena
+              .map((n) => {
+                const c = getComputedStyle(n);
+                return [
+                  c.outlineStyle,
+                  c.outlineWidth,
+                  c.outlineColor,
+                  c.boxShadow,
+                  c.borderColor,
+                  c.borderWidth,
+                  c.backgroundColor,
+                ].join('|');
+              })
+              .join('#');
+          const conFoco = foto();
           const cs = getComputedStyle(el);
-          const visible =
-            (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) ||
-            cs.boxShadow !== 'none';
+          const conOutline = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0;
+          el.blur();
+          const sinFoco = foto();
+          el.focus();
+          const visible = conOutline || conFoco !== sinFoco;
           return {
             visible,
             etiqueta:

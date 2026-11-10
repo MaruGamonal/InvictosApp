@@ -126,12 +126,49 @@ const REGLAS = [
   },
 ];
 
+/**
+ * Borra los comentarios de bloque conservando los saltos de línea, para
+ * que los números de línea sigan valiendo: un hex citado en un
+ * comentario de varias líneas no es un color usado.
+ */
+function sinComentarios(codigo) {
+  return codigo.replace(/\/\*[\s\S]*?\*\//g, (bloque) => bloque.replace(/[^\n]/g, ' '));
+}
+
+/**
+ * Une cada etiqueta JSX de varias líneas en la línea donde abre, para
+ * que `<img … alt="" />` partido en renglones no parezca sin `alt`.
+ */
+function etiquetasEnUnaLinea(lineas) {
+  return lineas.map((linea, i) => {
+    if (!/<(img|div)\b[^>]*$/.test(linea)) return linea;
+    let completa = linea;
+    for (
+      let j = i + 1;
+      j < lineas.length &&
+      !/>/.test(lineas[j - 1].slice(lineas[j - 1].lastIndexOf('<'))) &&
+      j < i + 30;
+      j++
+    ) {
+      completa += ' ' + lineas[j].trim();
+      if (/>/.test(lineas[j])) break;
+    }
+    return completa;
+  });
+}
+
 for (const archivo of archivos) {
-  const lineas = readFileSync(archivo, 'utf8').split('\n');
+  const codigo = readFileSync(archivo, 'utf8');
+  // Lo que dibuja `next/og` usa estilos inline por obligación: el
+  // dibujante no lee CSS. Ahí `estilo-inline` no es un hallazgo.
+  const esImagenGenerada = /from 'next\/og'/.test(codigo);
+  let lineas = sinComentarios(codigo).split('\n');
+  if (archivo.endsWith('.tsx')) lineas = etiquetasEnUnaLinea(lineas);
   lineas.forEach((texto, i) => {
     if (/^\s*(\/\/|\*|\/\*)/.test(texto)) return; // comentarios
     for (const r of REGLAS) {
       if (!r.aplica(archivo)) continue;
+      if (esImagenGenerada && r.regla === 'estilo-inline') continue;
       const m = texto.match(r.regex);
       if (m && (!r.filtro || r.filtro(m))) anotar(archivo, i + 1, r.severidad, r.regla, r.detalle);
     }
