@@ -536,6 +536,19 @@ que la cargues.
 lados de la misma cerradura: la base lo manda en la cabecera y la
 aplicación lo compara. Si no coinciden, las tareas dan 403.
 
+**Cuidado con las duplicadas.** Si guardás una variable con `Preview`
+y sin rama, y después la volvés a agregar con la rama `pruebas`,
+quedan **dos filas**: una `Preview` suelta y otra `Preview ⑂ pruebas`.
+Vercel no se queja, porque para él son dos alcances distintos. La rama
+`pruebas` toma la atada a la rama —tiene precedencia— así que el
+ambiente anda igual y la duplicada no se nota.
+
+Lo que deja es la fila suelta valiendo para **cualquier otra** rama que
+abras. Borralas: en la lista, filtrá por `Preview`, y de cada par
+borrá la que **no** dice `⑂ pruebas`. Si lo que querías era cambiarle
+la rama a una que ya existe, se hace con `Edit` sobre la fila, no
+agregando otra.
+
 **Revisá que Production quedó como estaba:** filtrá por `Production` y
 confirmá que `NEXT_PUBLIC_AMBIENTE` **no está**, o está en `produccion`.
 Nunca en `pruebas`. Y que `DATABASE_URL` de Production siga apuntando a
