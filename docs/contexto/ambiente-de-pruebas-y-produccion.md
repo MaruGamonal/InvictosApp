@@ -213,6 +213,27 @@ destildarlas deja el proyecto cerrado desde el minuto cero.
 - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `service_role` → `SUPABASE_SERVICE_ROLE_KEY` (**secreta**)
 
+> **Los proyectos nuevos traen llaves con otro formato.** Donde antes
+> había dos JWT largos que empezaban con `eyJ`, ahora hay
+> `sb_publishable_…` y `sb_secret_…`. Son las mismas dos llaves con
+> otra cara, y van en las mismas dos variables:
+>
+> | lo que dice el panel | la variable |
+> |---|---|
+> | `anon` / `publishable` → `sb_publishable_…` | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+> | `secret` → `sb_secret_…` | `SUPABASE_SERVICE_ROLE_KEY` |
+>
+> El nombre de la variable no cambia aunque el panel ya no diga
+> "service_role": lo que importa es qué lee el código. Y el código lo
+> soporta — `@supabase/supabase-js` 2.112.4 y `@supabase/ssr` 0.12.5
+> mandan las llaves nuevas en la cabecera `apikey` en vez de como
+> Bearer, que es lo que el formato nuevo necesita.
+>
+> La que **nunca** va en una variable `NEXT_PUBLIC_` es la
+> `sb_secret_…`: ésa es la que puede todo, y `NEXT_PUBLIC_` la
+> escribiría adentro del bundle del navegador. Hay un test que lo
+> impide, pero no dependas de eso.
+
 Y las **cadenas de conexión**: botón **Connect**, arriba de todo en la
 página del proyecto. Ahí hay tres y **no son equivalentes** — hay que
 anotar dos:
