@@ -226,6 +226,12 @@ anotar dos:
 Las dos traen `[YOUR-PASSWORD]`: reemplazalo por la contraseña, los
 corchetes incluidos.
 
+Es la contraseña que pusiste al **crear** el proyecto, y el panel no la
+vuelve a mostrar nunca. Si no la guardaste: Settings → Database → **Reset
+database password**, que genera una nueva. Hacelo antes de cargar nada,
+porque al resetearla cambian las dos cadenas y habría que volver a
+pegarlas en Vercel.
+
 > **Por qué dos.** La aplicación corre en funciones sin servidor y
 > necesita el modo transacción, donde el lugar en el pooler se ocupa
 > sólo mientras dura una consulta; con el modo sesión se agota el cupo
@@ -375,7 +381,7 @@ select name from vault.decrypted_secrets where name in ('host_canonico','cron_se
 
 Tiene que devolver **las dos filas**.
 
-## B4. Crear la rama
+## B4. Crear la rama ✅ (10/11)
 
 **Dónde:** tu máquina (PowerShell, en la carpeta del proyecto).
 
