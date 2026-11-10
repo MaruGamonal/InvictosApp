@@ -428,7 +428,7 @@ con `branch 'pruebas' set up to track 'origin/pruebas'`.
 > el cartel amarillo. Mientras no toques esta rama, producción sigue
 > exactamente como está.
 
-## B5. Variables en Vercel
+## B5. Variables en Vercel ✅ (10/11 — build verde, esquema aplicado)
 
 **Dónde:** **el mismo** proyecto de Vercel que ya tenés, el de INVICTA
 → Settings → Environment Variables.
