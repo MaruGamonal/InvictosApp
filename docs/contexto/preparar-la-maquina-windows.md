@@ -119,17 +119,37 @@ Para el **ambiente de pruebas** (paso B7), con los valores del proyecto
 de Supabase de pruebas:
 
 ```powershell
-@"
+@'
 NEXT_PUBLIC_AMBIENTE=pruebas
 DATABASE_URL=la-cadena-del-session-pooler-puerto-5432
 NEXT_PUBLIC_SUPABASE_URL=la-url-del-proyecto-de-pruebas
 NEXT_PUBLIC_SUPABASE_ANON_KEY=la-anon-key-de-pruebas
 SUPABASE_SERVICE_ROLE_KEY=la-service-role-de-pruebas
-"@ | Set-Content -Path .env -Encoding utf8
+'@ | Set-Content -Path .env -Encoding utf8
 ```
 
 Pegá eso en PowerShell **con tus valores reemplazados**, de una sola
 vez, y Enter.
+
+Tres cosas de ese comando, que no son adorno:
+
+- **Las cinco líneas del medio son el contenido del archivo, no
+  comandos.** Van adentro del bloque. Pegadas sueltas en PowerShell,
+  cada una da `The term 'NEXT_PUBLIC_AMBIENTE=pruebas' is not
+  recognized as the name of a cmdlet`.
+- **Las comillas son simples** (`@'` para abrir, `'@` para cerrar). Con
+  comillas dobles PowerShell interpreta el `$` como el principio de una
+  variable, y una contraseña de base que tenga un `$` se guardaría
+  cortada —sin error, sin aviso, y el síntoma aparece recién al
+  conectar—.
+- **El `'@` que cierra va pegado al margen izquierdo**, sin espacios
+  adelante. Es un requisito de PowerShell: indentado, no cierra el
+  bloque.
+
+Si preferís no pelear con la consola, `notepad .env` hace lo mismo:
+dice que el archivo no existe, le decís que sí, pegás las cinco líneas
+y guardás con Ctrl+S. Abierto así, el Bloc de notas respeta el nombre y
+no le agrega `.txt`.
 
 **Comprobación:**
 
