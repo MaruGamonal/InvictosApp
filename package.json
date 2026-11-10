@@ -59,6 +59,7 @@
     "pg": "8.23.0",
     "prettier": "3.9.6",
     "typescript": "5.9.3",
+    "vite-node": "3.2.4",
     "vitest": "3.2.7"
   },
   "overrides": {

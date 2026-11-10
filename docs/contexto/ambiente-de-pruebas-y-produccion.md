@@ -1,175 +1,337 @@
-# Salir a producción con un ambiente de pruebas al lado
+# Salir a producción, con un ambiente de pruebas al lado
 
-Paso a paso de lo que hay que hacer **fuera del repositorio**: un sitio
-de pruebas con datos demo para pasarles a los dueños de torneos, y una
-producción que no se contamine.
+Los pasos a ejecutar, en orden. Cada uno dice **qué hacer**, **dónde**, y
+**cómo comprobar que salió bien** antes de pasar al siguiente. Si algo no
+da lo que dice acá, parar: seguir con un paso a medias es lo que después
+cuesta una tarde de encontrar.
 
-Está escrito para seguirlo de arriba abajo, una sola vez. Cada paso dice
-qué hacer, dónde, y **cómo comprobar que salió bien** antes de pasar al
-siguiente. Si algo no da lo que dice acá, parar ahí: seguir con un paso
-a medias es lo que después cuesta una tarde de encontrar.
+Son tres bloques:
 
-La forma elegida: **un solo proyecto de Vercel con dos ramas**.
-Producción sale de la rama por defecto; una rama `pruebas` se despliega
-como Preview, con su propio dominio y sus propias variables, apuntando a
-un Supabase aparte.
+- **A — Producción**: cerrar el agujero de permisos, desplegar y dejarla limpia.
+- **B — Ambiente de pruebas**: Supabase nuevo, Vercel, datos demo.
+- **C — Abrir**: qué les pasás a los dueños.
 
----
-
-## Antes de empezar
-
-Tené a mano:
-
-- Acceso al panel de Supabase (el proyecto de producción, y vas a crear otro).
-- Acceso al proyecto de Vercel.
-- Acceso al DNS de `invicta.com.ar` (para el subdominio de pruebas).
-- El repositorio clonado en tu máquina, con `npm install` hecho.
-
-Y entendé una cosa antes de tocar nada, porque explica media guía:
-
-> **Las tareas programadas no corren en Vercel. Corren adentro de la
-> base de datos**, con `pg_cron`, y le pegan al sitio por HTTP. Por eso
-> cada base necesita saber a qué sitio pegarle. Antes esa dirección
-> estaba escrita en el código; ahora sale de un secreto del Vault de
-> cada proyecto de Supabase. Si no se lo cargás al de pruebas, sus
-> tareas **no hacen nada** — a propósito, para que no le peguen al sitio
-> real.
+Hacé A completo antes de empezar B.
 
 ---
 
-## Paso 0 — Comprobar que producción no está expuesta por la Data API
+## Dos cosas que explican media guía
 
-Antes que nada, porque si está mal es más urgente que todo lo demás.
+**1. Las tareas programadas no corren en Vercel.** Corren adentro de la
+base de datos, con `pg_cron`, y le pegan al sitio por HTTP. Por eso cada
+base necesita saber a qué sitio pegarle. Antes esa dirección estaba
+escrita en el código —con lo cual un Supabase nuevo le hubiera disparado
+al sitio real— y ahora sale de un secreto del Vault de cada proyecto.
 
-**Dos hechos de este producto:** la aplicación usa Supabase **sólo para
-Auth y para subir imágenes** —no hay una sola llamada a la Data API
-(PostgREST)— y **ninguna tabla tiene RLS**, porque la aplicación se
-conecta a Postgres directo con `DATABASE_URL`.
+**2. Supabase le concede `ALL` al rol público sobre cada tabla nueva.**
+En un proyecto que usa Supabase para todo, eso se compensa con RLS. Acá
+no: la aplicación habla con Postgres **directo** por `DATABASE_URL` y
+usa Supabase sólo para Auth y Storage, así que nunca hubo una política
+de RLS porque nunca hizo falta.
 
-Si el proyecto de producción se creó con «Enable Data API» y
-«Automatically expose new tables» prendidas (los valores por defecto),
-esas dos cosas juntas significan que **cualquiera con la anon key puede
-leer todas las tablas**, `usuario` y sus mails incluidos. La anon key no
-es secreta: viaja en el bundle del navegador, es una `NEXT_PUBLIC_`.
+Eso sería alcanzable con la anon key —que es pública, viaja en el bundle
+del navegador— **si la Data API estuviera prendida**. En producción
+estaba apagada, así que no hubo exposición: no había camino HTTP. Pero
+dejaba toda la protección colgando de un toggle del panel, y los
+*default privileges* iban a seguir concediendo cada tabla nueva. Por eso
+se cierra por abajo, con una migración.
 
-Con los valores de **Project Settings → Data API** de producción:
+---
+
+# Bloque A — Producción
+
+## A1. La Data API ✅ (verificado el 06/11: ya estaba apagada)
+
+**Dónde:** Supabase de producción → Project Settings → Data API.
+
+Confirmado en off, y así tiene que quedar. Es lo correcto: la
+aplicación tiene 14 llamadas a `.auth` y 1 a `.storage` —endpoints
+distintos, `/auth/v1` y `/storage/v1`— y **ninguna** a la Data API.
+
+El cartel «No schemas can be queried» es esperado y, para esta
+aplicación, inofensivo.
+
+Que estuviera apagada es lo que hizo que los permisos de `anon` no
+fueran alcanzables desde afuera. Lo que A2 agrega es que dejen de
+depender de este toggle.
+
+## A2. Desplegar ✅ (06/11)
+
+**Dónde:** tu máquina y Vercel.
 
 ```bash
-curl -s "https://TU-PROYECTO.supabase.co/rest/v1/usuario?select=email&limit=1" \
-  -H "apikey: TU-ANON-KEY"
+git checkout <la-rama-por-defecto>
+git merge claude/invictos-proyecto-analysis-211omo
+git push
 ```
 
-- Devuelve `[]` o un error de permisos → está bien, seguí al paso 1.
-- **Devuelve un mail** → está expuesto.
+Esperá a que el deploy de Production termine en verde. Las migraciones
+corren solas en el build (`vercel.json` → `migrate:deploy && next build`);
+no hay que correr nada a mano.
 
-### Qué se encontró en producción (06/11)
+Este deploy lleva dos cosas que importan acá:
 
-Estaba expuesto, y no sólo para leer. Esta consulta, en el SQL Editor,
-lo muestra:
+- La migración que le **quita a `anon` y `authenticated` todo permiso**
+  sobre `public`, y arregla los *default privileges* para que las tablas
+  que cree la próxima migración no vuelvan a nacer concedidas.
+- El host de las tareas saliendo del Vault en vez de estar escrito en el
+  código.
+
+## A3. Comprobar producción ✅ (06/11 — queda mirar el SMTP, abajo)
+
+**Dónde:** Supabase de producción → SQL Editor.
+
+Pegá entero el contenido de **`db/consultas/diagnostico-de-ambiente.sql`**
+y ejecutalo. Devuelve cuatro filas, siempre — y eso es a propósito: tres
+consultas sueltas que devuelven cero filas son ambiguas, porque cero es
+la respuesta correcta para una y la equivocada para otra.
+
+En un ambiente desplegado y sano dice:
+
+| chequeo | resultado |
+|---|---|
+| permisos de anon/authenticated | `OK — cero permisos (cerrado)` |
+| secreto host_canonico | `OK — apunta a https://www.invicta.com.ar` |
+| tareas programadas | `confirmar-resultados-vencidos => lee host_canonico (OK)`, lo mismo `recalcular-score`, y `limpiar-intentos-limitados => no sale a la red (SQL local)` |
+| migración de permisos | `OK — aplicada DD/MM HH:MM` |
+
+La misma consulta sirve para el ambiente de pruebas (paso B8).
+
+Si (2) no devuelve nada, cargalo a mano y las tareas vuelven a andar:
 
 ```sql
-select table_name, string_agg(privilege_type, ', ') as permisos
-from information_schema.role_table_grants
-where grantee = 'anon' and table_schema = 'public'
-group by table_name
-order by table_name;
+select vault.create_secret('https://www.invicta.com.ar', 'host_canonico');
 ```
 
-Devolvía **todas** las tablas con `SELECT, INSERT, UPDATE, DELETE,
-TRUNCATE` para el rol `anon`. O sea: con la anon key —que es pública,
-viaja en el bundle del navegador— se podía leer la tabla `usuario`
-entera, y también escribirla y vaciarla.
+**Revisá también el SMTP de producción.** Authentication → Emails →
+SMTP Settings: tiene que decir que el SMTP propio está **habilitado**.
+Si está en el remitente de Supabase, los correos de Auth —confirmar
+cuenta y recuperar contraseña— **sólo llegan a los miembros del
+proyecto de Supabase**; a cualquier otra dirección Supabase se niega a
+mandarlos. Es un límite del servicio, no del plan, y no avisa en el
+producto: la persona pide el enlace, la aplicación responde "te lo
+mandamos", y el correo nunca sale. Dos minutos de mirar una pantalla
+contra un problema que no se ve desde adentro.
 
-**Se cerró en dos capas:**
+**Y que el sitio siga sano:** entrá a `www.invicta.com.ar`, iniciá
+sesión y abrí una ficha de torneo. Si el login anda, Auth está bien; si
+se ven las fotos, Storage está bien. Es todo lo que podría haberse roto
+al apagar la Data API, y no debería.
 
-1. **Apagar la Data API** en Project Settings → Data API. Cierra el
-   camino HTTP en el acto. Es lo primero que hay que hacer, y es
-   seguro: la aplicación usa Supabase sólo para Auth (`/auth/v1`) y
-   Storage (`/storage/v1`), que son endpoints distintos y no se tocan.
-   Hay 14 llamadas a `.auth` y 1 a `.storage` en todo el código, y
-   **ninguna** a la Data API.
-2. **La migración `cerrar-permisos-de-los-roles-publicos`**, que le
-   quita a `anon` y `authenticated` todo permiso sobre `public` y
-   —esto es lo que más importa— **arregla los default privileges**,
-   para que las tablas que cree la próxima migración no vuelvan a nacer
-   concedidas. Sin eso, revocar lo de hoy duraría hasta la próxima
-   tabla.
+## A4. Dejar producción sin datos demo ⏸️ (postergado a propósito)
 
-La migración corre sola en cada deploy y en cada ambiente, así que el
-proyecto de pruebas nace cerrado sin que haya que acordarse de nada.
+Hay **dos formas**. La primera no necesita tener el proyecto instalado.
 
-Después de desplegar, comprobalo con la misma consulta: tiene que
-devolver **cero filas**.
+### Forma 1 — desde el SQL Editor (más simple)
+
+Pegá entero el contenido de **`db/consultas/auditoria-de-datos-demo.sql`**
+en el SQL Editor de producción y ejecutalo. Sólo lee, no modifica nada.
+
+Devuelve ocho filas. Las seis primeras tienen que dar **0**. Las dos
+últimas son para comparar: dicen cuántas filas **no** demo hay, así
+"todo en cero" no puede confundirse con "la base está vacía".
+
+### Forma 2 — desde tu máquina
+
+Necesita el proyecto instalado: ver
+**`preparar-la-maquina-windows.md`**. Con un archivo `.env` en la raíz
+que tenga **una sola línea**:
+
+```
+DATABASE_URL=<la cadena de conexión de producción>
+```
+
+Importa que **no** esté `NEXT_PUBLIC_AMBIENTE`: esa ausencia es lo que
+hace que el script se reconozca en producción y se niegue a escribir.
+
+```bash
+npm run demo:auditar
+```
+
+Imprime el ambiente y el host **antes** de mirar nada, y termina con
+código 1 si encuentra algo, así que también sirve en un paso
+automático.
+
+### Si aparece algo
+
+Son datos de alguna corrida vieja del seed. Para borrarlos hace falta
+la forma 2, porque la limpieza respeta el orden de dependencias entre
+tablas y eso no es una consulta suelta:
+
+```bash
+# 1. Agregá al .env:  NEXT_PUBLIC_AMBIENTE=pruebas
+npm run demo:limpiar -- --confirmar
+# 2. Sacá esa línea del .env
+npm run demo:auditar   # tiene que dar cero
+```
+
+> Que haya que poner esa variable a mano para borrar en producción es a
+> propósito: tiene que ser un acto deliberado, no algo que pase por
+> tener el archivo equivocado abierto.
+
+**Ojo con una distinción.** `demo:limpiar` borra **sólo** lo marcado
+como demo: cuentas `@demo.invicta.com.ar` y entidades con `[DEMO]` en
+el nombre. Las cuentas de prueba que hayas creado a mano con un mail
+real no las ve el auditor ni las toca la limpieza — ésas se deciden
+aparte.
 
 ---
 
-## Paso 1 — Crear el proyecto de Supabase de pruebas
+# Bloque B — Ambiente de pruebas
+
+## B1. Crear el proyecto de Supabase ✅ (10/11)
 
 **Dónde:** panel de Supabase → New project.
 
 | Campo | Qué poner |
 |---|---|
 | **Organization** | La que ya tenés |
-| **GitHub (optional)** | **No conectar** (ver abajo) |
+| **GitHub (optional)** | **No conectar** |
 | **Project name** | `invicta-pruebas` |
-| **Database password** | «Generate a password», y **guardala ya**: no se puede volver a ver y la necesitás para el `DATABASE_URL` |
-| **Region** | «Need a specific region?» → **South America (São Paulo)**. Vercel corre en `gru1`, que es São Paulo. Si producción está en otra, usá la misma |
+| **Database password** | «Generate a password», y **guardala ya**: no se puede volver a ver |
+| **Region** | «Need a specific region?» → **South America (São Paulo)**. Vercel corre en `gru1`, que es São Paulo |
+| **Enable Data API** | **destildar** |
+| **Automatically expose new tables** | **destildar** |
+| **Enable automatic RLS** | dejar como está |
 
 **Por qué no conectar GitHub:** esa opción hace que Supabase despliegue
 cambios de esquema desde el repositorio, y las migraciones ya las corre
-el build de Vercel (`vercel.json` → `migrate:deploy && next build`). Dos
-cosas desplegando el mismo esquema se pisan.
+el build de Vercel. Dos cosas sobre el mismo esquema se pisan.
 
-### Security — las dos casillas que importan
+**Sobre las dos casillas de Security:** la migración del bloque A cierra
+los permisos igual, así que esto es la segunda capa, no la única. Pero
+destildarlas deja el proyecto cerrado desde el minuto cero.
 
-| Opción | Qué poner | Por qué |
+> Si el **Table Editor** del panel no anda con la Data API apagada,
+> volvé a prenderla y dejá «Automatically expose new tables» apagada. El
+> **SQL Editor funciona de las dos formas**, que es lo que hace falta
+> para B3.
+
+**Cuando termine de crearse**, anotá de **Project Settings → Data API**:
+
+- `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+- `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `service_role` → `SUPABASE_SERVICE_ROLE_KEY` (**secreta**)
+
+> **Los proyectos nuevos traen llaves con otro formato.** Donde antes
+> había dos JWT largos que empezaban con `eyJ`, ahora hay
+> `sb_publishable_…` y `sb_secret_…`. Son las mismas dos llaves con
+> otra cara, y van en las mismas dos variables:
+>
+> | lo que dice el panel | la variable |
+> |---|---|
+> | `anon` / `publishable` → `sb_publishable_…` | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+> | `secret` → `sb_secret_…` | `SUPABASE_SERVICE_ROLE_KEY` |
+>
+> El nombre de la variable no cambia aunque el panel ya no diga
+> "service_role": lo que importa es qué lee el código. Y el código lo
+> soporta — `@supabase/supabase-js` 2.112.4 y `@supabase/ssr` 0.12.5
+> mandan las llaves nuevas en la cabecera `apikey` en vez de como
+> Bearer, que es lo que el formato nuevo necesita.
+>
+> La que **nunca** va en una variable `NEXT_PUBLIC_` es la
+> `sb_secret_…`: ésa es la que puede todo, y `NEXT_PUBLIC_` la
+> escribiría adentro del bundle del navegador. Hay un test que lo
+> impide, pero no dependas de eso.
+
+Y las **cadenas de conexión**: botón **Connect**, arriba de todo en la
+página del proyecto. Ahí hay tres y **no son equivalentes** — hay que
+anotar dos:
+
+| La que dice | Puerto | Para qué |
 |---|---|---|
-| **Enable Data API** | **destildar** | La aplicación no la usa. Es una API REST pública sobre el esquema que no le sirve a nadie acá, y es superficie de ataque gratis |
-| **Automatically expose new tables** | **destildar** | Es la que concede permisos al rol público sobre cada tabla nueva. Sin RLS, eso es lectura abierta de todo. Supabase mismo recomienda apagarla |
-| **Enable automatic RLS** | dejar destildada | Con la Data API apagada no cambia nada, y la aplicación se conecta como dueña de las tablas, que saltea RLS igual |
+| **Transaction pooler** | `6543` | La aplicación (`DATABASE_URL`) |
+| **Session pooler** | `5432` | Las migraciones (`DATABASE_URL_MIGRACIONES`) y tu `.env` local |
+| ~~Direct connection~~ | `5432` | **No usar.** En los proyectos nuevos resuelve sólo por IPv6, y ni el build de Vercel ni tu máquina lo hablan |
 
-> **Si el Table Editor del panel no anda** con la Data API apagada,
-> volvé a prenderla y dejá **«Automatically expose new tables» apagada**,
-> que es la que realmente abre la puerta. El **SQL Editor funciona de
-> las dos formas**, que es lo que hace falta para el paso 3.
+Las dos traen `[YOUR-PASSWORD]`: reemplazalo por la contraseña, los
+corchetes incluidos.
 
-### Cuando termine de crearse
+Es la contraseña que pusiste al **crear** el proyecto, y el panel no la
+vuelve a mostrar nunca. Si no la guardaste: Settings → Database → **Reset
+database password**, que genera una nueva. Hacelo antes de cargar nada,
+porque al resetearla cambian las dos cadenas y habría que volver a
+pegarlas en Vercel.
 
-Andá a **Project Settings → Data API** y copiá a un lado:
+> **Por qué dos.** La aplicación corre en funciones sin servidor y
+> necesita el modo transacción, donde el lugar en el pooler se ocupa
+> sólo mientras dura una consulta; con el modo sesión se agota el cupo
+> y ya causó una caída real en producción. Las migraciones, en cambio,
+> **no pueden** ir por modo transacción: `node-pg-migrate` se protege
+> de dos despliegues simultáneos con un advisory lock, que es de
+> sesión, y por el pooler se tomaría en una conexión y se liberaría en
+> otra — dejando el despliegue siguiente colgado.
 
-- `Project URL` → es tu `NEXT_PUBLIC_SUPABASE_URL`
-- `anon public` → es tu `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `service_role` → es tu `SUPABASE_SERVICE_ROLE_KEY` (**esta es secreta**:
-  nunca va a un archivo del repositorio ni a una variable `NEXT_PUBLIC_`)
+> Las claves siguen ahí aunque la Data API esté apagada: `anon` y
+> `service_role` son claves de Auth y Storage también.
 
-Y en **Project Settings → Database → Connection string → URI**, la
-cadena de conexión con la contraseña del punto 3 → es tu `DATABASE_URL`.
+**Comprobación:** el proyecto figura *Active* y tenés las cuatro cosas.
 
-> Si la cadena trae `[YOUR-PASSWORD]`, reemplazalo por la contraseña real.
+## B2. Configurar Auth ✅ (10/11)
 
-> Las claves siguen estando en esa pantalla aunque la Data API esté
-> apagada: `anon` y `service_role` son claves de Auth y Storage también,
-> no sólo de PostgREST.
-
-**Cómo saber que salió bien:** el proyecto figura como *Active* y tenés
-las cuatro cosas anotadas.
-
----
-
-## Paso 2 — Configurar Auth en el proyecto de pruebas
-
-Esto es lo mismo que ya está hecho en producción. Hay que repetirlo.
-
-**Dónde:** Authentication → URL Configuration.
+**Dónde:** proyecto de pruebas → Authentication → URL Configuration.
 
 - **Site URL**: `https://pruebas.invicta.com.ar`
-  (o el subdominio que elijas; usá el mismo en todos los pasos).
 - **Redirect URLs**: agregá `https://pruebas.invicta.com.ar/**`
 
-**Dónde:** Authentication → Emails → Templates.
+### B2.1 — SMTP propio, **primero**
 
-Dos plantillas, con el mismo texto que producción. Lo que importa es que
-usen `token_hash`:
+**Dónde:** Authentication → Emails → SMTP Settings → Enable custom SMTP.
+
+Sin esto, la pantalla de plantillas dice *"Set up custom SMTP to edit
+templates"* y no deja editar nada. No es un capricho del panel: desde el
+3 de junio de 2026 los proyectos nuevos del plan gratuito que usan el
+remitente propio de Supabase **no pueden modificar las plantillas de
+Auth**. Los proyectos viejos conservan las suyas; por eso producción
+tiene las dos con `token_hash` y el proyecto de pruebas, recién creado,
+no te deja ponerlas.
+
+Pero el remitente de Supabase tiene dos límites peores que ese, y los
+dos se levantan con SMTP propio:
+
+| | remitente de Supabase | con SMTP propio |
+|---|---|---|
+| a quién le manda | **sólo a los miembros del proyecto**; cualquier otra dirección falla con *"Email address not authorized"* | a cualquiera |
+| cuántos | 2 por hora | 30 por hora (ajustable en Rate Limits) |
+| plantillas | no se editan (proyectos nuevos, plan gratuito) | se editan |
+
+El de "sólo miembros del proyecto" es el que importa acá: los dueños de
+los torneos no son miembros del proyecto de Supabase, así que cualquier
+correo de Auth que les toque **no les va a llegar**.
+
+Con la misma cuenta de Resend que ya usás para los correos de producto:
+
+| campo | valor |
+|---|---|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` (literal, esa palabra) |
+| Password | tu API key de Resend, la que empieza con `re_` |
+| Sender email | **sólo la dirección**: `avisos@invicta.com.ar` |
+| Sender name | `INVICTA (pruebas)` |
+
+**Ojo con el Sender email.** La variable `CORREO_REMITENTE` que ya está
+en Vercel vale `INVICTA <avisos@invicta.com.ar>` —nombre y dirección
+juntos, que es el formato que pide la API de Resend—. Supabase los pide
+en **dos campos separados**: en *Sender email* va sólo
+`avisos@invicta.com.ar`, sin el nombre ni los `<>`. Si pegás la variable
+entera ahí, el correo sale mal o Resend lo rechaza.
+
+Dónde está el valor, si no lo tenés a mano: Vercel → Settings →
+Environment Variables → filtrá `Production` → `CORREO_REMITENTE`. O en
+el panel de Resend → Domains, que es el dominio verificado.
+
+La dirección tiene que estar en un dominio verificado en Resend — si es
+el mismo que producción, ya lo está (SPF, DKIM y DMARC se hicieron el
+02/10).
+
+**Comprobación:** la pantalla de Templates deja escribir. Si sigue
+diciendo que necesitás SMTP, no quedó guardado.
+
+### B2.2 — Las plantillas
+
+**Dónde:** Authentication → Emails → Templates. Dos plantillas, con
+`token_hash`:
 
 - **Magic Link**:
   ```
@@ -180,49 +342,59 @@ usen `token_hash`:
   {{ .SiteURL }}/restablecer-password/confirmar?token_hash={{ .TokenHash }}&type=recovery
   ```
 
-> **Por qué `token_hash` y no el enlace por defecto.** El enlace por
-> defecto apunta a un `GET` de Supabase que consume el token y recién
-> después redirige. Los escáneres de correo abren los enlaces para
-> revisarlos, así que el token se quemaba antes de que la persona
-> hiciera clic. Con `token_hash` el enlace cae en una pantalla nuestra
-> que no canjea nada: muestra un botón, y el canje lo hace el `POST` de
-> ese botón. Los escáneres siguen enlaces, no completan formularios.
+> **Por qué `token_hash`:** el enlace por defecto apunta a un `GET` de
+> Supabase que consume el token y recién después redirige. Los escáneres
+> de correo abren los enlaces para revisarlos, así que el token se
+> quemaba antes de que la persona hiciera clic. Con `token_hash` el
+> enlace cae en una pantalla nuestra que no canjea nada: muestra un
+> botón, y el canje lo hace el `POST` de ese botón.
 
-**Cómo saber que salió bien:** las dos plantillas muestran `token_hash`
-en el cuerpo, y la lista de Redirect URLs tiene la línea con `/**`.
+**Comprobación:** las dos plantillas muestran `token_hash`, y la lista
+de Redirect URLs tiene la línea con `/**`.
 
----
+### Si decidís abrir pruebas sin SMTP propio
 
-## Paso 3 — Cargar los dos secretos del Vault (el paso que no se saltea)
+Se puede, porque **las cuentas demo no necesitan ningún correo**: el
+seed las crea ya confirmadas de los dos lados —en Supabase Auth y en
+`usuario.email_confirmado`— y se entra con email y contraseña. Para lo
+que vas a mostrar en el bloque C, alcanza.
 
-**Dónde:** proyecto de pruebas → SQL Editor → New query.
+Lo que queda roto, para que no te sorprenda:
 
-Primero inventá un `CRON_SECRET` para pruebas, **distinto al de
-producción**. Cualquier cadena larga al azar sirve; guardala, la vas a
-volver a usar en el paso 5.
+| flujo | sin SMTP propio |
+|---|---|
+| entrar con una cuenta demo | **anda** (contraseña, sin correo) |
+| verificar una organización | **anda** — ese correo lo escribimos nosotros y sale por Resend, no por Supabase, así que no depende ni de la plantilla ni del remitente |
+| registrar una cuenta nueva | el correo no llega (dirección no autorizada), y si llega, el enlace por defecto cae en `/acceso/confirmar` sin `token_hash` y la pantalla dice **"El enlace está incompleto"** |
+| "Reenviar enlace de confirmación" | lo mismo |
+| "Olvidé mi contraseña" | lo mismo |
 
-Pegá y ejecutá, reemplazando los dos valores:
+Ojo con uno: el seed deja **una cuenta demo sin confirmar** a propósito,
+para poder ver el bloqueo de `verificarCuentaConfirmada`. Si un dueño
+entra con ésa y toca "Reenviar enlace", cae justo en el flujo roto.
+
+## B3. Cargar los dos secretos del Vault ✅ (10/11)
+
+**Dónde:** proyecto de pruebas → SQL Editor.
+
+Inventá un `CRON_SECRET` para pruebas, **distinto al de producción**.
+Cualquier cadena larga al azar. Guardalo: lo vas a volver a usar en B5.
 
 ```sql
 select vault.create_secret('https://pruebas.invicta.com.ar', 'host_canonico');
 select vault.create_secret('EL-CRON-SECRET-QUE-INVENTASTE', 'cron_secret');
 ```
 
-Reglas del valor de `host_canonico`:
+Reglas del valor de `host_canonico`: **sin barra al final**, y **que no
+redirija**.
 
-- **Sin barra al final.** El código le pega la ruta directamente.
-- **Exactamente el host que responde**, no uno que redirija. Si tu
-  dominio redirige de `pruebas.invicta.com.ar` a otra cosa, poné el
-  destino final.
+> `pg_net` usa libcurl, y libcurl **descarta la cabecera `Authorization`
+> al seguir una redirección que cambia de host**, por seguridad y sin
+> avisar. Si la URL redirige, el pedido llega sin credencial y la
+> aplicación lo rechaza con "sin permiso" — que te manda a buscar el
+> problema al secreto en vez de a la URL. Ya pasó una vez en producción.
 
-> **Por qué importa tanto.** `pg_net` usa libcurl, y libcurl **descarta
-> la cabecera `Authorization` al seguir una redirección que cambia de
-> host**, por seguridad y sin avisar. Si la URL redirige, el pedido
-> llega sin credencial y la aplicación lo rechaza con "sin permiso" —
-> que manda a buscar el problema al valor del secreto en vez de a la
-> URL. Ya pasó una vez en producción.
-
-**Cómo saber que salió bien:**
+**Comprobación:**
 
 ```sql
 select name from vault.decrypted_secrets where name in ('host_canonico','cron_secret');
@@ -230,154 +402,261 @@ select name from vault.decrypted_secrets where name in ('host_canonico','cron_se
 
 Tiene que devolver **las dos filas**.
 
-**En producción no hagas nada.** La migración le crea `host_canonico`
-sola, reconociéndola porque ya tiene la tarea agendada con el host viejo
-adentro. Una base nueva no tiene esa tarea, así que no hereda la URL de
-producción — que es justamente el punto.
+## B4. Crear la rama ✅ (10/11)
 
----
+**Dónde:** tu máquina (PowerShell, en la carpeta del proyecto).
 
-## Paso 4 — Desplegar producción primero
+La rama por defecto del repositorio hoy es
+`claude/invictos-proyecto-analysis-211omo` — es la única que existe, y
+es la que Vercel despliega como producción. De ahí sale `pruebas`.
 
-Antes de armar el ambiente de pruebas conviene que producción ya tenga
-esta tanda de cambios: así la migración le crea su secreto y queda igual
-que antes, sin sorpresas mezcladas con el ambiente nuevo.
-
-1. Mergeá la rama de trabajo a la rama por defecto (la que Vercel
-   despliega como Production).
-2. Esperá a que el deploy termine en verde.
-
-**Cómo saber que salió bien.** En el SQL Editor **de producción**:
-
-```sql
-select name from vault.decrypted_secrets where name = 'host_canonico';
-select jobname, command from cron.job;
-```
-
-- La primera tiene que devolver una fila.
-- En la segunda, el `command` de `confirmar-resultados-vencidos` y
-  `recalcular-score` **ya no tiene que tener `www.invicta.com.ar`
-  escrito adentro**: ahora lee `host_canonico` del Vault.
-
-Si `host_canonico` no aparece en producción, cargalo a mano con el mismo
-`select vault.create_secret(...)` del paso 3, con la URL de producción.
-Mientras no esté, las tareas no corren.
-
----
-
-## Paso 5 — Crear la rama y configurar Vercel
-
-### 5a. La rama
-
-En tu máquina:
-
-```bash
-git checkout <la-rama-por-defecto>
+```powershell
+cd ~\InvictosApp
+git checkout claude/invictos-proyecto-analysis-211omo
 git pull
 git checkout -b pruebas
 git push -u origin pruebas
 ```
 
-Vercel va a desplegarla sola como Preview.
+**Comprobación:** `git branch` muestra `* pruebas`, y el `push` termina
+con `branch 'pruebas' set up to track 'origin/pruebas'`.
 
-### 5b. Las variables
+> **Por qué una rama aparte.** Vercel despliega la rama por defecto como
+> **Production** y cualquier otra rama como **Preview**. Las variables
+> que cargás en B5 están tildadas sólo en `Preview`, así que es la rama
+> `pruebas` —y no producción— la que va a tomar el Supabase de pruebas y
+> el cartel amarillo. Mientras no toques esta rama, producción sigue
+> exactamente como está.
 
-**Dónde:** proyecto de Vercel → Settings → Environment Variables.
+## B5. Variables en Vercel ✅ (10/11 — build verde, esquema aplicado)
 
-Por cada una: escribir nombre y valor, y **tildar sólo `Preview`**
-(destildar `Production` y `Development`). Esto es lo que hace que el
-ambiente de pruebas use su propia base sin tocar producción.
+**Dónde:** **el mismo** proyecto de Vercel que ya tenés, el de INVICTA
+→ Settings → Environment Variables.
 
-| Variable | Valor | ¿Secreta? |
+**No se crea un proyecto nuevo en Vercel.** Un proyecto de Vercel ya
+tiene dos ambientes adentro: despliega la rama por defecto como
+**Production** y cualquier otra rama como **Preview**. El ambiente de
+pruebas es la rama `pruebas` corriendo como Preview, con estas
+variables tildadas sólo ahí. Lo que separa los dos ambientes no es el
+proyecto de Vercel: es el proyecto de **Supabase**, que sí es nuevo, y
+estas variables que lo apuntan.
+
+Un proyecto aparte en Vercel significaría dos proyectos siguiendo el
+mismo repositorio, dos listas de variables que se desincronizan, y el
+dominio y los despliegues partidos en dos tableros. No hay nada que
+ganar.
+
+Por cada una: nombre, valor, y **tildar sólo `Preview`** (destildar
+Production y Development).
+
+**Varias ya existen, y compartidas con producción.** Al intentar
+agregarlas, Vercel contesta *"A variable with the name X already exists
+for the target preview,production on branch undefined"*. Eso quiere
+decir que esa variable hoy vale **para los dos ambientes**: Production
+y Preview leen el mismo valor, el de producción.
+
+Es importante entender qué implica, porque no es sólo un estorbo para
+cargar las nuevas: **mientras siga así, cualquier rama que no sea la de
+producción se despliega apuntando a la base de producción.** Y el
+`buildCommand` de `vercel.json` es `npm run migrate:deploy && next
+build`, así que ese despliegue además corre las migraciones contra esa
+base. No es destructivo —`node-pg-migrate up` aplica sólo las
+pendientes, y una rama salida de producción no tiene ninguna—, pero el
+sitio que queda publicado en la URL del preview es producción con otra
+dirección.
+
+Hasta hoy no pasaba nada porque no había ninguna rama además de la de
+producción. La rama `pruebas` es la primera.
+
+**Qué hacer con cada una que ya existe**, en este orden:
+
+1. Entrá a la que existe → `Edit` → **destildá `Preview`**, dejá sólo
+   `Production` → Save. Eso deja el valor de producción donde tiene que
+   estar y libera el nombre para Preview.
+2. Agregá la nueva, con el valor del ambiente de pruebas, tildando
+   `Preview` y escribiendo `pruebas` en *Git Branch*.
+
+Hay un atajo: Vercel le da precedencia a un valor atado a una rama por
+encima de uno general de Preview, así que agregando sólo el paso 2
+`pruebas` ya tomaría el valor correcto. **No lo tomes.** Deja el
+problema de arriba intacto para la próxima rama que abras, que es
+exactamente el día en que no te vas a acordar de esto.
+
+**Mejor todavía: atalas a la rama.** Al tildar `Preview`, Vercel deja
+poner un nombre de rama en el campo *Git Branch*. Si ponés `pruebas`,
+la variable vale **sólo** para esa rama; si lo dejás vacío, vale para
+**cualquier** rama que no sea la de producción. Con el campo vacío
+funciona igual hoy —`pruebas` es la única rama que no es producción—,
+pero el día que abras una rama para probar algo, ese preview también va
+a escribir en la base de pruebas, que es la que están mirando los
+dueños. Poné `pruebas` en las once.
+
+| Variable | Tipo | Valor |
 |---|---|---|
-| `NEXT_PUBLIC_AMBIENTE` | `pruebas` | no |
-| `DATABASE_URL` | la del paso 1 | **sí** |
-| `NEXT_PUBLIC_SUPABASE_URL` | la del paso 1 | no |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | la del paso 1 | no |
-| `SUPABASE_SERVICE_ROLE_KEY` | la del paso 1 | **sí** |
-| `NEXT_PUBLIC_SITE_URL` | `https://pruebas.invicta.com.ar` | no |
-| `CRON_SECRET` | el que inventaste en el paso 3 | **sí** |
-| `RESEND_API_KEY` | la misma de producción, o una de prueba | **sí** |
-| `CORREO_REMITENTE` | el mismo de producción | no |
-| `SENTRY_DSN` | uno aparte, o dejarla sin definir | no |
+| `NEXT_PUBLIC_AMBIENTE` | Config | `pruebas` |
+| `DATABASE_URL` | **Secret** | la del **Transaction pooler**, puerto `6543` |
+| `DATABASE_URL_MIGRACIONES` | **Secret** | la del **Session pooler**, puerto `5432` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Config | la de B1 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Config | la de B1 |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | la de B1 |
+| `NEXT_PUBLIC_SITE_URL` | Config | `https://pruebas.invicta.com.ar` |
+| `CRON_SECRET` | **Secret** | el de B3, **idéntico** |
+| `RESEND_API_KEY` | **Secret** | la misma de producción, o una de prueba |
+| `CORREO_REMITENTE` | Config | el mismo de producción, **entero**: `INVICTA <avisos@invicta.com.ar>` |
+| `SENTRY_DSN` | — | dejarla sin definir |
 
-**El valor de `CRON_SECRET` en Vercel tiene que ser idéntico al que
-cargaste en el Vault** del paso 3. Son los dos lados de la misma
-cerradura: la base manda ese valor en la cabecera y la aplicación lo
-compara. Si no coinciden, las tareas dan 403.
+**La regla del tipo es la misma que la del nombre.** Vercel pide elegir
+entre `Secret` —que no se puede volver a leer— y `Config` —que sí—, y
+avisa si marcás `Secret` algo que empieza con `NEXT_PUBLIC_`. Tiene
+razón, y conviene entender por qué: Next.js **escribe el valor de toda
+variable `NEXT_PUBLIC_` adentro del JavaScript que baja al navegador**.
+Marcarla `Secret` no la esconde de nadie; sólo te impide a vos volver a
+leerla desde el panel, mientras cualquiera la ve en el bundle. Si una
+variable `NEXT_PUBLIC_` llevara algo que no puede ser público, el
+problema no sería el tipo en Vercel: sería que ese dato no va en una
+variable `NEXT_PUBLIC_`.
 
-### 5c. Revisar que producción quedó como estaba
+Las cuatro `NEXT_PUBLIC_` de esta tabla son públicas a propósito: el
+nombre del ambiente, la URL del proyecto de Supabase, la URL del sitio
+y la anon key, que Supabase diseñó para viajar en el navegador. Las
+cinco `Secret` son las que llevan una contraseña o una llave: las dos
+cadenas de conexión, la service_role, el `CRON_SECRET` y la de Resend.
 
-En la misma pantalla, filtrá por `Production` y confirmá:
+> Que la anon key sea pública no quiere decir que no haga nada: es la
+> llave con la que cualquiera entraría por la Data API. Por eso está
+> apagada (A1) y por eso la migración del bloque A le saca todos los
+> permisos a `anon`. La llave es pública; la puerta está cerrada.
 
-- `NEXT_PUBLIC_AMBIENTE` **no está**, o está en `produccion`. Nunca en
-  `pruebas`.
-- Las demás siguen apuntando al Supabase de producción.
+**Las dos cadenas son obligatorias.** Si falta
+`DATABASE_URL_MIGRACIONES`, el despliegue **falla en el build** con un
+mensaje que lo explica — no se rompe en silencio, pero te traba hasta
+que la cargues.
 
-### 5d. El dominio
+**`CRON_SECRET` tiene que ser idéntico al del Vault de B3.** Son los dos
+lados de la misma cerradura: la base lo manda en la cabecera y la
+aplicación lo compara. Si no coinciden, las tareas dan 403.
+
+**Cuidado con las duplicadas.** Si guardás una variable con `Preview`
+y sin rama, y después la volvés a agregar con la rama `pruebas`,
+quedan **dos filas**: una `Preview` suelta y otra `Preview ⑂ pruebas`.
+Vercel no se queja, porque para él son dos alcances distintos. La rama
+`pruebas` toma la atada a la rama —tiene precedencia— así que el
+ambiente anda igual y la duplicada no se nota.
+
+Lo que deja es la fila suelta valiendo para **cualquier otra** rama que
+abras. Borralas: en la lista, filtrá por `Preview`, y de cada par
+borrá la que **no** dice `⑂ pruebas`. Si lo que querías era cambiarle
+la rama a una que ya existe, se hace con `Edit` sobre la fila, no
+agregando otra.
+
+**Revisá que Production quedó como estaba:** filtrá por `Production` y
+confirmá que `NEXT_PUBLIC_AMBIENTE` **no está**, o está en `produccion`.
+Nunca en `pruebas`. Y que `DATABASE_URL` de Production siga apuntando a
+la base de producción.
+
+**Las variables no entran solas:** sólo las toman los despliegues
+**nuevos**. El Preview que Vercel ya construyó al subir la rama en B4
+—el que falló por no tener nada de esto— no se arregla al guardarlas.
+Hay que redesplegar: Deployments → el de la rama `pruebas` → menú `···`
+→ Redeploy. B6 y B7 vienen después, así que si preferís, redesplegá una
+sola vez al terminar B6.
+
+## B6. El dominio ✅ (10/11 — banda amarilla verificada)
 
 **Dónde:** Settings → Domains → Add.
 
 1. Agregá `pruebas.invicta.com.ar`.
-2. Cuando pregunte a qué rama, elegí `pruebas`.
-3. Cargá en tu DNS el registro que Vercel te indique (suele ser un
-   `CNAME` a `cname.vercel-dns.com`).
+2. **Asignalo a la rama `pruebas`.** Vercel asigna todo dominio nuevo a
+   la rama de producción primero: hay que entrar a `Edit` en el
+   dominio, elegir `Preview` como ambiente y escribir `pruebas` en el
+   campo *Git Branch*. Si esto queda sin hacer, el dominio apunta a
+   producción.
+3. Cargá en tu DNS el registro que Vercel indique. El destino es un
+   nombre propio del proyecto (`<algo>.vercel-dns-017.com`), no el
+   genérico `cname.vercel-dns.com`: copialo con el botón de copiar de
+   la columna Value, porque son quince caracteres al azar donde un
+   cero por una o no se ve y el síntoma es el mismo «Invalid
+   Configuration» sin pista.
 
-> **Sin dominio fijo no sirve.** La URL que Vercel le da a un Preview
-> cambia en cada deploy: no se la podés pasar a nadie.
+   En el campo *Target* va **el nombre pelado**, no una URL: sin
+   `https://` y sin barra al final.
 
-**Cómo saber que salió bien:** abrís `https://pruebas.invicta.com.ar` y
-carga el sitio, con **una banda amarilla arriba** que dice «Ambiente de
-pruebas — los datos no son reales». Si no está la banda, `NEXT_PUBLIC_AMBIENTE`
-no quedó en Preview: revisá 5b.
+   **Si el DNS está en Cloudflare**, el registro va con **Proxy status
+   en DNS only** —la nubecita gris—. Vercel lo pide explícitamente en
+   la columna *Proxy: Disabled*. Con el proxy naranja, Cloudflare
+   contesta por el dominio, Vercel no puede validarlo ni emitir el
+   certificado, y la fila se queda en rojo sin decir por qué.
 
----
+4. **Un dominio recién asignado no se sirve solo.** Vercel engancha los
+   dominios a un despliegue **cuando lo crea**, así que los despliegues
+   anteriores a la asignación no lo llevan: la fila queda en «No
+   Deployment», con un mensaje que sugiere *"push to <rama de
+   producción>"*. **No hagas eso** —desplegaría producción—. Mandá un
+   push a la rama `pruebas` y el despliegue nuevo toma el dominio.
 
-## Paso 6 — Sembrar los datos demo
+> **Ojo con el `www.`:** si al agregar el dominio queda
+> `www.pruebas.invicta.com.ar`, no sirve. Hay cuatro lugares que ya
+> dicen `https://pruebas.invicta.com.ar` —`NEXT_PUBLIC_SITE_URL`, el
+> Site URL y las Redirect URLs de Supabase, y `host_canonico` en el
+> Vault—, y el último rompe las tareas programadas sin decir por qué:
+> `pg_net` pierde la cabecera `Authorization` al seguir una redirección
+> que cambia de host.
 
-Esto se corre **desde tu máquina**, apuntando al Supabase de pruebas.
+> **Sin dominio fijo no sirve:** la URL de un Preview cambia en cada
+> deploy y no se la podés pasar a nadie.
 
-Creá un archivo `.env` en la raíz del repositorio con esto —y sólo esto:
+**Comprobación:** abrís `https://pruebas.invicta.com.ar` y carga, con
+**una banda amarilla arriba** que dice «Ambiente de pruebas — los datos
+no son reales». Si la banda no está, `NEXT_PUBLIC_AMBIENTE` no quedó en
+Preview: volvé a B5.
+
+## B7. Sembrar los datos demo ✅ (10/11 — 24 chequeos pasados)
+
+**Dónde:** tu máquina. Si todavía no la preparaste, empezá por
+**`preparar-la-maquina-windows.md`** — este paso no se puede hacer
+desde el panel de Supabase: el seed pasa por los servicios reales del
+producto y crea las cuentas en Supabase Auth.
+
+`.env` con **esto y sólo esto**:
 
 ```
 NEXT_PUBLIC_AMBIENTE=pruebas
-DATABASE_URL=<la del paso 1>
-NEXT_PUBLIC_SUPABASE_URL=<la del paso 1>
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<la del paso 1>
-SUPABASE_SERVICE_ROLE_KEY=<la del paso 1>
+DATABASE_URL=<la del Session pooler, puerto 5432>
+NEXT_PUBLIC_SUPABASE_URL=<la de B1>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<la publishable, de B1>
+SUPABASE_SERVICE_ROLE_KEY=<la secreta, de B1>
 ```
 
-Después:
+> Acá va la del **Session pooler**, no la de transacción: `migrate:up`
+> necesita la sesión fija del advisory lock, igual que el despliegue. Y
+> el seed anda bien por ahí.
 
 ```bash
+npm run migrate:up      # si el deploy de la rama ya corrió, no hace nada
 npm run demo:sembrar
 npm run demo:validar
 ```
 
-**Lo primero que imprime `demo:sembrar` son dos líneas:**
+> El `migrate:up` está por si querés sembrar antes de que Vercel
+> despliegue la rama: sin esquema no hay dónde sembrar. Si el deploy ya
+> pasó, la base ya está migrada y el comando no hace nada.
+
+**Lo primero que imprime `demo:sembrar` son dos líneas. Leelas:**
 
 ```
   ambiente: pruebas
   base:     db.xxxx.supabase.co:5432/postgres
 ```
 
-**Leelas.** Si dicen `produccion`, el script corta solo y no escribe
-nada. Si el host no es el de pruebas, cortá vos con Ctrl+C: el error
-fácil acá no es ignorar una advertencia, es tener el `.env` equivocado
-y no darte cuenta.
+Si dice `produccion`, el script corta solo y no escribe nada. Si el host
+no es el de pruebas, cortá vos con Ctrl+C. El error fácil acá no es
+ignorar una advertencia: es tener el `.env` equivocado y no notarlo.
 
-`demo:validar` corre una lista de chequeos que **tienen que dar cero
-filas** cada uno. Si alguno falla, el dataset quedó mal y conviene
-volver a empezar con `npm run demo:reset`.
-
-**Cómo saber que salió bien:** `demo:validar` termina sin errores, y
-abriendo `https://pruebas.invicta.com.ar/torneos` y eligiendo una ciudad
-aparecen torneos con `[DEMO]` en el nombre.
+**Al final imprime las once cuentas** con su mail exacto y la contraseña
+compartida. **Copialas de ahí**, no de ningún documento: así no pueden
+estar desactualizadas.
 
 ### Qué queda sembrado
-
-Seis torneos, cada uno en un estado distinto, para que haya algo que
-mirar en cada pantalla:
 
 | Torneo | Estado |
 |---|---|
@@ -388,97 +667,78 @@ mirar en cada pantalla:
 | `[DEMO] Copa Misiones` | certamen con divisiones A y B |
 | `[DEMO] Copa Borrador F7` | borrador sin publicar |
 
-Y once cuentas. **El seed las imprime al final con el mail exacto de
-cada una** — copialas de ahí, no de este documento: así nunca pueden
-estar desactualizadas. Todas entran con la misma contraseña, que también
-imprime.
+**Comprobación:** `demo:validar` termina sin errores, y en
+`https://pruebas.invicta.com.ar/torneos` —eligiendo una ciudad— aparecen
+torneos con `[DEMO]`.
 
----
+## B8. La comprobación final, la más barata ✅ (10/11)
 
-## Paso 7 — Comprobar que producción está limpia
-
-Cambiá el `.env` para que apunte a **producción**, y **sacá la línea
-`NEXT_PUBLIC_AMBIENTE=pruebas`**. Después:
-
-```bash
-npm run demo:auditar
-```
-
-Sólo lee, no escribe nada. Imprime cuántas filas demo hay y, aparte,
-cuántas **no** demo tiene la base — así "limpio" no puede querer decir
-"la base está vacía".
-
-**Lo que tiene que decir:** `Sin rastros de datos demo.`
-
-Si encuentra algo (de alguna corrida vieja), se limpia así:
-
-1. Agregá temporalmente `NEXT_PUBLIC_AMBIENTE=pruebas` a ese `.env`.
-2. `npm run demo:limpiar -- --confirmar`
-3. **Sacá la línea de nuevo.**
-4. `npm run demo:auditar` para confirmar que quedó en cero.
-
-> Que haya que poner la variable a mano para borrar en producción es a
-> propósito: tiene que ser un acto deliberado, no algo que pase por
-> tener el archivo equivocado abierto.
-
----
-
-## Paso 8 — La comprobación final, la más barata
-
-Abrí las dos pestañas, una al lado de la otra:
+Las dos pestañas, una al lado de la otra:
 
 - `https://pruebas.invicta.com.ar` → **se ve la banda amarilla**.
 - `https://www.invicta.com.ar` → **no se ve ninguna banda**.
 
-Si las dos se ven iguales, algo quedó mal en las variables de Vercel
-(paso 5b/5c) y hay que arreglarlo antes de pasarle el enlace a nadie.
+Si las dos se ven iguales, algo quedó mal en B5 y hay que arreglarlo
+antes de pasarle el enlace a nadie.
+
+Y en el SQL Editor **de pruebas**, que la migración también cerró ahí:
+
+```sql
+select table_name from information_schema.role_table_grants
+where grantee in ('anon', 'authenticated') and table_schema = 'public';
+```
+
+Cero filas.
 
 ---
 
-## Qué les pasás a los dueños de torneos
+# Bloque C — Abrir a los dueños
 
 Un mensaje con:
 
 1. **El enlace**: `https://pruebas.invicta.com.ar`
-2. **Que es un ambiente de pruebas**: los torneos que ven son inventados,
-   y lo que carguen se puede borrar sin aviso cuando se resiembre. La
-   banda amarilla de arriba se los recuerda.
+2. **Que es un ambiente de pruebas**: los torneos que ven son
+   inventados, y lo que carguen se puede borrar sin aviso cuando se
+   resiembre. La banda amarilla se los recuerda.
 3. **Cómo entrar**, de las dos formas:
-   - Con una cuenta demo: les pasás el mail y la contraseña que imprimió
-     el seed. La de `organizador` es la que más les sirve — ve el panel
-     completo, con torneos en todos los estados.
-   - Con su propio mail, registrándose. Así prueban el alta de verdad.
+   - Con una cuenta demo (el mail y la contraseña que imprimió el seed).
+     La de `organizador` es la que más les sirve: ve el panel completo,
+     con torneos en todos los estados.
+   - Con su propio mail, registrándose, si quieren probar el alta.
 4. **Dónde te escriben** lo que encuentren.
 
 ### Si alguien no recibe el correo de confirmación
 
-Es lo primero que va a pasar. Dos causas, en orden de probabilidad:
+Con el SMTP propio de B2.1 configurado, las dos causas históricas
+—que Supabase sólo entregue a los miembros del proyecto, y que no se
+puedan editar las plantillas— ya no aplican. Lo que queda:
 
-1. **Resend en modo sandbox** sólo entrega a direcciones verificadas.
-   Afecta al correo de verificación de organización. Se arregla
-   verificando el dominio en Resend, o agregando esas direcciones.
-2. **El correo de confirmación de cuenta** lo manda Supabase Auth, no
-   Resend, y tiene un límite de envíos por hora en el plan gratuito.
+1. **El límite de envíos.** Con SMTP propio arranca en 30 por hora, y
+   se sube en Authentication → Rate Limits. Si varios dueños piden
+   enlaces a la vez, es alcanzable.
+2. **La cuota de Resend**, compartida con producción si usás la misma
+   API key. Mirala en el panel de Resend antes de abrir.
+3. **Spam.** El dominio tiene SPF, DKIM y DMARC, así que no debería,
+   pero es lo primero que hay que descartar.
 
-Mientras tanto, siempre podés pasarles una cuenta demo.
+**Para entrar no hace falta ningún correo**: las cuentas demo tienen
+contraseña. Deciles que usen eso y no "olvidé mi contraseña", y el
+problema no aparece.
 
 ---
 
-## Cosas que conviene saber
+## Para después
 
-**El correo de producto está apagado**, en los dos ambientes. Es una
-decisión tomada (`CORREO_DE_PRODUCTO_ACTIVO` en
-`services/notificaciones/tipos.ts`): lo único que sale por mail es lo de
-la cuenta. Las notificaciones viven dentro de la aplicación.
+**Resembrar pruebas**, con el `.env` de pruebas: `npm run demo:reset`.
+Borra lo demo, lo vuelve a sembrar y lo valida. Lo que hayan cargado los
+dueños con sus propias cuentas **no** se borra: la limpieza sólo toca lo
+marcado como demo.
 
-**Las migraciones corren solas en cada deploy** (`vercel.json` →
-`buildCommand`). No hay que correr nada a mano después de desplegar.
+**El correo de producto está apagado** en los dos ambientes, por
+decisión (`CORREO_DE_PRODUCTO_ACTIVO` en
+`services/notificaciones/tipos.ts`). Lo único que sale por mail es lo de
+la cuenta; las notificaciones viven dentro de la aplicación.
 
-**Para volver a empezar con los datos de pruebas**, con el `.env` de
-pruebas: `npm run demo:reset`. Borra lo demo, lo vuelve a sembrar y lo
-valida. Lo que hayan cargado los dueños con sus propias cuentas **no** se
-borra: la limpieza sólo toca lo marcado como demo.
-
-**Si cambiás el dominio de pruebas** más adelante, hay que actualizar
-tres lugares: el secreto `host_canonico` del Vault, `NEXT_PUBLIC_SITE_URL`
-en Vercel, y las URLs de Auth en Supabase.
+**Si cambiás el dominio de pruebas**, hay que actualizar tres lugares:
+el secreto `host_canonico` del Vault, `NEXT_PUBLIC_SITE_URL` en Vercel, y
+las URLs de Auth en Supabase.

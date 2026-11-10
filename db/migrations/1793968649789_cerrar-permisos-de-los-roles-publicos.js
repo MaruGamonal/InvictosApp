@@ -15,10 +15,16 @@ export const shorthands = undefined;
  * usa Supabase sólo para Auth y Storage, así que nunca hubo una sola
  * política de RLS — no hacía falta ninguna.
  *
- * Las dos cosas juntas dejaban `SELECT, INSERT, UPDATE, DELETE,
- * TRUNCATE` sobre todas las tablas al alcance de cualquiera con la anon
- * key. Y la anon key **no es secreta**: es `NEXT_PUBLIC_`, viaja en el
- * bundle del navegador. Leer `usuario` entera, o vaciarla.
+ * El resultado: `SELECT, INSERT, UPDATE, DELETE, TRUNCATE` sobre todas
+ * las tablas, para un rol al que se llega con la anon key — que **no es
+ * secreta**: es `NEXT_PUBLIC_` y viaja en el bundle del navegador.
+ *
+ * **No hubo exposición**, porque la Data API estaba apagada y sin
+ * PostgREST no hay camino HTTP hasta esos permisos. Lo que había era
+ * toda la protección colgando de un toggle del panel: alcanzaba con que
+ * alguien lo prendiera una vez, para probar algo, y el agujero se abría
+ * solo. Esto lo cierra por abajo, donde no depende de una pantalla de
+ * configuración.
  *
  * **Por qué una migración y no un SQL a mano.** Por tres razones:
  *
