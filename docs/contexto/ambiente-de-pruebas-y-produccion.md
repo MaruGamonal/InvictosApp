@@ -55,7 +55,7 @@ Que estuviera apagada es lo que hizo que los permisos de `anon` no
 fueran alcanzables desde afuera. Lo que A2 agrega es que dejen de
 depender de este toggle.
 
-## A2. Desplegar
+## A2. Desplegar ✅ (06/11)
 
 **Dónde:** tu máquina y Vercel.
 
@@ -77,7 +77,7 @@ Este deploy lleva dos cosas que importan acá:
 - El host de las tareas saliendo del Vault en vez de estar escrito en el
   código.
 
-## A3. Comprobar producción
+## A3. Comprobar producción ✅ (06/11 — queda mirar el SMTP, abajo)
 
 **Dónde:** Supabase de producción → SQL Editor.
 
@@ -118,7 +118,7 @@ sesión y abrí una ficha de torneo. Si el login anda, Auth está bien; si
 se ven las fotos, Storage está bien. Es todo lo que podría haberse roto
 al apagar la Data API, y no debería.
 
-## A4. Dejar producción sin datos demo
+## A4. Dejar producción sin datos demo ⏸️ (postergado a propósito)
 
 Hay **dos formas**. La primera no necesita tener el proyecto instalado.
 
@@ -179,7 +179,7 @@ aparte.
 
 # Bloque B — Ambiente de pruebas
 
-## B1. Crear el proyecto de Supabase
+## B1. Crear el proyecto de Supabase ✅ (10/11)
 
 **Dónde:** panel de Supabase → New project.
 
@@ -240,7 +240,7 @@ corchetes incluidos.
 
 **Comprobación:** el proyecto figura *Active* y tenés las cuatro cosas.
 
-## B2. Configurar Auth
+## B2. Configurar Auth ✅ (10/11)
 
 **Dónde:** proyecto de pruebas → Authentication → URL Configuration.
 
@@ -346,7 +346,7 @@ Ojo con uno: el seed deja **una cuenta demo sin confirmar** a propósito,
 para poder ver el bloqueo de `verificarCuentaConfirmada`. Si un dueño
 entra con ésa y toca "Reenviar enlace", cae justo en el flujo roto.
 
-## B3. Cargar los dos secretos del Vault
+## B3. Cargar los dos secretos del Vault ✅ (10/11)
 
 **Dónde:** proyecto de pruebas → SQL Editor.
 
