@@ -671,7 +671,7 @@ estar desactualizadas.
 `https://pruebas.invicta.com.ar/torneos` —eligiendo una ciudad— aparecen
 torneos con `[DEMO]`.
 
-## B8. La comprobación final, la más barata
+## B8. La comprobación final, la más barata ✅ (10/11)
 
 Las dos pestañas, una al lado de la otra:
 
@@ -709,15 +709,21 @@ Un mensaje con:
 
 ### Si alguien no recibe el correo de confirmación
 
-Es lo primero que va a pasar. Dos causas, en orden de probabilidad:
+Con el SMTP propio de B2.1 configurado, las dos causas históricas
+—que Supabase sólo entregue a los miembros del proyecto, y que no se
+puedan editar las plantillas— ya no aplican. Lo que queda:
 
-1. **Resend en modo sandbox** sólo entrega a direcciones verificadas.
-   Afecta al correo de verificación de organización. Se arregla
-   verificando el dominio en Resend, o agregando esas direcciones.
-2. **El correo de confirmación de cuenta** lo manda Supabase Auth, no
-   Resend, y tiene un límite de envíos por hora en el plan gratuito.
+1. **El límite de envíos.** Con SMTP propio arranca en 30 por hora, y
+   se sube en Authentication → Rate Limits. Si varios dueños piden
+   enlaces a la vez, es alcanzable.
+2. **La cuota de Resend**, compartida con producción si usás la misma
+   API key. Mirala en el panel de Resend antes de abrir.
+3. **Spam.** El dominio tiene SPF, DKIM y DMARC, así que no debería,
+   pero es lo primero que hay que descartar.
 
-Mientras tanto, siempre podés pasarles una cuenta demo.
+**Para entrar no hace falta ningún correo**: las cuentas demo tienen
+contraseña. Deciles que usen eso y no "olvidé mi contraseña", y el
+problema no aparece.
 
 ---
 
