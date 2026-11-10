@@ -280,11 +280,23 @@ Con la misma cuenta de Resend que ya usás para los correos de producto:
 | Port | `465` |
 | Username | `resend` (literal, esa palabra) |
 | Password | tu API key de Resend, la que empieza con `re_` |
-| Sender email | el mismo de `CORREO_REMITENTE` |
+| Sender email | **sólo la dirección**: `avisos@invicta.com.ar` |
 | Sender name | `INVICTA (pruebas)` |
 
-La dirección del remitente tiene que estar en un dominio verificado en
-Resend — si usás el mismo que producción, ya lo está.
+**Ojo con el Sender email.** La variable `CORREO_REMITENTE` que ya está
+en Vercel vale `INVICTA <avisos@invicta.com.ar>` —nombre y dirección
+juntos, que es el formato que pide la API de Resend—. Supabase los pide
+en **dos campos separados**: en *Sender email* va sólo
+`avisos@invicta.com.ar`, sin el nombre ni los `<>`. Si pegás la variable
+entera ahí, el correo sale mal o Resend lo rechaza.
+
+Dónde está el valor, si no lo tenés a mano: Vercel → Settings →
+Environment Variables → filtrá `Production` → `CORREO_REMITENTE`. O en
+el panel de Resend → Domains, que es el dominio verificado.
+
+La dirección tiene que estar en un dominio verificado en Resend — si es
+el mismo que producción, ya lo está (SPF, DKIM y DMARC se hicieron el
+02/10).
 
 **Comprobación:** la pantalla de Templates deja escribir. Si sigue
 diciendo que necesitás SMTP, no quedó guardado.
@@ -407,7 +419,7 @@ Production y Development).
 | `NEXT_PUBLIC_SITE_URL` | `https://pruebas.invicta.com.ar` |
 | `CRON_SECRET` | el de B3, **idéntico** |
 | `RESEND_API_KEY` | la misma de producción, o una de prueba |
-| `CORREO_REMITENTE` | el mismo de producción |
+| `CORREO_REMITENTE` | el mismo de producción, **entero**: `INVICTA <avisos@invicta.com.ar>` |
 | `SENTRY_DSN` | uno aparte, o dejarla sin definir |
 
 **Las dos cadenas son obligatorias.** Si falta
