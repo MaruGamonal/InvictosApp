@@ -561,7 +561,7 @@ Hay que redesplegar: Deployments → el de la rama `pruebas` → menú `···`
 → Redeploy. B6 y B7 vienen después, así que si preferís, redesplegá una
 sola vez al terminar B6.
 
-## B6. El dominio
+## B6. El dominio ✅ (10/11 — banda amarilla verificada)
 
 **Dónde:** Settings → Domains → Add.
 
@@ -571,8 +571,36 @@ sola vez al terminar B6.
    dominio, elegir `Preview` como ambiente y escribir `pruebas` en el
    campo *Git Branch*. Si esto queda sin hacer, el dominio apunta a
    producción.
-3. Cargá en tu DNS el registro que Vercel indique (suele ser un `CNAME`
-   a `cname.vercel-dns.com`).
+3. Cargá en tu DNS el registro que Vercel indique. El destino es un
+   nombre propio del proyecto (`<algo>.vercel-dns-017.com`), no el
+   genérico `cname.vercel-dns.com`: copialo con el botón de copiar de
+   la columna Value, porque son quince caracteres al azar donde un
+   cero por una o no se ve y el síntoma es el mismo «Invalid
+   Configuration» sin pista.
+
+   En el campo *Target* va **el nombre pelado**, no una URL: sin
+   `https://` y sin barra al final.
+
+   **Si el DNS está en Cloudflare**, el registro va con **Proxy status
+   en DNS only** —la nubecita gris—. Vercel lo pide explícitamente en
+   la columna *Proxy: Disabled*. Con el proxy naranja, Cloudflare
+   contesta por el dominio, Vercel no puede validarlo ni emitir el
+   certificado, y la fila se queda en rojo sin decir por qué.
+
+4. **Un dominio recién asignado no se sirve solo.** Vercel engancha los
+   dominios a un despliegue **cuando lo crea**, así que los despliegues
+   anteriores a la asignación no lo llevan: la fila queda en «No
+   Deployment», con un mensaje que sugiere *"push to <rama de
+   producción>"*. **No hagas eso** —desplegaría producción—. Mandá un
+   push a la rama `pruebas` y el despliegue nuevo toma el dominio.
+
+> **Ojo con el `www.`:** si al agregar el dominio queda
+> `www.pruebas.invicta.com.ar`, no sirve. Hay cuatro lugares que ya
+> dicen `https://pruebas.invicta.com.ar` —`NEXT_PUBLIC_SITE_URL`, el
+> Site URL y las Redirect URLs de Supabase, y `host_canonico` en el
+> Vault—, y el último rompe las tareas programadas sin decir por qué:
+> `pg_net` pierde la cabecera `Authorization` al seguir una redirección
+> que cambia de host.
 
 > **Sin dominio fijo no sirve:** la URL de un Preview cambia en cada
 > deploy y no se la podés pasar a nadie.
