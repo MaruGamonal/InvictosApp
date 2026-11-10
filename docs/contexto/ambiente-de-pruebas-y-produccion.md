@@ -449,6 +449,39 @@ ganar.
 Por cada una: nombre, valor, y **tildar sólo `Preview`** (destildar
 Production y Development).
 
+**Varias ya existen, y compartidas con producción.** Al intentar
+agregarlas, Vercel contesta *"A variable with the name X already exists
+for the target preview,production on branch undefined"*. Eso quiere
+decir que esa variable hoy vale **para los dos ambientes**: Production
+y Preview leen el mismo valor, el de producción.
+
+Es importante entender qué implica, porque no es sólo un estorbo para
+cargar las nuevas: **mientras siga así, cualquier rama que no sea la de
+producción se despliega apuntando a la base de producción.** Y el
+`buildCommand` de `vercel.json` es `npm run migrate:deploy && next
+build`, así que ese despliegue además corre las migraciones contra esa
+base. No es destructivo —`node-pg-migrate up` aplica sólo las
+pendientes, y una rama salida de producción no tiene ninguna—, pero el
+sitio que queda publicado en la URL del preview es producción con otra
+dirección.
+
+Hasta hoy no pasaba nada porque no había ninguna rama además de la de
+producción. La rama `pruebas` es la primera.
+
+**Qué hacer con cada una que ya existe**, en este orden:
+
+1. Entrá a la que existe → `Edit` → **destildá `Preview`**, dejá sólo
+   `Production` → Save. Eso deja el valor de producción donde tiene que
+   estar y libera el nombre para Preview.
+2. Agregá la nueva, con el valor del ambiente de pruebas, tildando
+   `Preview` y escribiendo `pruebas` en *Git Branch*.
+
+Hay un atajo: Vercel le da precedencia a un valor atado a una rama por
+encima de uno general de Preview, así que agregando sólo el paso 2
+`pruebas` ya tomaría el valor correcto. **No lo tomes.** Deja el
+problema de arriba intacto para la próxima rama que abras, que es
+exactamente el día en que no te vas a acordar de esto.
+
 **Mejor todavía: atalas a la rama.** Al tildar `Preview`, Vercel deja
 poner un nombre de rama en el campo *Git Branch*. Si ponés `pruebas`,
 la variable vale **sólo** para esa rama; si lo dejás vacío, vale para
