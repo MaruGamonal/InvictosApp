@@ -610,7 +610,7 @@ sola vez al terminar B6.
 no son reales». Si la banda no está, `NEXT_PUBLIC_AMBIENTE` no quedó en
 Preview: volvé a B5.
 
-## B7. Sembrar los datos demo
+## B7. Sembrar los datos demo ✅ (10/11 — 24 chequeos pasados)
 
 **Dónde:** tu máquina. Si todavía no la preparaste, empezá por
 **`preparar-la-maquina-windows.md`** — este paso no se puede hacer
