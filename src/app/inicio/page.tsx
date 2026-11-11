@@ -12,6 +12,7 @@ import { TarjetaActividad } from '@/components/TarjetaActividad';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { SinProximoPartido } from './SinProximoPartido';
 import styles from './pagina.module.css';
 import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
@@ -250,17 +251,7 @@ export default async function PaginaInicio({
                 </Link>
               </section>
             ) : (
-              <div className={styles.pasoSiguiente}>
-                <div className={`fuente-display ${styles.pasoSiguienteTitulo}`}>
-                  Sin partido programado
-                </div>
-                <p className={styles.pasoSiguienteTexto}>
-                  Mientras tanto, descubrí otro torneo para tu equipo.
-                </p>
-                <Link href="/torneos" className={styles.pasoSiguienteBoton}>
-                  Descubrir torneos
-                </Link>
-              </div>
+              <SinProximoPartido torneos={inicio.jugador.torneos} />
             )}
 
             {bloqueAhoraActividad}
