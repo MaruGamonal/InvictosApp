@@ -39,7 +39,7 @@ export default async function PaginaListaDeBuenaFe({
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link href={`/torneo/${id}`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
@@ -58,6 +58,6 @@ export default async function PaginaListaDeBuenaFe({
       />
 
       <p className={styles.textoAyuda}>El DT no ocupa cupo de jugadores.</p>
-    </div>
+    </main>
   );
 }

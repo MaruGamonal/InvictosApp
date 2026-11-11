@@ -17,7 +17,7 @@ export default async function PaginaPreferencias() {
   const preferencias = await obtenerPreferenciasNotificacion(undefined, contexto);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link
         href="/notificaciones"
         className={styles.enlaceVolver}
@@ -38,6 +38,6 @@ export default async function PaginaPreferencias() {
       </Link>
       <h1 className={`fuente-display ${styles.titulo}`}>Preferencias</h1>
       <PanelPreferencias preferenciasIniciales={preferencias} />
-    </div>
+    </main>
   );
 }

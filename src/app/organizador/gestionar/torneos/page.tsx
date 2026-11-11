@@ -27,7 +27,7 @@ export default async function PaginaTorneosDeLaOrganizacion() {
   return (
     <div className={styles.contenidoPagina}>
       <section className={styles.seccion}>
-        <h2 className={styles.tituloSeccion}>Mis torneos</h2>
+        <h1 className={styles.tituloSeccion}>Mis torneos</h1>
 
         {/* El mismo botón que en Inicio: si la organización no puede
             publicar otro torneo (`06`, D-51), acá tampoco. Un atajo

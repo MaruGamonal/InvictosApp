@@ -33,7 +33,7 @@
 }
 
 .fecha {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--identidad-texto-secundario);
@@ -101,7 +101,7 @@
 }
 
 .dato dt {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-texto-terciario);
@@ -318,7 +318,7 @@
 }
 
 .entro {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-texto-terciario);
@@ -372,7 +372,7 @@
   padding: 0 10px;
   border: 0;
   background: var(--color-superficie);
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   color: var(--color-texto-secundario);
   cursor: pointer;
 }

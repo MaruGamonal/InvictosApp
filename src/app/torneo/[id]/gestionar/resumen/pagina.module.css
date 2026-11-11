@@ -23,7 +23,7 @@
 }
 
 .etiquetaProximo {
-  font: 700 11px/1 var(--fuente-texto);
+  font: 700 12px/1 var(--fuente-texto);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--acento);
@@ -145,7 +145,7 @@
 
 .tituloEspera {
   margin: 0;
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-texto-terciario);

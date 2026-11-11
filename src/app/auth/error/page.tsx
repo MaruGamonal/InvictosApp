@@ -27,7 +27,7 @@ export default async function PaginaErrorDeAcceso({
   const { motivo } = await searchParams;
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <h1 className="fuente-display">El enlace no funcionó</h1>
       <p className={styles.texto}>
         Puede haber vencido o ya haberse usado. Pedí uno nuevo para entrar.
@@ -36,6 +36,6 @@ export default async function PaginaErrorDeAcceso({
         Volver a ingresar
       </Link>
       {motivo ? <p className={styles.motivo}>Código del error: {motivo}</p> : null}
-    </div>
+    </main>
   );
 }

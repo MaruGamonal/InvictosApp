@@ -74,7 +74,7 @@ export default async function PaginaDescubrimiento({
 
   if (!ciudadId) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <header className={styles.hero}>
           <MarcaInvicta />
           <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
@@ -84,7 +84,7 @@ export default async function PaginaDescubrimiento({
           <SelectorDeCiudad provincias={provincias} alElegirCiudad={elegirCiudad} />
         </div>
         <NavInferior activo="torneos" />
-      </div>
+      </main>
     );
   }
 
@@ -116,7 +116,7 @@ export default async function PaginaDescubrimiento({
   });
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <header className={styles.hero}>
         <MarcaInvicta />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Torneos cerca de vos</h1>
@@ -316,6 +316,6 @@ export default async function PaginaDescubrimiento({
       </div>
 
       <NavInferior activo="torneos" />
-    </div>
+    </main>
   );
 }

@@ -1,0 +1,14 @@
+/* El mismo "← Volver" que ya usaban ranking, invitar o la lista de
+   buena fe, con su área táctil. */
+.enlace {
+  composes: area-tactil from global;
+  align-self: flex-start;
+  color: var(--color-texto-secundario);
+  font: 600 13px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+.enlace:focus-visible {
+  outline: 2px solid var(--acento-oscuro);
+  outline-offset: 2px;
+}

@@ -7,6 +7,7 @@ import { AvisoCuentaNoConfirmada } from '@/components/AvisoCuentaNoConfirmada';
 import { estadoParaCrear } from '@/app/_puedeCrear';
 import { FormularioCrearEquipo } from './FormularioCrearEquipo';
 import styles from '../../ingresar/pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = { title: conNombreProducto('Crear equipo') };
 
@@ -20,18 +21,20 @@ export default async function PaginaCrearEquipo() {
   const { cuentaConfirmada } = await estadoParaCrear(contexto);
   if (!cuentaConfirmada) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
+        <EnlaceVolver alternativa="/inicio" />
         <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
         <AvisoCuentaNoConfirmada mensaje="Confirmá tu cuenta para crear un equipo — revisá tu correo o pedí que te reenviemos el enlace." />
-      </div>
+      </main>
     );
   }
 
   const provincias = await listarCiudadesCacheado();
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
+      <EnlaceVolver alternativa="/inicio" />
       <FormularioCrearEquipo provincias={provincias} />
-    </div>
+    </main>
   );
 }

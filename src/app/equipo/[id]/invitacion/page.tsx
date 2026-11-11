@@ -34,13 +34,13 @@ export default async function PaginaResponderInvitacion({
     .join(' y ');
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Escudo src={invitacion.escudoUrl} nombre={invitacion.equipoNombre} tamano={72} />
       <h1 className={`fuente-display ${styles.titulo}`}>{invitacion.equipoNombre} te invita</h1>
       <p className={styles.texto}>
         Como {rolesTexto}. Podés aceptar o rechazar — rechazar no queda a la vista de nadie.
       </p>
       <BotonesResponderInvitacion equipoId={id} />
-    </div>
+    </main>
   );
 }

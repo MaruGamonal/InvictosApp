@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioRecuperacion } from './FormularioRecuperacion';
 import styles from '../ingresar/pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = {
   title: conNombreProducto('Recuperar acceso'),
@@ -11,8 +12,9 @@ export const metadata: Metadata = {
 /** "¿Olvidaste tu contraseña?" — llega desde el link en `/ingresar`. */
 export default function PaginaRecuperarPassword() {
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
+      <EnlaceVolver alternativa="/ingresar" />
       <FormularioRecuperacion />
-    </div>
+    </main>
   );
 }
