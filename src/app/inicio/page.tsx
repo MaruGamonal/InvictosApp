@@ -134,7 +134,7 @@ export default async function PaginaInicio({
                 modalidad={torneo.modalidad}
                 division={torneo.division}
                 imagenUrl={torneo.imagenUrl}
-                etiquetaDerecha="En curso"
+                estadoComoBadge="in_progress"
               />
             ))}
           </div>
