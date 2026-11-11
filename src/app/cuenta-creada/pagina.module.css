@@ -15,7 +15,7 @@
   width: 60px;
   height: 60px;
   border-radius: var(--radio-pill);
-  background: rgba(0, 168, 204, 0.15);
+  background: var(--acento-fondo);
   color: var(--acento-oscuro);
   display: flex;
   align-items: center;

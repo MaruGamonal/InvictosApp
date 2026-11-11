@@ -48,7 +48,7 @@
 
 .color {
   height: 40px;
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   border: 1px solid var(--borde-sutil);
 }
 

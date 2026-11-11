@@ -70,7 +70,7 @@
 
 .campo select {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 10px 12px;
   font-family: var(--fuente-texto);
   font-size: 14px;
@@ -177,7 +177,7 @@
 }
 
 .dialogo::backdrop {
-  background: rgba(14, 23, 32, 0.55);
+  background: var(--velo);
 }
 
 .filaTitulo {

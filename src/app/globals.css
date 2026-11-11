@@ -127,6 +127,25 @@
   --espacio-gap-seccion: 20px;
 
   --sombra-tarjeta: 0 1px 2px rgba(14, 23, 32, 0.06);
+
+  /* Lo que flota sobre el contenido: avisos, la barra de descubrimiento. */
+  --sombra-flotante: 0 8px 24px rgba(14, 23, 32, 0.14);
+
+  /* El velo detrás de un diálogo o una hoja. Había dos —0.55 y 0.72— sin
+     un motivo escrito para la diferencia: uno solo. */
+  --velo: rgba(14, 23, 32, 0.65);
+
+  /* Radio de campos, opciones y chips chicos: un escalón debajo del de
+     botón. Estaba escrito a mano en 21 lugares. */
+  --radio-campo: 6px;
+
+  /* Un chip o etiqueta translúcida sobre una superficie oscura (la
+     cabecera): se ve el fondo a través. Estaba duplicado. */
+  --fondo-sobre-oscuro: rgba(255, 255, 255, 0.08);
+  --borde-sobre-oscuro: rgba(255, 255, 255, 0.24);
+
+  /* Fondo suave del acento, para un ícono o un círculo de énfasis. */
+  --acento-fondo: rgba(0, 168, 204, 0.15);
 }
 
 /* Tres densidades (`08`, 6.5), aplicables por pantalla con un atributo. */

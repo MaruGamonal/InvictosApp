@@ -57,7 +57,7 @@
   background: var(--acento);
   color: var(--acento-texto-sobre);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 8px 14px;
   font: 700 13px/1 var(--fuente-texto);
   cursor: pointer;
@@ -72,7 +72,7 @@
 .botonSecundarioChico {
   background: none;
   border: 1.5px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 7px 12px;
   font: 700 12px/1 var(--fuente-texto);
   color: var(--color-texto);

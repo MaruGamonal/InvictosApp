@@ -145,7 +145,7 @@
   flex: 1;
   min-width: 140px;
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 8px 10px;
   font-family: var(--fuente-texto);
   font-size: 13px;
@@ -169,7 +169,7 @@
   background: var(--acento);
   color: var(--acento-texto-sobre);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 8px 14px;
   font: 700 13px/1 var(--fuente-texto);
   cursor: pointer;
@@ -201,7 +201,7 @@
 .botonPeligroChico {
   background: none;
   border: 1.5px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 7px 12px;
   font: 700 12px/1 var(--fuente-texto);
   cursor: pointer;
@@ -242,7 +242,7 @@
 .formularioChico select,
 .formularioChico textarea {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 11px 12px;
   font-family: var(--fuente-texto);
   font-size: 14px;
@@ -311,7 +311,7 @@
 .filaGoles input {
   width: 56px;
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 8px;
   font-family: var(--fuente-texto);
   font-size: 14px;
@@ -331,7 +331,7 @@
 .campoJugadorDelPartido select {
   font-weight: 400;
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 8px;
   font-family: var(--fuente-texto);
   font-size: 14px;
@@ -357,7 +357,7 @@
 
 .filaEvento select {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 7px 8px;
   font-family: var(--fuente-texto);
   font-size: 13px;

@@ -174,7 +174,7 @@
 .botonPeligroChico {
   background: none;
   border: 1.5px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 7px 12px;
   font: 700 12px/1 var(--fuente-texto);
   cursor: pointer;
@@ -202,7 +202,7 @@
 .formularioChico input[type='text'],
 .formularioChico select {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 11px 12px;
   font-family: var(--fuente-texto);
   font-size: 14px;
