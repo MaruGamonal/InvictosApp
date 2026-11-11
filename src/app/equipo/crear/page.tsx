@@ -20,18 +20,18 @@ export default async function PaginaCrearEquipo() {
   const { cuentaConfirmada } = await estadoParaCrear(contexto);
   if (!cuentaConfirmada) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
         <AvisoCuentaNoConfirmada mensaje="Confirmá tu cuenta para crear un equipo — revisá tu correo o pedí que te reenviemos el enlace." />
-      </div>
+      </main>
     );
   }
 
   const provincias = await listarCiudadesCacheado();
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioCrearEquipo provincias={provincias} />
-    </div>
+    </main>
   );
 }

@@ -161,9 +161,10 @@ export default async function PaginaInicio({
   );
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <CabeceraDeModo
         modo="jugador"
+        nombreComoTitulo
         nombreUsuario={inicio.nombreUsuario}
         puedeCambiarDeModo={inicio.esOrganizador}
       />
@@ -357,6 +358,6 @@ export default async function PaginaInicio({
       </div>
 
       <NavInferior activo="inicio" autenticado />
-    </div>
+    </main>
   );
 }

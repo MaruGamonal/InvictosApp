@@ -29,7 +29,7 @@ export default async function PaginaPerfil() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <header className={styles.hero}>
         <MarcaInvicta conEnlaceIngresar={false} />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Perfil</h1>
@@ -101,6 +101,6 @@ export default async function PaginaPerfil() {
       </div>
 
       <NavInferior activo="perfil" autenticado />
-    </div>
+    </main>
   );
 }

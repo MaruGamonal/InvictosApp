@@ -62,11 +62,11 @@ export default async function PaginaIngresar({
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioIngreso
         modoInicial={modo === 'crear' ? 'crear' : 'ingresar'}
         accionPendiente={accionPendiente}
       />
-    </div>
+    </main>
   );
 }

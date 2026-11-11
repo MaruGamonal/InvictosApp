@@ -23,7 +23,7 @@ export default async function PaginaReglamentoInicial({
   if (!contexto.usuarioId) redirect('/ingresar');
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <div className={styles.tarjeta}>
         <h1 className={`fuente-display ${styles.titulo}`}>
           Reglamento <span className={styles.textoOpcional}>(opcional)</span>
@@ -33,6 +33,6 @@ export default async function PaginaReglamentoInicial({
         </p>
         <FormularioReglamentoInicial torneoId={id} />
       </div>
-    </div>
+    </main>
   );
 }

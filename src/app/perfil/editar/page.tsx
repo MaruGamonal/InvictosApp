@@ -20,8 +20,8 @@ export default async function PaginaEditarPerfil() {
   ]);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioEditarPerfil perfil={perfil} provincias={provincias} />
-    </div>
+    </main>
   );
 }

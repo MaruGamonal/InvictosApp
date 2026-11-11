@@ -28,15 +28,15 @@ export default async function PaginaCrearTorneo() {
   const { cuentaConfirmada, tieneOrganizacion } = await estadoParaCrear(contexto);
   if (!cuentaConfirmada) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <h1 className={`fuente-display ${styles.titulo}`}>Crear torneo</h1>
         <AvisoCuentaNoConfirmada mensaje="Confirmá tu cuenta para crear un torneo — revisá tu correo o pedí que te reenviemos el enlace." />
-      </div>
+      </main>
     );
   }
   if (!tieneOrganizacion) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <h1 className={`fuente-display ${styles.titulo}`}>Crear torneo</h1>
         <p className={styles.texto}>
           Los torneos nacen bajo una organización. Creá la tuya y volvé a esta pantalla.
@@ -44,15 +44,15 @@ export default async function PaginaCrearTorneo() {
         <Link href="/organizador/gestionar/crear" className={styles.boton}>
           Crear mi organización
         </Link>
-      </div>
+      </main>
     );
   }
 
   const provincias = await listarCiudadesCacheado();
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioCrearTorneo provincias={provincias} />
-    </div>
+    </main>
   );
 }

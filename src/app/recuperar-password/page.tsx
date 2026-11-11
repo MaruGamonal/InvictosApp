@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 /** "¿Olvidaste tu contraseña?" — llega desde el link en `/ingresar`. */
 export default function PaginaRecuperarPassword() {
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioRecuperacion />
-    </div>
+    </main>
   );
 }

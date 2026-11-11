@@ -18,7 +18,7 @@ export const metadata: Metadata = {
  */
 export default function PaginaCuentaCreada() {
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <div className={styles.icono}>
         <svg
           width="24"
@@ -46,6 +46,6 @@ export default function PaginaCuentaCreada() {
       <Link href="/inicio" className={styles.boton}>
         Empezar
       </Link>
-    </div>
+    </main>
   );
 }

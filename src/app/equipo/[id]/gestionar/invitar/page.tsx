@@ -25,12 +25,12 @@ export default async function PaginaInvitarIntegrante({
   if (!roles.includes('captain') && !roles.includes('delegate')) redirect(`/equipo/${id}`);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
       <h1 className={`fuente-display ${styles.titulo}`}>Invitar integrante</h1>
       <FormularioInvitarIntegrante equipoId={id} />
-    </div>
+    </main>
   );
 }

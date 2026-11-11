@@ -234,3 +234,20 @@ input[type='radio'] {
   flex-shrink: 0;
   accent-color: var(--acento-oscuro);
 }
+
+/**
+ * Texto sólo para lector de pantalla: está en el documento (un `<h1>`
+ * que la pantalla no muestra, una aclaración) pero no se ve. Recortado a
+ * 1px y no con `display: none`, que lo esconde también del lector.
+ */
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
