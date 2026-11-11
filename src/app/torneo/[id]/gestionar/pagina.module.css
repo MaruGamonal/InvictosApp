@@ -31,7 +31,7 @@
 }
 
 .tituloSeccion {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-texto-terciario);
@@ -123,7 +123,7 @@
 }
 
 .rolIntegrante {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-texto-secundario);
@@ -421,7 +421,7 @@
 }
 
 .marcaAvisa {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--acento-oscuro);
   flex: none;
@@ -552,7 +552,7 @@
   border-radius: 10px;
   background: var(--acento);
   color: var(--acento-texto-sobre);
-  font: 700 11px/1 var(--fuente-texto);
+  font: 700 12px/1 var(--fuente-texto);
 }
 
 .nombreCriterio {

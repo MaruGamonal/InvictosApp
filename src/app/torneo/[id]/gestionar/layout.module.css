@@ -95,7 +95,7 @@
   border-radius: 9px;
   background: var(--acento);
   color: var(--acento-texto-sobre);
-  font: 700 11px/1 var(--fuente-texto);
+  font: 700 12px/1 var(--fuente-texto);
   font-variant-numeric: tabular-nums;
 }
 

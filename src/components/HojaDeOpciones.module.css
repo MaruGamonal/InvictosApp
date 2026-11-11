@@ -70,7 +70,7 @@
   border-radius: var(--radio-pill);
   background: var(--fondo-sobre-oscuro);
   color: var(--identidad-texto);
-  font: 700 11px/1 var(--fuente-texto);
+  font: 700 12px/1 var(--fuente-texto);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   cursor: pointer;

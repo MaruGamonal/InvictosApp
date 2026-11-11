@@ -32,7 +32,7 @@
 
 .etiquetaDerecha {
   flex: none;
-  font: 700 10px/1 var(--fuente-texto);
+  font: 700 12px/1 var(--fuente-texto);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-texto-secundario);
