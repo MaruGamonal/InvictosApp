@@ -3,8 +3,13 @@ node_modules/
 out/
 build/
 dist/
+# Cualquier .env, no sólo los dos nombres conocidos: al trabajar con dos
+# ambientes se terminan guardando copias (`.env.pruebas`,
+# `.env.produccion`) y cada una lleva credenciales.
 .env
-.env.local
+.env.*
+# ...salvo la plantilla sin valores, que sí va al repositorio.
+!.env.example
 *.log
 .DS_Store
 coverage/
