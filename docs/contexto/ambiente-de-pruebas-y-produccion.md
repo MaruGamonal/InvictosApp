@@ -152,11 +152,44 @@ Imprime el ambiente y el host **antes** de mirar nada, y termina con
 código 1 si encuentra algo, así que también sirve en un paso
 automático.
 
+### Antes de borrar nada: qué más hay
+
+La auditoría dice cuánto hay **para borrar**. Lo que no dice es qué
+queda. Pegá entero **`db/consultas/que-hay-en-produccion.sql`** en el
+SQL Editor de producción —sólo lee— y mirá las dos listas que devuelve:
+los torneos y las cuentas que **no** están marcados como demo, que son
+los que `demo:limpiar` no va a tocar.
+
+La columna que manda es **`se_ve_en_el_buscador`**. Un torneo sólo
+aparece en el descubrimiento si es `public` **y** su organización está
+verificada (D-51). Lo que diga «SÍ — lo encuentra cualquiera» es lo que
+un visitante ve hoy; el resto existe pero no lo encuentra nadie sin el
+enlace. Esa columna convierte «hay 14 torneos que no sé qué son» en una
+lista corta de cosas que decidir.
+
 ### Si aparece algo
 
 Son datos de alguna corrida vieja del seed. Para borrarlos hace falta
-la forma 2, porque la limpieza respeta el orden de dependencias entre
-tablas y eso no es una consulta suelta:
+la forma 2 por dos razones, y la segunda no se arregla con SQL: la
+limpieza respeta el orden de dependencias entre tablas —unos veinte
+pasos de hijos a padres— y además **borra las cuentas de Supabase
+Auth**, que no viven en la base y sólo se tocan por la API de
+administración. Una consulta suelta en el SQL Editor dejaría las
+cuentas colgadas.
+
+> **Antes de empezar: ¿tenés la contraseña de la base de producción?**
+> La necesitás para armar el `DATABASE_URL`, y el que está en Vercel es
+> `Secret`, o sea que no se puede volver a leer. Si no la tenés, la
+> salida es *Reset database password* en Supabase — pero eso **corta
+> producción**: las cadenas que Vercel tiene guardadas dejan de servir
+> hasta que cargues las nuevas en `DATABASE_URL` y
+> `DATABASE_URL_MIGRACIONES` y redesplegues. Son unos minutos de sitio
+> caído, y conviene que sean una decisión y no una sorpresa a mitad de
+> camino.
+>
+> Y guardá antes tu `.env` de pruebas (`Copy-Item .env .env.pruebas`),
+> porque estos pasos lo pisan.
+
 
 ```bash
 # 1. Agregá al .env:  NEXT_PUBLIC_AMBIENTE=pruebas
