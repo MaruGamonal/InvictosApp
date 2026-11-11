@@ -64,13 +64,6 @@
   border: none;
 }
 
-/* El mapa se alcanza con Tab y no mostraba dónde estaba el foco
-   (WCAG 2.4.7). */
-.mapa iframe:focus-visible {
-  outline: 2px solid var(--acento-oscuro);
-  outline-offset: 2px;
-}
-
 .enlaceMapa {
   composes: area-tactil from global;
   align-self: flex-start;
