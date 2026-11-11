@@ -93,6 +93,40 @@
   font: 600 13px/1.3 var(--fuente-texto);
 }
 
+/* Local · marcador · visitante, con el marcador centrado y en display. */
+.ultimoResultado {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  margin-top: 4px;
+}
+
+.ultimoEquipo {
+  min-width: 0;
+  font: 600 13px/1.25 var(--fuente-texto);
+  color: var(--color-texto);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+}
+
+.ultimoVisitante {
+  text-align: right;
+}
+
+.ultimoMarcador {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
 .pie {
   display: flex;
   align-items: center;
