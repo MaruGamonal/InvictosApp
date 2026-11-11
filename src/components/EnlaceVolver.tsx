@@ -13,7 +13,7 @@ import styles from './EnlaceVolver.module.css';
  *
  * Vuelve a donde estaba la persona si llegó navegando la app, y si
  * llegó de afuera —un link de WhatsApp, un mail— va a `alternativa`, en
- * vez de sacarla de INVICTA.
+ * vez de sacarla de la aplicación.
  */
 export function EnlaceVolver({ alternativa }: { alternativa: string }) {
   const router = useRouter();
