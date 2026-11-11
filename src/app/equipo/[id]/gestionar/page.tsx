@@ -16,6 +16,7 @@ import { FormularioEditarEquipo } from './FormularioEditarEquipo';
 import { BotonArchivarEquipo } from './BotonArchivarEquipo';
 import { PanelDejarEquipo } from './PanelDejarEquipo';
 import styles from './pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar equipo') };
 
@@ -61,6 +62,7 @@ export default async function PaginaGestionarEquipo({
   if (!puedeGestionar) {
     return (
       <main className={styles.pagina}>
+        <EnlaceVolver alternativa={`/equipo/${id}`} />
         <h1 className={`fuente-display ${styles.titulo}`}>{equipo.nombre}</h1>
         <p className={styles.textoIntegrante}>
           Sos parte del plantel. Quien lleva el equipo —capitán o delegado— es quien lo edita,
@@ -78,6 +80,7 @@ export default async function PaginaGestionarEquipo({
 
   return (
     <main className={styles.pagina}>
+      <EnlaceVolver alternativa={`/equipo/${id}`} />
       <h1 className={`fuente-display ${styles.titulo}`}>Gestionar {equipo.nombre}</h1>
 
       <section className={styles.seccion}>

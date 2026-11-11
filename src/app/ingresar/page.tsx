@@ -4,6 +4,7 @@ import { construirContexto } from '@/lib/contexto';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioIngreso, type AccionPendienteDeLaUrl } from './FormularioIngreso';
 import styles from './pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = {
   title: conNombreProducto('Ingresar'),
@@ -63,6 +64,7 @@ export default async function PaginaIngresar({
 
   return (
     <main className={styles.pagina}>
+      <EnlaceVolver alternativa="/" />
       <FormularioIngreso
         modoInicial={modo === 'crear' ? 'crear' : 'ingresar'}
         accionPendiente={accionPendiente}

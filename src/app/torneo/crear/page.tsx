@@ -8,6 +8,7 @@ import { AvisoCuentaNoConfirmada } from '@/components/AvisoCuentaNoConfirmada';
 import { estadoParaCrear } from '@/app/_puedeCrear';
 import { FormularioCrearTorneo } from './FormularioCrearTorneo';
 import styles from '../../ingresar/pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = { title: conNombreProducto('Crear torneo') };
 
@@ -29,6 +30,7 @@ export default async function PaginaCrearTorneo() {
   if (!cuentaConfirmada) {
     return (
       <main className={styles.pagina}>
+        <EnlaceVolver alternativa="/organizador/gestionar" />
         <h1 className={`fuente-display ${styles.titulo}`}>Crear torneo</h1>
         <AvisoCuentaNoConfirmada mensaje="Confirmá tu cuenta para crear un torneo — revisá tu correo o pedí que te reenviemos el enlace." />
       </main>
@@ -37,6 +39,7 @@ export default async function PaginaCrearTorneo() {
   if (!tieneOrganizacion) {
     return (
       <main className={styles.pagina}>
+        <EnlaceVolver alternativa="/organizador/gestionar" />
         <h1 className={`fuente-display ${styles.titulo}`}>Crear torneo</h1>
         <p className={styles.texto}>
           Los torneos nacen bajo una organización. Creá la tuya y volvé a esta pantalla.
@@ -52,6 +55,7 @@ export default async function PaginaCrearTorneo() {
 
   return (
     <main className={styles.pagina}>
+      <EnlaceVolver alternativa="/organizador/gestionar" />
       <FormularioCrearTorneo provincias={provincias} />
     </main>
   );
