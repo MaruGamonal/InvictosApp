@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import type { PendientesPorPestana } from './_pendientes';
@@ -47,13 +48,29 @@ export function PestanasGestion({
   rolEnTorneo: 'organizacion' | 'colaborador';
 }) {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+
+  // La barra se desplaza de costado: a 360px no entran las cinco
+  // pestañas, y la activa podía quedar cortada contra el borde
+  // ("Resultado…"), justo la que dice dónde está la persona. Se lleva a
+  // la vista moviendo sólo la barra, sin mover la página.
+  useEffect(() => {
+    const nav = navRef.current;
+    const activa = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !activa) return;
+    const caja = nav.getBoundingClientRect();
+    const pestana = activa.getBoundingClientRect();
+    if (pestana.right > caja.right) nav.scrollLeft += pestana.right - caja.right + 16;
+    else if (pestana.left < caja.left) nav.scrollLeft -= caja.left - pestana.left + 16;
+  }, [pathname]);
+
   const visibles =
     rolEnTorneo === 'organizacion'
       ? PESTANAS
       : PESTANAS.filter((p) => PESTANAS_DE_COLABORADOR.has(p.segmento));
 
   return (
-    <nav className={styles.nav} aria-label="Secciones de gestión">
+    <nav ref={navRef} className={styles.nav} aria-label="Secciones de gestión">
       {visibles.map((pestana) => {
         const href = `/torneo/${torneoId}/gestionar/${pestana.segmento}`;
         // `startsWith` y no `===`: Configuración tiene una pantalla por
