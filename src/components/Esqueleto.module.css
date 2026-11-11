@@ -1,0 +1,55 @@
+.esqueleto {
+  width: 100%;
+}
+
+/* La banda de cabecera, con su color, para que la pantalla no parpadee
+   de claro a oscuro cuando llega. */
+.cabecera {
+  height: 132px;
+  background: var(--cabecera-jugador);
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-gap-lista);
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+  padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x);
+}
+
+.titulo,
+.tarjeta {
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-sutil);
+  animation: respirar 1.6s ease-in-out infinite;
+}
+
+.titulo {
+  width: 40%;
+  height: 12px;
+  border-radius: var(--radio-campo);
+}
+
+.tarjeta {
+  height: 88px;
+}
+
+@keyframes respirar {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Quieto para quien pidió menos movimiento: los bloques ya dicen que
+   algo está por llegar. */
+@media (prefers-reduced-motion: reduce) {
+  .titulo,
+  .tarjeta {
+    animation: none;
+  }
+}
