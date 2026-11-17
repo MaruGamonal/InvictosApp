@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { NOMBRE_PRODUCTO } from '@/lib/nombreProducto';
+import { robotsDeMetadata } from '@/lib/ambiente';
 import { ProveedorAvisos } from '@/components/avisos/Avisos';
 import { BandaDeAmbiente } from '@/components/BandaDeAmbiente';
 import { clasesDeFuentes } from './fuentes';
@@ -16,6 +17,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: NOMBRE_PRODUCTO,
   description: 'Torneos de fútbol amateur: encontralos, sumate y seguí la tabla.',
+  /**
+   * `undefined` en producción y el bloqueo en pruebas. Va además del
+   * `robots.txt`: ese pide no rastrear el sitio, esto pide no mostrar
+   * la página en resultados aunque el buscador haya llegado por un
+   * enlace que alguien compartió.
+   */
+  robots: robotsDeMetadata(),
   /** apple-touch-icon (T28, `09` 8.1): iOS no lee el manifiesto, así que necesita su propio link. */
   icons: {
     apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],

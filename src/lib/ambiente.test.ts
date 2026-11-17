@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AMBIENTES, esAmbienteDePruebas, obtenerAmbiente } from './ambiente';
+import {
+  AMBIENTES,
+  esAmbienteDePruebas,
+  obtenerAmbiente,
+  robotsDeMetadata,
+  seIndexa,
+} from './ambiente';
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -33,5 +39,29 @@ describe('obtenerAmbiente', () => {
 
   it('no hay más ambientes que esos dos', () => {
     expect([...AMBIENTES]).toEqual(['produccion', 'pruebas']);
+  });
+});
+
+describe('indexación', () => {
+  it('producción se indexa y no declara nada en la metadata', () => {
+    vi.stubEnv('NEXT_PUBLIC_AMBIENTE', 'produccion');
+    expect(seIndexa()).toBe(true);
+    expect(robotsDeMetadata()).toBeUndefined();
+  });
+
+  it('pruebas no se indexa, y lo dice en la metadata', () => {
+    vi.stubEnv('NEXT_PUBLIC_AMBIENTE', 'pruebas');
+    expect(seIndexa()).toBe(false);
+    expect(robotsDeMetadata()).toEqual({ index: false, follow: false });
+  });
+
+  /**
+   * Mismo default conservador que el resto del módulo: ante la duda, el
+   * sitio real tiene que seguir siendo indexable. Una variable mal
+   * escrita no puede sacar a producción de Google.
+   */
+  it('con la variable rota, se indexa', () => {
+    vi.stubEnv('NEXT_PUBLIC_AMBIENTE', 'prueba');
+    expect(seIndexa()).toBe(true);
   });
 });
