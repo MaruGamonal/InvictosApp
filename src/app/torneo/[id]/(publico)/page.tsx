@@ -95,7 +95,17 @@ export default async function PaginaFichaTorneo({ params }: { params: Promise<{ 
             {ficha.direccion}
           </p>
           <div className={styles.mapa}>
+            {/*
+              Fuera del recorrido con Tab. Con el foco adentro del mapa,
+              lo tiene el documento de Google: ni el <iframe> cumple
+              :focus ni su contenedor :focus-within, así que ningún estilo
+              de esta página puede mostrar dónde está (WCAG 2.4.7). Y
+              para el teclado, los controles del mapa embebido son más
+              trampa que ayuda. Lo mismo —ver la ubicación— lo hace
+              "Abrir en Google Maps", justo abajo, que sí muestra el foco.
+            */}
             <iframe
+              tabIndex={-1}
               title={`Ubicación de ${ficha.nombre}`}
               src={
                 ficha.latitud != null && ficha.longitud != null

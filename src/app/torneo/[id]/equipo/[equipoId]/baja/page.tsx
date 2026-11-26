@@ -36,7 +36,7 @@ export default async function PaginaDarDeBaja({
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link href={`/torneo/${id}`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
@@ -56,6 +56,6 @@ export default async function PaginaDarDeBaja({
           torneoEnCurso={resumen.torneoEstado === 'in_progress'}
         />
       )}
-    </div>
+    </main>
   );
 }

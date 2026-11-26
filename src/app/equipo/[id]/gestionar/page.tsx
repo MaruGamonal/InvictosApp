@@ -16,6 +16,7 @@ import { FormularioEditarEquipo } from './FormularioEditarEquipo';
 import { BotonArchivarEquipo } from './BotonArchivarEquipo';
 import { PanelDejarEquipo } from './PanelDejarEquipo';
 import styles from './pagina.module.css';
+import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar equipo') };
 
@@ -60,14 +61,15 @@ export default async function PaginaGestionarEquipo({
 
   if (!puedeGestionar) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
+        <EnlaceVolver alternativa={`/equipo/${id}`} />
         <h1 className={`fuente-display ${styles.titulo}`}>{equipo.nombre}</h1>
         <p className={styles.textoIntegrante}>
           Sos parte del plantel. Quien lleva el equipo —capitán o delegado— es quien lo edita,
           invita y arma las listas de buena fe.
         </p>
         <PanelDejarEquipo equipoId={id} perfilId={perfil.id} />
-      </div>
+      </main>
     );
   }
 
@@ -77,7 +79,8 @@ export default async function PaginaGestionarEquipo({
   ]);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
+      <EnlaceVolver alternativa={`/equipo/${id}`} />
       <h1 className={`fuente-display ${styles.titulo}`}>Gestionar {equipo.nombre}</h1>
 
       <section className={styles.seccion}>
@@ -130,16 +133,34 @@ export default async function PaginaGestionarEquipo({
       {esCapitan && (
         <section className={styles.seccion}>
           {gestion.torneoEnCursoQueBloqueaArchivado ? (
-            <p className={styles.avisoBloqueo}>
-              No podés archivar el equipo: está jugando{' '}
-              {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, un torneo en curso. Primero tenés
-              que dar de baja al equipo de ese torneo.
-            </p>
+            // La acción, deshabilitada, con el motivo y la salida al lado.
+            // Era una caja roja suelta, visible apenas se abría la
+            // pantalla: el color de error es para lo que rechaza o
+            // cancela (`08`, 6.3), y esto es una explicación.
+            <>
+              <button
+                type="button"
+                className={styles.enlacePeligro}
+                disabled
+                aria-describedby="motivo-no-archivar"
+              >
+                Archivar este equipo
+              </button>
+              <p id="motivo-no-archivar" className={styles.avisoBloqueo}>
+                Para archivarlo, primero dalo de baja de{' '}
+                {gestion.torneoEnCursoQueBloqueaArchivado.nombre}, que está en curso.{' '}
+                <Link
+                  href={`/torneo/${gestion.torneoEnCursoQueBloqueaArchivado.id}/equipo/${id}/baja`}
+                >
+                  Dar de baja del torneo
+                </Link>
+              </p>
+            </>
           ) : (
             <BotonArchivarEquipo equipoId={id} />
           )}
         </section>
       )}
-    </div>
+    </main>
   );
 }

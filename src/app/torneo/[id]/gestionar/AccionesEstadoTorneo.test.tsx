@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { AccionesEstadoTorneo } from './AccionesEstadoTorneo';
 
 const refresh = vi.fn();
@@ -63,5 +63,54 @@ describe('AccionesEstadoTorneo', () => {
 
     expect(queryByText('Falta confirmar el fixture.')).toBeNull();
     expect((getByText('Iniciar torneo') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  describe('finalizar el torneo', () => {
+    // Pasó: era el botón principal y finalizaba con un toque, también con
+    // partidos sin jugar. Finalizar no se puede deshacer.
+    it('con partidos pendientes, no es la acción principal y pide confirmación con lo que se pierde', () => {
+      const fetchFalso = vi.fn();
+      vi.stubGlobal('fetch', fetchFalso);
+      render(
+        <AccionesEstadoTorneo
+          torneoId="t-1"
+          estado="in_progress"
+          tienePartidos
+          partidosPendientes={5}
+        />,
+      );
+      const finalizar = screen.getByRole('button', { name: 'Finalizar torneo' });
+      expect(finalizar.className).toMatch(/botonSecundarioChico/);
+
+      fireEvent.click(finalizar);
+      expect(fetchFalso).not.toHaveBeenCalled();
+      expect(screen.getByText(/Quedan 5 partidos sin jugar/)).toBeInTheDocument();
+      expect(screen.getByText(/No se puede deshacer/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
+      expect(screen.getByRole('button', { name: 'Finalizar torneo' })).toBeInTheDocument();
+    });
+
+    it('sin partidos pendientes, lo sugiere (D-23b) y confirma antes de enviar', async () => {
+      const fetchFalso = vi.fn(async () => new Response(JSON.stringify({ ok: true, data: {} })));
+      vi.stubGlobal('fetch', fetchFalso);
+      render(
+        <AccionesEstadoTorneo
+          torneoId="t-1"
+          estado="in_progress"
+          tienePartidos
+          partidosPendientes={0}
+        />,
+      );
+      expect(screen.getByText(/Ya se jugaron todos los partidos/)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Finalizar torneo' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Sí, finalizar' }));
+      expect(fetchFalso).toHaveBeenCalledOnce();
+      const [, opciones] = fetchFalso.mock.calls[0] as unknown as [string, RequestInit];
+      expect(JSON.parse(String(opciones.body))).toEqual({
+        torneoId: 't-1',
+        estadoDestino: 'finished',
+      });
+    });
   });
 });

@@ -89,9 +89,16 @@ export function TarjetaTorneoPanel({ torneo }: { torneo: TorneoPanelOrganizador 
       {torneo.ultimoResultado && (
         <div className={styles.filaPartido}>
           <span className={styles.filaPartidoEtiqueta}>Último resultado</span>
-          <span className={styles.filaPartidoTexto}>
-            {torneo.ultimoResultado.equipoLocalNombre} {torneo.ultimoResultado.golesLocal} -{' '}
-            {torneo.ultimoResultado.golesVisitante} {torneo.ultimoResultado.equipoVisitanteNombre}
+          {/* El marcador es lo más grande de la fila (`08`, 5.1): iba
+              en línea con los nombres, al mismo tamaño que el texto. */}
+          <span className={styles.ultimoResultado}>
+            <span className={styles.ultimoEquipo}>{torneo.ultimoResultado.equipoLocalNombre}</span>
+            <span className={styles.ultimoMarcador}>
+              {torneo.ultimoResultado.golesLocal} - {torneo.ultimoResultado.golesVisitante}
+            </span>
+            <span className={`${styles.ultimoEquipo} ${styles.ultimoVisitante}`}>
+              {torneo.ultimoResultado.equipoVisitanteNombre}
+            </span>
           </span>
         </div>
       )}

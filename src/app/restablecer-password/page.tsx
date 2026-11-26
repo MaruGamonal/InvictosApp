@@ -15,8 +15,8 @@ export const metadata: Metadata = {
  */
 export default function PaginaRestablecerPassword() {
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <FormularioNuevaPassword />
-    </div>
+    </main>
   );
 }

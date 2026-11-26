@@ -37,6 +37,8 @@
 .fotoDegrade {
   position: absolute;
   inset: 0;
+  /* Velo y sombras propios de esta foto, para que el título se lea sobre
+     ella: no se repiten en otro lado, así que no son token. */
   background: linear-gradient(
     180deg,
     rgba(14, 23, 32, 0) 0%,

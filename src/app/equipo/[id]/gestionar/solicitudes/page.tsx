@@ -35,7 +35,7 @@ export default async function PaginaSolicitudesIngreso({
   const gestion = await obtenerGestionEquipo({ equipoId: id }, contexto);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
@@ -46,6 +46,6 @@ export default async function PaginaSolicitudesIngreso({
       ) : (
         <PanelSolicitudesIngreso equipoId={id} solicitudes={gestion.solicitudesPendientes} />
       )}
-    </div>
+    </main>
   );
 }

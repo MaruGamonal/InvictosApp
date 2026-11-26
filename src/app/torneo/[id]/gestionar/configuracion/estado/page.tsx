@@ -47,6 +47,11 @@ export default async function PaginaEstado({ params }: { params: Promise<{ id: s
         torneoId={id}
         estado={gestion.estado}
         tienePartidos={gestion.partidos.length > 0}
+        partidosPendientes={
+          gestion.partidos.filter((partido) =>
+            ['unscheduled', 'scheduled', 'postponed'].includes(partido.estado),
+          ).length
+        }
       />
 
       <div className={stylesCompartidos.seccion}>

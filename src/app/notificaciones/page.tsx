@@ -39,7 +39,7 @@ export default async function PaginaNotificaciones({
   const { notificaciones, cursorSiguiente } = await listarNotificaciones({}, contexto);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <MarcaInvicta conEnlaceIngresar={false} conCampana={false} />
       <div className={styles.filaTitulo}>
         <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
@@ -77,6 +77,6 @@ export default async function PaginaNotificaciones({
       ) : (
         <NavInferior activo="inicio" autenticado />
       )}
-    </div>
+    </main>
   );
 }

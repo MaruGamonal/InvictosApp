@@ -78,7 +78,7 @@ export default async function PaginaBuscarEquipos({
   });
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <header className={styles.hero}>
         <MarcaInvicta />
         <h1 className={`fuente-display ${styles.tituloHero}`}>Equipos</h1>
@@ -168,6 +168,6 @@ export default async function PaginaBuscarEquipos({
       </div>
 
       <NavInferior activo="equipos" />
-    </div>
+    </main>
   );
 }

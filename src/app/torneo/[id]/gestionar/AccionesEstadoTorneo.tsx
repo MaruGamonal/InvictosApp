@@ -10,6 +10,13 @@ export interface AccionesEstadoTorneoProps {
   torneoId: string;
   estado: string;
   tienePartidos: boolean;
+  /**
+   * Partidos que todavía se tienen que jugar (sin programar, programados
+   * o postergados). Decide si finalizar es la acción sugerida (`06`,
+   * D-23b: "con sugerencia del sistema cuando no quedan partidos
+   * pendientes") o una que hay que confirmar sabiendo lo que se pierde.
+   */
+  partidosPendientes?: number;
 }
 
 type EstadoDestino =
@@ -35,10 +42,12 @@ export function AccionesEstadoTorneo({
   torneoId,
   estado,
   tienePartidos,
+  partidosPendientes = 0,
 }: AccionesEstadoTorneoProps) {
   const router = useRouter();
   const avisos = useAvisos();
   const [enviando, setEnviando] = useState<string | null>(null);
+  const [confirmandoFinal, setConfirmandoFinal] = useState(false);
 
   async function avanzar(estadoDestino: EstadoDestino) {
     setEnviando(estadoDestino);
@@ -118,20 +127,70 @@ export function AccionesEstadoTorneo({
         </>
       )}
 
-      {estado === 'in_progress' && (
-        <div className={styles.filaAcciones}>
-          <button type="button" onClick={() => avanzar('finished')} disabled={enviando !== null}>
-            Finalizar torneo
-          </button>
-          <button
-            type="button"
-            className={styles.botonSecundarioChico}
-            onClick={() => avanzar('suspended')}
-            disabled={enviando !== null}
-          >
-            Suspender
-          </button>
-        </div>
+      {/*
+        Finalizar no tiene vuelta atrás: `finished` no transiciona a
+        nada, y un torneo finalizado ya no acepta resultados. Era el
+        botón principal de la pantalla y se ejecutaba con un toque,
+        también con partidos sin jugar. Ahora es la acción sugerida sólo
+        cuando no queda ninguno (`06`, D-23b) y siempre pide
+        confirmación diciendo la consecuencia real (`08`, 8).
+      */}
+      {estado === 'in_progress' && !confirmandoFinal && (
+        <>
+          {partidosPendientes === 0 && tienePartidos && (
+            <p className={styles.avisoChico}>
+              Ya se jugaron todos los partidos: podés finalizar el torneo.
+            </p>
+          )}
+          <div className={styles.filaAcciones}>
+            <button
+              type="button"
+              className={partidosPendientes > 0 ? styles.botonSecundarioChico : undefined}
+              onClick={() => setConfirmandoFinal(true)}
+              disabled={enviando !== null}
+            >
+              Finalizar torneo
+            </button>
+            <button
+              type="button"
+              className={styles.botonSecundarioChico}
+              onClick={() => avanzar('suspended')}
+              disabled={enviando !== null}
+            >
+              Suspender
+            </button>
+          </div>
+        </>
+      )}
+
+      {estado === 'in_progress' && confirmandoFinal && (
+        <>
+          <p className={styles.avisoChico}>
+            {partidosPendientes > 0
+              ? `Quedan ${partidosPendientes} ${partidosPendientes === 1 ? 'partido' : 'partidos'} sin jugar. `
+              : ''}
+            Al finalizar, la tabla queda como está y ya no se pueden cargar resultados. No se puede
+            deshacer. Los equipos reciben el aviso.
+          </p>
+          <div className={styles.filaAcciones}>
+            <button
+              type="button"
+              className={partidosPendientes > 0 ? styles.botonPeligro : undefined}
+              onClick={() => avanzar('finished')}
+              disabled={enviando !== null}
+            >
+              Sí, finalizar
+            </button>
+            <button
+              type="button"
+              className={styles.botonSecundarioChico}
+              onClick={() => setConfirmandoFinal(false)}
+              disabled={enviando !== null}
+            >
+              Volver
+            </button>
+          </div>
+        </>
       )}
 
       {estado === 'suspended' && (

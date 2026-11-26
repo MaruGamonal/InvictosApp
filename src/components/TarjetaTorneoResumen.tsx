@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Escudo } from './Escudo';
 import { obtenerEtiqueta } from '@/lib/etiquetas';
+import { Badge } from './Badge';
 import styles from './TarjetaTorneoResumen.module.css';
 
 export interface TarjetaTorneoResumenProps {
@@ -25,6 +26,13 @@ export interface TarjetaTorneoResumenProps {
   cupoEquipos?: number;
   /** Texto libre a la derecha (p. ej. "Siguiendo") — se ignora si hay `posicionActual`. */
   etiquetaDerecha?: string;
+  /**
+   * Estado del torneo a la derecha, como badge del catálogo (`04`,
+   * sección 6) — no como texto libre. "En curso" iba en la pastilla gris
+   * de `etiquetaDerecha` en el inicio y en verde en la ficha: el mismo
+   * estado de dos colores. Tiene precedencia sobre `etiquetaDerecha`.
+   */
+  estadoComoBadge?: string;
 }
 
 /** Fila de torneo compacta — Inicio ("Mis torneos", "Torneos que sigo", "Mis torneos" del organizador). */
@@ -41,6 +49,7 @@ export function TarjetaTorneoResumen({
   inscriptos,
   cupoEquipos,
   etiquetaDerecha,
+  estadoComoBadge,
 }: TarjetaTorneoResumenProps) {
   // Un torneo `draft` no tiene ficha pública (D-04b: CONTEXTO_PUBLICO nunca
   // lo ve, ni siquiera quien lo organiza) — mandar ahí sería un 404
@@ -70,7 +79,8 @@ export function TarjetaTorneoResumen({
           <span className={styles.posicionEtiqueta}>en la tabla</span>
         </div>
       ) : (
-        etiquetaDerecha && <span className={styles.etiquetaDerecha}>{etiquetaDerecha}</span>
+        (estadoComoBadge && <Badge campo="torneo.estado" valor={estadoComoBadge} />) ||
+        (etiquetaDerecha && <span className={styles.etiquetaDerecha}>{etiquetaDerecha}</span>)
       )}
     </Link>
   );

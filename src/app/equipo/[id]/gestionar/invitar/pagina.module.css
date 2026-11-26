@@ -42,7 +42,7 @@
 
 .campo input {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 13px 14px;
   font-family: var(--fuente-texto);
   font-size: 15px;

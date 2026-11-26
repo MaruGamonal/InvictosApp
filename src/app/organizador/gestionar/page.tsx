@@ -48,7 +48,7 @@ export default async function PaginaInicioOrganizador() {
     return (
       <div className={styles.contenidoPagina}>
         <div className={styles.vacio}>
-          <h2 className={styles.vacioTitulo}>Todavía no tenés una organización</h2>
+          <h1 className={styles.vacioTitulo}>Todavía no tenés una organización</h1>
           <p className={styles.vacioTexto}>
             Los torneos los organiza una organización, no una persona. Para crear tu primer torneo
             primero necesitás crear una.
@@ -65,6 +65,9 @@ export default async function PaginaInicioOrganizador() {
 
   return (
     <div className={styles.contenidoPagina}>
+      {/* El título de la pantalla, para lector de pantalla: a la vista ya
+          lo dicen la cabecera y el resumen de la organización. */}
+      <h1 className="solo-lector">Panel de {panel.nombreOrganizacion}</h1>
       <ResumenOrganizacion
         organizacionId={panel.organizacionId}
         nombre={panel.nombreOrganizacion}

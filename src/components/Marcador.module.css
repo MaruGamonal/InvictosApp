@@ -66,3 +66,12 @@
   background: var(--exito-vivo);
   animation: pulso 1.4s infinite;
 }
+
+/* Sin el pulso para quien pidió menos movimiento: el punto sigue
+   diciendo "en vivo" por color y por la etiqueta de al lado. Era la
+   única animación continua sin este resguardo (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  .puntoEnVivo {
+    animation: none;
+  }
+}

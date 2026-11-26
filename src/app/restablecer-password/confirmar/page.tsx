@@ -30,19 +30,19 @@ export default async function PaginaConfirmarRecuperacion({
 
   if (!token) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <div className={styles.tarjeta}>
           <h1 className={`fuente-display ${styles.titulo}`}>El enlace está incompleto</h1>
           <p className={styles.texto}>
             Puede que se haya cortado al copiarlo. Pedí uno nuevo desde la pantalla de ingreso.
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <form className={styles.tarjeta} method="POST" action="/api/restablecer-password/confirmar">
         <h1 className={`fuente-display ${styles.titulo}`}>Cambiar tu contraseña</h1>
         <p className={styles.texto}>
@@ -54,6 +54,6 @@ export default async function PaginaConfirmarRecuperacion({
           Continuar
         </button>
       </form>
-    </div>
+    </main>
   );
 }

@@ -65,19 +65,19 @@ export default async function PaginaConfirmarAcceso({
 
   if (!token) {
     return (
-      <div className={styles.pagina}>
+      <main className={styles.pagina}>
         <div className={styles.tarjeta}>
           <h1 className={`fuente-display ${styles.titulo}`}>El enlace está incompleto</h1>
           <p className={styles.texto}>
             Puede que se haya cortado al copiarlo. Pedí uno nuevo y volvé a intentar.
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <form className={styles.tarjeta} method="POST" action="/api/acceso/confirmar">
         <h1 className={`fuente-display ${styles.titulo}`}>
           {nombreOrganizacion ? 'Verificá tu organización' : 'Confirmá que sos vos'}
@@ -95,6 +95,6 @@ export default async function PaginaConfirmarAcceso({
           {nombreOrganizacion ? 'Verificar organización' : 'Continuar'}
         </button>
       </form>
-    </div>
+    </main>
   );
 }

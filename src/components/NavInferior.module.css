@@ -26,7 +26,7 @@
   gap: 5px;
   min-height: 52px;
   text-decoration: none;
-  font: 500 11px/1 var(--fuente-texto);
+  font: 500 12px/1 var(--fuente-texto);
   color: var(--color-texto-secundario);
 }
 

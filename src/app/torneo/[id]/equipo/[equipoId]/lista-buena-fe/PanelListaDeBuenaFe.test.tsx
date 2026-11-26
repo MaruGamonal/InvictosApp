@@ -41,8 +41,27 @@ describe('PanelListaDeBuenaFe', () => {
       />,
     );
     expect(getByText('Ya está en otro equipo de este torneo')).toBeTruthy();
-    expect(getByText('1 habilitados')).toBeTruthy();
-    expect(getByText('máx. 15')).toBeTruthy();
+    expect(getByText('1 jugador')).toBeTruthy();
+    expect(getByText('máx. 15 jugadores')).toBeTruthy();
+  });
+
+  it('cuenta aparte a quien va sin cupo: el capitán sin rol de jugador no es "0 habilitados"', () => {
+    // Pasó: con el capitán tildado decía "0 habilitados", porque sólo
+    // contaba jugadores, y se leía como que la lista estaba vacía.
+    const { getByText } = render(
+      <PanelListaDeBuenaFe
+        torneoId="t-1"
+        equipoId="eq-1"
+        integrantes={[
+          { ...INTEGRANTES[0]!, rolesEquipo: ['captain'] },
+          { ...INTEGRANTES[1]!, yaHabilitadoEnOtroEquipo: false },
+        ]}
+        minJugadores={null}
+        maxJugadores={null}
+        cerrada={false}
+      />,
+    );
+    expect(getByText('1 jugador · 1 más sin cupo (DT o delegado)')).toBeTruthy();
   });
 
   it('al confirmar, envía solo a los seleccionados con el rol inferido', async () => {

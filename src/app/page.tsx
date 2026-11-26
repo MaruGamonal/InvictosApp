@@ -38,7 +38,7 @@ export default async function PaginaBienvenida() {
   }
 
   return (
-    <div className={styles.pantalla}>
+    <main className={styles.pantalla}>
       <div className={styles.foto}>
         <Image
           src="/imagenes/bienvenida-hero.png"
@@ -81,6 +81,6 @@ export default async function PaginaBienvenida() {
           Descubrir torneos sin cuenta
         </Link>
       </div>
-    </div>
+    </main>
   );
 }

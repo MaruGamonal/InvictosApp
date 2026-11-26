@@ -24,6 +24,12 @@ export interface CabeceraDeModoProps {
    */
   alCostadoDelNombre?: ReactNode;
   /**
+   * El nombre como `<h1>` de la pantalla. Sólo donde la cabecera es el
+   * título (Inicio): en el panel de organizador cada subpantalla tiene el
+   * suyo, y dos `<h1>` confunden al lector de pantalla.
+   */
+  nombreComoTitulo?: boolean;
+  /**
    * La fila de 44px de abajo de la cabecera: en modo organizador con
    * más de una organización, cuál se está gestionando.
    *
@@ -67,6 +73,7 @@ export interface CabeceraDeModoProps {
  */
 export function CabeceraDeModo({
   modo,
+  nombreComoTitulo = false,
   nombreUsuario,
   fotoUrl,
   puedeCambiarDeModo = false,
@@ -89,7 +96,11 @@ export function CabeceraDeModo({
         <div className={styles.textoUsuario}>
           <span className={styles.saludo}>Hola,</span>
           <div className={styles.filaTitulo}>
-            <span className={`fuente-display ${styles.titulo}`}>{nombreUsuario}</span>
+            {nombreComoTitulo ? (
+              <h1 className={`fuente-display ${styles.titulo}`}>{nombreUsuario}</h1>
+            ) : (
+              <span className={`fuente-display ${styles.titulo}`}>{nombreUsuario}</span>
+            )}
             {alCostadoDelNombre}
           </div>
         </div>

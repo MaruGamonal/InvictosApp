@@ -63,6 +63,11 @@ export function PanelListaDeBuenaFe({
   const cantidadJugadores = integrantes.filter(
     (i) => seleccionados.has(i.perfilId) && inferirRolEnTorneo(i.rolesEquipo) === 'player',
   ).length;
+  // DT y delegados también van a la lista, pero no ocupan cupo de
+  // jugadores: se cuentan aparte. Decía "0 habilitados" con el capitán
+  // tildado —el capitán sin rol de jugador entra como delegado—, y eso se
+  // leía como que no había nadie.
+  const cantidadSinCupo = seleccionados.size - cantidadJugadores;
 
   async function confirmar() {
     if (enviando || seleccionados.size === 0) return;
@@ -109,8 +114,11 @@ export function PanelListaDeBuenaFe({
   return (
     <div>
       <div className={styles.filaContador}>
-        <span>{cantidadJugadores} habilitados</span>
-        {maxJugadores !== null && <span>máx. {maxJugadores}</span>}
+        <span>
+          {cantidadJugadores} {cantidadJugadores === 1 ? 'jugador' : 'jugadores'}
+          {cantidadSinCupo > 0 && ` · ${cantidadSinCupo} más sin cupo (DT o delegado)`}
+        </span>
+        {maxJugadores !== null && <span>máx. {maxJugadores} jugadores</span>}
       </div>
 
       {error && <p className={styles.errorChico}>{error}</p>}

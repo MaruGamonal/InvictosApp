@@ -35,7 +35,7 @@
   padding: 12px 12px 12px 16px;
   border-radius: var(--radio-tarjeta);
   border: 1px solid transparent;
-  box-shadow: 0 6px 20px rgba(14, 23, 32, 0.16);
+  box-shadow: var(--sombra-flotante);
   animation: entrar 180ms ease-out;
 }
 

@@ -12,7 +12,7 @@
 }
 
 .tituloSeccion {
-  font: 600 11px/1 var(--fuente-texto);
+  font: 600 12px/1 var(--fuente-texto);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-texto-terciario);

@@ -41,7 +41,7 @@ export default async function PaginaPublicarInicial({
   if (resumen.torneoEstado !== 'draft') redirect(`/torneo/${id}/gestionar`);
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <div className={styles.tarjeta}>
         <h1 className={`fuente-display ${styles.titulo}`}>Listo para publicar</h1>
         <p className={pasoStyles.breadcrumb}>· {resumen.ciudadNombre}</p>
@@ -56,6 +56,6 @@ export default async function PaginaPublicarInicial({
           destinoAlPublicar={`/torneo/${id}/gestionar`}
         />
       </div>
-    </div>
+    </main>
   );
 }

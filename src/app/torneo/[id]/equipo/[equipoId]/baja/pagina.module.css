@@ -79,7 +79,7 @@
 
 .formulario input[type='text'] {
   border: 1px solid var(--borde-neutro);
-  border-radius: 6px;
+  border-radius: var(--radio-campo);
   padding: 10px 12px;
   font-family: var(--fuente-texto);
   font-size: 14px;

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { TarjetaTorneoResumen } from './TarjetaTorneoResumen';
 
 afterEach(() => cleanup());
@@ -30,5 +30,23 @@ describe('TarjetaTorneoResumen', () => {
       />,
     );
     expect(getByRole('link')).toHaveAttribute('href', '/torneo/t-1/gestionar');
+  });
+
+  it('el estado como badge del catálogo, no como texto libre (`04`, sección 6)', () => {
+    // Pasó: "En curso" iba en una pastilla gris en el inicio y en verde
+    // en la ficha — el mismo estado de dos colores.
+    render(
+      <TarjetaTorneoResumen
+        torneoId="t-1"
+        nombre="Copa Otoño"
+        categoriaGenero="mixed"
+        modalidad="f5"
+        estadoComoBadge="in_progress"
+        etiquetaDerecha="esto no se muestra"
+      />,
+    );
+    const badge = screen.getByText('En curso');
+    expect(badge.className).toMatch(/exito/);
+    expect(screen.queryByText('esto no se muestra')).not.toBeInTheDocument();
   });
 });

@@ -29,7 +29,7 @@ export default async function PaginaRanking({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className={styles.pagina}>
+    <main className={styles.pagina}>
       <Link href={`/equipo/${id}`} className={styles.enlaceVolver}>
         ← Volver
       </Link>
@@ -75,6 +75,6 @@ export default async function PaginaRanking({ params }: { params: Promise<{ id: 
           </p>
         </>
       )}
-    </div>
+    </main>
   );
 }
