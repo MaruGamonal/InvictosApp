@@ -4,7 +4,7 @@
   flex-direction: column;
   max-width: var(--ancho-aplicacion);
   margin: 0 auto;
-  padding: 32px var(--espacio-pantalla-x) 48px;
+  padding: var(--espacio-gap-seccion) var(--espacio-pantalla-x) 48px;
   background: var(--color-fondo);
   gap: 24px;
 }

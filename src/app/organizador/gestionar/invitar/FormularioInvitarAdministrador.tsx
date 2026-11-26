@@ -5,6 +5,7 @@ import { useInvitacionPorCorreo } from '@/components/useInvitacionPorCorreo';
 import { DESCRIPCION_ADMINISTRADOR } from '@/lib/rolesDeOrganizacion';
 import styles from '../../../ingresar/pagina.module.css';
 import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   organizacionId: string;
@@ -31,8 +32,11 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={invitacion.enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Invitar administrador</h1>
-      <p className={styles.texto}>{DESCRIPCION_ADMINISTRADOR}</p>
+      <CabeceraDeTarea
+        volverA="/organizador/gestionar/equipo"
+        titulo="Invitar administrador"
+        descripcion={DESCRIPCION_ADMINISTRADOR}
+      />
 
       {invitacion.error && <p className={styles.error}>{invitacion.error}</p>}
 

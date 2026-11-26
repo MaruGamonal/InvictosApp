@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';

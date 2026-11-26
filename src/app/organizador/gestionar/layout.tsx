@@ -11,6 +11,7 @@ import {
 import { SelectorOrganizacionActiva } from './SelectorOrganizacionActiva';
 import { EtiquetaOrganizacion } from './EtiquetaOrganizacion';
 import { NavInferiorOrganizador } from './NavInferiorOrganizador';
+import { CabeceraSoloEnSecciones } from './CabeceraSoloEnSecciones';
 import styles from './layout.module.css';
 
 /**
@@ -61,26 +62,31 @@ export default async function LayoutOrganizadorGestionar({ children }: { childre
     <div className={styles.pagina}>
       {/* En grande va quien mira. La palabra "Organizador" salió de ahí:
           el modo lo dice su propio selector, en la fila de abajo. */}
-      <CabeceraDeModo
-        modo="organizador"
-        nombreUsuario={nombreUsuario}
-        puedeCambiarDeModo
-        alCostadoDelNombre={
-          organizacion && !hayVariasOrganizaciones ? (
-            <EtiquetaOrganizacion nombre={organizacion.nombre} logoUrl={activa?.logoUrl ?? null} />
-          ) : null
-        }
-        controlDeOrganizacion={
-          organizacion && hayVariasOrganizaciones ? (
-            <SelectorOrganizacionActiva
-              organizaciones={organizaciones}
-              activaId={organizacion.organizacionId}
-              nombreActiva={organizacion.nombre}
-              logoActiva={activa?.logoUrl ?? null}
-            />
-          ) : null
-        }
-      />
+      <CabeceraSoloEnSecciones>
+        <CabeceraDeModo
+          modo="organizador"
+          nombreUsuario={nombreUsuario}
+          puedeCambiarDeModo
+          alCostadoDelNombre={
+            organizacion && !hayVariasOrganizaciones ? (
+              <EtiquetaOrganizacion
+                nombre={organizacion.nombre}
+                logoUrl={activa?.logoUrl ?? null}
+              />
+            ) : null
+          }
+          controlDeOrganizacion={
+            organizacion && hayVariasOrganizaciones ? (
+              <SelectorOrganizacionActiva
+                organizaciones={organizaciones}
+                activaId={organizacion.organizacionId}
+                nombreActiva={organizacion.nombre}
+                logoActiva={activa?.logoUrl ?? null}
+              />
+            ) : null
+          }
+        />
+      </CabeceraSoloEnSecciones>
 
       <main className={styles.contenido}>{children}</main>
 

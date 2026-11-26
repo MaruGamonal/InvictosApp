@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerMiPerfil } from '@/services/identidad/obtenerMiPerfil';
@@ -9,6 +8,7 @@ import { EstadoVacio } from '@/components/EstadoVacio';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { PanelSolicitudesIngreso } from './PanelSolicitudesIngreso';
 import styles from './pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Solicitudes de ingreso') };
 
@@ -36,10 +36,7 @@ export default async function PaginaSolicitudesIngreso({
 
   return (
     <main className={styles.pagina}>
-      <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceVolver}>
-        ← Volver
-      </Link>
-      <h1 className={`fuente-display ${styles.titulo}`}>Solicitudes de ingreso</h1>
+      <CabeceraDeTarea volverA={`/equipo/${id}/gestionar`} titulo="Solicitudes de ingreso" />
 
       {gestion.solicitudesPendientes.length === 0 ? (
         <EstadoVacio mensaje="No hay solicitudes de ingreso pendientes." />

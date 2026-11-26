@@ -23,7 +23,8 @@ export function CabeceraDeTarea({
   descripcion,
   accion,
 }: {
-  volverA: string;
+  /** Sin `volverA`, sin "← Volver": para las pantallas a las que se llega desde un correo. */
+  volverA?: string;
   contexto?: string;
   titulo: string;
   descripcion?: ReactNode;
@@ -32,7 +33,7 @@ export function CabeceraDeTarea({
 }) {
   return (
     <header className={styles.cabecera}>
-      <EnlaceVolver alternativa={volverA} />
+      {volverA && <EnlaceVolver alternativa={volverA} />}
       {contexto && <p className={styles.contexto}>{contexto}</p>}
       <div className={styles.filaTitulo}>
         <h1 className={`fuente-display ${styles.titulo}`}>{titulo}</h1>

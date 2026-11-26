@@ -8,6 +8,7 @@ import { BuscadorDireccionTorneo } from '@/components/BuscadorDireccionTorneo';
 import { Escudo } from '@/components/Escudo';
 import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   provincias: ProvinciaListada[];
@@ -156,7 +157,7 @@ export function FormularioCrearTorneo({ provincias }: Props) {
   if (imagenFallida) {
     return (
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Torneo creado</h1>
+        <CabeceraDeTarea volverA="/organizador/gestionar" titulo="Torneo creado" />
         <p className={styles.error}>{imagenFallida.mensaje}</p>
         <p className={styles.texto}>
           El torneo quedó creado sin imagen. Podés subirla cuando quieras desde Configuración.
@@ -170,8 +171,11 @@ export function FormularioCrearTorneo({ provincias }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Crear torneo</h1>
-      <p className={styles.texto}>Nace en borrador. Lo publicás cuando esté listo.</p>
+      <CabeceraDeTarea
+        volverA="/organizador/gestionar"
+        titulo="Crear torneo"
+        descripcion="Nace en borrador. Lo publicás cuando esté listo."
+      />
 
       {error && <p className={styles.error}>{error}</p>}
 

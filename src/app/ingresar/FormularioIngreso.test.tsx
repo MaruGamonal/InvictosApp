@@ -3,6 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { FormularioIngreso } from './FormularioIngreso';
 
+// La cabecera trae "← Volver", que usa el router para volver atrás.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ back: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+}));
+
 const assign = vi.fn();
 
 afterEach(() => {

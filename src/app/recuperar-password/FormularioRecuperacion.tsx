@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import styles from '../ingresar/pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 type Estado =
   | { paso: 'formulario' }
@@ -46,11 +47,16 @@ export function FormularioRecuperacion() {
   if (estado.paso === 'enviado') {
     return (
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Te mandamos un enlace</h1>
-        <p className={styles.texto}>
-          Revisá <strong>{identificadorAcceso}</strong>. El enlace para elegir una contraseña nueva
-          vence en 30 minutos.
-        </p>
+        <CabeceraDeTarea
+          volverA="/ingresar"
+          titulo="Te mandamos un enlace"
+          descripcion={
+            <>
+              Revisá <strong>{identificadorAcceso}</strong>. El enlace para elegir una contraseña
+              nueva vence en 30 minutos.
+            </>
+          }
+        />
         <div className={styles.textoCentrado}>
           <Link href="/ingresar">Volver a ingresar</Link>
         </div>
@@ -60,10 +66,11 @@ export function FormularioRecuperacion() {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Recuperar acceso</h1>
-      <p className={styles.texto}>
-        Escribí el correo de tu cuenta y te mandamos un link para elegir una contraseña nueva.
-      </p>
+      <CabeceraDeTarea
+        volverA="/ingresar"
+        titulo="Recuperar acceso"
+        descripcion="Escribí el correo de tu cuenta y te mandamos un link para elegir una contraseña nueva."
+      />
 
       {estado.paso === 'error' && (
         <p className={styles.error} role="alert">

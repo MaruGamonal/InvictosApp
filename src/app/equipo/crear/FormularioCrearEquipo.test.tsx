@@ -4,6 +4,11 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { FormularioCrearEquipo } from './FormularioCrearEquipo';
 import { ProveedorAvisos } from '@/components/avisos/Avisos';
 
+// La cabecera trae "← Volver", que usa el router para volver atrás.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ back: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+}));
+
 const assign = vi.fn();
 
 afterEach(() => {

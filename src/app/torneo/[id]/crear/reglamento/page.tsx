@@ -4,6 +4,7 @@ import { construirContexto } from '@/lib/contexto';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioReglamentoInicial } from './FormularioReglamentoInicial';
 import styles from '@/app/ingresar/pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Reglamento') };
 
@@ -25,12 +26,12 @@ export default async function PaginaReglamentoInicial({
   return (
     <main className={styles.pagina}>
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>
-          Reglamento <span className={styles.textoOpcional}>(opcional)</span>
-        </h1>
-        <p className={styles.texto}>
-          Es el texto contra el que se resuelve cualquier disputa. Cada cambio queda versionado.
-        </p>
+        <CabeceraDeTarea
+          volverA={`/torneo/${id}/gestionar`}
+          contexto="Crear torneo · opcional"
+          titulo="Reglamento"
+          descripcion="Es el texto contra el que se resuelve cualquier disputa. Cada cambio queda versionado."
+        />
         <FormularioReglamentoInicial torneoId={id} />
       </div>
     </main>
