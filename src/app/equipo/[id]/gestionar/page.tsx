@@ -17,6 +17,7 @@ import { BotonArchivarEquipo } from './BotonArchivarEquipo';
 import { PanelDejarEquipo } from './PanelDejarEquipo';
 import styles from './pagina.module.css';
 import { EnlaceVolver } from '@/components/EnlaceVolver';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Gestionar equipo') };
 
@@ -80,8 +81,11 @@ export default async function PaginaGestionarEquipo({
 
   return (
     <main className={styles.pagina}>
-      <EnlaceVolver alternativa={`/equipo/${id}`} />
-      <h1 className={`fuente-display ${styles.titulo}`}>Gestionar {equipo.nombre}</h1>
+      <CabeceraDeTarea
+        volverA={`/equipo/${id}`}
+        contexto={equipo.nombre}
+        titulo="Gestionar equipo"
+      />
 
       <section className={styles.seccion}>
         <h2 className={styles.tituloSeccion}>Datos del equipo</h2>

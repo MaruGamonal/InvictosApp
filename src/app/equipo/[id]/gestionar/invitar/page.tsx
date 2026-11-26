@@ -7,6 +7,7 @@ import { obtenerRolesEnEquipo } from '@/lib/permisos';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioInvitarIntegrante } from './FormularioInvitarIntegrante';
 import styles from './pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Invitar integrante') };
 
@@ -26,10 +27,7 @@ export default async function PaginaInvitarIntegrante({
 
   return (
     <main className={styles.pagina}>
-      <Link href={`/equipo/${id}/gestionar`} className={styles.enlaceVolver}>
-        ← Volver
-      </Link>
-      <h1 className={`fuente-display ${styles.titulo}`}>Invitar integrante</h1>
+      <CabeceraDeTarea volverA={`/equipo/${id}/gestionar`} titulo="Invitar integrante" />
       <FormularioInvitarIntegrante equipoId={id} />
     </main>
   );
