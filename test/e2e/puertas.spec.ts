@@ -30,6 +30,24 @@ test.describe('puertas de acceso', () => {
     await expect(page.getByLabel('Recordarme')).toBeHidden();
   });
 
+  /**
+   * El nav pregunta si hay sesión en cada pantalla pública. Antes la
+   * respuesta para el visitante era un 401, que dejaba un error en la
+   * consola de cada página y tapaba los errores de verdad.
+   */
+  test('una pantalla pública no responde con errores al visitante', async ({ page }) => {
+    const fallidas: string[] = [];
+    page.on('response', (respuesta) => {
+      if (respuesta.url().includes('/api/') && respuesta.status() >= 400) {
+        fallidas.push(`${respuesta.status()} ${respuesta.url()}`);
+      }
+    });
+    const sesion = page.waitForResponse((r) => r.url().includes('/api/sesion'));
+    await page.goto('/torneos');
+    expect((await sesion).status()).toBe(200);
+    expect(fallidas).toEqual([]);
+  });
+
   test('la portada lleva a descubrir torneos sin pedir cuenta', async ({ page }) => {
     await page.goto('/');
     await page
