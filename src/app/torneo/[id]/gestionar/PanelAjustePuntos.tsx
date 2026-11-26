@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAvisos } from '@/components/avisos/Avisos';
 import { motivoDelFallo } from '@/components/avisos/motivoDelFallo';
 import styles from './pagina.module.css';
+import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDeshabilitado';
 
 export interface PanelAjustePuntosProps {
   torneoId: string;
@@ -50,6 +51,15 @@ export function PanelAjustePuntos({
   const cantidad = Number(ajuste);
   const valido =
     ajuste !== '' && Number.isInteger(cantidad) && cantidad !== 0 && motivo.trim() !== '';
+  const motivoDeshabilitado = valido
+    ? null
+    : motivoPorFaltantes([
+        ...(ajuste === '' || !Number.isInteger(cantidad) || cantidad === 0
+          ? ['los puntos (distintos de cero)']
+          : []),
+        ...(motivo.trim() === '' ? ['el motivo'] : []),
+      ]);
+  const idMotivo = `motivo-ajuste-${equipoId}`;
 
   async function aplicar() {
     if (!valido || enviando) return;
@@ -130,7 +140,12 @@ export function PanelAjustePuntos({
       </label>
 
       <div className={styles.filaAcciones}>
-        <button type="button" onClick={aplicar} disabled={!valido || enviando}>
+        <button
+          type="button"
+          onClick={aplicar}
+          disabled={!valido || enviando}
+          aria-describedby={motivoDeshabilitado ? idMotivo : undefined}
+        >
           {enviando ? 'Aplicando…' : 'Aplicar ajuste'}
         </button>
         <button
@@ -142,6 +157,7 @@ export function PanelAjustePuntos({
           Cancelar
         </button>
       </div>
+      <MotivoDeshabilitado id={idMotivo} motivo={motivoDeshabilitado} />
     </div>
   );
 }

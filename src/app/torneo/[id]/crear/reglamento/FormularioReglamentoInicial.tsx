@@ -4,6 +4,7 @@ import { subirArchivo, validarArchivo, TIPOS_DOCUMENTO } from '@/lib/subidaClien
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/ingresar/pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   torneoId: string;
@@ -107,9 +108,16 @@ export function FormularioReglamentoInicial({ torneoId }: Props) {
         className={styles.boton}
         onClick={continuar}
         disabled={enviando || subiendo || !hayContenido}
+        aria-describedby={!hayContenido ? 'motivo-reglamento-inicial' : undefined}
       >
         {enviando ? 'Guardando…' : 'Continuar a publicar'}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-reglamento-inicial"
+        motivo={
+          !hayContenido ? 'Escribí el reglamento o subí un archivo. Si no, omitilo abajo.' : null
+        }
+      />
       <button
         type="button"
         className={styles.enlaceOmitir}

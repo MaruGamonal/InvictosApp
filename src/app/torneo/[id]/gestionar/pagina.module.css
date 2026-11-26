@@ -308,6 +308,13 @@
   gap: 8px;
 }
 
+.notaResultado {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--color-texto-secundario);
+}
+
 .filaGoles input {
   width: 56px;
   border: 1px solid var(--borde-neutro);

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useInvitacionPorCorreo } from '@/components/useInvitacionPorCorreo';
 import { DESCRIPCION_ADMINISTRADOR } from '@/lib/rolesDeOrganizacion';
 import styles from '../../../ingresar/pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   organizacionId: string;
@@ -65,9 +66,14 @@ export function FormularioInvitarAdministrador({ organizacionId }: Props) {
         type="submit"
         className={styles.boton}
         disabled={invitacion.enviando || !invitacion.email.trim()}
+        aria-describedby={!invitacion.email.trim() ? 'motivo-invitar-admin' : undefined}
       >
         {invitacion.enviando ? 'Invitando…' : 'Invitar administrador'}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-invitar-admin"
+        motivo={!invitacion.email.trim() ? 'Falta completar el correo.' : null}
+      />
     </form>
   );
 }

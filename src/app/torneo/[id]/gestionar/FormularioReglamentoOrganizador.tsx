@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './pagina.module.css';
 import { ZONA_HORARIA } from '@/lib/zonaHoraria';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 export interface ReglamentoVigenteProps {
   numeroVersion: number;
@@ -81,9 +82,17 @@ export function FormularioReglamentoOrganizador({
             required
           />
         </label>
-        <button type="submit" disabled={enviando || !texto.trim()}>
+        <button
+          type="submit"
+          disabled={enviando || !texto.trim()}
+          aria-describedby={!texto.trim() ? 'motivo-reglamento' : undefined}
+        >
           {enviando ? 'Publicando…' : 'Publicar reglamento'}
         </button>
+        <MotivoDeshabilitado
+          id="motivo-reglamento"
+          motivo={!texto.trim() ? 'Escribí el texto del reglamento.' : null}
+        />
       </form>
     </div>
   );

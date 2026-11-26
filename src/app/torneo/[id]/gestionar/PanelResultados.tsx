@@ -3,6 +3,7 @@
 import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 import { useAvisos } from '@/components/avisos/Avisos';
 import { GOLES_MAXIMOS_POR_EQUIPO } from '@/lib/marcador';
 import { descuadreDeGoles, textoDelDescuadre } from './_sumaDeGoles';
@@ -248,6 +249,19 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
 
         // UC-34 — avisa, no bloquea: el botón de guardar sigue igual.
         const marcadorCompleto = valores.local !== '' && valores.visitante !== '';
+        // Con los dos vacíos los campos ya dicen qué falta; con uno solo
+        // escrito, el botón gris confundía ("¿por qué no puedo cargar?").
+        const faltaUnLado =
+          valores.local === '' && valores.visitante !== ''
+            ? partido.equipoLocalNombre
+            : valores.visitante === '' && valores.local !== ''
+              ? partido.equipoVisitanteNombre
+              : null;
+        const motivoCargar = faltaUnLado ? `Faltan los goles de ${faltaUnLado}.` : null;
+        const idMotivoCargar = `motivo-cargar-${partido.id}`;
+        const faltaGanador =
+          noDisputado[partido.id]?.resolucion === 'walkover' &&
+          !noDisputado[partido.id]?.equipoGanadorId;
         const descuadre = marcadorCompleto
           ? descuadreDeGoles(eventosPartido, partido.equipoLocalId, partido.equipoVisitanteId, {
               local: Number(valores.local),
@@ -285,10 +299,12 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                 type="button"
                 onClick={() => cargar(partido)}
                 disabled={enviando !== null || valores.local === '' || valores.visitante === ''}
+                aria-describedby={motivoCargar ? idMotivoCargar : undefined}
               >
                 {enviando === partido.id ? 'Cargando…' : 'Cargar'}
               </button>
             </div>
+            <MotivoDeshabilitado id={idMotivoCargar} motivo={motivoCargar} />
 
             {hayJugadores && (
               <label className={styles.campoJugadorDelPartido}>
@@ -324,6 +340,17 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                   )}
                 </select>
               </label>
+            )}
+
+            {/* Goleadores, tarjetas y jugador del partido salen de la
+                lista de buena fe: sin habilitados no hay a quién elegir.
+                Sin esta línea, unas tarjetas los tenían y otras no, sin
+                explicación. */}
+            {!hayElegibles && (
+              <p className={styles.notaResultado}>
+                Para anotar goleadores y jugador del partido, los equipos tienen que cargar su lista
+                de buena fe.
+              </p>
             )}
 
             {hayElegibles && (
@@ -536,15 +563,16 @@ export function PanelResultados({ partidos, elegiblesPorEquipo }: PanelResultado
                     <button
                       type="button"
                       onClick={() => registrarNoDisputado(partido)}
-                      disabled={
-                        enviando !== null ||
-                        (noDisputado[partido.id]!.resolucion === 'walkover' &&
-                          !noDisputado[partido.id]!.equipoGanadorId)
-                      }
+                      disabled={enviando !== null || faltaGanador}
+                      aria-describedby={faltaGanador ? `motivo-ganador-${partido.id}` : undefined}
                     >
                       Guardar
                     </button>
                   </div>
+                  <MotivoDeshabilitado
+                    id={`motivo-ganador-${partido.id}`}
+                    motivo={faltaGanador ? 'Elegí qué equipo ganó por presentación.' : null}
+                  />
                 </div>
               )}
             </div>

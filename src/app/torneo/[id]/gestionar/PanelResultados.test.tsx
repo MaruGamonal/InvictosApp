@@ -38,6 +38,23 @@ describe('PanelResultados', () => {
     expect(queryByText('Goleadores y tarjetas (opcional)')).toBeNull();
   });
 
+  /** Sin la explicación, unas tarjetas tenían goleadores y otras no. */
+  it('sin habilitados, explica que hace falta la lista de buena fe', () => {
+    const { getByText } = render(<PanelResultados partidos={[PARTIDO]} elegiblesPorEquipo={{}} />);
+    expect(getByText(/tienen que cargar su lista de buena fe/)).toBeTruthy();
+  });
+
+  it('con un solo marcador escrito, dice qué falta y el botón lo referencia', () => {
+    const { getByLabelText, getByRole, getByText } = render(
+      <PanelResultados partidos={[PARTIDO]} elegiblesPorEquipo={{}} />,
+    );
+    fireEvent.change(getByLabelText('Goles de Los Pibes'), { target: { value: '2' } });
+    const boton = getByRole('button', { name: 'Cargar' }) as HTMLButtonElement;
+    expect(boton.disabled).toBe(true);
+    const motivo = getByText('Faltan los goles de Racing del Barrio.');
+    expect(boton.getAttribute('aria-describedby')).toBe(motivo.id);
+  });
+
   it('carga el marcador solo, sin eventos: no manda el campo eventos', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);

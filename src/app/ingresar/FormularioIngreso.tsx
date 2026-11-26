@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDeshabilitado';
 import Link from 'next/link';
 import { CampoPassword } from '@/components/CampoPassword';
 import styles from './pagina.module.css';
@@ -59,9 +60,14 @@ export function FormularioIngreso({ modoInicial, accionPendiente }: Props) {
   // form, pero no avisaba nada mientras se escribía. Server-side ya lo
   // exige (`registrar.ts`, D-52); esto es solo la señal visual que faltaba.
   const passwordCorta = esCrear && password.length > 0 && password.length < 8;
-  const formularioValido = esCrear
-    ? nombreVisible.trim() !== '' && identificadorAcceso.trim() !== '' && password.length >= 8
-    : identificadorAcceso.trim() !== '' && password.trim() !== '';
+  const faltantes = [
+    ...(esCrear && nombreVisible.trim() === '' ? ['el nombre visible'] : []),
+    ...(identificadorAcceso.trim() === '' ? ['el correo'] : []),
+    ...(password.trim() === '' ? ['la contraseña'] : []),
+  ];
+  // La contraseña corta ya tiene su aviso debajo del campo: acá no se repite.
+  const motivoDeshabilitado = motivoPorFaltantes(faltantes);
+  const formularioValido = faltantes.length === 0 && !(esCrear && password.length < 8);
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -224,9 +230,11 @@ export function FormularioIngreso({ modoInicial, accionPendiente }: Props) {
         type="submit"
         className={styles.boton}
         disabled={estado.paso === 'enviando' || !formularioValido}
+        aria-describedby={motivoDeshabilitado ? 'motivo-ingreso' : undefined}
       >
         {estado.paso === 'enviando' ? 'Enviando…' : esCrear ? 'Crear cuenta' : 'Ingresar'}
       </button>
+      <MotivoDeshabilitado id="motivo-ingreso" motivo={motivoDeshabilitado} />
 
       <div className={styles.textoCentrado}>
         {esCrear ? (

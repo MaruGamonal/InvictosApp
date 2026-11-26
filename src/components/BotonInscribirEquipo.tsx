@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './BotonInscribirEquipo.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 export interface ReglamentoVigenteProps {
   numeroVersion: number;
@@ -410,9 +411,14 @@ export function BotonInscribirEquipo({ torneoId, reglamentoVigente }: BotonInscr
           className={styles.pillPrimaria}
           onClick={confirmar}
           disabled={enviando || !acepto}
+          aria-describedby={!acepto ? 'motivo-inscribir' : undefined}
         >
           {enviando ? 'Enviando…' : 'Confirmar inscripción'}
         </button>
+        <MotivoDeshabilitado
+          id="motivo-inscribir"
+          motivo={!acepto ? 'Para confirmar, tildá «Leí y acepto el reglamento».' : null}
+        />
       </>
     );
   }
