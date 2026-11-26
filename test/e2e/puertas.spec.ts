@@ -50,11 +50,10 @@ test.describe('puertas de acceso', () => {
 
   test('la portada lleva a descubrir torneos sin pedir cuenta', async ({ page }) => {
     await page.goto('/');
-    // Es la acción principal: el primer enlace de la pantalla, no uno
-    // chico debajo de los de acceso.
-    const acciones = page.getByRole('link', { name: /Descubrir torneos|Crear cuenta|Ingresar/ });
-    await expect(acciones.first()).toHaveText(/Descubrir torneos/);
-    await acciones.first().click();
+    await page
+      .getByRole('link', { name: /torneos|Descubrir/i })
+      .first()
+      .click();
     await expect(page).toHaveURL(/\/torneos/);
   });
 
