@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 /**
  * Pantalla de bienvenida (`docs/diseno/Invictos - Entrada.dc.html`,
  * pantalla "Bienvenida") — pedida explícitamente como la puerta de
- * entrada real, con las tres acciones del diseño: Ingresar, Crear
- * cuenta y descubrir sin cuenta.
+ * entrada real, con las tres acciones del diseño: descubrir sin cuenta
+ * —la principal—, Crear cuenta e Ingresar.
  *
  * No contradice D-90 ("la app abre mostrando los torneos... sin que
  * pida nada"): esta pantalla no pide ningún dato, solo ofrece un tercer
@@ -71,15 +71,22 @@ export default async function PaginaBienvenida() {
       </div>
 
       <div className={styles.acciones}>
-        <Link href="/ingresar?modo=crear" className={styles.botonPrimario}>
-          Crear cuenta
+        {/* Descubrir va primero y en grande (`05`, principio 1; D-90): mirar
+            torneos no pide nada, y es lo que hace casi todo el que llega
+            por un link. Antes era un enlace chico debajo de los dos
+            botones de acceso, la opción que menos se veía. */}
+        <Link href="/torneos" className={styles.botonPrimario}>
+          Descubrir torneos
+          <span className={styles.aclaracion}>Sin cuenta, sin dar ningún dato</span>
         </Link>
-        <Link href="/ingresar" className={styles.botonSecundario}>
-          Ingresar
-        </Link>
-        <Link href="/torneos" className={styles.enlaceDescubrir}>
-          Descubrir torneos sin cuenta
-        </Link>
+        <div className={styles.filaAcceso}>
+          <Link href="/ingresar?modo=crear" className={styles.botonSecundario}>
+            Crear cuenta
+          </Link>
+          <Link href="/ingresar" className={styles.botonSecundario}>
+            Ingresar
+          </Link>
+        </div>
       </div>
     </main>
   );
