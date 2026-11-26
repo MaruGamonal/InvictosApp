@@ -51,6 +51,16 @@ describe('NumerosDelJugador', () => {
     });
   });
 
+  /** Lo que suma y lo que resta, separados: una roja no es un logro más. */
+  it('las tarjetas van aparte, bajo su propio título', () => {
+    const { container, getByRole } = render(<NumerosDelJugador historial={[torneo({})]} />);
+    const [logros, tarjetas] = container.querySelectorAll('dl');
+    expect(logros!.textContent).toContain('Goles');
+    expect(logros!.textContent).not.toMatch(/Amarillas|Rojas/);
+    expect(tarjetas!.textContent).toMatch(/Amarillas.*Rojas/);
+    expect(getByRole('heading', { name: 'Tarjetas' })).toBeTruthy();
+  });
+
   /** En un total, cero rojas es un dato: no se esconde. */
   it('muestra los ceros', () => {
     const { container } = render(<NumerosDelJugador historial={[torneo({})]} />);

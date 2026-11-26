@@ -1,11 +1,18 @@
-.numeros {
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Lo que suma: tarjetas grandes, el número en display. */
+.logros {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 8px;
   margin: 0;
 }
 
-.numero {
+.logro {
   display: flex;
   /* El número arriba y la etiqueta abajo, pero en el DOM va primero la
      etiqueta (`<dt>` antes de `<dd>`). `space-between` alinea los
@@ -34,4 +41,51 @@
   font-weight: 600;
   line-height: 1.25;
   color: var(--color-texto-secundario);
+}
+
+/* Lo que resta: aparte, en una sola fila chica y sin el número en
+   display. No va en rojo: una tarjeta no es un error de la app, y el
+   rojo queda para eso (`08`, 6.3). */
+.disciplina {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-sutil);
+}
+
+.tituloDisciplina {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+.tarjetas {
+  display: flex;
+  gap: 16px;
+  margin: 0 0 0 auto;
+}
+
+.tarjeta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.etiquetaTarjeta {
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+.valorTarjeta {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }

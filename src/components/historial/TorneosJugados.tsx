@@ -62,22 +62,27 @@ export function TorneosJugados({ historial }: { historial: TorneoJugado[] }) {
                     <span className="solo-lector"> veces jugador del partido</span>
                   </span>
                 )}
-                {torneo.tarjetasAmarillas > 0 && (
-                  <span className={styles.tarjeta}>
-                    <span aria-hidden>🟨 </span>
-                    {torneo.tarjetasAmarillas}
-                    <span className="solo-lector">
-                      {torneo.tarjetasAmarillas === 1 ? ' amarilla' : ' amarillas'}
-                    </span>
-                  </span>
-                )}
-                {torneo.tarjetasRojas > 0 && (
-                  <span className={styles.tarjeta}>
-                    <span aria-hidden>🟥 </span>
-                    {torneo.tarjetasRojas}
-                    <span className="solo-lector">
-                      {torneo.tarjetasRojas === 1 ? ' roja' : ' rojas'}
-                    </span>
+                {/* Las tarjetas, aparte y a la derecha: no son un logro. */}
+                {(torneo.tarjetasAmarillas > 0 || torneo.tarjetasRojas > 0) && (
+                  <span className={styles.tarjetas}>
+                    {torneo.tarjetasAmarillas > 0 && (
+                      <span className={styles.tarjeta}>
+                        <span aria-hidden>🟨 </span>
+                        {torneo.tarjetasAmarillas}
+                        <span className="solo-lector">
+                          {torneo.tarjetasAmarillas === 1 ? ' amarilla' : ' amarillas'}
+                        </span>
+                      </span>
+                    )}
+                    {torneo.tarjetasRojas > 0 && (
+                      <span className={styles.tarjeta}>
+                        <span aria-hidden>🟥 </span>
+                        {torneo.tarjetasRojas}
+                        <span className="solo-lector">
+                          {torneo.tarjetasRojas === 1 ? ' roja' : ' rojas'}
+                        </span>
+                      </span>
+                    )}
                   </span>
                 )}
               </span>
