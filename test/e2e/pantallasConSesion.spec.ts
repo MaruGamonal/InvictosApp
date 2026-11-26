@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { leerEscenario } from './_escenario';
 import { iniciarSesion } from './_sesion';
+import { expectNumero } from './_numeros';
 
 /**
  * Cada pantalla que **sólo existe con sesión**, abierta de verdad.
@@ -170,6 +171,16 @@ test.describe('la gestión de un equipo, con sesión de capitán', () => {
       await abre(page, `/equipo/${escenario.equipoDelCapitanId}/gestionar${sufijo}`);
     });
   }
+
+  /** Sus números, en su propio perfil: lo mismo que ve cualquiera en la ficha pública. */
+  test('en su perfil ve sus goles, tarjetas y jugador del partido', async ({ page }) => {
+    await abre(page, '/perfil');
+    await expect(page.getByRole('heading', { name: 'Tus números' })).toBeVisible();
+    await expectNumero(page, 'Goles', '3');
+    await expectNumero(page, 'Jugador del partido', '1');
+    await expectNumero(page, 'Amarillas', '1');
+    await expect(page.getByText(escenario.torneoNombre)).toBeVisible();
+  });
 
   test('la lista de buena fe de su equipo abre', async ({ page }) => {
     await abre(

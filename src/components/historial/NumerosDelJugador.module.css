@@ -1,0 +1,37 @@
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.numero {
+  display: flex;
+  /* El número arriba y la etiqueta abajo, pero en el DOM va primero la
+     etiqueta (`<dt>` antes de `<dd>`). `space-between` alinea los
+     números entre tarjetas aunque una etiqueta ocupe dos renglones. */
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+.valor {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.etiqueta {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-texto-secundario);
+}

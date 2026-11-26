@@ -11,6 +11,9 @@ import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import { BotonCerrarSesion } from '@/components/BotonCerrarSesion';
 import { conNombreProducto } from '@/lib/nombreProducto';
+import { obtenerHistorialDelJugador } from '@/services/identidad/obtenerHistorialDelJugador';
+import { NumerosDelJugador } from '@/components/historial/NumerosDelJugador';
+import { TorneosJugados } from '@/components/historial/TorneosJugados';
 import styles from './pagina.module.css';
 
 export const metadata: Metadata = { title: conNombreProducto('Mi perfil') };
@@ -24,6 +27,7 @@ export default async function PaginaPerfil() {
     obtenerMiPerfil(undefined, contexto),
     crearClienteServidor(),
   ]);
+  const historial = await obtenerHistorialDelJugador({ perfilId: perfil.id }, contexto);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -44,6 +48,26 @@ export default async function PaginaPerfil() {
           {user?.email && <p className={styles.email}>{user.email}</p>}
           <Badge campo="perfilDeportivo.visibilidad" valor={perfil.visibilidad} conPunto />
         </div>
+
+        {/* Lo que el jugador viene a buscar a su perfil: sus goles, sus
+            tarjetas y las veces que lo eligieron jugador del partido. Lo
+            mismo que ve cualquiera en su ficha pública. */}
+        <section className={styles.seccion} aria-labelledby="titulo-numeros">
+          <h2 id="titulo-numeros" className={styles.tituloSeccion}>
+            Tus números
+          </h2>
+          {historial.length === 0 ? (
+            <p className={styles.sinHistorial}>
+              Cuando juegues un torneo, acá vas a ver tus goles, tus tarjetas y las veces que te
+              eligieron jugador del partido.
+            </p>
+          ) : (
+            <>
+              <NumerosDelJugador historial={historial} />
+              <TorneosJugados historial={historial} />
+            </>
+          )}
+        </section>
 
         <span className={styles.tituloSeccion}>Tu cuenta</span>
         <dl className={styles.tarjetaDatos}>
