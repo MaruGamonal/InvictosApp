@@ -197,16 +197,7 @@ export default function PaginaCatalogo() {
         {/* Con un hijo de muestra: sin anuncio el contenedor no se
             renderiza, y una sección vacía en la galería no exhibe nada. */}
         <ContenedorPublicidad>
-          <div
-            style={{
-              minHeight: 90,
-              display: 'grid',
-              placeItems: 'center',
-              background: 'var(--color-superficie)',
-            }}
-          >
-            Acá iría el anuncio
-          </div>
+          <div className={styles.muestraAnuncio}>Acá iría el anuncio</div>
         </ContenedorPublicidad>
       </section>
 
@@ -222,13 +213,7 @@ export default function PaginaCatalogo() {
         <h2 className={styles.tituloSeccion}>Hoja de opciones — el chip del modo</h2>
         {/* Sobre el hero oscuro, que es donde vive: el disparador usa los
             tokens de identidad y sobre fondo claro no se lee como es. */}
-        <div
-          style={{
-            background: 'var(--identidad-fondo)',
-            padding: '18px var(--espacio-pantalla-x)',
-            borderRadius: 'var(--radio-tarjeta)',
-          }}
-        >
+        <div className={styles.fondoIdentidad}>
           <SelectorDeModo modoActual="jugador" />
         </div>
       </section>
@@ -237,16 +222,7 @@ export default function PaginaCatalogo() {
         <h2 className={styles.tituloSeccion}>Aviso de goles que no cuadran (UC-34)</h2>
         {/* Avisa y no bloquea, así que va en tono de advertencia y no de
             error: el botón de guardar sigue habilitado al lado. */}
-        <p
-          style={{
-            margin: 0,
-            padding: '8px 10px',
-            borderRadius: 'var(--radio-boton)',
-            background: 'var(--advertencia-fondo)',
-            color: 'var(--advertencia-texto)',
-            font: '500 12px/1.4 var(--fuente-texto)',
-          }}
-        >
+        <p className={styles.avisoGoles}>
           Los goles cargados no coinciden con el marcador — Los Pibes: 3 en el marcador y 1
           atribuido. Podés guardar igual.
         </p>
@@ -257,19 +233,13 @@ export default function PaginaCatalogo() {
         {/* El punto es compararlos: cada uno solo se ve bien, y así fue
             como se desparramaron cinco cabeceras de cada color sin que
             el color significara nada. */}
-        <div style={{ display: 'grid', gap: 10 }}>
+        <div className={styles.listaCabeceras}>
           {(['--cabecera-jugador', '--cabecera-organizador'] as const).map((token) => (
+            // El fondo sí va inline: es el token que se muestra.
             <div
               key={token}
-              style={{
-                background: `var(${token})`,
-                color: 'var(--identidad-texto)',
-                borderRadius: 'var(--radio-tarjeta)',
-                padding: '18px var(--espacio-pantalla-x)',
-                font: '700 13px/1 var(--fuente-texto)',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-              }}
+              className={styles.muestraCabecera}
+              style={{ background: `var(${token})` }}
             >
               {token.replace('--cabecera-', '')}
             </div>

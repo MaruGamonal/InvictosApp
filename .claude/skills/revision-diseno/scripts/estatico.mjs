@@ -95,6 +95,10 @@ const REGLAS = [
   {
     aplica: (a) => a.endsWith('.tsx'),
     regex: /style=\{\{[^}]*(color|background|margin|padding)\s*:/,
+    // Un color que sale de un token variable (`var(${token})`, una muestra
+    // del catálogo) no tiene clase fija que lo reemplace: es legítimo.
+    filtro: (m) =>
+      !/^style=\{\{\s*background:\s*`var\(\$\{\w+\}\)`\s*\}\}/.test(m.input.slice(m.index)),
     severidad: 'media',
     regla: 'estilo-inline',
     detalle: 'Estilo inline de color o espaciado: se saltea los tokens.',
