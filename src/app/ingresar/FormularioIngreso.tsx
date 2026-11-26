@@ -5,6 +5,7 @@ import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDesh
 import Link from 'next/link';
 import { CampoPassword } from '@/components/CampoPassword';
 import styles from './pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 /**
  * UC-01 — cliente de `POST /api/ingresar` (correo + contraseña) y
@@ -153,10 +154,13 @@ export function FormularioIngreso({ modoInicial, accionPendiente }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>{esCrear ? 'Crear cuenta' : 'Ingresar'}</h1>
-      <p className={styles.texto}>
-        {esCrear ? 'Solo lo justo para empezar.' : 'Con el correo y la contraseña de tu cuenta.'}
-      </p>
+      <CabeceraDeTarea
+        volverA="/"
+        titulo={esCrear ? 'Crear cuenta' : 'Ingresar'}
+        descripcion={
+          esCrear ? 'Solo lo justo para empezar.' : 'Con el correo y la contraseña de tu cuenta.'
+        }
+      />
 
       {estado.paso === 'error' && (
         <p className={styles.error} role="alert">

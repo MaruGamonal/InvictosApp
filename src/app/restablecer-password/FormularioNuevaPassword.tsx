@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { CampoPassword } from '@/components/CampoPassword';
 import styles from '../ingresar/pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 type Estado = { paso: 'formulario' } | { paso: 'enviando' } | { paso: 'error'; mensaje: string };
 
@@ -43,8 +44,10 @@ export function FormularioNuevaPassword() {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Elegí una contraseña nueva</h1>
-      <p className={styles.texto}>Reemplaza la anterior en toda tu cuenta.</p>
+      <CabeceraDeTarea
+        titulo="Elegí una contraseña nueva"
+        descripcion="Reemplaza la anterior en toda tu cuenta."
+      />
 
       {estado.paso === 'error' && (
         <p className={styles.error} role="alert">

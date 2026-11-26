@@ -8,6 +8,7 @@ import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
 import styles from '../../../ingresar/pagina.module.css';
 import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   provincias: ProvinciaListada[];
@@ -102,7 +103,7 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
   if (logoFallido) {
     return (
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Organización creada</h1>
+        <CabeceraDeTarea volverA="/organizador/gestionar" titulo="Organización creada" />
         <p className={styles.error}>{logoFallido}</p>
         <p className={styles.texto}>
           La organización quedó creada sin logo. Podés subirlo cuando quieras desde Perfil público.
@@ -116,8 +117,11 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Crear organización</h1>
-      <p className={styles.texto}>Quién organiza tus torneos — la podés editar después.</p>
+      <CabeceraDeTarea
+        volverA="/organizador/gestionar"
+        titulo="Crear organización"
+        descripcion="Quién organiza tus torneos — la podés editar después."
+      />
 
       {error && <p className={styles.error}>{error}</p>}
 

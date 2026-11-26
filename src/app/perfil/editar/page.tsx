@@ -6,7 +6,6 @@ import { listarCiudadesCacheado } from '@/app/torneos/_datos';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { FormularioEditarPerfil } from './FormularioEditarPerfil';
 import styles from '../../ingresar/pagina.module.css';
-import { EnlaceVolver } from '@/components/EnlaceVolver';
 
 export const metadata: Metadata = { title: conNombreProducto('Editar perfil') };
 
@@ -22,7 +21,6 @@ export default async function PaginaEditarPerfil() {
 
   return (
     <main className={styles.pagina}>
-      <EnlaceVolver alternativa="/perfil" />
       <FormularioEditarPerfil perfil={perfil} provincias={provincias} />
     </main>
   );

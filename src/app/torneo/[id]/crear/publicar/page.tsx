@@ -6,7 +6,7 @@ import { esErrorDeAplicacion } from '@/lib/errores';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { PanelPublicarTorneo } from '@/components/PanelPublicarTorneo';
 import styles from '@/app/ingresar/pagina.module.css';
-import pasoStyles from './pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Listo para publicar') };
 
@@ -43,8 +43,11 @@ export default async function PaginaPublicarInicial({
   return (
     <main className={styles.pagina}>
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Listo para publicar</h1>
-        <p className={pasoStyles.breadcrumb}>· {resumen.ciudadNombre}</p>
+        <CabeceraDeTarea
+          volverA={`/torneo/${id}/crear/reglamento`}
+          contexto={`Crear torneo · ${resumen.ciudadNombre}`}
+          titulo="Listo para publicar"
+        />
 
         <PanelPublicarTorneo
           torneoId={id}

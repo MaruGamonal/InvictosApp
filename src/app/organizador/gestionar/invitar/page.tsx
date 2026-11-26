@@ -4,6 +4,7 @@ import { conNombreProducto } from '@/lib/nombreProducto';
 import { obtenerOrganizacionActivaCacheada } from '../_datos';
 import { FormularioInvitarAdministrador } from './FormularioInvitarAdministrador';
 import styles from '../equipo/pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Invitar administrador') };
 
@@ -15,7 +16,7 @@ export default async function PaginaInvitarAdministrador() {
   if (organizacion.rol !== 'owner') {
     return (
       <div className={styles.contenidoPagina}>
-        <h1 className={styles.titulo}>Invitar administrador</h1>
+        <CabeceraDeTarea volverA="/organizador/gestionar/equipo" titulo="Invitar administrador" />
         <p className={styles.aviso}>
           Solo el Titular puede invitar administradores a la organización.
         </p>

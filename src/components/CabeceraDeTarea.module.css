@@ -1,0 +1,43 @@
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contexto {
+  margin: 8px 0 0;
+  font: 600 12px/1.3 var(--fuente-texto);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--acento-oscuro);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.filaTitulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.contexto + .filaTitulo {
+  margin-top: 0;
+}
+
+.cabecera > :first-child + .filaTitulo {
+  margin-top: 8px;
+}
+
+.descripcion {
+  margin: 4px 0 0;
+  font: 400 14px/1.45 var(--fuente-texto);
+  color: var(--color-texto-secundario);
+}

@@ -8,6 +8,7 @@ import { Escudo } from '@/components/Escudo';
 import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
 import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDeshabilitado';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   provincias: ProvinciaListada[];
@@ -130,7 +131,7 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   if (escudoFallido) {
     return (
       <div className={styles.tarjeta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Equipo creado</h1>
+        <CabeceraDeTarea volverA="/inicio" titulo="Equipo creado" />
         <p className={styles.error}>{escudoFallido.mensaje}</p>
         <p className={styles.texto}>
           El equipo quedó creado sin escudo. Podés subirlo cuando quieras desde Gestionar equipo.
@@ -144,8 +145,11 @@ export function FormularioCrearEquipo({ provincias }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <h1 className={`fuente-display ${styles.titulo}`}>Crear equipo</h1>
-      <p className={styles.texto}>Podés inscribirlo con el plantel vacío y sumar gente después.</p>
+      <CabeceraDeTarea
+        volverA="/inicio"
+        titulo="Crear equipo"
+        descripcion="Podés inscribirlo con el plantel vacío y sumar gente después."
+      />
 
       {error && <p className={styles.error}>{error}</p>}
 

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { construirContexto } from '@/lib/contexto';
 import { obtenerResumenBajaDelTorneo } from '@/services/inscripciones/obtenerResumenBajaDelTorneo';
@@ -7,6 +6,7 @@ import { esErrorDeAplicacion } from '@/lib/errores';
 import { conNombreProducto } from '@/lib/nombreProducto';
 import { PanelDarDeBaja } from './PanelDarDeBaja';
 import styles from './pagina.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 export const metadata: Metadata = { title: conNombreProducto('Dar de baja del torneo') };
 
@@ -37,13 +37,11 @@ export default async function PaginaDarDeBaja({
 
   return (
     <main className={styles.pagina}>
-      <Link href={`/torneo/${id}`} className={styles.enlaceVolver}>
-        ← Volver
-      </Link>
-      <h1 className={`fuente-display ${styles.titulo}`}>Dar de baja del torneo</h1>
-      <p className={styles.texto}>
-        {resumen.equipoNombre} · {resumen.torneoNombre}
-      </p>
+      <CabeceraDeTarea
+        volverA={`/torneo/${id}`}
+        contexto={`${resumen.equipoNombre} · ${resumen.torneoNombre}`}
+        titulo="Dar de baja"
+      />
 
       {ESTADOS_TERMINALES.has(resumen.inscripcionEstado) ? (
         <p className={styles.avisoCerrada}>

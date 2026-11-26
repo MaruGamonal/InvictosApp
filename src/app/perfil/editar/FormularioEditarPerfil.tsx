@@ -9,6 +9,7 @@ import { Escudo } from '@/components/Escudo';
 import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
 import propios from './FormularioEditarPerfil.module.css';
+import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   perfil: MiPerfil;
@@ -94,13 +95,16 @@ export function FormularioEditarPerfil({ perfil, provincias }: Props) {
 
   return (
     <form className={styles.tarjeta} onSubmit={enviar}>
-      <div className={styles.filaEtiqueta}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Mi perfil</h1>
-        <Link href={`/jugador/${perfil.id}`} className={styles.enlaceChico}>
-          Ver cómo te ven los demás
-        </Link>
-      </div>
-      <p className={styles.texto}>Todo esto es opcional.</p>
+      <CabeceraDeTarea
+        volverA="/perfil"
+        titulo="Mi perfil"
+        descripcion="Todo esto es opcional."
+        accion={
+          <Link href={`/jugador/${perfil.id}`} className={styles.enlaceChico}>
+            Ver cómo te ven los demás
+          </Link>
+        }
+      />
 
       <div className={propios.filaFoto}>
         <button
