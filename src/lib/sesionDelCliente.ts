@@ -7,7 +7,9 @@
  * para cualquiera, así que no puede decir si hay sesión. Los tres
  * componentes que sí lo necesitan —el nav inferior, la campanita y el
  * enlace de ingreso— lo preguntaban cada uno por su cuenta con
- * `GET /api/mi-usuario`, en cada montaje.
+ * `GET /api/mi-usuario`, en cada montaje. (Ahora es `GET /api/sesion`,
+ * que contesta 200 también al visitante: el 401 de la otra ruta dejaba
+ * un error en la consola de cada página pública.)
  *
  * Eso son hasta tres pedidos idénticos por pantalla, y **otros tres al
  * cambiar de pantalla**, porque los componentes se vuelven a montar. El
@@ -62,10 +64,15 @@ function recordar(autenticado: boolean): void {
 let enCurso: Promise<boolean> | undefined;
 
 export function consultarSesion(): Promise<boolean> {
-  enCurso ??= fetch('/api/mi-usuario')
-    .then((respuesta) => {
-      recordar(respuesta.ok);
-      return respuesta.ok;
+  enCurso ??= fetch('/api/sesion')
+    .then(async (respuesta) => {
+      // Una respuesta de error (500) no dice nada sobre la sesión: se
+      // trata como un corte de red, sin recordar.
+      if (!respuesta.ok) return false;
+      const cuerpo = (await respuesta.json()) as { data?: { autenticado?: boolean } };
+      const autenticado = cuerpo.data?.autenticado === true;
+      recordar(autenticado);
+      return autenticado;
     })
     .catch(() => {
       // Sin conexión no se recuerda nada: un corte de red no es una

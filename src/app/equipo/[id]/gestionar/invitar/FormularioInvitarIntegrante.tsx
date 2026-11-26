@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAvisos } from '@/components/avisos/Avisos';
 import styles from './pagina.module.css';
+import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   equipoId: string;
@@ -33,7 +34,11 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
   const [rol, setRol] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
-  const formularioValido = nombreVisible.trim() !== '' && rol !== '';
+  const motivoDeshabilitado = motivoPorFaltantes([
+    ...(nombreVisible.trim() === '' ? ['el nombre o correo'] : []),
+    ...(rol === '' ? ['el rol'] : []),
+  ]);
+  const formularioValido = motivoDeshabilitado === null;
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -110,9 +115,15 @@ export function FormularioInvitarIntegrante({ equipoId }: Props) {
         </div>
       </div>
 
-      <button type="submit" className={styles.boton} disabled={enviando || !formularioValido}>
+      <button
+        type="submit"
+        className={styles.boton}
+        disabled={enviando || !formularioValido}
+        aria-describedby={motivoDeshabilitado ? 'motivo-invitar' : undefined}
+      >
         {enviando ? 'Invitando…' : 'Enviar invitación'}
       </button>
+      <MotivoDeshabilitado id="motivo-invitar" motivo={motivoDeshabilitado} />
     </form>
   );
 }

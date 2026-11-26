@@ -56,3 +56,40 @@
 .tablaEjemplo {
   overflow-x: auto;
 }
+
+.muestraAnuncio {
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  background: var(--color-superficie);
+}
+
+/* El chip de modo vive sobre el hero oscuro: se muestra ahí. */
+.fondoIdentidad {
+  background: var(--identidad-fondo);
+  padding: 18px var(--espacio-pantalla-x);
+  border-radius: var(--radio-tarjeta);
+}
+
+.avisoGoles {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radio-boton);
+  background: var(--advertencia-fondo);
+  color: var(--advertencia-texto);
+  font: 500 12px/1.4 var(--fuente-texto);
+}
+
+.listaCabeceras {
+  display: grid;
+  gap: 10px;
+}
+
+.muestraCabecera {
+  color: var(--identidad-texto);
+  border-radius: var(--radio-tarjeta);
+  padding: 18px var(--espacio-pantalla-x);
+  font: 700 13px/1 var(--fuente-texto);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

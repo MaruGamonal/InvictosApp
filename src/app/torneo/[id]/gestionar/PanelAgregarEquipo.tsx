@@ -6,6 +6,7 @@ import { useAvisos } from '@/components/avisos/Avisos';
 import { motivoDelFallo } from '@/components/avisos/motivoDelFallo';
 import { Escudo } from '@/components/Escudo';
 import styles from './pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 export interface PanelAgregarEquipoProps {
   torneoId: string;
@@ -183,9 +184,14 @@ export function PanelAgregarEquipo({ torneoId, habilitado }: PanelAgregarEquipoP
         type="button"
         onClick={() => agregar({ nombre: buscado, categoriaGenero }, buscado)}
         disabled={enviando || buscado.length === 0}
+        aria-describedby={buscado.length === 0 ? 'motivo-agregar-equipo' : undefined}
       >
         {enviando ? 'Agregando…' : `Crear «${buscado || '…'}» e inscribirlo`}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-agregar-equipo"
+        motivo={buscado.length === 0 ? 'Escribí el nombre del equipo.' : null}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { EstadoVacio } from '@/components/EstadoVacio';
 import styles from './pagina.module.css';
 import { ZONA_HORARIA } from '@/lib/zonaHoraria';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 export interface PartidoProgramable {
   id: string;
@@ -114,46 +115,53 @@ export function PanelProgramarPartidos({ partidos, ciudadId }: PanelProgramarPar
           </span>
 
           {partido.estado === 'played' ? null : editando === partido.id ? (
-            <div className={styles.filaAccion}>
-              <input
-                type="datetime-local"
-                aria-label="Fecha y hora del partido"
-                value={fechaHora}
-                onChange={(evento) => setFechaHora(evento.target.value)}
-                disabled={enviando}
+            <>
+              <div className={styles.filaAccion}>
+                <input
+                  type="datetime-local"
+                  aria-label="Fecha y hora del partido"
+                  value={fechaHora}
+                  onChange={(evento) => setFechaHora(evento.target.value)}
+                  disabled={enviando}
+                />
+                <input
+                  type="text"
+                  placeholder="Sede (opcional)"
+                  aria-label="Sede (opcional)"
+                  value={sedeNombre}
+                  onChange={(evento) => setSedeNombre(evento.target.value)}
+                  disabled={enviando}
+                />
+                <input
+                  type="text"
+                  placeholder="Dirección"
+                  aria-label="Dirección de la sede"
+                  value={sedeDireccion}
+                  onChange={(evento) => setSedeDireccion(evento.target.value)}
+                  disabled={enviando}
+                />
+                <button
+                  type="button"
+                  onClick={() => guardar(partido.id)}
+                  disabled={enviando || !fechaHora}
+                  aria-describedby={!fechaHora ? `motivo-programar-${partido.id}` : undefined}
+                >
+                  {enviando ? 'Guardando…' : 'Guardar'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.botonSecundarioChico}
+                  onClick={() => setEditando(null)}
+                  disabled={enviando}
+                >
+                  Cancelar
+                </button>
+              </div>
+              <MotivoDeshabilitado
+                id={`motivo-programar-${partido.id}`}
+                motivo={!fechaHora ? 'Elegí el día y la hora.' : null}
               />
-              <input
-                type="text"
-                placeholder="Sede (opcional)"
-                aria-label="Sede (opcional)"
-                value={sedeNombre}
-                onChange={(evento) => setSedeNombre(evento.target.value)}
-                disabled={enviando}
-              />
-              <input
-                type="text"
-                placeholder="Dirección"
-                aria-label="Dirección de la sede"
-                value={sedeDireccion}
-                onChange={(evento) => setSedeDireccion(evento.target.value)}
-                disabled={enviando}
-              />
-              <button
-                type="button"
-                onClick={() => guardar(partido.id)}
-                disabled={enviando || !fechaHora}
-              >
-                {enviando ? 'Guardando…' : 'Guardar'}
-              </button>
-              <button
-                type="button"
-                className={styles.botonSecundarioChico}
-                onClick={() => setEditando(null)}
-                disabled={enviando}
-              >
-                Cancelar
-              </button>
-            </div>
+            </>
           ) : (
             <button
               type="button"

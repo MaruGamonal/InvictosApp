@@ -7,6 +7,7 @@ import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
 import { useAvisos } from '@/components/avisos/Avisos';
 import styles from '../../ingresar/pagina.module.css';
+import { MotivoDeshabilitado, motivoPorFaltantes } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   provincias: ProvinciaListada[];
@@ -45,7 +46,11 @@ export function FormularioCrearEquipo({ provincias }: Props) {
   const [escudoFallido, setEscudoFallido] = useState<{ equipoId: string; mensaje: string } | null>(
     null,
   );
-  const formularioValido = nombre.trim() !== '' && categoriaGenero !== '';
+  const motivoDeshabilitado = motivoPorFaltantes([
+    ...(nombre.trim() === '' ? ['el nombre del equipo'] : []),
+    ...(categoriaGenero === '' ? ['la categoría de género'] : []),
+  ]);
+  const formularioValido = motivoDeshabilitado === null;
 
   const inputEscudoRef = useRef<HTMLInputElement>(null);
   const [archivoEscudo, setArchivoEscudo] = useState<File | null>(null);
@@ -218,9 +223,15 @@ export function FormularioCrearEquipo({ provincias }: Props) {
         />
       </div>
 
-      <button type="submit" className={styles.boton} disabled={enviando || !formularioValido}>
+      <button
+        type="submit"
+        className={styles.boton}
+        disabled={enviando || !formularioValido}
+        aria-describedby={motivoDeshabilitado ? 'motivo-crear-equipo' : undefined}
+      >
         {enviando ? 'Creando…' : 'Crear equipo'}
       </button>
+      <MotivoDeshabilitado id="motivo-crear-equipo" motivo={motivoDeshabilitado} />
     </form>
   );
 }

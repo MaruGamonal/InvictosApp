@@ -5,6 +5,7 @@ import { Escudo } from '@/components/Escudo';
 import { Badge } from '@/components/Badge';
 import type { IntegranteListaDeBuenaFe } from '@/services/inscripciones/obtenerListaDeBuenaFe';
 import styles from './pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   torneoId: string;
@@ -178,9 +179,14 @@ export function PanelListaDeBuenaFe({
         className={styles.botonPrincipal}
         onClick={confirmar}
         disabled={enviando || seleccionados.size === 0}
+        aria-describedby={seleccionados.size === 0 ? 'motivo-lista' : undefined}
       >
         {enviando ? 'Confirmando…' : 'Confirmar lista'}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-lista"
+        motivo={seleccionados.size === 0 ? 'Tildá al menos a una persona del plantel.' : null}
+      />
     </div>
   );
 }

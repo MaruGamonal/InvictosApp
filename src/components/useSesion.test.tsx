@@ -5,6 +5,11 @@ import { olvidarSesionConsultada } from '@/lib/sesionDelCliente';
 import { NavInferior } from './NavInferior';
 import { useSesion } from './useSesion';
 
+/** Lo que contesta `/api/sesion`: 200 siempre, con o sin sesión. */
+function respuesta(autenticado: boolean) {
+  return { ok: true, json: async () => ({ ok: true, data: { autenticado } }) };
+}
+
 function Sonda() {
   const autenticado = useSesion();
   return <span data-testid="estado">{String(autenticado)}</span>;
@@ -24,7 +29,7 @@ describe('useSesion', () => {
    * pantalla (nav, campanita, enlace de ingreso). Reportado en vivo.
    */
   it('tres componentes a la vez hacen UN solo pedido', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    const fetchMock = vi.fn().mockResolvedValue(respuesta(true));
     vi.stubGlobal('fetch', fetchMock);
 
     render(
@@ -37,17 +42,17 @@ describe('useSesion', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith('/api/mi-usuario');
+    expect(fetchMock).toHaveBeenCalledWith('/api/sesion');
   });
 
   it('con sesión responde true, sin sesión false', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(true)));
     const conSesion = render(<Sonda />);
     await waitFor(() => expect(conSesion.getByTestId('estado').textContent).toBe('true'));
 
     cleanup();
     olvidarSesionConsultada();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(false)));
     const sinSesion = render(<Sonda />);
     await waitFor(() => expect(sinSesion.getByTestId('estado').textContent).toBe('false'));
   });
@@ -58,7 +63,7 @@ describe('useSesion', () => {
    * recordado, así que el nav ya está en el primer render.
    */
   it('al volver a montar arranca con la respuesta recordada, sin esperar', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(true)));
     const primera = render(<Sonda />);
     await waitFor(() => expect(primera.getByTestId('estado').textContent).toBe('true'));
     cleanup();
@@ -67,6 +72,14 @@ describe('useSesion', () => {
     olvidarSesionConsultadaSinBorrarLoRecordado();
     const segunda = render(<NavInferior activo="inicio" />);
     expect(segunda.container.querySelector('nav')).toBeTruthy();
+  });
+
+  /** El visitante ya no recibe un 401: el sin-sesión llega en el cuerpo. */
+  it('sin sesión se recuerda como "no hay"', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(false)));
+    const { getByTestId } = render(<Sonda />);
+    await waitFor(() => expect(getByTestId('estado').textContent).toBe('false'));
+    expect(sessionStorage.getItem('sesion_activa')).toBe('0');
   });
 
   /** Un corte de red no es una respuesta: no se recuerda como "no hay sesión". */
@@ -95,13 +108,13 @@ describe('NavInferior', () => {
 
   /** Sin sesión sigue oculto: un visitante no ve un nav de cuenta. */
   it('sin sesión no se dibuja', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(false)));
     const { container } = render(<NavInferior activo="torneos" />);
     await waitFor(() => expect(container.querySelector('nav')).toBeNull());
   });
 
   it('en una pantalla pública, con sesión termina apareciendo', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respuesta(true)));
     const { container } = render(<NavInferior activo="torneos" />);
     await waitFor(() => expect(container.querySelector('nav')).toBeTruthy());
   });

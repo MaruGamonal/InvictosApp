@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   torneoId: string;
@@ -29,6 +30,7 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
   const [motivoDetalle, setMotivoDetalle] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const falteDetalle = motivo === 'other' && motivoDetalle.trim() === '';
 
   async function confirmar() {
     if (enviando) return;
@@ -99,10 +101,15 @@ export function PanelDarDeBaja({ torneoId, equipoId, torneoEnCurso }: Props) {
         type="button"
         className={styles.botonPeligro}
         onClick={confirmar}
-        disabled={enviando || (motivo === 'other' && motivoDetalle.trim() === '')}
+        disabled={enviando || falteDetalle}
+        aria-describedby={falteDetalle ? 'motivo-baja' : undefined}
       >
         {enviando ? 'Dando de baja…' : 'Confirmar baja del torneo'}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-baja"
+        motivo={falteDetalle ? 'Contá el motivo en el campo de arriba.' : null}
+      />
     </div>
   );
 }

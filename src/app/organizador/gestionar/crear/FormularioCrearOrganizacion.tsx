@@ -7,6 +7,7 @@ import type { ProvinciaListada } from '@/services/descubrimiento/listarCiudades'
 import { BuscadorCiudad } from '@/components/BuscadorCiudad';
 import { Escudo } from '@/components/Escudo';
 import styles from '../../../ingresar/pagina.module.css';
+import { MotivoDeshabilitado } from '@/components/MotivoDeshabilitado';
 
 interface Props {
   provincias: ProvinciaListada[];
@@ -181,9 +182,18 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
         />
       </div>
 
-      <button type="submit" className={styles.boton} disabled={enviando || !nombre.trim()}>
+      <button
+        type="submit"
+        className={styles.boton}
+        disabled={enviando || !nombre.trim()}
+        aria-describedby={!nombre.trim() ? 'motivo-crear-organizacion' : undefined}
+      >
         {enviando ? 'Creando…' : 'Crear organización'}
       </button>
+      <MotivoDeshabilitado
+        id="motivo-crear-organizacion"
+        motivo={!nombre.trim() ? 'Falta completar el nombre.' : null}
+      />
     </form>
   );
 }

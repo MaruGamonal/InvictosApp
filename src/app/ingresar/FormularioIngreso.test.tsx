@@ -23,6 +23,24 @@ describe('FormularioIngreso', () => {
     expect(queryByLabelText('Recordarme')).toBeNull();
   });
 
+  /** Un botón gris sin explicación deja adivinando qué falta. */
+  it('con el botón deshabilitado, dice qué falta completar', () => {
+    const { getByLabelText, getByRole, getByText, queryByText } = render(
+      <FormularioIngreso modoInicial="ingresar" />,
+    );
+    const boton = getByRole('button', { name: 'Ingresar' }) as HTMLButtonElement;
+    expect(boton.disabled).toBe(true);
+    expect(getByText('Falta completar el correo y la contraseña.')).toBeTruthy();
+
+    fireEvent.change(getByLabelText('Correo'), { target: { value: 'vos@example.com' } });
+    const motivo = getByText('Falta completar la contraseña.');
+    expect(boton.getAttribute('aria-describedby')).toBe(motivo.id);
+
+    fireEvent.change(getByLabelText('Contraseña'), { target: { value: 'algo' } });
+    expect(boton.disabled).toBe(false);
+    expect(queryByText(/Falta completar/)).toBeNull();
+  });
+
   it('al ingresar, manda "recordarme" en el body según el checkbox', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal('fetch', fetchMock);

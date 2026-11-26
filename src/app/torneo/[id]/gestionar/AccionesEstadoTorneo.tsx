@@ -222,6 +222,9 @@ export function AccionesEstadoTorneo({
               Iniciar torneo
             </button>
           </div>
+          {!tienePartidos && (
+            <p className={styles.avisoChico}>Para iniciarlo, falta confirmar el fixture.</p>
+          )}
         </>
       )}
     </div>
