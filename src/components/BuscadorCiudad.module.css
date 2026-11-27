@@ -15,7 +15,10 @@
   color: var(--color-texto);
 }
 
-.contenedor input:focus {
+/* `[type]` sube la especificidad: los formularios de gestión estilan
+   `.formularioChico input[type='text']`, que empataba con `input:focus`
+   y, por cargar después, le borraba el borde de foco al buscador. */
+.contenedor input[type]:focus {
   border: 2px solid var(--acento-oscuro);
   padding: 12px 13px;
 }
