@@ -63,6 +63,11 @@
   display: flex;
   gap: 10px;
   margin-left: auto;
+}
+
+/* La línea separa las tarjetas de los goles: sin goles ni nada antes,
+   no hay qué separar y quedaba sola. */
+.tarjetas:not(:first-child) {
   padding-left: 10px;
   border-left: 1px solid var(--borde-sutil);
 }
