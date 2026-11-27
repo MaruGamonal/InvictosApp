@@ -11,6 +11,7 @@ import { Badge } from '@/components/Badge';
 import { PanelResponderResultado } from './PanelResponderResultado';
 import { PanelAlineacion } from './PanelAlineacion';
 import { PanelCargarResultado } from './PanelCargarResultado';
+import { GolesYTarjetas } from './GolesYTarjetas';
 import styles from './pagina.module.css';
 import { ZONA_HORARIA } from '@/lib/zonaHoraria';
 
@@ -110,6 +111,16 @@ export default async function PaginaPartido({
               <span className={styles.nombreEquipo}>{partido.visitante.nombre}</span>
             </div>
           </div>
+        )}
+
+        {/* Los goles, justo debajo del marcador que explican. */}
+        {hayResultado && (
+          <GolesYTarjetas
+            local={partido.local}
+            visitante={partido.visitante}
+            eventos={partido.eventos}
+            jugadorDelPartido={partido.jugadorDelPartido}
+          />
         )}
 
         <dl className={styles.datos}>
