@@ -13,11 +13,29 @@ export const metadata: Metadata = { title: conNombreProducto('Crear organizació
  * el layout de `/organizador/gestionar` ya pone el header, el bottom
  * nav y el `max-width`/padding del contenido.
  */
-export default async function PaginaCrearOrganizacion() {
+/**
+ * `?siguiente=crear-torneo`: se llegó desde "Crear torneo", que pide una
+ * organización primero. Al terminar se vuelve ahí. Es un valor de una
+ * lista cerrada y no una URL: una dirección libre en el enlace dejaría
+ * armar uno que, al crear la organización, mande a otro sitio.
+ */
+const SIGUIENTES = {
+  'crear-torneo': { href: '/torneo/crear', etiqueta: 'Seguir con el torneo' },
+} as const;
+
+export default async function PaginaCrearOrganizacion({
+  searchParams,
+}: {
+  searchParams: Promise<{ siguiente?: string }>;
+}) {
   const contexto = await construirContexto();
   if (!contexto.usuarioId) redirect('/ingresar');
 
-  const provincias = await listarCiudadesCacheado();
+  const [{ siguiente }, provincias] = await Promise.all([searchParams, listarCiudadesCacheado()]);
+  const destino =
+    siguiente && siguiente in SIGUIENTES
+      ? SIGUIENTES[siguiente as keyof typeof SIGUIENTES]
+      : undefined;
 
-  return <FormularioCrearOrganizacion provincias={provincias} />;
+  return <FormularioCrearOrganizacion provincias={provincias} destino={destino} />;
 }

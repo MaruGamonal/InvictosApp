@@ -12,7 +12,15 @@ import { CabeceraDeTarea } from '@/components/CabeceraDeTarea';
 
 interface Props {
   provincias: ProvinciaListada[];
+  /**
+   * A dónde seguir después de crearla. Por defecto, el panel; desde
+   * "Crear torneo" (que pide una organización primero), de vuelta ahí,
+   * para que la persona no tenga que encontrar sola el camino.
+   */
+  destino?: { href: string; etiqueta: string };
 }
+
+const PANEL = { href: '/organizador/gestionar', etiqueta: 'Ir al panel' };
 
 /**
  * UC-06 — Cliente de `POST /api/organizaciones/crear`. Mismo criterio
@@ -20,7 +28,7 @@ interface Props {
  * (`/api/organizaciones/logo`) para no bloquear la creación si la
  * subida falla.
  */
-export function FormularioCrearOrganizacion({ provincias }: Props) {
+export function FormularioCrearOrganizacion({ provincias, destino = PANEL }: Props) {
   const [nombre, setNombre] = useState('');
   const [ciudadId, setCiudadId] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -91,7 +99,7 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
         }
       }
 
-      window.location.assign('/organizador/gestionar');
+      window.location.assign(destino.href);
     } catch {
       setError('No pudimos conectar. Probá de nuevo.');
       setEnviando(false);
@@ -108,8 +116,8 @@ export function FormularioCrearOrganizacion({ provincias }: Props) {
         <p className={styles.texto}>
           La organización quedó creada sin logo. Podés subirlo cuando quieras desde Perfil público.
         </p>
-        <Link className={styles.boton} href="/organizador/gestionar">
-          Ir al panel
+        <Link className={styles.boton} href={destino.href}>
+          {destino.etiqueta}
         </Link>
       </div>
     );

@@ -248,6 +248,13 @@
 }
 
 .boton {
+  /* También se usa en enlaces (<Link>, <a>): sin esto salían subrayados
+     y con el texto a la izquierda. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
   background: var(--acento);
   color: var(--acento-texto-sobre);
   font-weight: 700;
@@ -256,7 +263,13 @@
   border: none;
   border-radius: var(--radio-boton);
   cursor: pointer;
+  /* Al pie del formulario. Donde no hay formulario arriba, dejaba una
+     pantalla vacía en el medio: ahí va `.botonSeguido`. */
   margin-top: auto;
+}
+
+.botonSeguido {
+  margin-top: 8px;
 }
 
 .boton:disabled {

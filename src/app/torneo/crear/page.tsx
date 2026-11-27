@@ -41,9 +41,15 @@ export default async function PaginaCrearTorneo() {
         <CabeceraDeTarea
           volverA="/organizador/gestionar"
           titulo="Crear torneo"
-          descripcion="Los torneos nacen bajo una organización. Creá la tuya y volvé a esta pantalla."
+          descripcion="Los torneos nacen bajo una organización. Creá la tuya y seguís acá."
         />
-        <Link href="/organizador/gestionar/crear" className={styles.boton}>
+        {/* Justo debajo del texto: con el `margin-top: auto` de los
+            formularios quedaba al pie, a una pantalla de distancia. Y al
+            crear la organización se vuelve acá sola (`?siguiente`). */}
+        <Link
+          href="/organizador/gestionar/crear?siguiente=crear-torneo"
+          className={`${styles.boton} ${styles.botonSeguido}`}
+        >
           Crear mi organización
         </Link>
       </main>

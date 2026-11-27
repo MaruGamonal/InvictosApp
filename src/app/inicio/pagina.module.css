@@ -87,6 +87,51 @@
   gap: 4px;
 }
 
+/* Las tarjetas que son un enlace entero llevan flecha, como "Empezar ›":
+   sin ella se leían como texto, no como algo que se toca. */
+.tarjetaConFlecha {
+  position: relative;
+  padding-right: 40px;
+}
+
+.tarjetaConFlecha::after {
+  content: '›';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 600 22px/1 var(--fuente-texto);
+  color: var(--color-texto-terciario);
+}
+
+.accionesEquipo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.botonEquipo,
+.botonEquipoSecundario {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: var(--radio-boton);
+  font: 700 14px/1 var(--fuente-texto);
+  text-decoration: none;
+}
+
+.botonEquipo {
+  background: var(--acento);
+  color: var(--acento-texto-sobre);
+}
+
+.botonEquipoSecundario {
+  border: 1.5px solid var(--borde-neutro);
+  color: var(--color-texto);
+}
+
 .tarjetaAccionTitulo {
   font: 700 16px/1.2 var(--fuente-texto);
 }

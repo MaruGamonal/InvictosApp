@@ -64,7 +64,12 @@ export function AvisoCuentaNoConfirmada({ mensaje }: AvisoCuentaNoConfirmadaProp
           </button>
         )
       )}
-      {estado === 'error' && <p className={styles.error}>{motivo}</p>}
+      {/* Un rechazo con explicación ("ya te mandamos uno") no es un error:
+          va en el tono del aviso. Rojo sólo si falló la conexión o algo
+          nuestro, que es cuando el botón vuelve para reintentar. */}
+      {estado === 'error' && (
+        <p className={sePuedeReintentar ? styles.error : styles.mensaje}>{motivo}</p>
+      )}
     </div>
   );
 }

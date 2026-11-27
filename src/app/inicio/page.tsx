@@ -180,18 +180,13 @@ export default async function PaginaInicio({
                 Elegí por dónde arrancar. Podés hacer las dos cosas cuando quieras.
               </p>
             </div>
-            <Link href="/torneos" className={styles.tarjetaAccion}>
+            <Link href="/torneos" className={`${styles.tarjetaAccion} ${styles.tarjetaConFlecha}`}>
               <div className={styles.tarjetaAccionTitulo}>Descubrir un torneo</div>
               <div className={styles.tarjetaAccionTexto}>
                 Buscá por ciudad y modalidad, sin necesidad de tener equipo todavía.
               </div>
             </Link>
-            <Link href="/equipo/crear" className={styles.tarjetaAccion}>
-              <div className={styles.tarjetaAccionTitulo}>Crear o sumarme a un equipo</div>
-              <div className={styles.tarjetaAccionTexto}>
-                Armá tu plantel, o esperá la invitación de un capitán.
-              </div>
-            </Link>
+            <TarjetaCrearOSumarme />
             <Link href="/torneo/crear" className={styles.tarjetaAccionSecundaria}>
               <span>¿Vas a organizar un torneo?</span>
               <span className={styles.tarjetaAccionEnlace}>Empezar ›</span>
@@ -204,11 +199,7 @@ export default async function PaginaInicio({
             arriba): no hay nada de jugador que mostrar, pero la pantalla
             tiene que decir algo en vez de quedar vacía. */}
         {!inicio.esRecienLlegado && !inicio.jugador && (
-          <EstadoVacio
-            mensaje="Todavía no formás parte de ningún equipo."
-            textoAccion="Crear o sumarme a un equipo"
-            hrefAccion="/equipo/crear"
-          />
+          <TarjetaCrearOSumarme titulo="Todavía no formás parte de ningún equipo" />
         )}
 
         {!inicio.esRecienLlegado && inicio.jugador && (
@@ -359,5 +350,31 @@ export default async function PaginaInicio({
 
       <NavInferior activo="inicio" autenticado />
     </main>
+  );
+}
+
+/**
+ * "Crear o sumarme a un equipo" con los dos caminos a la vista. Antes era
+ * una sola tarjeta que llevaba a crear un equipo: sumarse no tenía
+ * entrada, y el texto mandaba a esperar una invitación. Sumarse es
+ * buscar el equipo y pedirle entrar desde su ficha ("Pedir sumarme",
+ * UC-53).
+ */
+function TarjetaCrearOSumarme({ titulo = 'Crear o sumarme a un equipo' }: { titulo?: string }) {
+  return (
+    <div className={styles.tarjetaAccion}>
+      <div className={styles.tarjetaAccionTitulo}>{titulo}</div>
+      <div className={styles.tarjetaAccionTexto}>
+        Armá tu plantel, o buscá tu equipo y pedí sumarte.
+      </div>
+      <div className={styles.accionesEquipo}>
+        <Link href="/equipo/crear" className={styles.botonEquipo}>
+          Crear equipo
+        </Link>
+        <Link href="/equipos" className={styles.botonEquipoSecundario}>
+          Buscar equipo
+        </Link>
+      </div>
+    </div>
   );
 }
