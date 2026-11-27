@@ -95,9 +95,9 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
     [escenario.torneoId],
   );
 
-  // El capitán del equipo local se anota en la lista de buena fe y hace
-  // los tres goles: con eso su perfil tiene historial (UC-38), que es lo
-  // que las pruebas de esa pantalla necesitan ver.
+  // El capitán del equipo local se anota en la lista de buena fe, hace
+  // los tres goles, se lleva una amarilla y es el jugador del partido:
+  // con eso su perfil tiene historial (UC-38) y números que mostrar.
   const local = equipos.find((equipo) => equipo.equipoId === primerPartido[0]!.equipo_local_id)!;
   await confirmarPlantel(
     {
@@ -114,11 +114,21 @@ export async function sembrarEscenario(): Promise<EscenarioSembrado> {
       version: primerPartido[0]!.version,
       golesLocal: 3,
       golesVisitante: 1,
-      eventos: [0, 1, 2].map(() => ({
-        perfilId: local.capitan.perfilId,
-        equipoId: local.equipoId,
-        tipoEvento: 'goal' as const,
-      })),
+      eventos: [
+        ...[0, 1, 2].map(() => ({
+          perfilId: local.capitan.perfilId,
+          equipoId: local.equipoId,
+          tipoEvento: 'goal' as const,
+        })),
+        // Una amarilla, para que el perfil tenga tarjetas que mostrar.
+        {
+          perfilId: local.capitan.perfilId,
+          equipoId: local.equipoId,
+          tipoEvento: 'yellow_card' as const,
+        },
+      ],
+      // Y elegido jugador del partido: los números del perfil lo cuentan.
+      jugadorDelPartidoPerfilId: local.capitan.perfilId,
       // Y la alineación (UC-38): con esto el partido muestra quiénes
       // jugaron y el historial del jugador cuenta un partido.
       alineaciones: [{ perfilId: local.capitan.perfilId, equipoId: local.equipoId }],

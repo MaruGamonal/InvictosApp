@@ -125,3 +125,22 @@
   padding: 14px;
   border-radius: var(--radio-boton);
 }
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* El título de sección se come 8px de abajo para pegarse a su tarjeta;
+   dentro de esta sección el hueco ya lo pone el gap. */
+.seccion .tituloSeccion {
+  margin: 0;
+}
+
+.sinHistorial {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-texto-secundario);
+}

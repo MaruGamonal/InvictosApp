@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectNumero } from './_numeros';
 import { leerEscenario } from './_escenario';
 
 const escenario = leerEscenario();
@@ -26,6 +27,16 @@ test.describe('el perfil público del jugador', () => {
     await expect(page.getByText('⚽ 3 goles')).toBeVisible();
     // UC-38: el dato que no existía hasta que hubo alineación por partido.
     await expect(page.getByText('1 partido', { exact: true })).toBeVisible();
+  });
+
+  /** Los totales de la carrera, arriba de todo: lo primero que se busca. */
+  test('muestra los números: goles, jugador del partido y tarjetas', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Números' })).toBeVisible();
+    await expectNumero(page, 'Goles', '3');
+    await expectNumero(page, 'Jugador del partido', '1');
+    await expectNumero(page, 'Amarillas', '1');
+    // En un total el cero sí es un dato.
+    await expectNumero(page, 'Rojas', '0');
   });
 
   test('el torneo del historial lleva a su ficha', async ({ page }) => {

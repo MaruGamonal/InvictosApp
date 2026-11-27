@@ -14,6 +14,8 @@ import {
   type PerfilPublico,
 } from '@/services/identidad/obtenerPerfilPublico';
 import { obtenerHistorialDelJugador } from '@/services/identidad/obtenerHistorialDelJugador';
+import { NumerosDelJugador } from '@/components/historial/NumerosDelJugador';
+import { TorneosJugados } from '@/components/historial/TorneosJugados';
 import styles from './pagina.module.css';
 
 /**
@@ -101,17 +103,18 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
                 <span>{obtenerEtiqueta('perfilDeportivo.posicion', perfil.posicion).etiqueta}</span>
               </div>
             )}
-            {perfil.vecesJugadorDelPartido > 0 && (
-              <p className={styles.statJugadorDelPartido}>
-                ⭐ Jugador del partido — {perfil.vecesJugadorDelPartido}{' '}
-                {perfil.vecesJugadorDelPartido === 1 ? 'vez' : 'veces'}
-              </p>
-            )}
           </div>
         </div>
       </header>
 
       <main className={styles.contenido}>
+        {historial.length > 0 && (
+          <section className={styles.seccionNumeros}>
+            <h2 className={styles.tituloSeccion}>Números</h2>
+            <NumerosDelJugador historial={historial} />
+          </section>
+        )}
+
         <section>
           <h2 className={styles.tituloSeccion}>Equipos</h2>
           {perfil.equipos.length === 0 ? (
@@ -144,59 +147,7 @@ export default async function PaginaPerfilPublico({ params }: { params: Promise<
         {historial.length > 0 && (
           <section>
             <h2 className={styles.tituloSeccion}>Torneos jugados</h2>
-            <ul className={styles.listaTorneos}>
-              {historial.map((torneo) => (
-                <li key={`${torneo.torneoId}-${torneo.equipoId}`} className={styles.torneo}>
-                  <Link href={`/torneo/${torneo.torneoId}`} className={styles.enlaceTorneo}>
-                    <div className={styles.torneoCabecera}>
-                      <span className={styles.torneoNombre}>{torneo.torneoNombre}</span>
-                      <span className={styles.torneoAnio}>{comoAño(torneo.fechaInicio)}</span>
-                    </div>
-                    <span className={styles.torneoDetalle}>
-                      {torneo.equipoNombre}
-                      {torneo.ciudadNombre && ` · ${torneo.ciudadNombre}`}
-                      {' · '}
-                      {obtenerEtiqueta('torneo.modalidad', torneo.modalidad).etiqueta}
-                    </span>
-                    {/* Sólo lo que tiene algo que decir: una fila de
-                        ceros no es un dato, es ruido. Y no hay
-                        "partidos jugados": nadie registra quién entró a
-                        la cancha, así que el número no existe. */}
-                    {(torneo.partidosJugados > 0 ||
-                      torneo.goles > 0 ||
-                      torneo.tarjetasAmarillas > 0 ||
-                      torneo.tarjetasRojas > 0 ||
-                      torneo.vecesJugadorDelPartido > 0) && (
-                      <span className={styles.torneoMarcas}>
-                        {/* Cero no se muestra: la alineación es opcional,
-                            y un "0 partidos" se leería como que no jugó
-                            en vez de como que nadie la cargó. */}
-                        {torneo.partidosJugados > 0 && (
-                          <span>
-                            {torneo.partidosJugados}{' '}
-                            {torneo.partidosJugados === 1 ? 'partido' : 'partidos'}
-                          </span>
-                        )}
-                        {torneo.goles > 0 && (
-                          <span>
-                            ⚽ {torneo.goles} {torneo.goles === 1 ? 'gol' : 'goles'}
-                          </span>
-                        )}
-                        {torneo.vecesJugadorDelPartido > 0 && (
-                          <span>⭐ {torneo.vecesJugadorDelPartido}</span>
-                        )}
-                        {torneo.tarjetasAmarillas > 0 && (
-                          <span className={styles.amarilla}>🟨 {torneo.tarjetasAmarillas}</span>
-                        )}
-                        {torneo.tarjetasRojas > 0 && (
-                          <span className={styles.roja}>🟥 {torneo.tarjetasRojas}</span>
-                        )}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <TorneosJugados historial={historial} />
           </section>
         )}
       </main>
