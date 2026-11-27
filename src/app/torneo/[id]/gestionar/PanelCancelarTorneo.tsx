@@ -99,7 +99,7 @@ export function PanelCancelarTorneo({ torneoId }: PanelCancelarTorneoProps) {
         />
       )}
 
-      <p className={styles.avisoChico}>
+      <p className={styles.avisoAdvertencia}>
         Cancelar es definitivo. Los partidos ya jugados cuentan igual para el score de los equipos.
       </p>
 

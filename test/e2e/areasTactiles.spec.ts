@@ -19,24 +19,26 @@ const escenario = leerEscenario();
  * Se mide a 360px, el teléfono más angosto que se soporta. Un enlace
  * dentro de un párrafo queda exceptuado, como dice WCAG.
  */
-async function controlesChicos(pagina: Page): Promise<string[]> {
-  return pagina.evaluate(() =>
-    Array.from(
-      document.querySelectorAll<HTMLElement>(
-        'a[href], button, input:not([type="hidden"]), select, textarea, summary, [role="button"]',
-      ),
-    )
-      .filter((el) => el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
-      .filter(
-        (el) =>
-          !(el.tagName === 'A' && getComputedStyle(el).display === 'inline' && el.closest('p')),
+async function controlesChicos(pagina: Page, minimo = 24, dentroDe = 'body'): Promise<string[]> {
+  return pagina.evaluate(
+    ([minimo, dentroDe]) =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          `${dentroDe} :is(a[href], button, input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), select, textarea, summary, [role="button"])`,
+        ),
       )
-      .map((el) => ({ el, r: el.getBoundingClientRect() }))
-      .filter(({ r }) => r.width > 0 && Math.min(r.width, r.height) < 24)
-      .map(
-        ({ el, r }) =>
-          `${el.tagName.toLowerCase()} «${(el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 30)}» ${Math.round(r.width)}×${Math.round(r.height)}px`,
-      ),
+        .filter((el) => el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+        .filter(
+          (el) =>
+            !(el.tagName === 'A' && getComputedStyle(el).display === 'inline' && el.closest('p')),
+        )
+        .map((el) => ({ el, r: el.getBoundingClientRect() }))
+        .filter(({ r }) => r.width > 0 && Math.min(r.width, r.height) < minimo)
+        .map(
+          ({ el, r }) =>
+            `${el.tagName.toLowerCase()} «${(el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 30)}» ${Math.round(r.width)}×${Math.round(r.height)}px`,
+        ),
+    [minimo, dentroDe] as const,
   );
 }
 
@@ -81,6 +83,25 @@ test.describe('áreas táctiles, organizador', () => {
       await revisar(page, ruta);
     });
   }
+});
+
+/**
+ * Cargar resultados es la pantalla ⭐ del organizador (`08`, 11), y se
+ * usa parado en la cancha, con una mano (`05`, 2.1): ahí no alcanza el
+ * mínimo de WCAG, cada acción mide 44px. "Cargar", "No se jugó" y los
+ * campos de goles medían entre 28 y 37 (revisión de diseño, tercera
+ * corrida). Los checkboxes quedan afuera: van en una fila tocable.
+ */
+test.describe('áreas táctiles de 44px en la carga de resultados', () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await iniciarSesion(context, escenario.usuarios.titularId, { baseUrl: baseURL! });
+  });
+  test('/torneo/[id]/gestionar/resultados', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto(`/torneo/${t}/gestionar/resultados`);
+    await page.waitForLoadState('networkidle');
+    expect(await controlesChicos(page, 44, 'main')).toEqual([]);
+  });
 });
 
 test.describe('áreas táctiles, capitán', () => {

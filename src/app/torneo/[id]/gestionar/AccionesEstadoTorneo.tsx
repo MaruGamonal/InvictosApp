@@ -98,7 +98,7 @@ export function AccionesEstadoTorneo({
 
       {estado === 'registration_closed' && (
         <>
-          {!tienePartidos && <p className={styles.avisoChico}>Falta confirmar el fixture.</p>}
+          {!tienePartidos && <p className={styles.avisoAdvertencia}>Falta confirmar el fixture.</p>}
           <div className={styles.filaAcciones}>
             <button
               type="button"
@@ -165,7 +165,7 @@ export function AccionesEstadoTorneo({
 
       {estado === 'in_progress' && confirmandoFinal && (
         <>
-          <p className={styles.avisoChico}>
+          <p className={styles.avisoAdvertencia}>
             {partidosPendientes > 0
               ? `Quedan ${partidosPendientes} ${partidosPendientes === 1 ? 'partido' : 'partidos'} sin jugar. `
               : ''}
@@ -223,7 +223,7 @@ export function AccionesEstadoTorneo({
             </button>
           </div>
           {!tienePartidos && (
-            <p className={styles.avisoChico}>Para iniciarlo, falta confirmar el fixture.</p>
+            <p className={styles.avisoAdvertencia}>Para iniciarlo, falta confirmar el fixture.</p>
           )}
         </>
       )}

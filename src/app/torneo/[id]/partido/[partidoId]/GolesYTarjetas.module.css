@@ -82,6 +82,17 @@
   text-decoration: underline;
 }
 
+.goleador {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pelota {
+  flex: none;
+}
+
 .cantidad {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
