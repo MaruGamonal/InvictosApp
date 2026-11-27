@@ -118,7 +118,26 @@ sesión y abrí una ficha de torneo. Si el login anda, Auth está bien; si
 se ven las fotos, Storage está bien. Es todo lo que podría haberse roto
 al apagar la Data API, y no debería.
 
-## A4. Dejar producción sin datos demo ⏸️ (postergado a propósito)
+## A4. Dejar producción en cero
+
+> **Decidido el 27/11: se vacía entera.** Hasta ahora todo lo que hay en
+> producción es data de prueba y pruebas con amigos. Para empezar a
+> usarla de verdad va a cero: datos demo, datos de prueba a mano y
+> todas las cuentas, la propia incluida.
+>
+> Eso cambia cuál es la herramienta. `demo:limpiar` sólo toca lo
+> marcado como `[DEMO]`, así que dejaría los 14 torneos y las 7 cuentas
+> que no llevan esa marca. Para esto va
+> **`db/consultas/vaciar-produccion.sql`**, que se pega en el SQL
+> Editor —no necesita la contraseña de la base, que era lo que trababa
+> el camino anterior— y vacía las 26 tablas del producto de una sola
+> vez, preservando el catálogo (`provincia`, `ciudad`) y
+> `pgmigrations`.
+>
+> Lo que sigue abajo queda como referencia de la limpieza parcial, que
+> es la que se usa en el ambiente de pruebas.
+
+## A4-bis. Sólo los datos demo (referencia)
 
 Hay **dos formas**. La primera no necesita tener el proyecto instalado.
 
