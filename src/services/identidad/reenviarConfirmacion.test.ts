@@ -73,6 +73,28 @@ describe('reenviarConfirmacion', () => {
     });
   });
 
+  /**
+   * Reportado en vivo: "Reenviar enlace" respondía "Algo salió mal de
+   * nuestro lado". Supabase no deja pedir otro enlace al mismo correo
+   * hasta pasado un rato, y eso no es una falla: el enlace ya salió.
+   */
+  it('si Supabase rechaza por su límite de envíos, lo explica en vez de un error interno', async () => {
+    const limite = Object.assign(
+      new Error('For security purposes, you can only request this after 45 seconds.'),
+      { status: 429, code: 'over_email_send_rate_limit' },
+    );
+    mockearDb({
+      usuario: { email: 'vale@example.com', email_confirmado: false },
+      signInWithOtp: vi.fn(async () => ({ error: limite })),
+    });
+    const { reenviarConfirmacion } = await import('./reenviarConfirmacion');
+
+    await expect(reenviarConfirmacion(undefined, contextoCon('usuario-1'))).rejects.toMatchObject({
+      codigo: 'DATOS_INVALIDOS',
+      detalle: [expect.objectContaining({ problema: expect.stringContaining('revisá tu correo') })],
+    });
+  });
+
   it('usuario inexistente, NO_ENCONTRADO', async () => {
     mockearDb({ usuario: null });
     const { reenviarConfirmacion } = await import('./reenviarConfirmacion');

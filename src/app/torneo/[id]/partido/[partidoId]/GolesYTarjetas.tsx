@@ -48,9 +48,16 @@ function agrupar(eventos: EventoDelPartido[]): Linea[] {
 function Nombre({ linea }: { linea: Linea }) {
   return (
     <>
-      <Link href={`/jugador/${linea.perfilId}`} className={styles.nombre}>
-        {linea.nombreVisible}
-      </Link>
+      {/* La pelota va pegada al nombre: suelta, en la columna del
+          visitante quedaba sola en un renglón cuando el nombre no entraba. */}
+      <span className={styles.goleador}>
+        <span aria-hidden className={styles.pelota}>
+          ⚽
+        </span>{' '}
+        <Link href={`/jugador/${linea.perfilId}`} className={styles.nombre}>
+          {linea.nombreVisible}
+        </Link>
+      </span>
       {/* Los espacios son para el texto (lector de pantalla, copiar): en
           la fila flex no se ven, el hueco lo pone el gap. */}
       {linea.cantidad > 1 && (
@@ -111,7 +118,7 @@ export function GolesYTarjetas({ local, visitante, eventos, jugadorDelPartido }:
                   <ul className={styles.lista}>
                     {lineas.map((linea) => (
                       <li key={`${linea.perfilId}-${linea.enContra}`}>
-                        <span aria-hidden>⚽</span> <Nombre linea={linea} />
+                        <Nombre linea={linea} />
                       </li>
                     ))}
                   </ul>

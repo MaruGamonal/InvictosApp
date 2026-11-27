@@ -121,12 +121,12 @@ export function PanelInscripciones({
               <Badge campo="inscripcion.estado" valor={inscripcion.estado} />
             </div>
             {inscripcion.advertenciaCategoria && (
-              <p className={styles.avisoChico}>
+              <p className={styles.avisoAdvertencia}>
                 La categoría del equipo no coincide con la del torneo.
               </p>
             )}
             {inscripcion.advertenciaMultiplesDivisiones && (
-              <p className={styles.avisoChico}>
+              <p className={styles.avisoAdvertencia}>
                 Este equipo ya está inscripto en otra división de este certamen.
               </p>
             )}

@@ -166,6 +166,12 @@
 .filaIntegranteCabecera
   button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro),
 .filaGoles button:not(.botonSecundarioChico):not(.botonPeligroChico):not(.botonPeligro) {
+  /* 44px: el organizador carga y programa parado en la cancha, con una
+     mano (`05`, 2.1). Medían 29. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: var(--acento);
   color: var(--acento-texto-sobre);
   border: none;
@@ -199,6 +205,13 @@
 
 .botonSecundarioChico,
 .botonPeligroChico {
+  /* "Chico" por el peso visual (borde, sin relleno), no por el área
+     táctil: 44px como cualquier acción de la cancha (`05`, 2.1). Medían
+     28 —"No se jugó", "Programar", "Finalizar torneo"—. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: none;
   border: 1.5px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
@@ -241,6 +254,7 @@
 .formularioChico input[type='email'],
 .formularioChico select,
 .formularioChico textarea {
+  min-height: 44px;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
   padding: 11px 12px;
@@ -317,6 +331,7 @@
 
 .filaGoles input {
   width: 56px;
+  min-height: 44px;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
   padding: 8px;
@@ -336,6 +351,7 @@
 }
 
 .campoJugadorDelPartido select {
+  min-height: 44px;
   font-weight: 400;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
@@ -363,6 +379,7 @@
 }
 
 .filaEvento select {
+  min-height: 44px;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
   padding: 7px 8px;
@@ -410,7 +427,18 @@
   color: var(--error-texto);
 }
 
+/* Una aclaración chica. Neutra: "Este torneo aparece en las búsquedas"
+   es el estado normal, y pintarla de advertencia la hacía parecer un
+   problema (`08`, 6.3). Lo que sí pide atención usa `.avisoAdvertencia`. */
 .avisoChico {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-texto-secundario);
+}
+
+/* Algo que falta o una consecuencia que conviene ver antes de actuar:
+   "Falta confirmar el fixture", "Cancelar es definitivo". */
+.avisoAdvertencia {
   margin: 0;
   font-size: 13px;
   color: var(--advertencia-texto);

@@ -120,7 +120,7 @@ export function PanelDondeSeVe({
       </div>
 
       {visibilidad === 'unlisted' && !organizacionVerificada && (
-        <p className={styles.avisoChico}>
+        <p className={styles.avisoAdvertencia}>
           Para que aparezca en las búsquedas, primero verificá tu organización.
         </p>
       )}

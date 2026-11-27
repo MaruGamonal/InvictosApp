@@ -1,28 +1,40 @@
+/*
+ * Una cuenta sin confirmar no es un error: es un paso que falta. Iba
+ * entero en los colores de error —también el "Te reenviamos el
+ * enlace", que es una buena noticia— y la pantalla parecía rota
+ * (`08`, 6.3: el rojo es para lo que revierte, rechaza o cancela).
+ * Ahora: advertencia para el aviso, éxito para el reenvío y error sólo
+ * cuando el reenvío falla.
+ */
 .aviso {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background: var(--error-fondo);
-  border: 1px solid var(--error-borde);
-  border-radius: var(--radio-boton);
-  padding: 12px 14px;
+  gap: 10px;
+  margin-top: 16px;
+  background: var(--advertencia-fondo);
+  border-radius: var(--radio-tarjeta);
+  padding: 14px 16px;
 }
 
 .mensaje {
   margin: 0;
-  color: var(--error-texto);
+  color: var(--advertencia-texto);
   font-size: 14px;
+  line-height: 1.45;
 }
 
 .boton {
   align-self: flex-start;
-  background: none;
-  color: var(--error-texto);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  background: var(--color-superficie);
+  color: var(--advertencia-texto);
   font-family: var(--fuente-texto);
   font-weight: 700;
-  font-size: 13px;
-  padding: 8px 14px;
-  border: 1.5px solid var(--error-texto);
+  font-size: 14px;
+  padding: 0 18px;
+  border: 1.5px solid var(--advertencia-texto);
   border-radius: var(--radio-pill);
   cursor: pointer;
 }
@@ -34,8 +46,8 @@
 
 .confirmacion {
   margin: 0;
-  color: var(--error-texto);
-  font-size: 13px;
+  color: var(--exito-texto);
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -43,4 +55,5 @@
   margin: 0;
   color: var(--error-texto);
   font-size: 13px;
+  line-height: 1.4;
 }

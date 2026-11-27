@@ -35,6 +35,21 @@ export const reenviarConfirmacion: Servicio<void, { enviado: true }> = async (_i
   try {
     await enviarEmailConfirmacion(usuario.email);
   } catch (error) {
+    // El caso más común no es una falla: Supabase no deja pedir otro
+    // enlace al mismo correo hasta pasado un rato, y la app ya manda
+    // uno al registrarse y otro al bloquear la acción. Tocar "Reenviar"
+    // enseguida chocaba con ese límite y se mostraba como "Algo salió
+    // mal de nuestro lado" (reportado en vivo). Es un rechazo con
+    // explicación: el enlace ya está en camino.
+    if (esLimiteDelProveedor(error)) {
+      throw crearError('DATOS_INVALIDOS', [
+        {
+          campo: 'email',
+          problema:
+            'Ya te mandamos un enlace hace un momento: revisá tu correo, también en spam. Si no llegó, pedí otro en unos minutos.',
+        },
+      ]);
+    }
     // `crearError` arma un error de aplicación, y `comoRespuestaHttp` no
     // reporta esos a Sentry: son casos de negocio esperados. Este no lo
     // es —es el proveedor de correo rechazando el envío, casi siempre por
@@ -48,3 +63,16 @@ export const reenviarConfirmacion: Servicio<void, { enviado: true }> = async (_i
 
   return { enviado: true };
 };
+
+/**
+ * Si el error es el límite de envíos de Supabase Auth: 429, o los
+ * códigos y el texto con que lo anuncia ("For security purposes, you can
+ * only request this after N seconds").
+ */
+export function esLimiteDelProveedor(error: unknown): boolean {
+  const e = error as { status?: unknown; code?: unknown; message?: unknown } | null;
+  if (!e) return false;
+  if (e.status === 429) return true;
+  if (typeof e.code === 'string' && /rate_limit/.test(e.code)) return true;
+  return typeof e.message === 'string' && /security purposes|rate limit/i.test(e.message);
+}

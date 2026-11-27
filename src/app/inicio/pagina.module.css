@@ -87,6 +87,29 @@
   gap: 4px;
 }
 
+/* Las tarjetas que son un enlace entero llevan flecha, como "Empezar ›":
+   sin ella se leían como texto, no como algo que se toca. */
+.tarjetaConFlecha {
+  position: relative;
+  padding-right: 40px;
+}
+
+.tarjetaConFlecha::after {
+  content: '›';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 600 22px/1 var(--fuente-texto);
+  color: var(--color-texto-terciario);
+}
+
+.sinEquipo {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-texto-secundario);
+}
+
 .tarjetaAccionTitulo {
   font: 700 16px/1.2 var(--fuente-texto);
 }

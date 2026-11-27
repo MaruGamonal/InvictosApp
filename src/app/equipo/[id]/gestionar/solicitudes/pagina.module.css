@@ -61,6 +61,11 @@
 }
 
 .botonSecundarioChico {
+  /* 44px de alto (`05`, 2.1), como en la gestión del torneo. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   background: none;
   border: 1.5px solid var(--borde-neutro);
   border-radius: var(--radio-campo);
