@@ -166,6 +166,20 @@ test.describe('la gestión de un equipo, con sesión de capitán', () => {
     await iniciarSesion(context, escenario.usuarios.capitanId, { baseUrl: baseURL! });
   });
 
+  /**
+   * El buscador de ciudad perdía su borde de foco dentro del formulario
+   * de gestión: una regla de la página empataba en especificidad y, por
+   * cargar después, lo pisaba (revisión de diseño, tercera corrida).
+   */
+  test('el buscador de ciudad muestra el foco dentro del formulario de gestión', async ({
+    page,
+  }) => {
+    await abre(page, `/equipo/${escenario.equipoDelCapitanId}/gestionar`);
+    const ciudad = page.locator('#ciudadEquipo');
+    await ciudad.focus();
+    await expect(ciudad).toHaveCSS('border-top-width', '2px');
+  });
+
   for (const sufijo of ['', '/invitar', '/solicitudes']) {
     test(`/equipo/[id]/gestionar${sufijo} abre sin romperse`, async ({ page }) => {
       await abre(page, `/equipo/${escenario.equipoDelCapitanId}/gestionar${sufijo}`);

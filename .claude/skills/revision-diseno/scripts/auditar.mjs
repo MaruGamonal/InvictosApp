@@ -168,7 +168,11 @@ function medirEnPagina() {
         el,
       );
     }
-    if (tam < 12) anotar('media', 'texto-chico', `Texto de ${tam}px.`, el);
+    // La inicial de un escudo sin imagen (`role="img"` con su nombre en
+    // aria-label) es un dibujo, no texto a leer: escala con el escudo y
+    // el nombre del equipo va al lado.
+    if (tam < 12 && !el.closest('[role="img"][aria-label]'))
+      anotar('media', 'texto-chico', `Texto de ${tam}px.`, el);
   }
 
   // --- Áreas táctiles ----------------------------------------------------
@@ -330,7 +334,20 @@ for (const ancho of anchos) {
   for (const ruta of rutas) {
     const pagina = await contexto.newPage();
     const errores = [];
-    pagina.on('console', (m) => m.type() === 'error' && errores.push(m.text()));
+    // Los scripts de Vercel (`/_vercel/insights`, analytics) sólo existen
+    // desplegados: en local responden 404 en todas las páginas y taparían
+    // los errores de verdad.
+    pagina.on('response', (r) => {
+      if (r.status() >= 400 && !r.url().includes('/_vercel/'))
+        errores.push(`${r.status()} ${r.url()}`);
+    });
+    pagina.on(
+      'console',
+      (m) =>
+        m.type() === 'error' &&
+        !m.text().startsWith('Failed to load resource') &&
+        errores.push(m.text()),
+    );
     pagina.on('pageerror', (e) => errores.push(String(e)));
     const hallazgos = [];
     let estado = null;

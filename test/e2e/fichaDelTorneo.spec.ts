@@ -61,6 +61,26 @@ test.describe('la ficha pública del torneo', () => {
  * nunca: cada una define su `openGraph` y Next lo reemplaza entero,
  * imagen incluida. Esto es lo que se rompería sin que nada avise.
  */
+/**
+ * El detalle de un partido jugado muestra quién hizo los goles, quién
+ * fue el jugador del partido y las tarjetas (`08`, 11). El sembrado
+ * deja al capitán del local con tres goles, una amarilla y elegido
+ * jugador del partido.
+ */
+test.describe('el detalle de un partido jugado', () => {
+  test('muestra goleadores, jugador del partido y tarjetas sin pedir cuenta', async ({ page }) => {
+    await page.goto(`/torneo/${escenario.torneoId}/partido/${escenario.partidoConResultadoId}`);
+    const nombre = escenario.perfilConHistorialNombre;
+    await expect(page.getByRole('heading', { name: 'Goles' })).toBeVisible();
+    await expect(page.getByRole('listitem').filter({ hasText: `${nombre} ×3` })).toBeVisible();
+    await expect(page.getByText('Jugador del partido')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tarjetas' })).toBeVisible();
+    // El nombre lleva a la ficha del jugador.
+    await page.getByRole('link', { name: nombre }).first().click();
+    await expect(page).toHaveURL(new RegExp(`/jugador/${escenario.perfilConHistorialId}`));
+  });
+});
+
 test.describe('la imagen al compartir el torneo', () => {
   for (const sufijo of ['', '/fixture', '/tabla']) {
     test(`/torneo/[id]${sufijo} publica una imagen que se puede bajar`, async ({

@@ -52,6 +52,18 @@ export interface JugadorAlineado {
   fueTitular: boolean;
 }
 
+/**
+ * Un gol o una tarjeta del partido (UC-34). `equipoId` es el equipo de
+ * quien lo protagonizó: un gol en contra (`own_goal`) suma al **otro**.
+ */
+export interface EventoDelPartido {
+  perfilId: string;
+  nombreVisible: string;
+  equipoId: string;
+  tipo: 'goal' | 'own_goal' | 'yellow_card' | 'red_card';
+  minuto: number | null;
+}
+
 /** Alguien que **podía** jugar: la lista de buena fe del torneo. */
 export interface JugadorHabilitado {
   perfilId: string;
@@ -101,6 +113,13 @@ export interface PartidoDetallado {
    * partido es un hecho del partido, como el marcador.
    */
   alineacion: JugadorAlineado[];
+  /**
+   * Goles y tarjetas, si se cargaron (`08`, 11: "goleadores y tarjetas
+   * si se cargaron"). Públicos como el marcador.
+   */
+  eventos: EventoDelPartido[];
+  /** Quién fue elegido jugador del partido, si alguien lo eligió. */
+  jugadorDelPartido: { perfilId: string; nombreVisible: string } | null;
   /** Quien mira gestiona el torneo y el partido admite cargar la alineación. */
   puedeCargarAlineacion: boolean;
   /**
@@ -146,6 +165,8 @@ interface Fila {
   fecha_carga_resultado: Date | null;
   torneo_estado: string;
   solo_organizador_carga_resultados: boolean;
+  jugador_del_partido_perfil_id: string | null;
+  jugador_del_partido_nombre: string | null;
 }
 
 export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = async (
@@ -164,13 +185,15 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
             ev.escudo_url AS equipo_visitante_escudo,
             p.fecha_hora_programada, p.fecha_hora_original, s.nombre AS sede_nombre,
             p.cargado_por_usuario_id, pd.nombre_visible AS cargado_por_nombre,
-            p.fecha_carga_resultado
+            p.fecha_carga_resultado,
+            p.jugador_del_partido_perfil_id, jp.nombre_visible AS jugador_del_partido_nombre
      FROM partido p
      JOIN torneo t ON t.id = p.torneo_id
      JOIN equipo el ON el.id = p.equipo_local_id
      JOIN equipo ev ON ev.id = p.equipo_visitante_id
      LEFT JOIN sede s ON s.id = p.sede_id
      LEFT JOIN perfil_deportivo pd ON pd.usuario_id = p.cargado_por_usuario_id
+     LEFT JOIN perfil_deportivo jp ON jp.id = p.jugador_del_partido_perfil_id
      WHERE p.id = $1`,
     [datos.partidoId],
   );
@@ -256,6 +279,25 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
     [datos.partidoId],
   );
 
+  // En el orden en que pasaron cuando hay minuto; sin minuto, los goles
+  // antes que las tarjetas y por nombre, para que el orden sea estable.
+  const { rows: filasEventos } = await pool.query<{
+    perfil_id: string;
+    nombre_visible: string;
+    equipo_id: string;
+    tipo_evento: EventoDelPartido['tipo'];
+    minuto: number | null;
+  }>(
+    `SELECT e.perfil_id, pd.nombre_visible, e.equipo_id, e.tipo_evento, e.minuto
+     FROM evento_partido e
+     JOIN perfil_deportivo pd ON pd.id = e.perfil_id
+     WHERE e.partido_id = $1
+     ORDER BY e.minuto ASC NULLS LAST,
+              (e.tipo_evento IN ('goal', 'own_goal')) DESC,
+              pd.nombre_visible ASC`,
+    [datos.partidoId],
+  );
+
   let habilitados: JugadorHabilitado[] = [];
   if (puedeCargarAlineacion) {
     const { rows: elegibles } = await pool.query<{
@@ -327,6 +369,20 @@ export const obtenerPartido: Servicio<ObtenerPartidoInput, PartidoDetallado> = a
       equipoId: a.equipo_id,
       fueTitular: a.fue_titular,
     })),
+    eventos: filasEventos.map((e) => ({
+      perfilId: e.perfil_id,
+      nombreVisible: e.nombre_visible,
+      equipoId: e.equipo_id,
+      tipo: e.tipo_evento,
+      minuto: e.minuto,
+    })),
+    jugadorDelPartido:
+      fila.jugador_del_partido_perfil_id && fila.jugador_del_partido_nombre
+        ? {
+            perfilId: fila.jugador_del_partido_perfil_id,
+            nombreVisible: fila.jugador_del_partido_nombre,
+          }
+        : null,
     puedeCargarAlineacion,
     puedeCargarResultado,
     habilitados,

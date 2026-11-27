@@ -1,0 +1,137 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.titulo,
+.tituloTarjetas {
+  margin: 0;
+  font: 600 12px/1 var(--fuente-texto);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-terciario);
+}
+
+/* Los goles de cada equipo en su columna, como en el marcador: el local
+   a la izquierda y el visitante a la derecha. */
+.columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.columna:last-child {
+  text-align: right;
+}
+
+.equipo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* Enlace en una lista, no dentro de un párrafo: WCAG 2.5.8 pide 24 px
+   de alto (`areasTactiles.spec.ts`). Sin llegar a los 44 de un botón,
+   que separaría demasiado los nombres de una misma columna. */
+/* El nombre, la cantidad y "(en contra)" en una misma línea mientras
+   entren; en la columna del visitante, alineados a la derecha. */
+.lista li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 4px;
+}
+
+.columna:last-child .lista li {
+  justify-content: flex-end;
+}
+
+.nombre {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--color-texto);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.nombre:hover {
+  text-decoration: underline;
+}
+
+.cantidad {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.enContra,
+.sinGoles {
+  color: var(--color-texto-secundario);
+  font-size: 13px;
+}
+
+.jugadorDelPartido {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  font-size: 14px;
+}
+
+.etiquetaJugador {
+  color: var(--color-texto-secundario);
+}
+
+/* Las tarjetas, aparte y con menos peso que los goles: no son un logro.
+   Sin rojo, que queda para los errores de la app (`08`, 6.3). */
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radio-tarjeta);
+  background: var(--fondo-sutil);
+}
+
+.listaTarjetas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.listaTarjetas .nombre {
+  font-weight: 500;
+}
+
+.equipoTarjeta {
+  color: var(--color-texto-secundario);
+}
