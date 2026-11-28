@@ -2,11 +2,23 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: var(--ancho-aplicacion);
-  margin: 0 auto;
-  padding: 32px var(--espacio-pantalla-x) 24px;
   background: var(--color-fondo);
-  gap: 20px;
+}
+
+/* Como Equipos, Torneos y Perfil: la identidad oscura arriba, con el
+   color de cada modo. */
+.hero,
+.heroOrganizador {
+  background: var(--cabecera-jugador);
+  color: var(--blanco);
+  padding: 18px var(--espacio-pantalla-x);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.heroOrganizador {
+  background: var(--cabecera-organizador);
 }
 
 .filaTitulo {
@@ -17,7 +29,8 @@
 }
 
 .titulo {
-  font-size: 26px;
+  font-size: 24px;
+  line-height: 1.1;
   margin: 0;
 }
 
@@ -25,11 +38,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   flex: none;
-  color: var(--color-texto-secundario);
+  color: var(--identidad-texto);
   border-radius: 50%;
+}
+
+.enlacePreferencias:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.contenido {
+  width: 100%;
+  max-width: var(--ancho-aplicacion);
+  margin: 0 auto;
+  padding: 20px var(--espacio-pantalla-x) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .lista {

@@ -10,6 +10,7 @@
 
 .busqueda {
   width: 100%;
+  min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--borde-neutro);
   border-radius: var(--radio-boton);
@@ -54,6 +55,12 @@
 }
 
 .ciudad {
+  /* 44px de área táctil (`05`, 2.1): 38 de chip más 3 arriba y 3 abajo
+     con el `::after`, que justo llenan el hueco de 6px entre filas sin
+     pisarse con la de al lado. Un chip de 44 hacía la lista de ciudades
+     —que ya es larga— casi el doble de alta. Medía 30. */
+  position: relative;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -66,6 +73,12 @@
   font-weight: 600;
   color: var(--color-texto);
   cursor: pointer;
+}
+
+.ciudad::after {
+  content: '';
+  position: absolute;
+  inset: -3px 0;
 }
 
 .ciudadActual {

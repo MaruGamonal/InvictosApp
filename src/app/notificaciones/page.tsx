@@ -40,42 +40,51 @@ export default async function PaginaNotificaciones({
 
   return (
     <main className={styles.pagina}>
-      <MarcaInvicta conEnlaceIngresar={false} conCampana={false} />
-      <div className={styles.filaTitulo}>
-        <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
-        <Link
-          href={
-            modo === 'organizador'
-              ? '/notificaciones/preferencias?modo=organizador'
-              : '/notificaciones/preferencias'
-          }
-          className={styles.enlacePreferencias}
-          aria-label="Preferencias de notificación"
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* La misma banda oscura que Equipos, Torneos y Perfil, con el color
+          del modo. Antes iba sobre fondo claro y era la única pantalla del
+          nav con otra cabecera. */}
+      <header className={modo === 'organizador' ? styles.heroOrganizador : styles.hero}>
+        <MarcaInvicta conEnlaceIngresar={false} conCampana={false} />
+        <div className={styles.filaTitulo}>
+          <h1 className={`fuente-display ${styles.titulo}`}>Notificaciones</h1>
+          <Link
+            href={
+              modo === 'organizador'
+                ? '/notificaciones/preferencias?modo=organizador'
+                : '/notificaciones/preferencias'
+            }
+            className={styles.enlacePreferencias}
+            aria-label="Preferencias de notificación"
           >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-          </svg>
-        </Link>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+            </svg>
+          </Link>
+        </div>
+      </header>
+      <div className={styles.contenido}>
+        <ListaNotificaciones
+          notificacionesIniciales={notificaciones}
+          cursorInicial={cursorSiguiente}
+          modo={modo}
+        />
       </div>
-      <ListaNotificaciones
-        notificacionesIniciales={notificaciones}
-        cursorInicial={cursorSiguiente}
-        modo={modo}
-      />
       {modo === 'organizador' ? (
         <NavInferiorOrganizador />
       ) : (
-        <NavInferior activo="inicio" autenticado />
+        // Sin pestaña activa: Notificaciones no es una del nav (se llega
+        // desde la campanita), y marcar "Inicio" decía que estabas ahí.
+        <NavInferior autenticado />
       )}
     </main>
   );
