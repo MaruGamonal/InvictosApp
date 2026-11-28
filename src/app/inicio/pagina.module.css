@@ -227,6 +227,9 @@
 }
 
 .pasoSiguienteBoton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: var(--acento);
   color: var(--acento-texto-sobre);
   font: 700 14px/1 var(--fuente-texto);

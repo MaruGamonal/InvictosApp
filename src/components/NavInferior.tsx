@@ -87,7 +87,8 @@ export function NavInferior({
   activo,
   autenticado: autenticadoDesdeElServidor,
 }: {
-  activo: PestanaNavInferior;
+  /** Sin `activo`, ninguna pestaña marcada: una pantalla que no es del nav. */
+  activo?: PestanaNavInferior;
   /** Lo que el servidor ya sabe; sin esto se pregunta desde el cliente. */
   autenticado?: boolean;
 }) {

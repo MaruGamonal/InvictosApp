@@ -182,7 +182,19 @@ function medirEnPagina() {
     ),
   ].filter(visible);
   for (const el of interactivos) {
-    const r = el.getBoundingClientRect();
+    const caja = el.getBoundingClientRect();
+    // El área táctil puede ser más grande que lo que se ve: un `::after`
+    // absoluto con márgenes negativos (el selector de modo, los chips de
+    // ciudad, los interruptores). Se suma, como la suma el dedo.
+    const despues = getComputedStyle(el, '::after');
+    const extra = (lado) =>
+      despues.content !== 'none' && despues.position === 'absolute'
+        ? Math.max(0, -parseFloat(despues[lado]) || 0)
+        : 0;
+    const r = {
+      width: caja.width + extra('left') + extra('right'),
+      height: caja.height + extra('top') + extra('bottom'),
+    };
     // Un enlace dentro de un párrafo queda exceptuado por WCAG 2.5.8.
     const enLinea =
       el.tagName === 'A' && getComputedStyle(el).display === 'inline' && el.closest('p');
